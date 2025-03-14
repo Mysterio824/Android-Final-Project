@@ -1,4 +1,4 @@
-package com.example.androidfinalproject
+package com.hacktok.androidfinalproject
 
 import org.junit.Test
 
