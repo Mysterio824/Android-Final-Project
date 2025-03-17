@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("org.jetbrains.kotlin.plugin.serialization")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 android {
@@ -42,7 +44,7 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = "17"  // Update to Java 17
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -62,6 +64,7 @@ dependencies {
     // Compose UI and Material libraries (versions managed by the BOM)
     implementation(libs.material3)
     implementation(libs.androidx.compose.material.material)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.foundation)
     implementation(libs.ui)
     implementation(libs.ui.tooling.preview)
@@ -72,6 +75,9 @@ dependencies {
     androidTestImplementation(libs.androidx.junit.v115)
     coreLibraryDesugaring(libs.desugar.jdk.libs.v203)
     implementation(libs.kotlin.reflect)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.kotlinx.serialization.json)
+
 
     implementation(libs.material.icons.extended)
     implementation(libs.androidx.compose.material3.material3)

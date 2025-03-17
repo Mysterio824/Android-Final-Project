@@ -1,5 +1,6 @@
-package com.androidfinalproject.hacktok.ui.passRecovery
+package com.androidfinalproject.hacktok.ui.forgotPassword
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -7,6 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.time.delay
 import java.util.regex.Pattern
 
 class ForgotPasswordViewModel : ViewModel() {
@@ -31,6 +33,7 @@ class ForgotPasswordViewModel : ViewModel() {
             is ForgotPasswordAction.SendCode -> sendVerificationCode()
             is ForgotPasswordAction.ResendCode -> resendVerificationCode()
             is ForgotPasswordAction.VerifyCode -> verifyCode()
+            is ForgotPasswordAction.NavigateBack -> {}
         }
     }
 
@@ -62,11 +65,9 @@ class ForgotPasswordViewModel : ViewModel() {
             _state.update { it.copy(isLoading = true) }
 
             viewModelScope.launch {
-                // Simulate API call to check if email exists and send code
                 kotlinx.coroutines.delay(1500)
 
-                // For demo purposes, we'll assume the email exists in the database
-                val emailExists = true // This would be a real check in production
+                val emailExists = true
 
                 if (emailExists) {
                     _state.update {
@@ -91,7 +92,6 @@ class ForgotPasswordViewModel : ViewModel() {
         _state.update { it.copy(isLoading = true) }
 
         viewModelScope.launch {
-            // Simulate API call to resend code
             kotlinx.coroutines.delay(1500)
 
             _state.update {
@@ -116,18 +116,15 @@ class ForgotPasswordViewModel : ViewModel() {
         _state.update { it.copy(isLoading = true) }
 
         viewModelScope.launch {
-            // Simulate API call to verify code
             kotlinx.coroutines.delay(1500)
 
-            // For demo purposes, we'll assume the code is correct
-            val isCodeCorrect = true // This would be a real check in production
+            val isCodeCorrect = true
 
             if (isCodeCorrect) {
-                // In a real app, you would navigate to a password reset screen here
                 _state.update {
                     it.copy(
                         isLoading = false,
-                        // You might want to navigate to a new screen here
+                        isCodeVerified = true
                     )
                 }
             } else {
@@ -140,6 +137,7 @@ class ForgotPasswordViewModel : ViewModel() {
             }
         }
     }
+
 
     private fun validateEmail(email: String): String? {
         return when {
