@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.hacktok.androidfinalproject"
+    namespace = "com.androidfinalproject.hacktok"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.hacktok.androidfinalproject"
+        applicationId = "com.androidfinalproject.hacktok"
         minSdk = 33
         targetSdk = 35
         versionCode = 1
