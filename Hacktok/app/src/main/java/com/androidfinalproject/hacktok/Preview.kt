@@ -7,28 +7,65 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.ui.auth.LoginScreen
 import com.androidfinalproject.hacktok.ui.auth.LoginState
-import com.androidfinalproject.hacktok.ui.forgotPassword.ForgotPasswordScreen
-import com.androidfinalproject.hacktok.ui.forgotPassword.ForgotPasswordState
-import com.androidfinalproject.hacktok.ui.resetPassword.ResetPasswordScreen
-import com.androidfinalproject.hacktok.ui.resetPassword.ResetPasswordState
+import com.androidfinalproject.hacktok.ui.friendList.FriendListScreen
+import com.androidfinalproject.hacktok.ui.friendList.FriendListState
 import com.androidfinalproject.hacktok.ui.theme.LoginAppTheme
+import org.bson.types.ObjectId
 
 @Preview(showBackground = true)
 @Composable
-fun ResetPasswordScreenPreview() {
+fun FriendListScreenPreview() {
     LoginAppTheme {
         Box(
             modifier = Modifier
                 .width(400.dp)
                 .height(800.dp)
         ) {
-            ResetPasswordScreen(
-                state = ResetPasswordState(
-                    email = "user@example.com",
-                    verificationCode = "123456",
+            val previewState = FriendListState(
+                users = listOf(
+                    User(
+                        username = "john_doe",
+                        email = "john@example.com"
+                    ),
+                    User(
+                        username = "jane_smith",
+                        email = "jane@example.com"
+                    ),
+                    User(
+                        username = "robert_johnson",
+                        email = "robert@example.com"
+                    ),
+                    User(
+                        username = "robert_johnson",
+                        email = "robert@example.com"
+                    )
                 ),
+                filteredUsers = listOf(
+                    User(
+                        username = "john_doe",
+                        email = "john@example.com"
+                    ),
+                    User(
+                        username = "jane_smith",
+                        email = "jane@example.com"
+                    ),
+                    User(
+                        username = "robert_johnson",
+                        email = "robert@example.com"
+                    ),
+                    User(
+                        username = "robert_johnson",
+                        email = "robert@example.com"
+                    )
+                ),
+                friendIds = setOf(ObjectId())
+            )
+
+            FriendListScreen(
+                state = previewState,
                 onAction = {}
             )
         }
@@ -37,16 +74,18 @@ fun ResetPasswordScreenPreview() {
 
 @Preview(showBackground = true)
 @Composable
-private fun ForgotPasswordScreenPreview() {
+private fun LoginScreenPreview() {
     LoginAppTheme {
         Box(
             modifier = Modifier
                 .width(400.dp)
                 .height(800.dp)
         ) {
-            ForgotPasswordScreen(
-                state = ForgotPasswordState(),
-                onAction = {}
+            LoginScreen (
+                state = LoginState(
+                    isLoginMode = false
+                ),
+                onAction = {},
             )
         }
     }

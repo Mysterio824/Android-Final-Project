@@ -6,6 +6,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.androidfinalproject.hacktok.router.routes.AuthRoute
 import com.androidfinalproject.hacktok.router.graph.authNavigation
+import com.androidfinalproject.hacktok.router.graph.friendListNavigation
+import com.androidfinalproject.hacktok.router.routes.FriendListRoute
 import com.androidfinalproject.hacktok.ui.theme.LoginAppTheme
 
 @Composable
@@ -15,10 +17,10 @@ fun App() {
         val navController = rememberNavController()
         NavHost(
             navController = navController,
-            startDestination = AuthRoute.AuthGraph.route
+            startDestination = FriendListRoute.Graph.route
         ) {
             authNavigation(navController)
-//            mainNavigation(navController)
+            friendListNavigation(navController)
         }
     }
 }

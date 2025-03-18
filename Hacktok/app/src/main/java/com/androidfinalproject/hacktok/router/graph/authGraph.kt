@@ -25,7 +25,7 @@ import com.androidfinalproject.hacktok.ui.resetPassword.ResetPasswordViewModel
 fun NavGraphBuilder.authNavigation(navController: NavController) {
     navigation(
         startDestination = AuthRoute.Login.route,
-        route = AuthRoute.AuthGraph.route
+        route = AuthRoute.Graph.route
     ) {
         composable(
             route = AuthRoute.Login.route,
@@ -61,9 +61,9 @@ fun NavGraphBuilder.authNavigation(navController: NavController) {
             LoginScreenRoot(
                 viewModel = LoginViewModel(),
                 onLoginSuccess = {
-                    navController.navigate(MainRoute.MainGraph.route) {
+                    navController.navigate(MainRoute.Graph.route) {
                         // Clear the back stack when logging in
-                        popUpTo(AuthRoute.AuthGraph.route) { inclusive = true }
+                        popUpTo(AuthRoute.Graph.route) { inclusive = true }
                     }
                 },
                 onForgetPassword = {
@@ -159,7 +159,7 @@ fun NavGraphBuilder.authNavigation(navController: NavController) {
                 onResetSuccess = {
                     navController.navigate(AuthRoute.Login.route) {
                         // Clear the back stack after password reset
-                        popUpTo(AuthRoute.AuthGraph.route) { inclusive = false }
+                        popUpTo(AuthRoute.Graph.route) { inclusive = false }
                     }
                 },
                 onGoBack = {
