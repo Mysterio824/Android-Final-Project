@@ -9,44 +9,45 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.androidfinalproject.hacktok.ui.auth.LoginScreen
 import com.androidfinalproject.hacktok.ui.auth.LoginState
-import com.androidfinalproject.hacktok.ui.passRecovery.ForgotPasswordAction
-import com.androidfinalproject.hacktok.ui.passRecovery.ForgotPasswordScreen
-import com.androidfinalproject.hacktok.ui.passRecovery.ForgotPasswordState
+import com.androidfinalproject.hacktok.ui.forgotPassword.ForgotPasswordScreen
+import com.androidfinalproject.hacktok.ui.forgotPassword.ForgotPasswordState
+import com.androidfinalproject.hacktok.ui.resetPassword.ResetPasswordScreen
+import com.androidfinalproject.hacktok.ui.resetPassword.ResetPasswordState
+import com.androidfinalproject.hacktok.ui.theme.LoginAppTheme
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-private fun LoginScreenPreview() {
-    Box(
-        modifier = Modifier
-            .width(400.dp)
-            .height(800.dp)
-    ) {
-        LoginScreen(
-            state = LoginState(
-                email = "abc@gmail.com",
-                password = "abc12345"
-            ),
-            onAction = {}
-        )
+fun ResetPasswordScreenPreview() {
+    LoginAppTheme {
+        Box(
+            modifier = Modifier
+                .width(400.dp)
+                .height(800.dp)
+        ) {
+            ResetPasswordScreen(
+                state = ResetPasswordState(
+                    email = "user@example.com",
+                    verificationCode = "123456",
+                ),
+                onAction = {}
+            )
+        }
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 private fun ForgotPasswordScreenPreview() {
-    Box(
-        modifier = Modifier
-            .width(400.dp)
-            .height(800.dp)
-    ) {
-        ForgotPasswordScreen (
-            state = ForgotPasswordState(
-                email = "ac",
-                isEmailEditable = false,
-                isCodeSent = true,
-            ),
-            onAction = {},
-            onNavigateBack = {}
-        )
+    LoginAppTheme {
+        Box(
+            modifier = Modifier
+                .width(400.dp)
+                .height(800.dp)
+        ) {
+            ForgotPasswordScreen(
+                state = ForgotPasswordState(),
+                onAction = {}
+            )
+        }
     }
 }

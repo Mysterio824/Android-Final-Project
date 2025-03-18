@@ -1,31 +1,36 @@
-package com.androidfinalproject.hacktok.ui.passRecovery
+package com.androidfinalproject.hacktok.ui.forgotPassword
 
+import android.util.Log
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.android.awaitFrame
+import kotlinx.coroutines.delay
 
 @Composable
 fun ForgotPasswordScreenRoot(
     viewModel: ForgotPasswordViewModel = viewModel(),
-    onNavigateBack: () -> Unit,
-    onResetSuccess: () -> Unit
+    onGoBack: () -> Unit,
+    onResetSuccess: (String, String) -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(state.isCodeVerified) {
+        if(state.isCodeVerified) {
+            onResetSuccess(state.email, state.verificationCode)
+        }
+    }
 
     ForgotPasswordScreen(
         state = state,
         onAction = { action ->
-            // Handle navigation or special actions here before passing to viewModel
             when (action) {
-                is ForgotPasswordAction.VerifyCode -> {
-                    // If code verification is successful, we might want to navigate
-                    // For now, we'll just pass the action to the viewModel
-                }
+                is ForgotPasswordAction.NavigateBack -> onGoBack()
                 else -> Unit
             }
             viewModel.onAction(action)
-        },
-        onNavigateBack = onNavigateBack
+        }
     )
 }

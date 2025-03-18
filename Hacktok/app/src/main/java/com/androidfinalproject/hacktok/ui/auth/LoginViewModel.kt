@@ -13,7 +13,6 @@ class LoginViewModel : ViewModel() {
     private val _state = MutableStateFlow(LoginState())
     val state: StateFlow<LoginState> = _state.asStateFlow()
 
-    // Email validation pattern
     private val emailPattern = Pattern.compile(
         "[a-zA-Z0-9+._%\\-]{1,256}" +
                 "@" +
@@ -37,30 +36,15 @@ class LoginViewModel : ViewModel() {
     }
 
     private fun updateEmail(email: String) {
-        _state.update { currentState ->
-            currentState.copy(
-                email = email,
-                emailError = validateEmail(email)
-            )
-        }
+        _state.update { it.copy(email = email, emailError = validateEmail(email)) }
     }
 
     private fun updatePassword(password: String) {
-        _state.update { currentState ->
-            currentState.copy(
-                password = password,
-                passwordError = validatePassword(password)
-            )
-        }
+        _state.update { it.copy(password = password, passwordError = validatePassword(password)) }
     }
 
     private fun updateConfirmPassword(confirmPassword: String) {
-        _state.update { currentState ->
-            currentState.copy(
-                confirmPassword = confirmPassword,
-                confirmPasswordError = validateConfirmPassword(confirmPassword, currentState.password)
-            )
-        }
+        _state.update { it.copy(confirmPassword = confirmPassword, confirmPasswordError = validateConfirmPassword(confirmPassword, _state.value.password)) }
     }
 
     private fun toggleAuthMode() {
@@ -70,39 +54,22 @@ class LoginViewModel : ViewModel() {
     private fun submitForm() {
         val currentState = _state.value
 
-        // Validate all fields
         val emailError = validateEmail(currentState.email)
         val passwordError = validatePassword(currentState.password)
-        val confirmPasswordError = if (!currentState.isLoginMode) {
-            validateConfirmPassword(currentState.confirmPassword, currentState.password)
-        } else null
+        val confirmPasswordError = if (!currentState.isLoginMode) validateConfirmPassword(currentState.confirmPassword, currentState.password) else null
 
-        // Update UI state with any validation errors
-        _state.update { it.copy(
-            emailError = emailError,
-            passwordError = passwordError,
-            confirmPasswordError = confirmPasswordError
-        )}
+        _state.update {
+            it.copy(
+                emailError = emailError,
+                passwordError = passwordError,
+                confirmPasswordError = confirmPasswordError
+            )
+        }
 
-        // Check if there are any validation errors
-        if (emailError == null && passwordError == null &&
-            (currentState.isLoginMode || confirmPasswordError == null)) {
-            // Proceed with authentication
+        if (emailError == null && passwordError == null && (currentState.isLoginMode || confirmPasswordError == null)) {
             _state.update { it.copy(isLoading = true) }
-
             viewModelScope.launch {
-                // Here you would normally call your repository to authenticate
-                // For demo purposes we'll just simulate a delay
                 kotlinx.coroutines.delay(1000)
-
-                if (currentState.isLoginMode) {
-                    // Perform login
-                    // authRepository.login(currentState.email, currentState.password)
-                } else {
-                    // Perform registration
-                    // authRepository.register(currentState.email, currentState.password)
-                }
-
                 _state.update { it.copy(isLoading = false) }
             }
         }
@@ -110,21 +77,14 @@ class LoginViewModel : ViewModel() {
 
     private fun signInWithGoogle() {
         _state.update { it.copy(isLoading = true) }
-
         viewModelScope.launch {
-            // Here you would normally call your repository to authenticate with Google
-            // For demo purposes we'll just simulate a delay
             kotlinx.coroutines.delay(1000)
-
-            // authRepository.signInWithGoogle()
-
             _state.update { it.copy(isLoading = false) }
         }
     }
 
     private fun handleForgotPassword() {
-        // Handle forgot password logic
-        // Perhaps navigate to a forgot password screen or show a dialog
+        _state.update { it.copy(navigateToForgotPassword = true) }
     }
 
     private fun validateEmail(email: String): String? {
