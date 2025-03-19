@@ -2,7 +2,6 @@ package com.androidfinalproject.hacktok.ui.search
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -19,38 +18,29 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import com.androidfinalproject.hacktok.model.Post
-import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.ui.search.component.PostItem
 import com.androidfinalproject.hacktok.ui.search.component.UserItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchDashboardScreen(
-    users: List<User> = emptyList(),
-    posts: List<Post> = emptyList()
+    viewModel: SearchViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
-    var searchQuery by remember { mutableStateOf("") }
-    var selectedTabIndex by remember { mutableIntStateOf(0) }
-    val tabs = listOf("Accounts", "Tags", "Places", "Posts")
+    val uiState = viewModel.uiState
+    val tabs = listOf("Accounts", "Tags", "Posts")
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // Thanh tìm kiếm giống Instagram
+        // Thanh tìm kiếm
         SearchBar(
-            query = searchQuery,
-            onQueryChange = { searchQuery = it },
+            query = uiState.searchQuery,
+            onQueryChange = { viewModel.onAction(SearchAction.UpdateQuery(it)) },
             onSearch = { /* Handle search if needed */ },
             active = false,
             onActiveChange = { /* No active state for now */ },
@@ -62,18 +52,18 @@ fun SearchDashboardScreen(
                 .clip(RoundedCornerShape(24.dp))
         ) {}
 
-        // Tab Row giống Instagram với chữ nhỏ hơn
+        // Tab Row
         TabRow(
-            selectedTabIndex = selectedTabIndex,
+            selectedTabIndex = uiState.selectedTabIndex,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 4.dp) // Giảm padding để tiết kiệm không gian
+                .padding(horizontal = 4.dp)
         ) {
             tabs.forEachIndexed { index, title ->
                 Tab(
-                    selected = selectedTabIndex == index,
-                    onClick = { selectedTabIndex = index },
-                    text = { Text(title, style = MaterialTheme.typography.bodySmall) } // Sử dụng bodySmall
+                    selected = uiState.selectedTabIndex == index,
+                    onClick = { viewModel.onAction(SearchAction.ChangeTab(index)) },
+                    text = { Text(title, style = MaterialTheme.typography.bodySmall) }
                 )
             }
         }
@@ -84,17 +74,11 @@ fun SearchDashboardScreen(
                 .fillMaxSize()
                 .padding(horizontal = 8.dp)
         ) {
-            when (selectedTabIndex) {
-                0 -> items(users.filter { it.username.contains(searchQuery, ignoreCase = true) }) { user ->
+            when (uiState.selectedTabIndex) {
+                0 -> items(uiState.filteredUsers) { user ->
                     UserItem(user = user)
                 }
-                1 -> items(posts.filter { it.content.contains(searchQuery, ignoreCase = true) && it.content.contains("#") }) { post ->
-                    PostItem(post = post)
-                }
-                2 -> items(posts.filter { it.content.contains(searchQuery, ignoreCase = true) && it.content.contains("place") }) { post ->
-                    PostItem(post = post)
-                }
-                3 -> items(posts.filter { it.content.contains(searchQuery, ignoreCase = true) }) { post ->
+                1, 2, 3 -> items(uiState.filteredPosts) { post ->
                     PostItem(post = post)
                 }
             }

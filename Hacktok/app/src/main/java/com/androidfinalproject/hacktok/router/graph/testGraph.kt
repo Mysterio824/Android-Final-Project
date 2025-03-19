@@ -8,11 +8,14 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.router.routes.MainRoute
 import com.androidfinalproject.hacktok.ui.search.SearchDashboardScreen
+import com.androidfinalproject.hacktok.ui.search.SearchViewModel
 
-fun NavGraphBuilder.testGraph(navController: NavController) {
+fun NavGraphBuilder.testGraph(
+    navController: NavController,
+    searchViewModel: SearchViewModel
+) {
     navigation(
         startDestination = MainRoute.SearchDashboard.route,
         route = MainRoute.MainGraph.route
@@ -34,10 +37,7 @@ fun NavGraphBuilder.testGraph(navController: NavController) {
                         )
             }
         ) {
-            SearchDashboardScreen(
-                users = MockData.mockUsers,
-                posts = MockData.mockPosts
-            )
+            SearchDashboardScreen(viewModel = searchViewModel)
         }
     }
 }
