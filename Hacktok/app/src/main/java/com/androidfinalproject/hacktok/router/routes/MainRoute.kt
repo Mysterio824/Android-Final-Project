@@ -8,5 +8,8 @@ sealed interface MainRoute : Route {
     data object Graph : MainRoute {
         override val route = "main_graph"
     }
-
+    @Serializable
+    data object SearchDashboard : MainRoute {
+        override val route = "search_dashboard"
+    }
 }
