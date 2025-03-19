@@ -18,9 +18,10 @@ fun App() {
 
         NavHost(
             navController = navController,
-            startDestination = MainRoute.MainGraph.route
+            startDestination = FriendListRoute.Graph.route
         ) {
-            testGraph(navController, searchViewModel)
+            authNavigation(navController)
+            friendListNavigation(navController)
         }
     }
 }

@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 sealed interface AuthRoute : Route {
     @Serializable
-    data object AuthGraph : AuthRoute {
+    data object Graph : AuthRoute {
         override val route = "auth_graph"
     }
 
