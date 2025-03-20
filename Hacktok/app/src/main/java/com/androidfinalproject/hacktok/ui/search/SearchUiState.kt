@@ -9,5 +9,7 @@ data class SearchUiState(
     val filteredUsers: List<User> = emptyList(),
     val filteredPosts: List<Post> = emptyList(),
     val searchQuery: String = "",
-    val selectedTabIndex: Int = 0
+    val selectedTabIndex: Int = 0,
+    val isLoading: Boolean = false,
+    val error: String? = null,
 )
