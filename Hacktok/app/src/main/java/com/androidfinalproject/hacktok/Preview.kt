@@ -117,11 +117,12 @@ fun UserProfilePreview() {
                     isActive = true
                 ),
                 posts = samplePosts,
-                isFriend = true,
-                isBlocked = false,
+                isFriend = false,
+                isBlocked = true,
                 onSendFriendRequest = {},
                 onUnfriend = {},
-                onChat = {}
+                onChat = {},
+                onBlock = {},
             )
         }
     }

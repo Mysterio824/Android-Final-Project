@@ -19,6 +19,9 @@ import com.androidfinalproject.hacktok.R
 import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.ui.profile.component.PostCard
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.SpanStyle
 
 @Composable
 fun UserProfileScreen (
@@ -28,7 +31,8 @@ fun UserProfileScreen (
     isBlocked: Boolean,
     onSendFriendRequest: () -> Unit,
     onUnfriend: () -> Unit,
-    onChat: () -> Unit
+    onChat: () -> Unit,
+    onBlock: () -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -55,18 +59,39 @@ fun UserProfileScreen (
         ) {
             Text(text = user.username, fontSize = 24.sp, fontWeight = FontWeight.Bold)
             Text(text = user.email, fontSize = 16.sp, color = Color.Gray)
-            Text(text = "12 Friends \u00B7 34 Posts", fontSize = 16.sp)
+            Text(
+                text = buildAnnotatedString {
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                        append("12") // Bold number
+                    }
+                    append(" Friends \u00B7 ") // Normal text
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                        append("34") // Bold number
+                    }
+                    append(" Posts") // Normal text
+                },
+                fontSize = 16.sp
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // Conditional Buttons
         if (isBlocked) {
-            Text(text = "You have blocked this user", color = Color.Red)
+            Button(
+                onClick = onBlock,
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF50C878)) // Red
+            ) {
+                Text("Unblock", color = Color.White)
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text("You can not see this user's content.", color = Color.Red, fontSize = 16.sp)
         } else {
             Row {
                 if (isFriend) {
-                    Button(onClick = onUnfriend, colors = ButtonDefaults.buttonColors(Color.Red)) {
+                    Button(onClick = onUnfriend) {
                         Text("Unfriend", color= Color.White)
                     }
                     Spacer(modifier = Modifier.width(10.dp))
@@ -78,17 +103,21 @@ fun UserProfileScreen (
                         Text("Add Friend")
                     }
                 }
+                Spacer(modifier = Modifier.width(10.dp))
+                Button(onClick = onBlock, colors = ButtonDefaults.buttonColors(Color.Red)) {
+                    Text("Block")
+                }
             }
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        LazyColumn (
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(posts) { post ->
-                PostCard(post)
+            LazyColumn (
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(posts) { post ->
+                    PostCard(post)
+                }
             }
         }
     }

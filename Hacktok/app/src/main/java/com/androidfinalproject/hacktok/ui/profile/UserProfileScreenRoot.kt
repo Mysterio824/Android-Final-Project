@@ -12,6 +12,7 @@ fun UserProfileScreenRoot(
     viewModel: UserProfileViewModel = viewModel(),
     userId: ObjectId?,
     onNavigateBack: () -> Unit,
+    onBlockUser: (ObjectId?) -> Unit,
     onChatWithFriend: (ObjectId?) -> Unit,
     onGoToPost: (ObjectId?) -> Unit
 ) {
@@ -30,7 +31,8 @@ fun UserProfileScreenRoot(
             isBlocked = state.isBlocked,
             onSendFriendRequest = { viewModel.onAction(UserProfileAction.AddFriend(userId)) },
             onUnfriend = { viewModel.onAction(UserProfileAction.Unfriend(userId)) },
-            onChat = { onChatWithFriend(userId) }
+            onChat = { onChatWithFriend(userId) },
+            onBlock = { onBlockUser(userId) }
         )
     } else if (state.isLoading) {
         // Show loading UI
