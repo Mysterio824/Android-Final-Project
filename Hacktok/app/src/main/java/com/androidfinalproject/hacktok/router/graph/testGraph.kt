@@ -18,7 +18,7 @@ fun NavGraphBuilder.testGraph(
 ) {
     navigation(
         startDestination = MainRoute.SearchDashboard.route,
-        route = MainRoute.MainGraph.route
+        route = MainRoute.Graph.route
     ) {
         composable(
             route = MainRoute.SearchDashboard.route,

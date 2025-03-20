@@ -12,8 +12,11 @@ import com.androidfinalproject.hacktok.ui.auth.LoginScreen
 import com.androidfinalproject.hacktok.ui.auth.LoginState
 import com.androidfinalproject.hacktok.ui.friendList.FriendListScreen
 import com.androidfinalproject.hacktok.ui.friendList.FriendListState
+import com.androidfinalproject.hacktok.ui.profile.UserProfileScreen
 import com.androidfinalproject.hacktok.ui.theme.LoginAppTheme
 import org.bson.types.ObjectId
+import java.util.Date
+import com.androidfinalproject.hacktok.model.Post
 
 @Preview(showBackground = true)
 @Composable
@@ -86,6 +89,39 @@ private fun LoginScreenPreview() {
                     isLoginMode = false
                 ),
                 onAction = {},
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun UserProfilePreview() {
+    LoginAppTheme {  // Add theme wrapper
+        Box(
+            modifier = Modifier
+                .width(400.dp)
+                .height(800.dp)
+        ) {
+            val samplePosts = listOf(
+                Post(id = ObjectId.get(), user = User(username = "John Doe", email="JohnTerry@example.com"), content = "This is my first post!"),
+                Post(id = ObjectId.get(), user = User(username = "John Doe", email="JohnTerry@example.com"), content = "This is my second post!"),
+            )
+
+            UserProfileScreen(
+                user = User(
+                    id = ObjectId.get(),
+                    username = "John Doe",
+                    email = "johndoe@example.com",
+                    createdAt = Date(),
+                    isActive = true
+                ),
+                posts = samplePosts,
+                isFriend = true,
+                isBlocked = false,
+                onSendFriendRequest = {},
+                onUnfriend = {},
+                onChat = {}
             )
         }
     }
