@@ -1,5 +1,6 @@
 package com.androidfinalproject.hacktok.ui.search.component
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
@@ -11,9 +12,13 @@ import androidx.compose.ui.unit.sp
 import com.androidfinalproject.hacktok.model.User
 
 @Composable
-fun UserItem(user: User) {
+fun UserItem(
+    user: User,
+    onClick: () -> Unit,
+) {
     Row(
         modifier = Modifier
+            .clickable (onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 8.dp) // Padding giống Instagram
     ) {
         // Hiển thị tên người dùng (giống Instagram: tên nổi bật)

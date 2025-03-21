@@ -8,9 +8,6 @@ data class Post(
     val content: String,
     val user: User,  // Tham chiếu đến người dùng đã tạo post
     val createdAt: Date = Date(),
-    val isActive: Boolean = true
-) {
-    override fun toString(): String {
-        return "id: $id, content: $content, created by: ${user.username}\n"
-    }
-}
+    val isActive: Boolean = true,
+    val likeCount: Int
+)
