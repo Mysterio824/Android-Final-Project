@@ -123,8 +123,8 @@ fun UserProfilePreview() {
                 .height(800.dp)
         ) {
             val samplePosts = listOf(
-                Post(id = ObjectId.get(), user = User(username = "John Doe", email="JohnTerry@example.com"), likeCount = 2, content = "This is my first post!"),
-                Post(id = ObjectId.get(), user = User(username = "John Doe", email="JohnTerry@example.com"), likeCount = 4, content = "This is my second post!"),
+                Post(id = ObjectId.get(), user = User(username = "John Doe", email="JohnTerry@example.com"), likeCount = 12, content = "This is my first post!"),
+                Post(id = ObjectId.get(), user = User(username = "John Doe", email="JohnTerry@example.com"), likeCount = 44, content = "This is my second post!"),
             )
 
             UserProfileScreen(
@@ -137,7 +137,7 @@ fun UserProfilePreview() {
                 ),
                 posts = samplePosts,
                 isFriend = false,
-                isBlocked = true,
+                isBlocked = false,
                 onSendFriendRequest = {},
                 onUnfriend = {},
                 onChat = {},
