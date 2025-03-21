@@ -4,15 +4,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.androidfinalproject.hacktok.model.User
 import org.bson.types.ObjectId
 
 @Composable
 fun FriendListScreenRoot(
     viewModel: FriendListViewModel = viewModel(),
     onNavigateBack: () -> Unit,
-    onChatWithFriend: (User) -> Unit,
-    onUserProfileView: (User) -> Unit
+    onChatWithFriend: (ObjectId?) -> Unit,
+    onUserProfileView: (ObjectId?) -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -21,8 +20,8 @@ fun FriendListScreenRoot(
         onAction = { action ->
             when (action) {
                 is FriendListAction.NavigateBack -> onNavigateBack()
-                is FriendListAction.ChatWithFriend -> onChatWithFriend(action.user)
-                is FriendListAction.UserClicked -> onUserProfileView(action.user)
+                is FriendListAction.ChatWithFriend -> onChatWithFriend(action.userId)
+                is FriendListAction.UserClicked -> onUserProfileView(action.userId)
                 else -> viewModel.onAction(action)
             }
         }

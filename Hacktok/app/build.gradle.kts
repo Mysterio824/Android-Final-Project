@@ -55,7 +55,6 @@ android {
 }
 
 dependencies {
-//    implementation("androidx.room:room-ktx:2.6.1") nay la cgi z
     // Use the Compose BOM to manage Compose dependency versions.
     val composeBom = platform("androidx.compose:compose-bom:2025.02.00")
     implementation(composeBom)
@@ -78,7 +77,6 @@ dependencies {
     implementation(libs.kotlin.reflect)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
-    implementation("androidx.compose.ui:ui-text-google-fonts:1.5.0")
 
 
     implementation(libs.material.icons.extended)

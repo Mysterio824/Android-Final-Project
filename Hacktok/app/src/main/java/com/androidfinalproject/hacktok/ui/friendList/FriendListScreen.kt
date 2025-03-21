@@ -73,13 +73,13 @@ fun FriendListScreen(
                         user = user,
                         isFriend = isFriend,
                         onAddFriend = {
-                            onAction(FriendListAction.AddFriend(user))
+                            onAction(FriendListAction.AddFriend(user.id))
                         },
                         onChatWithFriend = {
-                            onAction(FriendListAction.ChatWithFriend(user))
+                            onAction(FriendListAction.ChatWithFriend(user.id))
                         },
                         onUserClick = {
-                            onAction(FriendListAction.UserClicked(user))
+                            onAction(FriendListAction.UserClicked(user.id))
                         }
                     )
                     Divider(

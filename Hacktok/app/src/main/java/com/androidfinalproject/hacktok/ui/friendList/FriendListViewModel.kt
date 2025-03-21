@@ -2,7 +2,6 @@ package com.androidfinalproject.hacktok.ui.friendList
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,7 +21,7 @@ class FriendListViewModel : ViewModel() {
     fun onAction(action: FriendListAction) {
         when (action) {
             is FriendListAction.SearchQueryChanged -> updateSearchQuery(action.query)
-            is FriendListAction.AddFriend -> addFriend(action.user)
+            is FriendListAction.AddFriend -> addFriend(action.userId)
             is FriendListAction.LoadFriends -> loadFriends()
             else -> {}
         }
@@ -42,13 +41,13 @@ class FriendListViewModel : ViewModel() {
         }
     }
 
-    private fun addFriend(user: User) {
+    private fun addFriend(userId: ObjectId?) {
         viewModelScope.launch {
             // Implement logic to add friend
             // This is a placeholder for actual implementation
             _state.update { currentState ->
                 val updatedFriendIds = currentState.friendIds.toMutableSet()
-                updatedFriendIds.add(user.id)
+                updatedFriendIds.add(userId)
 
                 currentState.copy(friendIds = updatedFriendIds)
             }
@@ -61,7 +60,23 @@ class FriendListViewModel : ViewModel() {
 
             try {
 
-                val mockUsers = MockData.mockUsers
+                val mockUsers = listOf(
+                    User(
+                        ObjectId(),
+                        "john_doe",
+                        "john@example.com"
+                    ),
+                    User(
+                        ObjectId(),
+                        "jane_smith",
+                        "jane@example.com"
+                    ),
+                    User(
+                        ObjectId(),
+                        "robert_johnson",
+                        "robert@example.com"
+                    )
+                )
 
                 val mockFriendIds = setOf(mockUsers[0].id, mockUsers[1].id)
 
