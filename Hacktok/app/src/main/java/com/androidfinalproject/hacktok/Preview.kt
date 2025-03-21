@@ -16,7 +16,6 @@ import com.androidfinalproject.hacktok.ui.auth.LoginState
 import com.androidfinalproject.hacktok.ui.friendList.FriendListScreen
 import com.androidfinalproject.hacktok.ui.friendList.FriendListState
 import com.androidfinalproject.hacktok.ui.profile.UserProfileScreen
-import com.androidfinalproject.hacktok.ui.theme.LoginAppTheme
 import com.androidfinalproject.hacktok.ui.post.PostDetailScreen
 import com.androidfinalproject.hacktok.ui.post.PostDetailState
 import com.androidfinalproject.hacktok.ui.search.SearchDashboardScreen
@@ -124,8 +123,8 @@ fun UserProfilePreview() {
                 .height(800.dp)
         ) {
             val samplePosts = listOf(
-                Post(id = ObjectId.get(), user = User(username = "John Doe", email="JohnTerry@example.com"), content = "This is my first post!"),
-                Post(id = ObjectId.get(), user = User(username = "John Doe", email="JohnTerry@example.com"), content = "This is my second post!"),
+                Post(id = ObjectId.get(), user = User(username = "John Doe", email="JohnTerry@example.com"), likeCount = 2, content = "This is my first post!"),
+                Post(id = ObjectId.get(), user = User(username = "John Doe", email="JohnTerry@example.com"), likeCount = 4, content = "This is my second post!"),
             )
 
             UserProfileScreen(
