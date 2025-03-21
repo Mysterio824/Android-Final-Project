@@ -45,11 +45,13 @@ class UserProfileViewModel : ViewModel() {
                     Post(
                         id = ObjectId(),
                         user = mockUser,
+                        likeCount = 2,
                         content = "This is my first post!"
                     ),
                     Post(
                         id = ObjectId(),
                         user = mockUser,
+                        likeCount = 4,
                         content = "Another day, another post!"
                     )
                 )
