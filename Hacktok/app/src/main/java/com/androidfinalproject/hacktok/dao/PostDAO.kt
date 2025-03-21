@@ -24,7 +24,8 @@ class PostDAO(private val collection: MongoCollection<Document>) {
                 isActive = doc.getBoolean("isActive", true)
             ),
             createdAt = doc.getDate("createdAt") ?: Date(),
-            isActive = doc.getBoolean("isActive", true)
+            isActive = doc.getBoolean("isActive", true),
+            likeCount = doc.getInteger("likeCount", 0)
         )
     }
 
@@ -44,7 +45,7 @@ class PostDAO(private val collection: MongoCollection<Document>) {
     // Retrieve a post by its ObjectId.
     suspend fun getPostById(id: ObjectId): Post? {
         val doc = collection.find(Document("_id", id)).first()
-        return doc?.let { documentToPost(it) }
+        return doc.let { documentToPost(it) }
     }
 
     // Retrieve all posts.

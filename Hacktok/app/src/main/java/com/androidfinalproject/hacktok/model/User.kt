@@ -9,8 +9,4 @@ data class User(
     val email: String,
     val createdAt: Date = Date(),
     val isActive: Boolean = true
-) {
-    override fun toString(): String {
-        return "id: $id, username: $username\n"
-    }
-}
+)
