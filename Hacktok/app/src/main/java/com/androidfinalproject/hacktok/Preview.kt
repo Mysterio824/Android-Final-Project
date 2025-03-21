@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.ui.auth.LoginScreen
 import com.androidfinalproject.hacktok.ui.auth.LoginState
@@ -14,6 +15,11 @@ import com.androidfinalproject.hacktok.ui.friendList.FriendListScreen
 import com.androidfinalproject.hacktok.ui.friendList.FriendListState
 import com.androidfinalproject.hacktok.ui.theme.LoginAppTheme
 import org.bson.types.ObjectId
+import com.androidfinalproject.hacktok.ui.mainDashboard.DashboardScreen
+import com.androidfinalproject.hacktok.ui.mainDashboard.PostActionBar
+import com.androidfinalproject.hacktok.ui.mainDashboard.DashboardTopBar
+import com.androidfinalproject.hacktok.ui.mainDashboard.PostItem
+import com.androidfinalproject.hacktok.ui.mainDashboard.SearchBar
 
 @Preview(showBackground = true)
 @Composable
@@ -89,4 +95,37 @@ private fun LoginScreenPreview() {
             )
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewDashboardScreen() {
+    DashboardScreen()
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewPostItem() {
+    PostItem(
+        post =                     Post(ObjectId(), "Đụ má hôm nay tui buồn quá ấy anh em!", User(ObjectId(),"Kien","Kien@gmail.com")),
+
+        )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewSearchBar() {
+    SearchBar { /* No action needed for preview */ }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewPostActionBar() {
+    PostActionBar()
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewDashboardTopBar() {
+    DashboardTopBar { /* No action needed for preview */ }
 }
