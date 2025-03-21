@@ -7,13 +7,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun SearchBar(onSearch: (String) -> Unit) {
+fun WhatsNewBar(onSearch: (String) -> Unit) {
     var query by remember { mutableStateOf("") }
 
     TextField(
         value = query,
         onValueChange = { query = it },
-        placeholder = { Text("Search...") },
+        placeholder = { Text("What's new...") },
         modifier = Modifier.fillMaxWidth().padding(8.dp)
     )
 }

@@ -19,8 +19,7 @@ import com.androidfinalproject.hacktok.ui.mainDashboard.DashboardScreen
 import com.androidfinalproject.hacktok.ui.mainDashboard.PostActionBar
 import com.androidfinalproject.hacktok.ui.mainDashboard.DashboardTopBar
 import com.androidfinalproject.hacktok.ui.mainDashboard.PostItem
-import com.androidfinalproject.hacktok.ui.mainDashboard.SearchBar
-
+import com.androidfinalproject.hacktok.ui.mainDashboard.WhatsNewBar
 @Preview(showBackground = true)
 @Composable
 fun FriendListScreenPreview() {
@@ -107,15 +106,15 @@ fun PreviewDashboardScreen() {
 @Composable
 fun PreviewPostItem() {
     PostItem(
-        post =                     Post(ObjectId(), "Đụ má hôm nay tui buồn quá ấy anh em!", User(ObjectId(),"Kien","Kien@gmail.com")),
+        post = Post(ObjectId(), "Đụ  má hôm nay tui buồn quá ấy anh em!", User(ObjectId(),"Kien","Kien@gmail.com")),
 
         )
 }
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewSearchBar() {
-    SearchBar { /* No action needed for preview */ }
+fun PreviewWhatsNewBar() {
+    WhatsNewBar { /* No action needed for preview */ }
 }
 
 @Preview(showBackground = true)

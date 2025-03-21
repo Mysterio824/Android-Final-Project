@@ -12,12 +12,15 @@ import com.androidfinalproject.hacktok.ui.mainDashboard.*
 @Composable
 fun DashboardScreen(viewModel: DashboardViewModel = viewModel()) {
     val state = viewModel.state.collectAsState().value
+    var currentScreen by remember { mutableStateOf("Search") }
 
     Scaffold(
-        topBar = { DashboardTopBar { /* Xử lý search click */ } }
-    ) {
-        Column(modifier = Modifier.fillMaxSize().padding(it)) {
-            SearchBar { query -> /* Xử lý tìm kiếm */ }
+        topBar = { DashboardTopBar { /* Xử lý Whatsnew click */ } },
+        bottomBar = { BottomNavigationBar(currentScreen) { currentScreen = it } }
+    ) { paddingValues ->
+        Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+            WhatsNewBar { query -> /* Xử lý tìm kiếm */ }
+
             if (state.isLoading) {
                 CircularProgressIndicator(modifier = Modifier.fillMaxSize())
             } else {
