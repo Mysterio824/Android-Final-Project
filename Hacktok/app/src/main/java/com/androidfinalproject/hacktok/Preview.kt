@@ -117,7 +117,7 @@ private fun PostDetailScreenPreview() {
 @Preview(showBackground = true)
 @Composable
 fun UserProfilePreview() {
-    LoginAppTheme {  // Add theme wrapper
+    MainAppTheme {  // Add theme wrapper
         Box(
             modifier = Modifier
                 .width(400.dp)
