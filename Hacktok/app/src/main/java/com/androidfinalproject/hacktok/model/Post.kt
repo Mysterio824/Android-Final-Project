@@ -11,8 +11,8 @@ data class Post(
     val createdAt: Date = Date(),
     val isActive: Boolean = true,
     var likes: Int = 0,
-    var comments: MutableList<Any> = mutableListOf()
-    val likeCount: Int
+    var comments: MutableList<Any> = mutableListOf(),
+    val likeCount: Int=0
 ) {
     override fun toString(): String {
         return "id: $id, content: $content, created by: ${user.username}\n"

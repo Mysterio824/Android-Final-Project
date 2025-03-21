@@ -83,16 +83,15 @@ fun PreviewDashboardScreen() {
 @Preview(showBackground = true)
 @Composable
 fun PreviewPostItem() {
-    PostItem(
-        post = Post(ObjectId(), "Đụ  má hôm nay tui buồn quá ấy anh em!", User(ObjectId(),"Kien","Kien@gmail.com")),
-        )
+    val samplePost = Post(
+        id = ObjectId.get(),
+        content = "Hôm nay trời đẹp quá!",
+        user = User(ObjectId.get(), "TranVanC", "tranvanc@example.com")
+    )
+
+    PostItem(post = samplePost)
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewWhatsNewBar() {
-    WhatsNewBar { /* No action needed for preview */ }
-}
 
 @Preview(showBackground = true)
 @Composable
@@ -116,17 +115,6 @@ private fun PostDetailScreenPreview() {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewPostActionBar() {
-    PostActionBar()
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewDashboardTopBar() {
-    DashboardTopBar { /* No action needed for preview */ }
-}
 
 @Preview(showBackground = true)
 @Composable
