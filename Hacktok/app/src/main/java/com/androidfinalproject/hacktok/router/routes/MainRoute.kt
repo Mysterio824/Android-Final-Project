@@ -4,6 +4,16 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 sealed interface MainRoute : Route {
+    class MainGraph {
+        companion object {
+            val route: String
+                get() {
+                    TODO()
+                }
+        }
+
+    }
+
     @Serializable
     data object Graph : MainRoute {
         override val route = "main_graph"

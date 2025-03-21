@@ -22,6 +22,11 @@ import com.androidfinalproject.hacktok.ui.search.SearchDashboardScreen
 import com.androidfinalproject.hacktok.ui.search.SearchUiState
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 import org.bson.types.ObjectId
+import com.androidfinalproject.hacktok.ui.mainDashboard.DashboardScreen
+import com.androidfinalproject.hacktok.ui.mainDashboard.PostActionBar
+import com.androidfinalproject.hacktok.ui.mainDashboard.DashboardTopBar
+import com.androidfinalproject.hacktok.ui.mainDashboard.PostItem
+import com.androidfinalproject.hacktok.ui.mainDashboard.WhatsNewBar
 import java.util.Date
 import com.androidfinalproject.hacktok.model.Post
 
@@ -71,24 +76,22 @@ private fun LoginScreenPreview() {
 
 @Preview(showBackground = true)
 @Composable
-private fun FriendListScreenPreview() {
-    MainAppTheme {
-        Box(
-            modifier = Modifier
-                .width(400.dp)
-                .height(800.dp)
-        ) {
-            val mockUsers = MockData.mockUsers
-            FriendListScreen(
-              state = FriendListState(
-                  filteredUsers = mockUsers,
-                  friendIds = setOf(mockUsers[0].id, mockUsers[1].id),
-                  searchQuery = "",
-              ),
-              onAction = {},
-            )
-        }
-    }
+fun PreviewDashboardScreen() {
+    DashboardScreen()
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewPostItem() {
+    PostItem(
+        post = Post(ObjectId(), "Đụ  má hôm nay tui buồn quá ấy anh em!", User(ObjectId(),"Kien","Kien@gmail.com")),
+        )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewWhatsNewBar() {
+    WhatsNewBar { /* No action needed for preview */ }
 }
 
 @Preview(showBackground = true)
@@ -111,6 +114,18 @@ private fun PostDetailScreenPreview() {
             )
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewPostActionBar() {
+    PostActionBar()
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewDashboardTopBar() {
+    DashboardTopBar { /* No action needed for preview */ }
 }
 
 @Preview(showBackground = true)

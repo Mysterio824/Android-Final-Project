@@ -55,6 +55,7 @@ android {
 }
 
 dependencies {
+//    implementation("androidx.room:room-ktx:2.6.1") nay la cgi z
     // Use the Compose BOM to manage Compose dependency versions.
     val composeBom = platform("androidx.compose:compose-bom:2025.02.00")
     implementation(composeBom)
