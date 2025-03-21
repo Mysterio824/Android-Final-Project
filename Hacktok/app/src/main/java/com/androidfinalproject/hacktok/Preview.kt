@@ -4,72 +4,50 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ComposeCompilerApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.androidfinalproject.hacktok.model.Post
+import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.User
+import com.androidfinalproject.hacktok.router.routes.FriendListRoute
 import com.androidfinalproject.hacktok.ui.auth.LoginScreen
 import com.androidfinalproject.hacktok.ui.auth.LoginState
 import com.androidfinalproject.hacktok.ui.friendList.FriendListScreen
 import com.androidfinalproject.hacktok.ui.friendList.FriendListState
-import com.androidfinalproject.hacktok.ui.theme.LoginAppTheme
+import com.androidfinalproject.hacktok.ui.profile.UserProfileScreen
+import com.androidfinalproject.hacktok.ui.post.PostDetailScreen
+import com.androidfinalproject.hacktok.ui.post.PostDetailState
+import com.androidfinalproject.hacktok.ui.search.SearchDashboardScreen
+import com.androidfinalproject.hacktok.ui.search.SearchUiState
+import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 import org.bson.types.ObjectId
 import com.androidfinalproject.hacktok.ui.mainDashboard.DashboardScreen
 import com.androidfinalproject.hacktok.ui.mainDashboard.PostActionBar
 import com.androidfinalproject.hacktok.ui.mainDashboard.DashboardTopBar
 import com.androidfinalproject.hacktok.ui.mainDashboard.PostItem
 import com.androidfinalproject.hacktok.ui.mainDashboard.WhatsNewBar
+import java.util.Date
+import com.androidfinalproject.hacktok.model.Post
+
 @Preview(showBackground = true)
 @Composable
-fun FriendListScreenPreview() {
-    LoginAppTheme {
+fun SearchDashboardScreenPreview() {
+    MainAppTheme {
         Box(
             modifier = Modifier
                 .width(400.dp)
                 .height(800.dp)
         ) {
-            val previewState = FriendListState(
-                users = listOf(
-                    User(
-                        username = "john_doe",
-                        email = "john@example.com"
-                    ),
-                    User(
-                        username = "jane_smith",
-                        email = "jane@example.com"
-                    ),
-                    User(
-                        username = "robert_johnson",
-                        email = "robert@example.com"
-                    ),
-                    User(
-                        username = "robert_johnson",
-                        email = "robert@example.com"
-                    )
-                ),
-                filteredUsers = listOf(
-                    User(
-                        username = "john_doe",
-                        email = "john@example.com"
-                    ),
-                    User(
-                        username = "jane_smith",
-                        email = "jane@example.com"
-                    ),
-                    User(
-                        username = "robert_johnson",
-                        email = "robert@example.com"
-                    ),
-                    User(
-                        username = "robert_johnson",
-                        email = "robert@example.com"
-                    )
-                ),
-                friendIds = setOf(ObjectId())
+            val previewState = SearchUiState(
+                selectedTabIndex = 2, // change this to change tab
+                users = MockData.mockUsers,
+                filteredUsers = MockData.mockUsers,
+                posts = MockData.mockPosts,
+                filteredPosts = MockData.mockPosts
             )
 
-            FriendListScreen(
+            SearchDashboardScreen(
                 state = previewState,
                 onAction = {}
             )
@@ -80,7 +58,7 @@ fun FriendListScreenPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun LoginScreenPreview() {
-    LoginAppTheme {
+    MainAppTheme {
         Box(
             modifier = Modifier
                 .width(400.dp)
@@ -107,7 +85,6 @@ fun PreviewDashboardScreen() {
 fun PreviewPostItem() {
     PostItem(
         post = Post(ObjectId(), "Đụ  má hôm nay tui buồn quá ấy anh em!", User(ObjectId(),"Kien","Kien@gmail.com")),
-
         )
 }
 
@@ -115,6 +92,28 @@ fun PreviewPostItem() {
 @Composable
 fun PreviewWhatsNewBar() {
     WhatsNewBar { /* No action needed for preview */ }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PostDetailScreenPreview() {
+    MainAppTheme {
+        Box(
+            modifier = Modifier
+                .width(400.dp)
+                .height(800.dp)
+        ) {
+            PostDetailScreen(
+                postId = ObjectId(),
+                state = PostDetailState(
+                    post = MockData.mockPosts.first(),
+                    comments = MockData.mockComments,
+                    isCommentsVisible = true
+                ),
+                onAction = {},
+            )
+        }
+    }
 }
 
 @Preview(showBackground = true)
@@ -127,4 +126,38 @@ fun PreviewPostActionBar() {
 @Composable
 fun PreviewDashboardTopBar() {
     DashboardTopBar { /* No action needed for preview */ }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun UserProfilePreview() {
+    MainAppTheme {  // Add theme wrapper
+        Box(
+            modifier = Modifier
+                .width(400.dp)
+                .height(800.dp)
+        ) {
+            val samplePosts = listOf(
+                Post(id = ObjectId.get(), user = User(username = "John Doe", email="JohnTerry@example.com"), likeCount = 2, content = "This is my first post!"),
+                Post(id = ObjectId.get(), user = User(username = "John Doe", email="JohnTerry@example.com"), likeCount = 4, content = "This is my second post!"),
+            )
+
+            UserProfileScreen(
+                user = User(
+                    id = ObjectId.get(),
+                    username = "John Doe",
+                    email = "johndoe@example.com",
+                    createdAt = Date(),
+                    isActive = true
+                ),
+                posts = samplePosts,
+                isFriend = false,
+                isBlocked = true,
+                onSendFriendRequest = {},
+                onUnfriend = {},
+                onChat = {},
+                onBlock = {},
+            )
+        }
+    }
 }

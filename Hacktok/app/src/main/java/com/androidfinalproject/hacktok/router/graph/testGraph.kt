@@ -9,16 +9,19 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.androidfinalproject.hacktok.router.routes.MainRoute
+import com.androidfinalproject.hacktok.ui.post.PostDetailScreenRoot
+import com.androidfinalproject.hacktok.ui.post.PostDetailViewModel
 import com.androidfinalproject.hacktok.ui.search.SearchDashboardScreen
+import com.androidfinalproject.hacktok.ui.search.SearchDashboardScreenRoot
 import com.androidfinalproject.hacktok.ui.search.SearchViewModel
+import org.bson.types.ObjectId
 
 fun NavGraphBuilder.testGraph(
     navController: NavController,
-    searchViewModel: SearchViewModel
 ) {
     navigation(
         startDestination = MainRoute.SearchDashboard.route,
-        route = MainRoute.MainGraph.route
+        route = MainRoute.Graph.route
     ) {
         composable(
             route = MainRoute.SearchDashboard.route,
@@ -37,7 +40,12 @@ fun NavGraphBuilder.testGraph(
                         )
             }
         ) {
-            SearchDashboardScreen(viewModel = searchViewModel)
+            PostDetailScreenRoot (
+                postId = ObjectId(),
+                viewModel = PostDetailViewModel(),
+                onNavigateBack = {},
+                onUserProfileNavigate = {}
+            )
         }
     }
 }
