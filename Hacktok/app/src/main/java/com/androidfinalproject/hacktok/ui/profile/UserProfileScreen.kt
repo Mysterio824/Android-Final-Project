@@ -1,11 +1,14 @@
 package com.androidfinalproject.hacktok.ui.profile
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,6 +25,7 @@ import com.androidfinalproject.hacktok.ui.profile.component.PostCard
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.SpanStyle
+import com.androidfinalproject.hacktok.ui.post.component.PostContent
 
 @Composable
 fun UserProfileScreen (
@@ -42,13 +46,20 @@ fun UserProfileScreen (
         // Profile Picture
         Spacer(modifier = Modifier.height(16.dp))
 
-        Image(
-            painter = painterResource(id = R.drawable.profile_placeholder),
-            contentDescription = "Profile Picture",
+        Box(
             modifier = Modifier
-                .size(100.dp)
+                .size(80.dp)
                 .clip(CircleShape)
-        )
+                .background(MaterialTheme.colorScheme.primaryContainer)
+        ) {
+            androidx.compose.material3.Text(
+                text = user.username.first().toString(),
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.align(Alignment.Center)
+            )
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -116,7 +127,7 @@ fun UserProfileScreen (
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(posts) { post ->
-                    PostCard(post)
+                    PostContent(post = post, onLikeClick = { /* Handle like click */ }, onCommentClick = { /* Handle comment click */ }, onShareClick = {}, onUserClick = {})
                 }
             }
         }
