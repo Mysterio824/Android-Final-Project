@@ -21,7 +21,7 @@ import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 @Composable
 @Preview
 fun App() {
-    LoginAppTheme {
+    MainAppTheme {
         val navController = rememberNavController()
         val searchViewModel: SearchViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
         Log.d("Navigation", "Starting at: ${DashboardRoute.Graph.route}")
