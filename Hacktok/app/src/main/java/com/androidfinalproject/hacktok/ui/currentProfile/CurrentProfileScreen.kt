@@ -28,7 +28,7 @@ import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.ui.currentProfile.component.ActionButton
 import com.androidfinalproject.hacktok.ui.currentProfile.component.StatColumn
-import com.androidfinalproject.hacktok.ui.post.component.PostContent
+import com.androidfinalproject.hacktok.ui.post.component.EditPostContent
 import java.util.Locale
 
 @Composable
@@ -37,8 +37,8 @@ fun CurrentProfileScreen(
     user: User,
     posts: List<Post>,
     friendCount: Int,
-    onGoToEditing: () -> Unit,
-    onPostClick: (Post) -> Unit,
+    onPostEdit: () -> Unit,
+    onProfileEdit: () -> Unit,
 ) {
     val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     val groupedPosts = posts.sortedByDescending { it.createdAt }
@@ -75,7 +75,7 @@ fun CurrentProfileScreen(
             StatColumn(posts.size, "Posts")
         }
 
-        ActionButton(label = "Edit Profile", onClick = onGoToEditing)
+        ActionButton(label = "Edit Profile", onClick = onProfileEdit)
 
 //        horizontal line
         Divider(
@@ -104,12 +104,14 @@ fun CurrentProfileScreen(
                 )
 
                 postsForDate.forEach { post ->
-                    PostContent(
+                    EditPostContent (
                         post = post,
                         onLikeClick = {},
                         onShareClick = {},
                         onUserClick = {},
-                        onCommentClick = {})
+                        onCommentClick = {},
+                        onEditClick = onPostEdit
+                    )
                 }
             }
         }

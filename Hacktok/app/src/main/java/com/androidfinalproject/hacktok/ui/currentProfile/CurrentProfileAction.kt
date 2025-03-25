@@ -1,11 +1,8 @@
 package com.androidfinalproject.hacktok.ui.currentProfile
 
-import org.bson.types.ObjectId
+import com.androidfinalproject.hacktok.model.Post
 
 sealed class CurrentProfileAction {
-//    display user information
-//    manage posts
-//    setting to change information, password
-//    log out button
-    data object GoToEditing : CurrentProfileAction()
+    data class NavigateToPostEdit(val post: Post) : CurrentProfileAction()
+    data object NavigateToProfileEdit : CurrentProfileAction()
 }

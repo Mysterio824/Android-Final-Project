@@ -180,9 +180,9 @@ fun CurrentProfilePreview() {
                 ),
                 posts = samplePosts,
                 friendCount = 16,
-                onGoToEditing = {},
-                onPostClick = {},
-                navController = NavController(context = LocalContext.current)
+                navController = NavController(context = LocalContext.current),
+                onProfileEdit = {},
+                onPostEdit = {}
             )
         }
     }
