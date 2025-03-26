@@ -36,11 +36,11 @@ class DashboardViewModel : ViewModel() {
             _state.value = _state.value.copy(isLoading = true, error = null)
             try {
                 val mockPosts = listOf(
-                    Post(ObjectId(), "Hello world!", User(ObjectId(),"Kien","Kien@gmail.com")),
-                    Post(ObjectId(), " world!", User(ObjectId(),"A","A@gmail.com")),
-                    Post(ObjectId(), "Hello !", User(ObjectId(),"B","B@gmail.com")),
-                    Post(ObjectId(), "Heworld!", User(ObjectId(),"C","C@gmail.com")),
-                    Post(ObjectId(), "áđâsdá!", User(ObjectId(),"D","D@gmail.com")),
+                    Post(ObjectId(), "Hello world!", likeCount = 2, user = User(ObjectId(),"Kien","Kien@gmail.com")),
+                    Post(ObjectId(), " world!", likeCount = 2, user = User(ObjectId(),"A","A@gmail.com")),
+                    Post(ObjectId(), "Hello !",likeCount = 2, user = User(ObjectId(),"B","B@gmail.com")),
+                    Post(ObjectId(), "Heworld!", likeCount = 2, user = User(ObjectId(),"C","C@gmail.com")),
+                    Post(ObjectId(), "áđâsdá!", likeCount = 2, user = User(ObjectId(),"D","D@gmail.com")),
                 )
 
                 _state.update {

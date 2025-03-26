@@ -1,13 +1,16 @@
 package com.androidfinalproject.hacktok
 
+import android.content.Context
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ComposeCompilerApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.router.routes.FriendListRoute
@@ -29,6 +32,9 @@ import com.androidfinalproject.hacktok.ui.mainDashboard.PostItem
 import com.androidfinalproject.hacktok.ui.mainDashboard.WhatsNewBar
 import java.util.Date
 import com.androidfinalproject.hacktok.model.Post
+import com.androidfinalproject.hacktok.ui.currentProfile.CurrentProfileScreen
+import com.androidfinalproject.hacktok.ui.post.component.formatDate
+import java.text.SimpleDateFormat
 
 @Preview(showBackground = true)
 @Composable
@@ -145,6 +151,38 @@ fun UserProfilePreview() {
                 onUnfriend = {},
                 onChat = {},
                 onBlock = {},
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun CurrentProfilePreview() {
+    MainAppTheme {  // Add theme wrapper
+        Box(
+            modifier = Modifier
+                .width(400.dp)
+                .height(800.dp)
+        ) {
+            val samplePosts = listOf(
+                Post(id = ObjectId.get(), user = User(username = "John Doe", email="JohnTerry@example.com"), likeCount = 12, content = "This is my first post!"),
+                Post(id = ObjectId.get(), user = User(username = "John Doe", email="JohnTerry@example.com"), createdAt = SimpleDateFormat("yyyy/MM/dd").parse("2025/01/09"), likeCount = 12, content = "This is my first post!"),
+            )
+
+            CurrentProfileScreen (
+                user = User(
+                    id = ObjectId.get(),
+                    username = "John Doe",
+                    email = "johndoe@example.com",
+                    createdAt = Date(),
+                    isActive = true
+                ),
+                posts = samplePosts,
+                friendCount = 16,
+                navController = NavController(context = LocalContext.current),
+                onProfileEdit = {},
+                onPostEdit = {}
             )
         }
     }
