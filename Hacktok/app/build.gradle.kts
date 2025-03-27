@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     id("org.jetbrains.kotlin.plugin.serialization")
     id("org.jetbrains.kotlin.plugin.compose")
+    alias(libs.plugins.google.gms.google.services)
 }
 
 android {
@@ -55,7 +56,13 @@ android {
 }
 
 dependencies {
-//    implementation("androidx.room:room-ktx:2.6.1") nay la cgi z
+    implementation(libs.firebase.database)
+    implementation(libs.firebase.auth)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
+    implementation(libs.firebase.firestore)
+    //    implementation("androidx.room:room-ktx:2.6.1") nay la cgi z
     // Use the Compose BOM to manage Compose dependency versions.
     val composeBom = platform("androidx.compose:compose-bom:2025.02.00")
     implementation(composeBom)

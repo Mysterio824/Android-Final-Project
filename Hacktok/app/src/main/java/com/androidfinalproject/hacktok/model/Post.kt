@@ -4,6 +4,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import org.bson.types.ObjectId
 import java.util.Date
 
+
 data class Post(
     val id: ObjectId? = null,
     val content: String,
