@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+# Android Studio and local configuration
 *.iml
 .gradle
 /local.properties
@@ -8,17 +8,23 @@
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
+/.idea/deploymentTargetSelector.xml
+/.idea/vcs.xml
+/.idea/runConfigurations.xml
+
+# macOS system files
 .DS_Store
+
+# Build and output directories
 /build
 /captures
 .externalNativeBuild
 .cxx
-local.properties
-=======
-# Compiled class file
+
+# Compiled class files
 *.class
 
-# Log file
+# Log files
 *.log
 
 # BlueJ files
@@ -27,7 +33,7 @@ local.properties
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
-# Package Files #
+# Package Files
 *.jar
 *.war
 *.nar
@@ -36,10 +42,31 @@ local.properties
 *.tar.gz
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+# Virtual machine crash logs
 hs_err_pid*
 replay_pid*
 
-# Kotlin Gradle plugin data, see https://kotlinlang.org/docs/whatsnew20.html#new-directory-for-kotlin-data-in-gradle-projects
+# Kotlin Gradle plugin data
 .kotlin/
->>>>>>> d6475179ec454b78629cf5d1dd971b7dbfef838f
+
+# Android application files
+*.apk
+*.ap_
+*.aab
+
+# Files for the ART/Dalvik VM
+*.dex
+
+# Proguard folder
+proguard/
+
+# Google Services (e.g. APIs or Firebase)
+google-services.json
+
+# External native build folder
+.externalNativeBuild
+.cxx/
+
+# Keystore files (uncomment if you want to track them)
+# *.jks
+# *.keystore
