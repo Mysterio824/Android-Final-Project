@@ -18,7 +18,7 @@ object UsersRepository {
     private fun documentToUser(doc: Map<String, Any>, id: String): User? {
         return try {
             User(
-                id = try { ObjectId(id) } catch (e: Exception) { null }, // Convert String to ObjectId
+                id = try { ObjectId(id) } catch (e: Exception) { null }.toString(), // Convert String to ObjectId
                 username = doc["username"] as? String ?: "",
                 email = doc["email"] as? String ?: "",
                 createdAt = doc["createdAt"] as? Date ?: Date(),

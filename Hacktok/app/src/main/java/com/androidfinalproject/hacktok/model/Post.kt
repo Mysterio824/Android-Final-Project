@@ -1,24 +1,22 @@
 package com.androidfinalproject.hacktok.model
 
-import androidx.lifecycle.viewmodel.CreationExtras
-import org.bson.types.ObjectId
+import com.google.firebase.firestore.PropertyName
 import java.util.Date
 
-
 data class Post(
-    val id: ObjectId? = null,
-    val content: String,
-    val user: User,  // Tham chiếu đến người dùng đã tạo post
-    val createdAt: Date = Date(),
-    val isActive: Boolean = true,
-    var likes: Int = 0,
-    var comments: MutableList<Any> = mutableListOf(),
-    val likeCount: Int=0
+    @PropertyName("id") val id: String? = null, // ID do Firestore sinh hoặc tự định nghĩa
+    @PropertyName("content") val content: String,
+    @PropertyName("userId") val userId: String, // Tham chiếu đến user trong collection "users"
+    @PropertyName("createdAt") val createdAt: Date = Date(),
+    @PropertyName("isActive") val isActive: Boolean = true,
+    @PropertyName("likeCount") val likeCount: Int = 0, // Số lượt thích
+    @PropertyName("commentCount") val commentCount: Int = 0 // Số lượng bình luận
 ) {
+    // Constructor không tham số cho Firestore
+    constructor() : this(null, "", "", Date(), true, 0, 0)
+
     override fun toString(): String {
-        return "id: $id, content: $content, created by: ${user.username}\n"
-    }
-    private fun addCmt(cmt:String){
-        comments.add(cmt)
+        return "Post(id=$id, content='$content', userId='$userId', createdAt=$createdAt, " +
+                "isActive=$isActive, likeCount=$likeCount, commentCount=$commentCount)"
     }
 }
