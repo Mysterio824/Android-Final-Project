@@ -35,6 +35,9 @@ import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.ui.currentProfile.CurrentProfileScreen
 import com.androidfinalproject.hacktok.ui.post.component.formatDate
 import java.text.SimpleDateFormat
+import com.androidfinalproject.hacktok.ui.adminManage.components.AdminManagementScreen
+import com.androidfinalproject.hacktok.ui.adminManage.AdminManagementViewModel
+import com.androidfinalproject.hacktok.ui.adminManage.AdminManagementState
 
 @Preview(showBackground = true)
 @Composable
@@ -98,7 +101,6 @@ fun PreviewPostItem() {
     PostItem(post = samplePost)
 }
 
-
 @Preview(showBackground = true)
 @Composable
 private fun PostDetailScreenPreview() {
@@ -120,7 +122,6 @@ private fun PostDetailScreenPreview() {
         }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable
@@ -183,6 +184,22 @@ fun CurrentProfilePreview() {
                 navController = NavController(context = LocalContext.current),
                 onProfileEdit = {},
                 onPostEdit = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AdminManagementScreenPreview() {
+    MainAppTheme {
+        Box(
+            modifier = Modifier
+                .width(400.dp)
+                .height(800.dp)
+        ) {
+            AdminManagementScreen(
+                viewModel = AdminManagementViewModel()
             )
         }
     }
