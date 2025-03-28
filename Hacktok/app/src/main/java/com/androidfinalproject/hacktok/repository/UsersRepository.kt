@@ -1,28 +1,28 @@
 package com.androidfinalproject.hacktok.repository
 
 import com.androidfinalproject.hacktok.model.User
-import kotlinx.coroutines.flow.first
-
-import org.bson.Document
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
+import kotlinx.coroutines.tasks.await
 import org.bson.types.ObjectId
+import java.util.Date
 
 object UsersRepository {
-    // Define your database and collection names.
-    private const val DATABASE_NAME = "instagramClone"
     private const val COLLECTION_NAME = "users"
 
-    // Get the collection reference.
-    private val collection = MongoDbManager.getCollection(DATABASE_NAME, COLLECTION_NAME)
+    // Get Firestore instance
+    private val db = FirebaseFirestore.getInstance()
+    private val collection = db.collection(COLLECTION_NAME)
 
-    // Helper to convert a Document to a User object.
-    private fun documentToUser(doc: Document): User? {
+    // Helper to convert Firestore document to User object
+    private fun documentToUser(doc: Map<String, Any>, id: String): User? {
         return try {
             User(
-                id = doc.getObjectId("_id"),
-                username = doc.getString("username"),
-                email = doc.getString("email"),
-                createdAt = doc.getDate("createdAt"),
-                isActive = doc.getBoolean("isActive", true)
+                id = try { ObjectId(id) } catch (e: Exception) { null }, // Convert String to ObjectId
+                username = doc["username"] as? String ?: "",
+                email = doc["email"] as? String ?: "",
+                createdAt = doc["createdAt"] as? Date ?: Date(),
+                isActive = doc["isActive"] as? Boolean ?: true
             )
         } catch (e: Exception) {
             e.printStackTrace()
@@ -30,41 +30,82 @@ object UsersRepository {
         }
     }
 
-    // Create a new user.
+    // Create a new user
     suspend fun insertUser(user: User): ObjectId? {
-        // Create a document from the User object.
-        val doc = Document()
-            .append("name", user.username)
-            .append("email", user.email)
-            .append("createdAt", user.createdAt)
-            .append("isActive", user.isActive)
-        user.id?.let { doc["_id"] = it }
-        val result = collection.insertOne(doc)
-        return result.insertedId?.asObjectId()?.value
+        return try {
+            val userData = hashMapOf(
+                "username" to user.username,
+                "email" to user.email,
+                "createdAt" to user.createdAt,
+                "isActive" to user.isActive
+            )
+
+            val result = if (user.id == null) {
+                // If no ID provided, create new document with auto-generated ID
+                collection.add(userData).await()
+            } else {
+                // If ID provided, use it
+                collection.document(user.id.toString()).set(userData).await()
+                null // Return null since we're using provided ID
+            }
+
+            val newId = result?.id ?: user.id?.toString()
+            newId?.let { ObjectId(it) }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
     }
 
-    // Find a user by their ObjectId.
+    // Find a user by their ObjectId
     suspend fun findUserById(id: ObjectId): User? {
-        val doc = collection.find(Document("_id", id)).first()
-        return documentToUser(doc)
+        return try {
+            val document = collection.document(id.toString()).get().await()
+            if (document.exists()) {
+                documentToUser(document.data!!, document.id)
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
     }
 
-    // Retrieve all users.
+    // Retrieve all users
     suspend fun listUsers(): List<User> {
-        val documents = mutableListOf<Document>()
-        collection.find().collect { documents.add(it) }
-        return documents.mapNotNull { documentToUser(it) }
+        return try {
+            val result = collection.get().await()
+            result.documents.mapNotNull { doc ->
+                doc.data?.let { documentToUser(it, doc.id) }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
     }
 
-    // Update a user by their ObjectId.
-    suspend fun updateUser(id: ObjectId, update: Document): Long {
-        val result = collection.updateOne(Document("_id", id), update)
-        return result.modifiedCount
+    // Update a user by their ObjectId
+    suspend fun updateUser(id: ObjectId, update: Map<String, Any>): Long {
+        return try {
+            collection.document(id.toString())
+                .set(update, SetOptions.merge())
+                .await()
+            1L // Firestore doesn't return modified count, return 1 if successful
+        } catch (e: Exception) {
+            e.printStackTrace()
+            0L
+        }
     }
 
-    // Delete a user by their ObjectId.
+    // Delete a user by their ObjectId
     suspend fun deleteUser(id: ObjectId): Long {
-        val result = collection.deleteOne(Document("_id", id))
-        return result.deletedCount
+        return try {
+            collection.document(id.toString()).delete().await()
+            1L // Firestore doesn't return deleted count, return 1 if successful
+        } catch (e: Exception) {
+            e.printStackTrace()
+            0L
+        }
     }
 }
