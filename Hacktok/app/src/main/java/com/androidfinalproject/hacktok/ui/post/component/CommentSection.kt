@@ -21,7 +21,7 @@ import com.androidfinalproject.hacktok.model.User
 fun CommentSection(
     comments: List<Comment>,
     isLoading: Boolean,
-    onUserClick: (User) -> Unit
+    onUserClick: (String) -> Unit
 ) {
     Column(
         modifier = Modifier

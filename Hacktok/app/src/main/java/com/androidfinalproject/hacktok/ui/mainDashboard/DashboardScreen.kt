@@ -7,7 +7,9 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.androidfinalproject.hacktok.model.Post
+import com.androidfinalproject.hacktok.ui.mainDashboard.component.BottomNavigationBar
+import com.androidfinalproject.hacktok.ui.mainDashboard.component.DashboardTopBar
+import com.androidfinalproject.hacktok.ui.mainDashboard.component.WhatsNewBar
 import com.androidfinalproject.hacktok.ui.post.component.PostContent
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 

@@ -2,6 +2,7 @@ package com.androidfinalproject.hacktok.ui.mainDashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,7 +26,6 @@ class DashboardViewModel : ViewModel() {
         when (action) {
             is DashboardAction.LoadPosts -> loadPosts()
             is DashboardAction.LikePost -> likePost(action.postId)
-            is DashboardAction.CommentPost -> commentOnPost(action.postId, action.comment)
             is DashboardAction.SharePost -> sharePost(action.postId)
             else -> {}
         }
@@ -35,13 +35,7 @@ class DashboardViewModel : ViewModel() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, error = null)
             try {
-                val mockPosts = listOf(
-                    Post(ObjectId(), "Hello world!", likeCount = 2, user = User(ObjectId(),"Kien","Kien@gmail.com")),
-                    Post(ObjectId(), " world!", likeCount = 2, user = User(ObjectId(),"A","A@gmail.com")),
-                    Post(ObjectId(), "Hello !",likeCount = 2, user = User(ObjectId(),"B","B@gmail.com")),
-                    Post(ObjectId(), "Heworld!", likeCount = 2, user = User(ObjectId(),"C","C@gmail.com")),
-                    Post(ObjectId(), "áđâsdá!", likeCount = 2, user = User(ObjectId(),"D","D@gmail.com")),
-                )
+                val mockPosts = MockData.mockPosts
 
                 _state.update {
                     it.copy(
@@ -63,20 +57,7 @@ class DashboardViewModel : ViewModel() {
     private fun likePost(postId: String) {
         _state.update { currentState ->
             val updatedPosts = currentState.posts.map {
-                if (it.id.toString() == postId) it.copy(likes = it.likes + 1) else it
-            }
-            currentState.copy(posts = updatedPosts)
-        }
-    }
-
-    private fun commentOnPost(postId: String, comment: String) {
-        _state.update { currentState ->
-            val updatedPosts = currentState.posts.map {
-                if (it.id.toString() == postId) {
-                    val newComments = it.comments;
-                    newComments.add(comment)
-                    it.copy(comments = newComments);
-                }else it
+                if (it.id.toString() == postId) it.copy(likeCount = it.likeCount + 1) else it
             }
             currentState.copy(posts = updatedPosts)
         }

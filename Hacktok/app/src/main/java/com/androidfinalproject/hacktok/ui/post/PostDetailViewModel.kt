@@ -18,7 +18,7 @@ class PostDetailViewModel : ViewModel() {
     val state: StateFlow<PostDetailState> = _state.asStateFlow()
 
     // External action handler for navigation events
-    var onUserProfileNavigate: ((userId: ObjectId?) -> Unit)? = null
+    var onUserProfileNavigate: ((userId: String?) -> Unit)? = null
 
     fun onAction(action: PostDetailAction) {
         when (action) {
@@ -29,7 +29,7 @@ class PostDetailViewModel : ViewModel() {
             is PostDetailAction.Share -> sharePost()
             is PostDetailAction.UpdateCommentText -> updateCommentText(action.text)
             is PostDetailAction.SubmitComment -> submitComment()
-            is PostDetailAction.OnUserClick -> handleUserClick(action.user.id)
+            is PostDetailAction.OnUserClick -> handleUserClick(action.userId)
             is PostDetailAction.KeyboardShown -> showKeyboard()
             is PostDetailAction.KeyboardHidden -> hideKeyboard()
             PostDetailAction.NavigateBack -> TODO()
@@ -43,7 +43,7 @@ class PostDetailViewModel : ViewModel() {
             try {
                 // Mock data
                 val post = MockData.mockPosts.first()
-                val user = post.user
+                val user = MockData.mockUsers.first()
 
 
                 _state.update { it.copy(post = post) }
@@ -62,26 +62,7 @@ class PostDetailViewModel : ViewModel() {
                 kotlinx.coroutines.delay(500)
 
                 // Mock comments
-                val comments = listOf(
-                    Comment(
-                        id = ObjectId(),
-                        comment = "Great post!",
-                        like = 5,
-                        user = User(id = ObjectId(), username = "Alice", email = "alice@example.com")
-                    ),
-                    Comment(
-                        id = ObjectId(),
-                        comment = "I disagree with this point.",
-                        like = 2,
-                        user = User(id = ObjectId(), username = "Bob", email = "bob@example.com")
-                    ),
-                    Comment(
-                        id = ObjectId(),
-                        comment = "Very insightful, thanks for sharing!",
-                        like = 8,
-                        user = User(id = ObjectId(), username = "Carol", email = "carol@example.com")
-                    )
-                )
+                val comments = MockData.mockComments
 
                 _state.update { it.copy(comments = comments, isLoadingComments = false) }
             } catch (e: Exception) {
@@ -123,12 +104,7 @@ class PostDetailViewModel : ViewModel() {
     private fun submitComment() {
         val currentText = _state.value.commentText.trim()
         if (currentText.isNotEmpty()) {
-            val newComment = Comment(
-                id = ObjectId(),
-                comment = currentText,
-                like = 0,
-                user = User(id = ObjectId(), username = "CurrentUser", email = "me@example.com")
-            )
+            val newComment = MockData.mockComments.first()
 
             _state.update {
                 it.copy(
@@ -140,7 +116,7 @@ class PostDetailViewModel : ViewModel() {
         }
     }
 
-    private fun handleUserClick(userId: ObjectId?) {
+    private fun handleUserClick(userId: String?) {
         onUserProfileNavigate?.invoke(userId)
     }
 

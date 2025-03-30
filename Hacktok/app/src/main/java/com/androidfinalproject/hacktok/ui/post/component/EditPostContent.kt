@@ -23,7 +23,7 @@ fun EditPostContent (
     onLikeClick: () -> Unit,
     onCommentClick: () -> Unit,
     onShareClick: () -> Unit,
-    onUserClick: (User) -> Unit,
+    onUserClick: (String) -> Unit,
     onEditClick: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxWidth()) {

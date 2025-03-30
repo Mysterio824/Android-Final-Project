@@ -1,4 +1,4 @@
-package com.androidfinalproject.hacktok.ui.post
+package com.androidfinalproject.hacktok.ui.post.component
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer

@@ -56,8 +56,8 @@ android {
 }
 
 dependencies {
-    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
+    implementation (libs.kotlinx.coroutines.core.v164)
+    implementation (libs.kotlinx.coroutines.android)
     implementation(libs.firebase.database)
     implementation(libs.firebase.auth)
     implementation(libs.androidx.credentials)
@@ -87,7 +87,7 @@ dependencies {
     implementation(libs.kotlin.reflect)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
-    implementation("androidx.compose.ui:ui-text-google-fonts:1.5.0")
+    implementation(libs.androidx.ui.text.google.fonts)
 
 
     implementation(libs.material.icons.extended)
@@ -111,3 +111,4 @@ dependencies {
     implementation(libs.kotlinx.coroutines.reactive)
     implementation(libs.mongodb.driver.kotlin.coroutine)
 }
+

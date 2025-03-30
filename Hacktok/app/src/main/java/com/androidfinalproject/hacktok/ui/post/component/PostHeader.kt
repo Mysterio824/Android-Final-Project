@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.Post
 import java.text.SimpleDateFormat
 import java.util.*
@@ -39,7 +40,7 @@ fun PostHeader(
                 .clickable { onUserClick() }
         ) {
             Text(
-                text = post.user.username.first().toString(),
+                text = MockData.mockUsers.first().username.first().toString(),
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
@@ -56,7 +57,7 @@ fun PostHeader(
                 .clickable { onUserClick() }
         ) {
             Text(
-                text = post.user.username,
+                text = MockData.mockUsers.first().username,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
                 maxLines = 1,

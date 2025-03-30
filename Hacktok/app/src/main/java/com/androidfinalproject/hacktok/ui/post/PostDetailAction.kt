@@ -12,7 +12,7 @@ sealed class PostDetailAction {
     object Share : PostDetailAction()
     data class UpdateCommentText(val text: String) : PostDetailAction()
     object SubmitComment : PostDetailAction()
-    data class OnUserClick(val user: User) : PostDetailAction()
+    data class OnUserClick(val userId: String) : PostDetailAction()
     object KeyboardShown : PostDetailAction()
     object KeyboardHidden : PostDetailAction()
     data class LoadPost(val postId: ObjectId?) : PostDetailAction()

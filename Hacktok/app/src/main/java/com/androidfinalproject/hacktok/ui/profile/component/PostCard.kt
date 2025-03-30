@@ -17,6 +17,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.androidfinalproject.hacktok.R
+import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.Post
 
 @Composable
@@ -54,7 +55,7 @@ fun PostCard(post: Post) {
 //                modifier = Modifier.weight(1f)  // Expands to take remaining space
             ) {
                 Text(
-                    text = post.user.username,
+                    text = MockData.mockUsers.first().username,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Start

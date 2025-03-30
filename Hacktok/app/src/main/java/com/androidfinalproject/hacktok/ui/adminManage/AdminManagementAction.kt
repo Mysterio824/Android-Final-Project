@@ -9,7 +9,7 @@ sealed class AdminManagementAction {
     data class CreatePost(val content: String) : AdminManagementAction()
     data class EditPost(val postId: ObjectId?, val newContent: String) : AdminManagementAction()
     data class DeletePost(val postId: ObjectId?) : AdminManagementAction()
-    data class EditComment(val commentId: ObjectId?, val newContent: String) : AdminManagementAction()
+//    data class EditComment(val commentId: ObjectId?, val newContent: String) : AdminManagementAction()
     data class DeleteComment(val commentId: ObjectId?) : AdminManagementAction()
     data class SelectTab(val tabIndex: Int) : AdminManagementAction()
     object OpenCreatePostDialog : AdminManagementAction()

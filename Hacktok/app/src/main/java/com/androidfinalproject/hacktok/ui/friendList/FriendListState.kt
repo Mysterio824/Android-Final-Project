@@ -7,7 +7,7 @@ import org.bson.types.ObjectId
 data class FriendListState(
     val users: List<User> = emptyList(),
     val filteredUsers: List<User> = emptyList(),
-    val friendIds: Set<ObjectId?> = emptySet(),
+    val friendIds: Set<String?> = emptySet(),
     val searchQuery: String = "",
     val isLoading: Boolean = false,
     val error: String? = null

@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.bson.types.ObjectId
 
 class CurrentProfileViewModel : ViewModel() {
     private val _state = MutableStateFlow(CurrentProfileState(
@@ -15,7 +14,7 @@ class CurrentProfileViewModel : ViewModel() {
     ))
     val state = _state.asStateFlow()
 
-    fun editPost(postId: ObjectId?, newContent: String) {
+    fun editPost(postId: String?, newContent: String) {
         viewModelScope.launch {
             try {
                 // Implement your post editing logic here

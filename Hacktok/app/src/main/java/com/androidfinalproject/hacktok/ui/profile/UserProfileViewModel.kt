@@ -2,14 +2,12 @@ package com.androidfinalproject.hacktok.ui.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.androidfinalproject.hacktok.model.Post
-import com.androidfinalproject.hacktok.model.User
+import com.androidfinalproject.hacktok.model.MockData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.bson.types.ObjectId
 
 class UserProfileViewModel : ViewModel() {
     private val _state = MutableStateFlow(UserProfileState())
@@ -25,7 +23,7 @@ class UserProfileViewModel : ViewModel() {
         }
     }
 
-    fun loadUserProfile(userId: ObjectId?) {
+    fun loadUserProfile(userId: String?) {
         viewModelScope.launch {
             // Set loading state
             _state.update { currentState ->
@@ -35,26 +33,9 @@ class UserProfileViewModel : ViewModel() {
             try {
                 // This would typically be an API call
                 // Mock implementation for now
-                val mockUser = User(
-                    id = userId,
-                    username = "example_user",
-                    email = "user@example.com"
-                )
+                val mockUser = MockData.mockUsers.first()
 
-                val mockPosts = listOf(
-                    Post(
-                        id = ObjectId(),
-                        user = mockUser,
-                        likeCount = 2,
-                        content = "This is my first post!"
-                    ),
-                    Post(
-                        id = ObjectId(),
-                        user = mockUser,
-                        likeCount = 4,
-                        content = "Another day, another post!"
-                    )
-                )
+                val mockPosts = MockData.mockPosts
 
                 // Check if user is a friend (would come from repository)
                 val isFriend = true
@@ -87,7 +68,7 @@ class UserProfileViewModel : ViewModel() {
         state.value.user?.id?.let { loadUserProfile(it) }
     }
 
-    private fun addFriend(userId: ObjectId?) {
+    private fun addFriend(userId: String?) {
         viewModelScope.launch {
             // Implement friend addition logic
             _state.update { currentState ->
@@ -96,7 +77,7 @@ class UserProfileViewModel : ViewModel() {
         }
     }
 
-    private fun unfriend(userId: ObjectId?) {
+    private fun unfriend(userId: String?) {
         viewModelScope.launch {
             // Implement unfriend logic
             _state.update { currentState ->
@@ -105,7 +86,7 @@ class UserProfileViewModel : ViewModel() {
         }
     }
 
-    private fun blockUser(userId: ObjectId?) {
+    private fun blockUser(userId: String?) {
         viewModelScope.launch {
             // Implement block user logic
             _state.update { currentState ->

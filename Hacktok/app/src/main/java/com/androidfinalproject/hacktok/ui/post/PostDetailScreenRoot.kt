@@ -24,7 +24,7 @@ fun PostDetailScreenRoot(
     postId: ObjectId? = null,
     viewModel: PostDetailViewModel = viewModel(),
     onNavigateBack: () -> Unit,
-    onUserProfileNavigate: (ObjectId?) -> Unit = {}
+    onUserProfileNavigate: (String?) -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -34,7 +34,7 @@ fun PostDetailScreenRoot(
         onAction = { action ->
             when (action) {
                 is PostDetailAction.NavigateBack -> onNavigateBack()
-                is PostDetailAction.OnUserClick -> onUserProfileNavigate(action.user.id)
+                is PostDetailAction.OnUserClick -> onUserProfileNavigate(action.userId)
                 else -> viewModel.onAction(action)
             }
         }

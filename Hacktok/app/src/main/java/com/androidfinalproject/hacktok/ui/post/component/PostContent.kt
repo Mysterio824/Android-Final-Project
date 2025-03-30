@@ -16,6 +16,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.model.User
 import java.text.SimpleDateFormat
@@ -27,7 +28,7 @@ fun PostContent(
     onLikeClick: () -> Unit,
     onCommentClick: () -> Unit,
     onShareClick: () -> Unit,
-    onUserClick: (User) -> Unit
+    onUserClick: (String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -44,11 +45,11 @@ fun PostContent(
                     .size(32.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.primaryContainer)
-                    .clickable { onUserClick(post.user) },
+                    .clickable { onUserClick(post.userId) },
                 contentAlignment = Alignment.Center // Center the text inside the Box
             ) {
                 Text(
-                    text = post.user.username.first().toString().uppercase(),
+                    text = MockData.mockUsers.first().username.first().toString().uppercase(),
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
@@ -59,10 +60,10 @@ fun PostContent(
 
             Column {
                 Text(
-                    text = post.user.username,
+                    text = MockData.mockUsers.first().username,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.clickable { onUserClick(post.user) }
+                    modifier = Modifier.clickable { onUserClick(post.userId) }
                 )
 
                 Text(

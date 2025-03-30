@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.Post
 
 @Composable
@@ -34,7 +35,7 @@ fun PostItem(
     ) {
         // Tên người dùng (username) in đậm
         Text(
-            text = post.user.username,
+            text = MockData.mockUsers.first().username,
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 4.dp)

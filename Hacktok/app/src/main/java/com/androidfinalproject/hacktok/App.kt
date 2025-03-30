@@ -23,15 +23,14 @@ import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 fun App() {
     MainAppTheme {
         val navController = rememberNavController()
-        val searchViewModel: SearchViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
         Log.d("Navigation", "Starting at: ${DashboardRoute.Graph.route}")
         NavHost(
             navController = navController,
             startDestination = FriendListRoute.Graph.route
         ) {
-            dashboardNavigation(navController)
+//            dashboardNavigation(navController)
             authNavigation(navController)
-            friendListNavigation(navController)
+//            friendListNavigation(navController)
         }
 
     }

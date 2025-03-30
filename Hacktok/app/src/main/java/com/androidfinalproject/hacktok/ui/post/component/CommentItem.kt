@@ -16,10 +16,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.androidfinalproject.hacktok.model.Comment
+import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.User
 
 @Composable
-fun CommentItem(comment: Comment, onUserClick: (User) -> Unit) {
+fun CommentItem(comment: Comment, onUserClick: (String) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -30,11 +31,11 @@ fun CommentItem(comment: Comment, onUserClick: (User) -> Unit) {
                 .size(32.dp)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.primaryContainer)
-                .clickable { onUserClick(comment.user) },
+                .clickable { onUserClick(comment.userId) },
             contentAlignment = Alignment.Center // Center the text inside the Box
         ) {
             Text(
-                text = comment.user.username.first().toString().uppercase(),
+                text = MockData.mockUsers.first().username.first().toString().uppercase(),
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
@@ -53,20 +54,20 @@ fun CommentItem(comment: Comment, onUserClick: (User) -> Unit) {
                 .padding(12.dp)
         ) {
             Text(
-                text = comment.user.username,
+                text = MockData.mockUsers.first().username,
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.clickable { onUserClick(comment.user) }
+                modifier = Modifier.clickable { onUserClick(comment.userId) }
             )
 
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = comment.comment,
+                text = comment.content,
                 style = MaterialTheme.typography.bodyMedium
             )
 
-            if (comment.like > 0) {
+            if (comment.likeCount > 0) {
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Row(
@@ -82,7 +83,7 @@ fun CommentItem(comment: Comment, onUserClick: (User) -> Unit) {
                     Spacer(modifier = Modifier.width(4.dp))
 
                     Text(
-                        text = "${comment.like}",
+                        text = "${comment.likeCount}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

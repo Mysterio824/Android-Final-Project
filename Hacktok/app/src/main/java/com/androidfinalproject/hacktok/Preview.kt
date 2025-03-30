@@ -1,23 +1,17 @@
 package com.androidfinalproject.hacktok
 
-import android.content.Context
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.ComposeCompilerApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.androidfinalproject.hacktok.model.MockData
-import com.androidfinalproject.hacktok.model.User
-import com.androidfinalproject.hacktok.router.routes.FriendListRoute
 import com.androidfinalproject.hacktok.ui.auth.LoginScreen
 import com.androidfinalproject.hacktok.ui.auth.LoginState
-import com.androidfinalproject.hacktok.ui.friendList.FriendListScreen
-import com.androidfinalproject.hacktok.ui.friendList.FriendListState
 import com.androidfinalproject.hacktok.ui.profile.UserProfileScreen
 import com.androidfinalproject.hacktok.ui.post.PostDetailScreen
 import com.androidfinalproject.hacktok.ui.post.PostDetailState
@@ -26,18 +20,7 @@ import com.androidfinalproject.hacktok.ui.search.SearchUiState
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 import org.bson.types.ObjectId
 import com.androidfinalproject.hacktok.ui.mainDashboard.DashboardScreen
-import com.androidfinalproject.hacktok.ui.mainDashboard.PostActionBar
-import com.androidfinalproject.hacktok.ui.mainDashboard.DashboardTopBar
-import com.androidfinalproject.hacktok.ui.mainDashboard.PostItem
-import com.androidfinalproject.hacktok.ui.mainDashboard.WhatsNewBar
-import java.util.Date
-import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.ui.currentProfile.CurrentProfileScreen
-import com.androidfinalproject.hacktok.ui.post.component.formatDate
-import java.text.SimpleDateFormat
-import com.androidfinalproject.hacktok.ui.adminManage.components.AdminManagementScreen
-import com.androidfinalproject.hacktok.ui.adminManage.AdminManagementViewModel
-import com.androidfinalproject.hacktok.ui.adminManage.AdminManagementState
 
 @Preview(showBackground = true)
 @Composable
@@ -91,18 +74,6 @@ fun PreviewDashboardScreen() {
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewPostItem() {
-    val samplePost = Post(
-        id = ObjectId.get(),
-        content = "Hôm nay trời đẹp quá!",
-        user = User(ObjectId.get(), "TranVanC", "tranvanc@example.com")
-    )
-
-    PostItem(post = samplePost)
-}
-
-@Preview(showBackground = true)
-@Composable
 private fun PostDetailScreenPreview() {
     MainAppTheme {
         Box(
@@ -132,19 +103,10 @@ fun UserProfilePreview() {
                 .width(400.dp)
                 .height(800.dp)
         ) {
-            val samplePosts = listOf(
-                Post(id = ObjectId.get(), user = User(username = "John Doe", email="JohnTerry@example.com"), likeCount = 12, content = "This is my first post!"),
-                Post(id = ObjectId.get(), user = User(username = "John Doe", email="JohnTerry@example.com"), likeCount = 44, content = "This is my second post!"),
-            )
+            val samplePosts = MockData.mockPosts
 
             UserProfileScreen(
-                user = User(
-                    id = ObjectId.get(),
-                    username = "John Doe",
-                    email = "johndoe@example.com",
-                    createdAt = Date(),
-                    isActive = true
-                ),
+                user = MockData.mockUsers.first(),
                 posts = samplePosts,
                 isFriend = false,
                 isBlocked = false,
@@ -166,19 +128,10 @@ fun CurrentProfilePreview() {
                 .width(400.dp)
                 .height(800.dp)
         ) {
-            val samplePosts = listOf(
-                Post(id = ObjectId.get(), user = User(username = "John Doe", email="JohnTerry@example.com"), likeCount = 12, content = "This is my first post!"),
-                Post(id = ObjectId.get(), user = User(username = "John Doe", email="JohnTerry@example.com"), createdAt = SimpleDateFormat("yyyy/MM/dd").parse("2025/01/09"), likeCount = 12, content = "This is my first post!"),
-            )
+            val samplePosts = MockData.mockPosts
 
             CurrentProfileScreen (
-                user = User(
-                    id = ObjectId.get(),
-                    username = "John Doe",
-                    email = "johndoe@example.com",
-                    createdAt = Date(),
-                    isActive = true
-                ),
+                user = MockData.mockUsers.first(),
                 posts = samplePosts,
                 friendCount = 16,
                 navController = NavController(context = LocalContext.current),
@@ -189,18 +142,18 @@ fun CurrentProfilePreview() {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun AdminManagementScreenPreview() {
-    MainAppTheme {
-        Box(
-            modifier = Modifier
-                .width(400.dp)
-                .height(800.dp)
-        ) {
-            AdminManagementScreen(
-                viewModel = AdminManagementViewModel()
-            )
-        }
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun AdminManagementScreenPreview() {
+//    MainAppTheme {
+//        Box(
+//            modifier = Modifier
+//                .width(400.dp)
+//                .height(800.dp)
+//        ) {
+//            AdminManagementScreen(
+//                viewModel = AdminManagementViewModel()
+//            )
+//        }
+//    }
+//}

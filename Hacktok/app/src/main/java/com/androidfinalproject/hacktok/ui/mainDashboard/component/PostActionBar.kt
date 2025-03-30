@@ -1,4 +1,4 @@
-package com.androidfinalproject.hacktok.ui.mainDashboard;
+package com.androidfinalproject.hacktok.ui.mainDashboard.component;
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -8,7 +8,6 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 
 @Composable
 fun PostActionBar() {

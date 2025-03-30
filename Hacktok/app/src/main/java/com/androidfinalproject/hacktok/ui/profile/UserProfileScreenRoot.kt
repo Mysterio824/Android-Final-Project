@@ -5,16 +5,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import org.bson.types.ObjectId
 
 @Composable
 fun UserProfileScreenRoot(
     viewModel: UserProfileViewModel = viewModel(),
-    userId: ObjectId?,
+    userId: String?,
     onNavigateBack: () -> Unit,
-    onBlockUser: (ObjectId?) -> Unit,
-    onChatWithFriend: (ObjectId?) -> Unit,
-    onGoToPost: (ObjectId?) -> Unit
+    onBlockUser: (String?) -> Unit,
+    onChatWithFriend: (String?) -> Unit,
+    onGoToPost: (String?) -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 

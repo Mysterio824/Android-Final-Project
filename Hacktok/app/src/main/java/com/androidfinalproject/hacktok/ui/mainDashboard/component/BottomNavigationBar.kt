@@ -1,4 +1,4 @@
-package com.androidfinalproject.hacktok.ui.mainDashboard
+package com.androidfinalproject.hacktok.ui.mainDashboard.component
 
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
