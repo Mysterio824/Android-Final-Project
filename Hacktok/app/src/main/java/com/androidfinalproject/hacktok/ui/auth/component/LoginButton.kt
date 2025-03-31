@@ -13,7 +13,10 @@ import com.androidfinalproject.hacktok.ui.auth.LoginState
 
 
 @Composable
-fun LoginButton(state: LoginState, onAction: (LoginAction) -> Unit) {
+fun LoginButton(
+    state: LoginState,
+    onAction: (LoginAction) -> Unit
+) {
     Button(
         onClick = { onAction(LoginAction.Submit) },
         modifier = Modifier.fillMaxWidth(),

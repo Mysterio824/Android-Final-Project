@@ -1,4 +1,4 @@
-package com.androidfinalproject.hacktok.ui.post
+package com.androidfinalproject.hacktok.ui.mainDashboard
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -6,21 +6,19 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun PostDetailScreenRoot(
-    postId: String? = null,
-    viewModel: PostDetailViewModel = viewModel(),
-    onNavigateBack: () -> Unit,
-    onUserProfileNavigate: (String?) -> Unit = {}
+fun DashboardScreenRoot(
+    viewModel: DashboardViewModel = viewModel(),
+    onUserProfileNavigate: (String?) -> Unit = {},
+    onPostDetailNavigate: (String?) -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    PostDetailScreen(
+    DashboardScreen(
         state = state,
-        postId = postId,
         onAction = { action ->
             when (action) {
-                is PostDetailAction.NavigateBack -> onNavigateBack()
-                is PostDetailAction.OnUserClick -> onUserProfileNavigate(action.userId)
+                is DashboardAction.UserClick -> onUserProfileNavigate(action.userId)
+                is DashboardAction.PostClick -> onPostDetailNavigate(action.postId)
                 else -> viewModel.onAction(action)
             }
         }

@@ -11,11 +11,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.androidfinalproject.hacktok.model.Post
-import com.androidfinalproject.hacktok.model.User
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 
 @Composable
 fun EditPostContent (

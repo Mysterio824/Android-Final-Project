@@ -10,6 +10,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.androidfinalproject.hacktok.model.MockData
+import com.androidfinalproject.hacktok.ui.adminManage.AdminManagementScreen
+import com.androidfinalproject.hacktok.ui.adminManage.AdminManagementState
 import com.androidfinalproject.hacktok.ui.auth.LoginScreen
 import com.androidfinalproject.hacktok.ui.auth.LoginState
 import com.androidfinalproject.hacktok.ui.profile.UserProfileScreen
@@ -22,7 +24,9 @@ import org.bson.types.ObjectId
 import com.androidfinalproject.hacktok.ui.mainDashboard.DashboardScreen
 import com.androidfinalproject.hacktok.ui.currentProfile.CurrentProfileScreen
 import com.androidfinalproject.hacktok.ui.adminManage.AdminManagementViewModel
-import com.androidfinalproject.hacktok.ui.adminManage.components.AdminManagementScreen
+import com.androidfinalproject.hacktok.ui.mainDashboard.DashboardState
+import com.androidfinalproject.hacktok.ui.messageDashboard.MessageDashboardScreen
+import com.androidfinalproject.hacktok.ui.messageDashboard.MessageDashboardState
 
 @Preview(showBackground = true)
 @Composable
@@ -71,7 +75,20 @@ private fun LoginScreenPreview() {
 @Preview(showBackground = true)
 @Composable
 fun PreviewDashboardScreen() {
-    DashboardScreen()
+    MainAppTheme {
+        Box(
+            modifier = Modifier
+                .width(400.dp)
+                .height(800.dp)
+        ) {
+            DashboardScreen(
+                state = DashboardState(
+                    posts = MockData.mockPosts
+                ),
+                onAction = {}
+            )
+        }
+    }
 }
 
 @Preview(showBackground = true)
@@ -84,11 +101,10 @@ private fun PostDetailScreenPreview() {
                 .height(800.dp)
         ) {
             PostDetailScreen(
-                postId = ObjectId(),
+                postId = "",
                 state = PostDetailState(
                     post = MockData.mockPosts.first(),
-                    comments = MockData.mockComments,
-                    isCommentsVisible = true
+                    comments = MockData.mockComments
                 ),
                 onAction = {},
             )
@@ -154,7 +170,34 @@ fun AdminManagementScreenPreview() {
                 .height(800.dp)
         ) {
             AdminManagementScreen(
-                viewModel = AdminManagementViewModel()
+                state = AdminManagementState(
+                    users = MockData.mockUsers,
+                    filteredUsers = MockData.mockUsers,
+                    reports = MockData.mockReport,
+                    selectedTab = 3
+                ),
+                onAction = {},
+                modifier = Modifier
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ChatHomeScreenPreview() {
+    MainAppTheme {
+        Box(
+            modifier = Modifier
+                .width(400.dp)
+                .height(800.dp)
+        ) {
+            MessageDashboardScreen(
+                state = MessageDashboardState(
+                    userList = MockData.mockUsers,
+
+                ),
+                onAction = {}
             )
         }
     }

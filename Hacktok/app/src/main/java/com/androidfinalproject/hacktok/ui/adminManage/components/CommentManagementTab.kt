@@ -3,15 +3,13 @@ package com.androidfinalproject.hacktok.ui.adminManage.components
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.androidfinalproject.hacktok.model.Comment
 
@@ -58,7 +56,6 @@ fun CommentItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
-        elevation = 4.dp
     ) {
         Row(
             modifier = Modifier
@@ -67,17 +64,35 @@ fun CommentItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = "Comment: ${comment.content}", fontWeight = FontWeight.Bold)
-                Text(text = "By: ${comment.userId}")
-                Text(text = "Likes: ${comment.likeCount}")
+                Text(
+                    text = "Comment: ${comment.content}",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = "By: ${comment.userId}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = "Likes: ${comment.likeCount}",
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
 
             IconButton(onClick = onEdit) {
-                Icon(Icons.Default.Edit, contentDescription = "Edit Comment")
+                Icon(
+                    Icons.Default.Edit,
+                    contentDescription = "Edit Comment",
+                    tint = MaterialTheme.colorScheme.primary
+                )
             }
 
             IconButton(onClick = onDelete) {
-                Icon(Icons.Default.Delete, contentDescription = "Delete Comment", tint = Color.Red)
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = "Delete Comment",
+                    tint = MaterialTheme.colorScheme.error
+                )
             }
         }
     }
@@ -95,19 +110,20 @@ fun EditCommentDialog(
         onDismissRequest = onDismiss,
         title = { Text("Edit Comment") },
         text = {
-            TextField(
+            OutlinedTextField(
                 value = content,
                 onValueChange = { content = it },
-                label = { Text("Comment Content") }
+                label = { Text("Comment Content") },
+                modifier = Modifier.fillMaxWidth()
             )
         },
         confirmButton = {
-            Button(onClick = { onSave(content) }) {
+            TextButton(onClick = { onSave(content) }) {
                 Text("Save")
             }
         },
         dismissButton = {
-            Button(onClick = onDismiss) {
+            TextButton(onClick = onDismiss) {
                 Text("Cancel")
             }
         }

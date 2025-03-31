@@ -7,20 +7,27 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.androidfinalproject.hacktok.model.Comment
 import com.androidfinalproject.hacktok.model.MockData
-import com.androidfinalproject.hacktok.model.User
+import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 
 @Composable
-fun CommentItem(comment: Comment, onUserClick: (String) -> Unit) {
+fun CommentItem(
+    comment: Comment,
+    onUserClick: (String) -> Unit,
+    onLikeClick: (Comment) -> Unit,
+    isLikedByUser: Boolean
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -32,7 +39,7 @@ fun CommentItem(comment: Comment, onUserClick: (String) -> Unit) {
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.primaryContainer)
                 .clickable { onUserClick(comment.userId) },
-            contentAlignment = Alignment.Center // Center the text inside the Box
+            contentAlignment = Alignment.Center
         ) {
             Text(
                 text = MockData.mockUsers.first().username.first().toString().uppercase(),
@@ -67,28 +74,47 @@ fun CommentItem(comment: Comment, onUserClick: (String) -> Unit) {
                 style = MaterialTheme.typography.bodyMedium
             )
 
-            if (comment.likeCount > 0) {
-                Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        imageVector = Icons.Default.ThumbUp,
+                        imageVector = if (isLikedByUser) Icons.Filled.ThumbUp else Icons.Outlined.ThumbUp,
                         contentDescription = "Likes",
-                        modifier = Modifier.size(16.dp),
+                        modifier = Modifier
+                            .size(20.dp)
+                            .clickable { onLikeClick(comment) },
                         tint = MaterialTheme.colorScheme.primary
                     )
 
-                    Spacer(modifier = Modifier.width(4.dp))
+                    if (comment.likeCount > 0) {
+                        Spacer(modifier = Modifier.width(4.dp))
 
-                    Text(
-                        text = "${comment.likeCount}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                        Text(
+                            text = "${comment.likeCount}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
         }
+    }
+}
+
+@Composable
+@Preview(showBackground = true)
+private fun PreviewComponent() {
+    MainAppTheme {
+        CommentItem(
+            comment = MockData.mockComments.first().copy(likeCount = 1),
+            onUserClick = {},
+            onLikeClick = { true },
+            isLikedByUser = true
+        )
     }
 }

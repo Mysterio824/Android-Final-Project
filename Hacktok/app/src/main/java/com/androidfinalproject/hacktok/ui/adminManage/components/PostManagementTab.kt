@@ -3,15 +3,13 @@ package com.androidfinalproject.hacktok.ui.adminManage.components
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.androidfinalproject.hacktok.model.Post
 
@@ -76,12 +74,12 @@ fun CreatePostDialog(
         title = { Text("Create New Post") },
         text = { Text("New post will be created with default mock data") },
         confirmButton = {
-            Button(onClick = { onCreate() }) {
+            TextButton(onClick = { onCreate() }) {
                 Text("Create")
             }
         },
         dismissButton = {
-            Button(onClick = onDismiss) {
+            TextButton(onClick = onDismiss) {
                 Text("Cancel")
             }
         }
@@ -98,7 +96,6 @@ fun PostItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
-        elevation = 4.dp
     ) {
         Row(
             modifier = Modifier
@@ -107,22 +104,41 @@ fun PostItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = "Content: ${post.content}", fontWeight = FontWeight.Bold)
-                Text(text = "Posted by: ${post.userId}")
-                Text(text = "Likes: ${post.likeCount}")
+                Text(
+                    text = "Content: ${post.content}",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = "Posted by: ${post.userId}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = "Likes: ${post.likeCount}",
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
 
             IconButton(onClick = onEdit) {
-                Icon(Icons.Default.Edit, contentDescription = "Edit Post")
+                Icon(
+                    Icons.Default.Edit,
+                    contentDescription = "Edit Post",
+                    tint = MaterialTheme.colorScheme.primary
+                )
             }
 
             IconButton(onClick = onDelete) {
-                Icon(Icons.Default.Delete, contentDescription = "Delete Post", tint = Color.Red)
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = "Delete Post",
+                    tint = MaterialTheme.colorScheme.error
+                )
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditPostDialog(
     currentContent: String,
@@ -135,19 +151,20 @@ fun EditPostDialog(
         onDismissRequest = onDismiss,
         title = { Text("Edit Post") },
         text = {
-            TextField(
+            OutlinedTextField(
                 value = content,
                 onValueChange = { content = it },
-                label = { Text("Post Content") }
+                label = { Text("Post Content") },
+                modifier = Modifier.fillMaxWidth()
             )
         },
         confirmButton = {
-            Button(onClick = { onSave(content) }) {
+            TextButton(onClick = { onSave(content) }) {
                 Text("Save")
             }
         },
         dismissButton = {
-            Button(onClick = onDismiss) {
+            TextButton(onClick = onDismiss) {
                 Text("Cancel")
             }
         }

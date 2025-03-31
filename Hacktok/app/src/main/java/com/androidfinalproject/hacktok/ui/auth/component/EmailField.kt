@@ -12,7 +12,11 @@ import androidx.compose.material.icons.filled.Email
 import com.androidfinalproject.hacktok.ui.auth.LoginAction
 
 @Composable
-fun EmailField(email: String, emailError: String?, onAction: (LoginAction) -> Unit) {
+fun EmailField(
+    email: String,
+    emailError: String?,
+    onAction: (LoginAction) -> Unit
+) {
     OutlinedTextField(
         value = email,
         onValueChange = { onAction(LoginAction.UpdateEmail(it)) },

@@ -5,7 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Comment
+import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.*
@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.Post
-import com.androidfinalproject.hacktok.model.User
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -35,7 +34,6 @@ fun PostContent(
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        // User info
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
@@ -113,7 +111,7 @@ fun PostContent(
                 )
             ) {
                 Icon(
-                    imageVector = Icons.Default.Comment,
+                    imageVector = Icons.AutoMirrored.Filled.Comment,
                     contentDescription = "Comment"
                 )
                 Spacer(modifier = Modifier.width(4.dp))

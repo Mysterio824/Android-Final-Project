@@ -70,9 +70,9 @@ fun LoginScreen(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Divider(modifier = Modifier.weight(1f))
+                    HorizontalDivider(modifier = Modifier.weight(1f))
                     Text("OR", modifier = Modifier.padding(horizontal = 16.dp))
-                    Divider(modifier = Modifier.weight(1f))
+                    HorizontalDivider(modifier = Modifier.weight(1f))
                 }
 
                 GoogleSignInButton(

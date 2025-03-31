@@ -1,7 +1,7 @@
 package com.androidfinalproject.hacktok.ui.mainDashboard.component;
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Comment
 import androidx.compose.material.icons.filled.Favorite

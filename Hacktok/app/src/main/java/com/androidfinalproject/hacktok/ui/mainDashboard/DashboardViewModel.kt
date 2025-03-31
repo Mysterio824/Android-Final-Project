@@ -27,6 +27,8 @@ class DashboardViewModel : ViewModel() {
             is DashboardAction.LoadPosts -> loadPosts()
             is DashboardAction.LikePost -> likePost(action.postId)
             is DashboardAction.SharePost -> sharePost(action.postId)
+            is DashboardAction.UpdateStatusText -> updateText(action.text)
+            is DashboardAction.UploadPost -> {}
             else -> {}
         }
     }
@@ -61,6 +63,10 @@ class DashboardViewModel : ViewModel() {
             }
             currentState.copy(posts = updatedPosts)
         }
+    }
+
+    private fun updateText(text: String) {
+        _state.update { it.copy(query = text) }
     }
 
     private fun sharePost(postId: String) {

@@ -19,7 +19,7 @@ fun LoginScreenRoot(
             when (action) {
                 is LoginAction.Submit -> {
                     if (state.emailError == null && state.passwordError == null) {
-                        // You could set up navigation here
+                        // TODO
                     }
                 }
 
@@ -30,6 +30,7 @@ fun LoginScreenRoot(
                 is LoginAction.GoogleSignIn -> {
 
                 }
+
                 else -> Unit
             }
             viewModel.onAction(action)
