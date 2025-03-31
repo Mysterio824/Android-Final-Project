@@ -21,6 +21,8 @@ import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 import org.bson.types.ObjectId
 import com.androidfinalproject.hacktok.ui.mainDashboard.DashboardScreen
 import com.androidfinalproject.hacktok.ui.currentProfile.CurrentProfileScreen
+import com.androidfinalproject.hacktok.ui.adminManage.AdminManagementViewModel
+import com.androidfinalproject.hacktok.ui.adminManage.components.AdminManagementScreen
 
 @Preview(showBackground = true)
 @Composable
@@ -32,7 +34,7 @@ fun SearchDashboardScreenPreview() {
                 .height(800.dp)
         ) {
             val previewState = SearchUiState(
-                selectedTabIndex = 2, // change this to change tab
+                selectedTabIndex = 2,
                 users = MockData.mockUsers,
                 filteredUsers = MockData.mockUsers,
                 posts = MockData.mockPosts,
@@ -97,7 +99,7 @@ private fun PostDetailScreenPreview() {
 @Preview(showBackground = true)
 @Composable
 fun UserProfilePreview() {
-    MainAppTheme {  // Add theme wrapper
+    MainAppTheme {
         Box(
             modifier = Modifier
                 .width(400.dp)
@@ -122,7 +124,7 @@ fun UserProfilePreview() {
 @Preview(showBackground = true)
 @Composable
 fun CurrentProfilePreview() {
-    MainAppTheme {  // Add theme wrapper
+    MainAppTheme {
         Box(
             modifier = Modifier
                 .width(400.dp)
@@ -142,18 +144,18 @@ fun CurrentProfilePreview() {
     }
 }
 
-//@Preview(showBackground = true)
-//@Composable
-//fun AdminManagementScreenPreview() {
-//    MainAppTheme {
-//        Box(
-//            modifier = Modifier
-//                .width(400.dp)
-//                .height(800.dp)
-//        ) {
-//            AdminManagementScreen(
-//                viewModel = AdminManagementViewModel()
-//            )
-//        }
-//    }
-//}
+@Preview(showBackground = true)
+@Composable
+fun AdminManagementScreenPreview() {
+    MainAppTheme {
+        Box(
+            modifier = Modifier
+                .width(400.dp)
+                .height(800.dp)
+        ) {
+            AdminManagementScreen(
+                viewModel = AdminManagementViewModel()
+            )
+        }
+    }
+}
