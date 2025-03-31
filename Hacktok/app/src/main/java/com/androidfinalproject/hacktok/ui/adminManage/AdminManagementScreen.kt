@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.androidfinalproject.hacktok.ui.adminManage.AdminManagementAction
+import com.androidfinalproject.hacktok.ui.adminManage.AdminManagementState
 import com.androidfinalproject.hacktok.ui.adminManage.AdminManagementViewModel
 
 @Composable
@@ -24,6 +25,20 @@ fun AdminManagementScreen(
     modifier: Modifier = Modifier
 ) {
     val state = viewModel.state.collectAsState().value
+
+    AdminManagementContent(
+        state = state,
+        onAction = viewModel::onAction,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun AdminManagementContent(
+    state: AdminManagementState,
+    onAction: (AdminManagementAction) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val tabs = listOf("Users", "Posts", "Comments", "Statistics")
 
     Column(
@@ -44,19 +59,22 @@ fun AdminManagementScreen(
                 Tab(
                     text = { Text(title) },
                     selected = state.selectedTab == index,
-                    onClick = { viewModel.onAction(AdminManagementAction.SelectTab(index)) }
+                    onClick = { onAction(AdminManagementAction.SelectTab(index)) }
                 )
             }
         }
 
         when (state.selectedTab) {
             0 -> UserManagementTab(
-                users = state.users,
+                users = state.filteredUsers,
                 onUpdateRole = { userId, newRole ->
-                    viewModel.onAction(AdminManagementAction.UpdateUserRole(userId, newRole))
+                    onAction(AdminManagementAction.UpdateUserRole(userId, newRole))
                 },
                 onDelete = { userId ->
-                    viewModel.onAction(AdminManagementAction.DeleteUser(userId))
+                    onAction(AdminManagementAction.DeleteUser(userId))
+                },
+                onFilterUsers = { query ->
+                    onAction(AdminManagementAction.FilterUsers(query))
                 }
             )
             1 -> PostManagementTab(
@@ -65,25 +83,25 @@ fun AdminManagementScreen(
                 isEditDialogOpen = state.isEditPostDialogOpen,
                 postToEdit = state.postToEdit,
                 onOpenCreateDialog = {
-                    viewModel.onAction(AdminManagementAction.OpenCreatePostDialog)
+                    onAction(AdminManagementAction.OpenCreatePostDialog)
                 },
                 onCloseCreateDialog = {
-                    viewModel.onAction(AdminManagementAction.CloseCreatePostDialog)
+                    onAction(AdminManagementAction.CloseCreatePostDialog)
                 },
                 onCreatePost = {
-                    viewModel.onAction(AdminManagementAction.CreatePost)
+                    onAction(AdminManagementAction.CreatePost)
                 },
                 onOpenEditDialog = { post ->
-                    viewModel.onAction(AdminManagementAction.OpenEditPostDialog(post))
+                    onAction(AdminManagementAction.OpenEditPostDialog(post))
                 },
                 onCloseEditDialog = {
-                    viewModel.onAction(AdminManagementAction.CloseEditPostDialog)
+                    onAction(AdminManagementAction.CloseEditPostDialog)
                 },
                 onEditPost = { postId, newContent ->
-                    viewModel.onAction(AdminManagementAction.EditPost(postId, newContent))
+                    onAction(AdminManagementAction.EditPost(postId, newContent))
                 },
                 onDeletePost = { postId ->
-                    viewModel.onAction(AdminManagementAction.DeletePost(postId))
+                    onAction(AdminManagementAction.DeletePost(postId))
                 }
             )
             2 -> CommentManagementTab(
@@ -91,16 +109,16 @@ fun AdminManagementScreen(
                 isEditDialogOpen = state.isEditCommentDialogOpen,
                 commentToEdit = state.commentToEdit,
                 onOpenEditDialog = { comment ->
-                    viewModel.onAction(AdminManagementAction.OpenEditCommentDialog(comment))
+                    onAction(AdminManagementAction.OpenEditCommentDialog(comment))
                 },
                 onCloseEditDialog = {
-                    viewModel.onAction(AdminManagementAction.CloseEditCommentDialog)
+                    onAction(AdminManagementAction.CloseEditCommentDialog)
                 },
                 onEditComment = { commentId, newContent ->
-                    viewModel.onAction(AdminManagementAction.EditComment(commentId, newContent))
+                    onAction(AdminManagementAction.EditComment(commentId, newContent))
                 },
                 onDeleteComment = { commentId ->
-                    viewModel.onAction(AdminManagementAction.DeleteComment(commentId))
+                    onAction(AdminManagementAction.DeleteComment(commentId))
                 }
             )
             3 -> StatisticsTab(

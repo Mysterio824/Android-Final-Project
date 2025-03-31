@@ -19,19 +19,40 @@ import com.androidfinalproject.hacktok.model.UserRole
 fun UserManagementTab(
     users: List<User>,
     onUpdateRole: (String, UserRole) -> Unit,
-    onDelete: (String) -> Unit
+    onDelete: (String) -> Unit,
+    onFilterUsers: (String) -> Unit, // Added this parameter
+    modifier: Modifier = Modifier // Added modifier for flexibility
 ) {
-    LazyColumn(
-        modifier = Modifier
+    var searchQuery by remember { mutableStateOf("") }
+
+    Column(
+        modifier = modifier
             .fillMaxSize()
             .padding(top = 16.dp)
     ) {
-        items(users) { user ->
-            UserItem(
-                user = user,
-                onUpdateRole = { newRole -> onUpdateRole(user.id ?: "", newRole) },
-                onDelete = { onDelete(user.id ?: "") }
-            )
+        // Search bar for filtering users
+        TextField(
+            value = searchQuery,
+            onValueChange = { query ->
+                searchQuery = query
+                onFilterUsers(query) // Trigger the filter action
+            },
+            label = { Text("Search Users") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
+        )
+
+        LazyColumn(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            items(users) { user ->
+                UserItem(
+                    user = user,
+                    onUpdateRole = { newRole -> onUpdateRole(user.id ?: "", newRole) },
+                    onDelete = { onDelete(user.id ?: "") }
+                )
+            }
         }
     }
 }
