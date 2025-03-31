@@ -22,7 +22,7 @@ fun ChatList(
 
     LazyColumn {
         items(chatList) { chat ->
-            ChatRow(chat, menuItems)
+            ChatRow(chat, menuItems, onAction)
         }
     }
 }
