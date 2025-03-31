@@ -18,11 +18,11 @@ fun StatisticsTab(
     posts: List<Post>,
     comments: List<Comment>
 ) {
-    val activeUsers = users.count { it.isActive }
+    val activeUsers = users.count { it.isActive ?: false }
     val totalUsers = users.size
     val newUsers = users.count { user ->
         val oneMonthAgo = java.util.Date(System.currentTimeMillis() - 30L * 24 * 60 * 60 * 1000)
-        user.createdAt.after(oneMonthAgo)
+        user.createdAt?.after(oneMonthAgo) ?: false
     }
 
     Column(

@@ -1,30 +1,38 @@
 package com.androidfinalproject.hacktok.model
 
 import org.bson.types.ObjectId
+import java.util.Date
 
 object MockData {
     val mockUsers = listOf(
-        User("", "john", "john@example.com"),
-        User("", "jane_smith", "jane@example.com"),
-        User("", "bob_jones", "bob@example.com")
+        User("1", "john", "john@example.com", role = UserRole.USER),
+        User("2", "jane_smith", "jane@example.com", role = UserRole.MODERATOR),
+        User("3", "bob_jones", "bob@example.com", role = UserRole.ADMIN),
+        User("4", "admin_super", "admin@example.com", role = UserRole.SUPER_ADMIN)
     )
 
     val mockPosts = listOf(
-        Post("", "Hello world!", "2", likeCount = 10),
-        Post("", "Learning Kotlin!", "2", likeCount = 1000),
-        Post("", "Jetpack Compose is fun!", "2", likeCount = 123)
+        Post("1", "Hello world!", "2", likeCount = 10),
+        Post("2", "Learning Kotlin!", "2", likeCount = 1000),
+        Post("3", "Jetpack Compose is fun!", "2", likeCount = 123)
     )
 
     val mockComments = listOf(
-        Comment("", "Hello world", "10", "1"),
-        Comment("", "Hello world", "10", "1"),
-        Comment("", "Hello world", "10", "1"),
-        Comment("", "Hello world", "10", "1"),
-        Comment("", "Hello world", "10", "1"),
-        Comment("", "Great post! I really enjoyed reading this.","5", "2"),
-        Comment("", "I have a question about this. Can you elaborate more?", "2", "2"),
-        Comment("", "This is exactly what I needed to know. Thanks for sharing!", "8", "2")
+        Comment("1", "Hello world", "10", "1"),
+        Comment("2", "Hello world", "10", "1"),
+        Comment("3", "Hello world", "10", "1"),
+        Comment("4", "Hello world", "10", "1"),
+        Comment("5", "Hello world", "10", "1"),
+        Comment("6", "Great post! I really enjoyed reading this.","5", "2"),
+        Comment("7", "I have a question about this. Can you elaborate more?", "2", "2"),
+        Comment("8", "This is exactly what I needed to know. Thanks for sharing!", "8", "2")
+    )
+
+    // Added mockUserRoles
+    val mockUserRoles = listOf(
+        UserRole.USER,
+        UserRole.MODERATOR,
+        UserRole.ADMIN,
+        UserRole.SUPER_ADMIN
     )
 }
-
-
