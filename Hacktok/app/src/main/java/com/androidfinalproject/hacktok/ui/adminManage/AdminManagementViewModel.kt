@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.update
 class AdminManagementViewModel : ViewModel() {
     private val _state = MutableStateFlow(AdminManagementState(
         users = MockData.mockUsers,
+        filteredUsers = MockData.mockUsers,
         posts = MockData.mockPosts,
         comments = MockData.mockComments,
         availableRoles = MockData.mockUserRoles
@@ -30,6 +31,13 @@ class AdminManagementViewModel : ViewModel() {
                             } else {
                                 user
                             }
+                        },
+                        filteredUsers = currentState.filteredUsers.map { user ->
+                            if (user.id?.equals(action.userId) == true) {
+                                user.copy(role = action.newRole)
+                            } else {
+                                user
+                            }
                         }
                     )
                 }
@@ -37,7 +45,8 @@ class AdminManagementViewModel : ViewModel() {
             is AdminManagementAction.DeleteUser -> {
                 _state.update { currentState ->
                     currentState.copy(
-                        users = currentState.users.filter { it.id?.equals(action.userId) == false }
+                        users = currentState.users.filter { it.id?.equals(action.userId) == false },
+                        filteredUsers = currentState.filteredUsers.filter { it.id?.equals(action.userId) == false }
                     )
                 }
             }
@@ -73,7 +82,7 @@ class AdminManagementViewModel : ViewModel() {
                     currentState.copy(
                         comments = currentState.comments.map { comment ->
                             if (comment.id?.equals(action.commentId) == true)
-                                comment.copy(content = action.newContent) // Changed from 'comment' to 'content'
+                                comment.copy(content = action.newContent)
                             else comment
                         },
                         isEditCommentDialogOpen = false,
