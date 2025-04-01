@@ -20,40 +20,14 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.androidfinalproject.hacktok.model.Post
-import com.androidfinalproject.hacktok.model.User
-import com.androidfinalproject.hacktok.ui.friendList.FriendListAction
 import com.androidfinalproject.hacktok.ui.search.component.PostItem
 import com.androidfinalproject.hacktok.ui.search.component.UserItem
 
-
-@Composable
-fun SearchDashboardScreenRoot(
-    viewModel: SearchViewModel,
-    onUserClick: (User) -> Unit,
-    onPostClick: (Post) -> Unit,
-    onGoBack: () -> Unit
-) {
-    val state by viewModel.state.collectAsState()
-
-    SearchDashboardScreen(
-        state = state,
-        onAction = { action ->
-            when (action) {
-                is SearchAction.OnPostClick -> onPostClick(action.post)
-                is SearchAction.OnUserClick -> onUserClick(action.user)
-                else -> viewModel.onAction(action)
-            }
-        }
-    )
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,7 +42,6 @@ fun SearchDashboardScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // Thanh tìm kiếm
         SearchBar(
             query = state.searchQuery,
             onQueryChange = { onAction(SearchAction.UpdateQuery(it)) },
@@ -118,7 +91,6 @@ fun SearchDashboardScreen(
             }
         } else {
 
-            // Nội dung chính
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()

@@ -1,5 +1,6 @@
 package com.androidfinalproject.hacktok.ui.post
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.model.Comment
@@ -17,26 +18,35 @@ class PostDetailViewModel : ViewModel() {
     private val _state = MutableStateFlow(PostDetailState())
     val state: StateFlow<PostDetailState> = _state.asStateFlow()
 
-    // External action handler for navigation events
-    var onUserProfileNavigate: ((userId: String?) -> Unit)? = null
-
     fun onAction(action: PostDetailAction) {
         when (action) {
             is PostDetailAction.LoadPost -> loadPost(action.postId)
             is PostDetailAction.LoadComments -> loadComments()
-            is PostDetailAction.ToggleCommentSection -> toggleCommentSection()
             is PostDetailAction.ToggleLike -> toggleLike()
             is PostDetailAction.Share -> sharePost()
             is PostDetailAction.UpdateCommentText -> updateCommentText(action.text)
             is PostDetailAction.SubmitComment -> submitComment()
-            is PostDetailAction.OnUserClick -> handleUserClick(action.userId)
-            is PostDetailAction.KeyboardShown -> showKeyboard()
-            is PostDetailAction.KeyboardHidden -> hideKeyboard()
-            PostDetailAction.NavigateBack -> TODO()
+            is PostDetailAction.ToggleCommentInputFocus -> toggleCommentInputFocus()
+            is PostDetailAction.SetCommentFocus -> setCommentFocus(action.focused)
+            is PostDetailAction.LikeComment -> handleLikeComment(action.commentId)
+            is PostDetailAction.NavigateBack,
+            is PostDetailAction.OnUserClick -> {
+                Log.w("PostDetailViewModel", "Navigation action reached ViewModel but should be handled in Root: $action")
+            }
         }
     }
 
-    private fun loadPost(postId: ObjectId?) {
+    private fun toggleCommentInputFocus() {
+        _state.update { currentState ->
+            currentState.copy(isCommenting = !currentState.isCommenting)
+        }
+    }
+
+    private fun setCommentFocus(focused: Boolean) {
+        _state.update { it.copy(isCommenting = focused) }
+    }
+
+    private fun loadPost(postId: String?) {
         viewModelScope.launch {
             _state.update { it.copy(error = null) }
 
@@ -44,9 +54,10 @@ class PostDetailViewModel : ViewModel() {
                 // Mock data
                 val post = MockData.mockPosts.first()
                 val user = MockData.mockUsers.first()
+                val comment = MockData.mockComments
 
 
-                _state.update { it.copy(post = post) }
+                _state.update { it.copy(post = post, comments = comment ) }
             } catch (e: Exception) {
                 _state.update { it.copy(error = "Failed to load post: ${e.message}") }
             }
@@ -76,15 +87,6 @@ class PostDetailViewModel : ViewModel() {
         }
     }
 
-    private fun toggleCommentSection() {
-        val newVisibility = !_state.value.isCommentsVisible
-        _state.update { it.copy(isCommentsVisible = newVisibility) }
-
-        if (newVisibility && _state.value.comments.isEmpty()) {
-            onAction(PostDetailAction.LoadComments)
-        }
-    }
-
     private fun toggleLike() {
         _state.value.post?.let { post ->
             val updatedPost = post.copy(likeCount = post.likeCount + 1)
@@ -93,12 +95,14 @@ class PostDetailViewModel : ViewModel() {
     }
 
     private fun sharePost() {
-        // Implementation for sharing would be handled here
-        // Usually involves platform-specific code
+        // TODO
     }
 
     private fun updateCommentText(text: String) {
-        _state.update { it.copy(commentText = text) }
+        Log.d("Text:", text)
+        _state.update {
+            it.copy(commentText = text)
+        }
     }
 
     private fun submitComment() {
@@ -109,22 +113,14 @@ class PostDetailViewModel : ViewModel() {
             _state.update {
                 it.copy(
                     comments = listOf(newComment) + it.comments,
-                    commentText = "",
-                    isCommentsVisible = true
+                    commentText = ""
                 )
             }
         }
     }
 
-    private fun handleUserClick(userId: String?) {
-        onUserProfileNavigate?.invoke(userId)
+    private fun handleLikeComment(commentId: String?) {
+        //TODO
     }
 
-    private fun showKeyboard() {
-        _state.update { it.copy(isKeyboardVisible = true) }
-    }
-
-    private fun hideKeyboard() {
-        _state.update { it.copy(isKeyboardVisible = false) }
-    }
 }

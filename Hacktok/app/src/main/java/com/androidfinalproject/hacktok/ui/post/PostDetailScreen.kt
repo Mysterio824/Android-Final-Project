@@ -4,24 +4,20 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.unit.dp
 import com.androidfinalproject.hacktok.ui.post.component.*
-import org.bson.types.ObjectId
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PostDetailScreen(
     state: PostDetailState,
-    postId: ObjectId?,
+    postId: String?,
     onAction: (PostDetailAction) -> Unit,
 ) {
-    val focusManager = LocalFocusManager.current
-    val keyboardController = LocalSoftwareKeyboardController.current
     val scrollState = rememberLazyListState()
 
     LaunchedEffect(postId) {
@@ -31,36 +27,21 @@ fun PostDetailScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .imePadding() // Ensures proper layout when keyboard appears
-            .navigationBarsPadding() // Prevents UI from overlapping with system bars
+            .imePadding()
+            .navigationBarsPadding()
     ) {
-        // Top app bar
         TopAppBar(
             title = { Text("Post") },
             navigationIcon = {
                 IconButton(onClick = { onAction(PostDetailAction.NavigateBack) }) {
                     Icon(
-                        imageVector = Icons.Default.ArrowBack,
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back"
                     )
                 }
             }
         )
 
-        // Post content section
-        state.post?.let { post ->
-            Column(modifier = Modifier.fillMaxWidth()) {
-                PostContent(
-                    post = post,
-                    onLikeClick = { onAction(PostDetailAction.ToggleLike) },
-                    onCommentClick = { onAction(PostDetailAction.ToggleCommentSection) },
-                    onShareClick = { onAction(PostDetailAction.Share) },
-                    onUserClick = { userId -> onAction(PostDetailAction.OnUserClick(userId)) }
-                )
-            }
-        }
-
-        // Scrollable comments section
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -70,33 +51,61 @@ fun PostDetailScreen(
                 state = scrollState,
                 modifier = Modifier.fillMaxSize()
             ) {
-                // Error message if any
+                state.post?.let { post ->
+                    item {
+                        PostContent(
+                            post = post,
+                            onLikeClick = { onAction(PostDetailAction.ToggleLike) },
+                            onCommentClick = { onAction(PostDetailAction.ToggleCommentInputFocus) },
+                            onShareClick = { onAction(PostDetailAction.Share) },
+                            onUserClick = { userId -> onAction(PostDetailAction.OnUserClick(userId)) }
+                        )
+                    }
+
+                    item {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant
+                        )
+                    }
+                }
+
                 state.error?.let { errorMessage ->
                     item {
                         ErrorMessage(message = errorMessage)
                     }
                 }
 
-                if (state.isCommentsVisible) {
-                    item {
-                        CommentSection(
-                            comments = state.comments,
-                            isLoading = state.isLoadingComments,
-                            onUserClick = { userId -> onAction(PostDetailAction.OnUserClick(userId)) }
-                        )
-                    }
+                item {
+                    CommentSection(
+                        comments = state.comments,
+                        isLoading = state.isLoadingComments,
+                        onUserClick = { userId -> onAction(PostDetailAction.OnUserClick(userId)) },
+                        onLikeClick = { commentId -> onAction(PostDetailAction.LikeComment(commentId)) },
+                        isLikedByUser = { true }
+                    )
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }
 
-        // Comment input bar at bottom
         CommentInputBar(
             commentText = state.commentText,
-            onCommentTextChange = { text -> onAction(PostDetailAction.UpdateCommentText(text)) },
-            onSubmitComment = {
+            onSubmit = {
                 onAction(PostDetailAction.SubmitComment)
-                focusManager.clearFocus() // Dismiss focus
-                keyboardController?.hide() // Hide keyboard
+                // Optionally, you can clear focus after submitting
+                // onAction(PostDetailAction.SetCommentFocus(false))
+            },
+            onTextChange = { text ->
+                onAction(PostDetailAction.UpdateCommentText(text))
+            },
+            isFocused = state.isCommenting,
+            onFocusChanged = { isFocused ->
+                // Update ViewModel when focus changes
+                onAction(PostDetailAction.SetCommentFocus(isFocused))
             }
         )
     }

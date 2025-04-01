@@ -1,31 +1,36 @@
-package com.androidfinalproject.hacktok.ui.mainDashboard.component;
+package com.androidfinalproject.hacktok.ui.mainDashboard.component
 
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
-import androidx.compose.material3.Text
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardTopBar(onClick: () -> Unit) {
     TopAppBar(
-        title = { Text(
-            text = "Háck Tók",
-            color = Color.White, // ✅ Chữ trắng
-            fontWeight = FontWeight.Bold, // ✅ Đậm hơn
-            fontSize = 22.sp // ✅ To hơn
-        ) },
-        backgroundColor = Color.Black,
+        title = {
+            Text(
+                text = "HackTok",
+                color = MaterialTheme.colorScheme.onPrimary,
+                fontWeight = FontWeight.Bold,
+                fontSize = 22.sp
+            )
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            titleContentColor = MaterialTheme.colorScheme.onPrimary,
+            actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+        ),
         actions = {
             IconButton(onClick = onClick) {
-                Icon(Icons.Default.Settings, contentDescription = "Settings", tint = MaterialTheme.colorScheme.onSurface)
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = "Settings",
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
             }
         }
     )

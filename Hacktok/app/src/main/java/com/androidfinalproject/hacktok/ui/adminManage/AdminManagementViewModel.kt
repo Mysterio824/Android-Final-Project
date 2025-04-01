@@ -147,6 +147,14 @@ class AdminManagementViewModel : ViewModel() {
                     )
                 }
             }
+
+            is AdminManagementAction.BanUser -> TODO()
+            AdminManagementAction.CloseBanUserDialog -> TODO()
+            AdminManagementAction.CloseResolveReportDialog -> TODO()
+            is AdminManagementAction.OpenBanUserDialog -> TODO()
+            is AdminManagementAction.OpenResolveReportDialog -> TODO()
+            is AdminManagementAction.ResolveReport -> TODO()
+            is AdminManagementAction.NavigateToStatistics -> {}
         }
     }
 }

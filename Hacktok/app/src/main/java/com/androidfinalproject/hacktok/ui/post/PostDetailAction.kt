@@ -1,21 +1,15 @@
 package com.androidfinalproject.hacktok.ui.post
 
-import com.androidfinalproject.hacktok.model.Post
-import com.androidfinalproject.hacktok.model.User
-import com.androidfinalproject.hacktok.ui.friendList.FriendListAction
-import org.bson.types.ObjectId
-
-
 sealed class PostDetailAction {
-    object ToggleCommentSection : PostDetailAction()
     object ToggleLike : PostDetailAction()
     object Share : PostDetailAction()
     data class UpdateCommentText(val text: String) : PostDetailAction()
     object SubmitComment : PostDetailAction()
-    data class OnUserClick(val userId: String) : PostDetailAction()
-    object KeyboardShown : PostDetailAction()
-    object KeyboardHidden : PostDetailAction()
-    data class LoadPost(val postId: ObjectId?) : PostDetailAction()
+    data class OnUserClick(val userId: String?) : PostDetailAction()
+    object ToggleCommentInputFocus : PostDetailAction()
+    data class SetCommentFocus(val focused: Boolean) : PostDetailAction()
+    data class LikeComment(val commentId: String?) : PostDetailAction()
+    data class LoadPost(val postId: String?) : PostDetailAction()
     object LoadComments : PostDetailAction()
-    data object NavigateBack : PostDetailAction()
+    object NavigateBack : PostDetailAction()
 }

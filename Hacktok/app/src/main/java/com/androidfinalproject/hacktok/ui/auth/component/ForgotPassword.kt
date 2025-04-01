@@ -11,7 +11,9 @@ import com.androidfinalproject.hacktok.ui.auth.LoginAction
 
 
 @Composable
-fun ForgotPassword(onAction: (LoginAction) -> Unit) {
+fun ForgotPassword(
+    onAction: (LoginAction) -> Unit
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.End

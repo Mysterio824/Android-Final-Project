@@ -2,6 +2,7 @@ package com.androidfinalproject.hacktok.ui.adminManage
 
 import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.model.Comment
+import com.androidfinalproject.hacktok.model.Report
 import com.androidfinalproject.hacktok.model.UserRole
 
 sealed class AdminManagementAction {
@@ -27,4 +28,13 @@ sealed class AdminManagementAction {
     object CloseEditCommentDialog : AdminManagementAction()
 
     data class FilterUsers(val query: String) : AdminManagementAction()
+
+    object NavigateToStatistics: AdminManagementAction()
+
+    data class ResolveReport(val reportId: String, val resolutionNote: String) : AdminManagementAction()
+    data class BanUser(val userId: String, val isPermanent: Boolean, val durationDays: Int?) : AdminManagementAction()
+    object CloseResolveReportDialog : AdminManagementAction()
+    data class OpenResolveReportDialog(val report: Report) : AdminManagementAction()
+    object CloseBanUserDialog : AdminManagementAction()
+    data class OpenBanUserDialog(val report: Report) : AdminManagementAction()
 }

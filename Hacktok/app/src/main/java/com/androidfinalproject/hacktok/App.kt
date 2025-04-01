@@ -26,9 +26,9 @@ fun App() {
         Log.d("Navigation", "Starting at: ${DashboardRoute.Graph.route}")
         NavHost(
             navController = navController,
-            startDestination = FriendListRoute.Graph.route
+            startDestination = DashboardRoute.Graph.route
         ) {
-//            dashboardNavigation(navController)
+            dashboardNavigation(navController)
             authNavigation(navController)
 //            friendListNavigation(navController)
         }
