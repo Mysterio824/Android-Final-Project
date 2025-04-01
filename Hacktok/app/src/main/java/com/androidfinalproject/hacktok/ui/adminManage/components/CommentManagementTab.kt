@@ -11,7 +11,37 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.androidfinalproject.hacktok.model.Comment
+
+@Composable
+fun StatisticCard(title: String, count: Int, color: Color = Color.Blue) {
+    androidx.compose.material3.Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.1f))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            androidx.compose.material3.Text(
+                text = title,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Medium
+            )
+            androidx.compose.material3.Text(
+                text = count.toString(),
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = color
+            )
+        }
+    }
+}
 
 @Composable
 fun CommentManagementTab(
@@ -23,10 +53,20 @@ fun CommentManagementTab(
     onEditComment: (String, String) -> Unit,
     onDeleteComment: (String) -> Unit
 ) {
+    Column (
+        modifier = Modifier
+            .padding(16.dp)
+    ) {
+        // Statistic Cards
+        StatisticCard(title = "Comments Today", count = 29)
+        StatisticCard(title = "Comments This Month", count = 144)
+        StatisticCard(title = "Comments This Year", count = 23411)
+        StatisticCard(title = "Banned Comments", count = 776, color = Color.Red)
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = 16.dp)
     ) {
         items(comments) { comment ->
             CommentItem(
