@@ -14,19 +14,22 @@ import com.androidfinalproject.hacktok.ui.adminManage.AdminManagementScreen
 import com.androidfinalproject.hacktok.ui.adminManage.AdminManagementState
 import com.androidfinalproject.hacktok.ui.auth.LoginScreen
 import com.androidfinalproject.hacktok.ui.auth.LoginState
-import com.androidfinalproject.hacktok.ui.profile.UserProfileScreen
+import com.androidfinalproject.hacktok.ui.commentStatistic.CommentStatistics
+import com.androidfinalproject.hacktok.ui.commentStatistic.CommentStatisticsScreen
 import com.androidfinalproject.hacktok.ui.post.PostDetailScreen
 import com.androidfinalproject.hacktok.ui.post.PostDetailState
 import com.androidfinalproject.hacktok.ui.search.SearchDashboardScreen
 import com.androidfinalproject.hacktok.ui.search.SearchUiState
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
-import org.bson.types.ObjectId
 import com.androidfinalproject.hacktok.ui.mainDashboard.DashboardScreen
 import com.androidfinalproject.hacktok.ui.currentProfile.CurrentProfileScreen
-import com.androidfinalproject.hacktok.ui.adminManage.AdminManagementViewModel
+import com.androidfinalproject.hacktok.ui.editProfile.EditProfileScreen
+import com.androidfinalproject.hacktok.ui.editProfile.EditProfileState
 import com.androidfinalproject.hacktok.ui.mainDashboard.DashboardState
 import com.androidfinalproject.hacktok.ui.messageDashboard.MessageDashboardScreen
 import com.androidfinalproject.hacktok.ui.messageDashboard.MessageDashboardState
+import com.androidfinalproject.hacktok.ui.userStatistic.UserStatisticsScreen
+import com.androidfinalproject.hacktok.ui.userStatistic.UserStatisticsState
 
 @Preview(showBackground = true)
 @Composable
@@ -114,24 +117,42 @@ private fun PostDetailScreenPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun UserProfilePreview() {
+fun EditUserPreview() {
     MainAppTheme {
         Box(
             modifier = Modifier
                 .width(400.dp)
                 .height(800.dp)
         ) {
-            val samplePosts = MockData.mockPosts
+            val user = MockData.mockUsers.first()
 
-            UserProfileScreen(
-                user = MockData.mockUsers.first(),
-                posts = samplePosts,
-                isFriend = false,
-                isBlocked = false,
-                onSendFriendRequest = {},
-                onUnfriend = {},
-                onChat = {},
-                onBlock = {},
+            EditProfileScreen(
+                state = EditProfileState(
+                    username = user.username,
+                    fullName = user.fullName ?: "Unknown",
+                    email = user.email,
+                    bio = user.bio ?: "",
+                    role = user.role,
+                    errorState = emptyMap()
+                ),
+                onAction = {}
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+fun UserStatisticScreenReview() {
+    MainAppTheme {
+        Box(
+            modifier = Modifier
+                .width(400.dp)
+                .height(800.dp)
+        ) {
+            UserStatisticsScreen(
+                state = MockData.sampleUserStatisticsState,
+                onAction = {}
             )
         }
     }
@@ -171,9 +192,6 @@ fun AdminManagementScreenPreview() {
         ) {
             AdminManagementScreen(
                 state = AdminManagementState(
-                    users = MockData.mockUsers,
-                    filteredUsers = MockData.mockUsers,
-                    reports = MockData.mockReport,
                     selectedTab = 3
                 ),
                 onAction = {},
@@ -198,6 +216,27 @@ fun ChatHomeScreenPreview() {
 
                 ),
                 onAction = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun CommentStatisticScreenPreview() {
+    MainAppTheme {
+        Box(
+            modifier = Modifier
+                .width(400.dp)
+                .height(800.dp)
+        ) {
+            CommentStatisticsScreen(
+                statistics = CommentStatistics(
+                    dailyComments = 100,
+                    monthlyComments = 2000,
+                    yearlyComments = 100000,
+                    bannedComments = 0
+                )
             )
         }
     }

@@ -10,7 +10,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.androidfinalproject.hacktok.ui.adminManage.components.*
+import com.androidfinalproject.hacktok.ui.adminManage.commentManagement.*
+import com.androidfinalproject.hacktok.ui.adminManage.postManagement.PostManagementTabRoot
+import com.androidfinalproject.hacktok.ui.adminManage.postManagement.PostManagementViewModel
+import com.androidfinalproject.hacktok.ui.adminManage.reportManagement.ReportManagementTabRoot
+import com.androidfinalproject.hacktok.ui.adminManage.reportManagement.ReportManagementViewModel
+import com.androidfinalproject.hacktok.ui.adminManage.userManagement.UserManagementTabRoot
+import com.androidfinalproject.hacktok.ui.adminManage.userManagement.UserManagementViewModel
 
 @Composable
 fun AdminManagementScreen(
@@ -69,93 +75,17 @@ fun AdminManagementScreen(
         }
 
         when (state.selectedTab) {
-            0 -> UserManagementTab(
-                users = state.filteredUsers,
-                onUpdateRole = { userId, newRole ->
-                    onAction(AdminManagementAction.UpdateUserRole(userId, newRole))
-                },
-                onDelete = { userId ->
-                    onAction(AdminManagementAction.DeleteUser(userId))
-                },
-                onFilterUsers = { query ->
-                    onAction(AdminManagementAction.FilterUsers(query))
-                }
+            0 -> UserManagementTabRoot(
+                viewModel = UserManagementViewModel()
             )
-            1 -> PostManagementTab(
-                posts = state.posts,
-                isCreateDialogOpen = state.isCreatePostDialogOpen,
-                isEditDialogOpen = state.isEditPostDialogOpen,
-                postToEdit = state.postToEdit,
-                onOpenCreateDialog = {
-                    onAction(AdminManagementAction.OpenCreatePostDialog)
-                },
-                onCloseCreateDialog = {
-                    onAction(AdminManagementAction.CloseCreatePostDialog)
-                },
-                onCreatePost = {
-                    onAction(AdminManagementAction.CreatePost)
-                },
-                onOpenEditDialog = { post ->
-                    onAction(AdminManagementAction.OpenEditPostDialog(post))
-                },
-                onCloseEditDialog = {
-                    onAction(AdminManagementAction.CloseEditPostDialog)
-                },
-                onEditPost = { postId, newContent ->
-                    onAction(AdminManagementAction.EditPost(postId, newContent))
-                },
-                onDeletePost = { postId ->
-                    onAction(AdminManagementAction.DeletePost(postId))
-                }
+            1 -> PostManagementTabRoot(
+                viewModel = PostManagementViewModel()
             )
-            2 -> CommentManagementTab(
-                comments = state.comments,
-                isEditDialogOpen = state.isEditCommentDialogOpen,
-                commentToEdit = state.commentToEdit,
-                onOpenEditDialog = { comment ->
-                    onAction(AdminManagementAction.OpenEditCommentDialog(comment))
-                },
-                onCloseEditDialog = {
-                    onAction(AdminManagementAction.CloseEditCommentDialog)
-                },
-                onEditComment = { commentId, newContent ->
-                    onAction(AdminManagementAction.EditComment(commentId, newContent))
-                },
-                onDeleteComment = { commentId ->
-                    onAction(AdminManagementAction.DeleteComment(commentId))
-                }
+            2 -> CommentManagementTabRoot(
+                viewModel = CommentManagementViewModel()
             )
-            3 -> ReportManagementTab(
-                reports = state.reports,
-                reportCounts = state.reportCounts,
-                isBanDialogOpen = state.isBanUserDialogOpen,
-                isResolveDialogOpen = state.isResolveReportDialogOpen,
-                selectedReport = state.selectedReport,
-                onOpenBanDialog = { report ->
-                    onAction(AdminManagementAction.OpenBanUserDialog(report))
-                },
-                onCloseBanDialog = {
-                    onAction(AdminManagementAction.CloseBanUserDialog)
-                },
-                onOpenResolveDialog = { report ->
-                    onAction(AdminManagementAction.OpenResolveReportDialog(report))
-                },
-                onCloseResolveDialog = {
-                    onAction(AdminManagementAction.CloseResolveReportDialog)
-                },
-                onBanUser = { userId, isPermanent, durationDays ->
-                    onAction(AdminManagementAction.BanUser(userId, isPermanent, durationDays))
-                },
-                onDeleteContent = { contentId, contentType ->
-                    when (contentType) {
-                        "post" -> onAction(AdminManagementAction.DeletePost(contentId))
-                        "comment" -> onAction(AdminManagementAction.DeleteComment(contentId))
-                        else -> { /* Do nothing for unsupported types */ }
-                    }
-                },
-                onResolveReport = { reportId, resolutionNote ->
-                    onAction(AdminManagementAction.ResolveReport(reportId, resolutionNote))
-                }
+            3 -> ReportManagementTabRoot(
+                viewModel = ReportManagementViewModel()
             )
         }
     }
