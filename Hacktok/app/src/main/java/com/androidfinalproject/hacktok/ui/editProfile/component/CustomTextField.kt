@@ -14,19 +14,15 @@ import androidx.compose.ui.unit.dp
 fun CustomTextField(
     label: String,
     value: String,
-    readOnly: Boolean = false,
     isError: Boolean = false,
     keyboardType: KeyboardType = KeyboardType.Text,
     onValueChange: (String) -> Unit = {}
 ) {
     OutlinedTextField(
         value = value,
-        onValueChange = { newValue ->
-            if (!readOnly) onValueChange(newValue)
-        },
+        onValueChange = onValueChange,
         label = { Text(label) },
         isError = isError,
-        readOnly = readOnly,
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         modifier = Modifier
             .fillMaxWidth()

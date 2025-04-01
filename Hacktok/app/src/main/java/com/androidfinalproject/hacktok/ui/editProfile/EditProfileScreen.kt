@@ -10,26 +10,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.model.UserRole
 import com.androidfinalproject.hacktok.ui.messageDashboard.component.ProfileImage
 import com.androidfinalproject.hacktok.ui.editProfile.component.CustomTextField
 import com.androidfinalproject.hacktok.ui.editProfile.component.DropdownField
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun EditProfileScreen(
-    user: User
+    viewModel: EditProfileViewModel = viewModel()
 ) {
-    var username by remember { mutableStateOf(user.username) }
-    var fullName by remember { mutableStateOf(user.fullName ?: "Unknown") }
-    var email by remember { mutableStateOf(user.email) }
-    var bio by remember { mutableStateOf(user.bio ?: "") }
-    var role by remember { mutableStateOf(user.role.name) }
-
-    var isUsernameError by remember { mutableStateOf(false) }
-    var isFullNameError by remember { mutableStateOf(false) }
-    var isEmailError by remember { mutableStateOf(false) }
-    var isBioError by remember { mutableStateOf(false) }
+    val username by viewModel.username.collectAsState()
+    val fullName by viewModel.fullName.collectAsState()
+    val email by viewModel.email.collectAsState()
+    val bio by viewModel.bio.collectAsState()
+    val role by viewModel.role.collectAsState()
+    val errorState by viewModel.errorState.collectAsState()
 
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp)
@@ -45,11 +41,40 @@ fun EditProfileScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        CustomTextField(label = "Username", value = username, isError = isUsernameError, onValueChange = { username = it })
-        CustomTextField(label = "Full Name", value = fullName, isError = isFullNameError, onValueChange =  { fullName = it })
-        CustomTextField(label = "Email", value = email, isError = isEmailError, onValueChange = { email = it })
-        CustomTextField(label = "Bio", value = bio, isError = isBioError, onValueChange =  { bio = it })
-        DropdownField(label = "Role", selectedValue = role, options = UserRole.entries.map { it.name }, onValueChange = { role = it })
+        CustomTextField(
+            label = "Username",
+            value = username,
+            isError = errorState["username"] ?: false,
+            onValueChange = { viewModel.updateField("username", it) }
+        )
+
+        CustomTextField(
+            label = "Full Name",
+            value = fullName,
+            isError = errorState["fullName"] ?: false,
+            onValueChange = { viewModel.updateField("fullName", it) }
+        )
+
+        CustomTextField(
+            label = "Email",
+            value = email,
+            isError = errorState["email"] ?: false,
+            onValueChange = { viewModel.updateField("email", it) }
+        )
+
+        CustomTextField(
+            label = "Bio",
+            value = bio,
+            isError = errorState["bio"] ?: false,
+            onValueChange = { viewModel.updateField("bio", it) }
+        )
+
+        DropdownField(
+            label = "Role",
+            selectedValue = role.name,
+            options = UserRole.entries.map { it.name },
+            onValueChange = { viewModel.updateField("role", it) }
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -69,21 +94,7 @@ fun EditProfileScreen(
 
             Button(
                 onClick = {
-                    isUsernameError = username.isBlank()
-                    isFullNameError = fullName.isBlank()
-                    isEmailError = email.isBlank()
-                    isBioError = bio.isBlank()
-
-                    if (!(isUsernameError || isFullNameError || isEmailError || isBioError)) {
-                        val updatedUser = user.copy(
-                            username = username,
-                            fullName = fullName,
-                            email = email,
-                            bio = bio,
-                            role = UserRole.valueOf(role)
-                        )
-                        // Save updatedUser to backend or state management
-                    }
+                    viewModel.saveProfile()
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF6D00)), // Orange
                 shape = RoundedCornerShape(12.dp),
