@@ -17,7 +17,7 @@ fun CurrentProfileScreenRoot(
     // Observe actions and handle navigation
     LaunchedEffect(Unit) {
 
-    }
+    };
 
     CurrentProfileScreen(
         navController = navController,

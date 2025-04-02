@@ -1,0 +1,110 @@
+package com.androidfinalproject.hacktok.ui.chat
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.androidfinalproject.hacktok.model.Message
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import java.util.Date
+import java.util.UUID
+
+class ChatViewModel : ViewModel() {
+    private val _state = MutableStateFlow(ChatState())
+    val state = _state.asStateFlow()
+
+    fun sendMessage(content: String) {
+        if (content.isBlank()) return
+
+        val newMessage = Message(
+            id = UUID.randomUUID().toString(),
+            senderId = _state.value.currentUser.username,
+            content = content,
+            createdAt = Date()
+        )
+
+        viewModelScope.launch {
+            // Trong thực tế, sẽ gửi tin nhắn lên server tại đây
+
+            // Cập nhật state với tin nhắn mới
+            _state.update { currentState ->
+                currentState.copy(
+                    messages = currentState.messages + newMessage
+                )
+            }
+        }
+    }
+
+    fun deleteMessage(messageId: String) {
+        viewModelScope.launch {
+            // Trong thực tế, sẽ xóa tin nhắn trên server tại đây
+
+            // Cập nhật state bằng cách loại bỏ tin nhắn
+            _state.update { currentState ->
+                currentState.copy(
+                    messages = currentState.messages.filter { it.id != messageId }
+                )
+            }
+        }
+    }
+
+    // Hàm mô phỏng việc tải dữ liệu ban đầu
+    fun loadInitialMessages() {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+
+            try {
+                // Trong thực tế, sẽ tải tin nhắn từ server tại đây
+                // Hiện tại, tạo một số tin nhắn mẫu
+                val demoMessages = createDemoMessages()
+
+                _state.update { currentState ->
+                    currentState.copy(
+                        messages = demoMessages,
+                        isLoading = false
+                    )
+                }
+            } catch (e: Exception) {
+                _state.update { currentState ->
+                    currentState.copy(
+                        error = "Không thể tải tin nhắn: ${e.message}",
+                        isLoading = false
+                    )
+                }
+            }
+        }
+    }
+
+    private fun createDemoMessages(): List<Message> {
+        val user1 = _state.value.currentUser.username
+        val user2 = _state.value.otherUser.username
+
+        return listOf(
+            Message(
+                id = UUID.randomUUID().toString(),
+                senderId = user2,
+                content = "Chào bạn, bạn khỏe không?",
+                createdAt = Date(System.currentTimeMillis() - 3600000)
+            ),
+            Message(
+                id = UUID.randomUUID().toString(),
+                senderId = user1,
+                content = "Mình khỏe, còn bạn thì sao?",
+                createdAt = Date(System.currentTimeMillis() - 3500000)
+            ),
+            Message(
+                id = UUID.randomUUID().toString(),
+                senderId = user2,
+                content = "Mình cũng khỏe. Hôm nay bạn đã làm gì?",
+                createdAt = Date(System.currentTimeMillis() - 3400000)
+            ),
+            Message(
+                id = UUID.randomUUID().toString(),
+                senderId = user1,
+                content = "Mình đang code một ứng dụng Android. Còn bạn?",
+                createdAt = Date(System.currentTimeMillis() - 3300000)
+            )
+        )
+    }
+}
