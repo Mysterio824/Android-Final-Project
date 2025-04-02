@@ -17,7 +17,6 @@ fun ChatScreenRoot(
     val state by viewModel.state.collectAsState()
     val scope = rememberCoroutineScope()
 
-    // Tải tin nhắn khi màn hình được hiển thị
     LaunchedEffect(key1 = Unit) {
         viewModel.loadInitialMessages()
     }
@@ -32,6 +31,12 @@ fun ChatScreenRoot(
             scope.launch {
                 viewModel.deleteMessage(messageId)
             }
+        },
+        onBackClick = {
+            navController.popBackStack()
+        },
+        onInfoClick = {
+            navController.navigate("manage_user/${state.otherUser.username}")
         }
     )
 }

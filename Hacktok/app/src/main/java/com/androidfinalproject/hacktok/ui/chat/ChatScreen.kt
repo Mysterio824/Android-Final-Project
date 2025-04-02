@@ -1,6 +1,8 @@
 package com.androidfinalproject.hacktok.ui.chat
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -12,6 +14,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -31,10 +35,10 @@ fun ChatScreen(
     onBackClick: () -> Unit = {},
     onInfoClick: () -> Unit = {},
     onDeleteMessage: (String) -> Unit = {}
-
 ) {
     var messageText by remember { mutableStateOf(TextFieldValue("")) }
-    MainAppTheme{
+
+    MainAppTheme {
         Column(modifier = Modifier.fillMaxSize()) {
             ChatTopBar(
                 otherUser = otherUser,
@@ -49,7 +53,8 @@ fun ChatScreen(
                 items(messages.sortedByDescending { it.createdAt }) { message ->
                     ChatBubble(
                         message = message,
-                        isCurrentUser = message.senderId == currentUserId
+                        isCurrentUser = message.senderId == currentUserId,
+                        onDeleteMessage = onDeleteMessage
                     )
                 }
             }
@@ -68,16 +73,27 @@ fun ChatScreen(
     }
 }
 
+
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ChatBubble(
     message: Message,
-    isCurrentUser: Boolean
+    isCurrentUser: Boolean,
+    onDeleteMessage: (String) -> Unit
 ) {
-    Row(
+    var showTime by remember { mutableStateOf(false) }
+    var showMenu by remember { mutableStateOf(false) }
+    val clipboardManager = LocalClipboardManager.current
+
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
-        horizontalArrangement = if (isCurrentUser) Arrangement.End else Arrangement.Start
+            .padding(8.dp)
+            .combinedClickable(
+                onClick = { showTime = !showTime }, // Nhấn để hiển thị thời gian
+                onLongClick = { showMenu = true } // Nhấn giữ để mở menu
+            ),
+        contentAlignment = if (isCurrentUser) Alignment.CenterEnd else Alignment.CenterStart
     ) {
         Box(
             modifier = Modifier
@@ -87,13 +103,47 @@ fun ChatBubble(
                 )
                 .padding(12.dp)
         ) {
-            Text(
-                text = message.content,
-                color = Color.White
-            )
+            Column {
+                Text(
+                    text = message.content,
+                    color = Color.White
+                )
+                if (showTime) {
+                    Text(
+                        text = message.createdAt.toString(),
+                        color = Color.White.copy(alpha = 0.7f),
+                        style = MaterialTheme.typography.caption
+                    )
+                }
+            }
+        }
+
+        // Toggle menu khi nhấn giữ tin nhắn
+        DropdownMenu(
+            expanded = showMenu,
+            onDismissRequest = { showMenu = false }
+        ) {
+            DropdownMenuItem(
+                onClick = {
+                    clipboardManager.setText(AnnotatedString(message.content)) // Copy tin nhắn
+                    showMenu = false
+                }
+            ) {
+                Text("Copy")
+            }
+            DropdownMenuItem(
+                onClick = {
+                    message.id?.let { onDeleteMessage(it) } // Xóa tin nhắn
+                    showMenu = false
+                }
+            ) {
+                Text("Delete", color = Color.Red)
+            }
         }
     }
 }
+
+
 
 @Preview(showBackground = true)
 @Composable
