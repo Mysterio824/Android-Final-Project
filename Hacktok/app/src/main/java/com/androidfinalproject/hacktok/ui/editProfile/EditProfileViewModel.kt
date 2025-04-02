@@ -1,54 +1,65 @@
 package com.androidfinalproject.hacktok.ui.editProfile
 
 import androidx.lifecycle.ViewModel
+import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.model.UserRole
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
-class EditProfileViewModel(user: User) : ViewModel() {
-    private val _username = MutableStateFlow(user.username)
-    val username = _username.asStateFlow()
+class EditProfileViewModel(userId: String) : ViewModel() {
+    private val _state = MutableStateFlow( EditProfileState() )
+    val state = _state.asStateFlow()
 
-    private val _fullName = MutableStateFlow(user.fullName ?: "Unknown")
-    val fullName = _fullName.asStateFlow()
+    init{
+        val user = MockData.mockUsers.first()
+        _state.update {
+            it.copy(
+                username = user.username,
+                fullName = user.fullName ?: "Unknown",
+                email = user.email,
+                bio = user.bio ?: "",
+                role = user.role,
+                errorState = emptyMap()
+            )
+        }
+    }
 
-    private val _email = MutableStateFlow(user.email)
-    val email = _email.asStateFlow()
-
-    private val _bio = MutableStateFlow(user.bio ?: "")
-    val bio = _bio.asStateFlow()
-
-    private val _role = MutableStateFlow(user.role)
-    val role = _role.asStateFlow()
-
-    private val _errorState = MutableStateFlow(mapOf<String, Boolean>())
-    val errorState = _errorState.asStateFlow()
-
-    fun updateField(field: String, value: String) {
-        when (field) {
-            "username" -> _username.value = value
-            "fullName" -> _fullName.value = value
-            "email" -> _email.value = value
-            "bio" -> _bio.value = value
-            "role" -> _role.value = UserRole.valueOf(value)
+    fun onAction(action: EditProfileAction) {
+        when (action) {
+            is EditProfileAction.UpdateField -> {
+                when (action.field) {
+                    "username" -> _state.update { it.copy(username = action.value) }
+                    "fullName" -> _state.update { it.copy(fullName = action.value) }
+                    "email" -> _state.update { it.copy(email = action.value) }
+                    "bio" -> _state.update { it.copy(bio = action.value) }
+                    "role" -> _state.update { it.copy(role = UserRole.valueOf(action.value)) }
+                }
+            }
+            EditProfileAction.SaveProfile -> {
+                if (validateFields()) {
+                    // Call backend API or store data
+                    // For now, we'll just log the updated state
+                    println("Saving profile: ${_state.value}")
+                }
+            }
+            EditProfileAction.Cancel -> {
+                // Reset fields or navigate back
+                // For now, we'll just log the action
+                println("Cancel action triggered")
+            }
         }
     }
 
     private fun validateFields(): Boolean {
         val errors = mutableMapOf<String, Boolean>()
-        errors["username"] = _username.value.isBlank()
-        errors["fullName"] = _fullName.value.isBlank()
-        errors["email"] = _email.value.isBlank()
-        errors["bio"] = _bio.value.isBlank()
+        errors["username"] = _state.value.username.isBlank()
+        errors["fullName"] = _state.value.fullName.isBlank()
+        errors["email"] = _state.value.email.isBlank()
+        errors["bio"] = _state.value.bio.isBlank()
 
-        _errorState.value = errors
+        _state.update { it.copy(errorState = errors) }
         return !errors.containsValue(true)
-    }
-
-    fun saveProfile() {
-        if (validateFields()) {
-            // Call backend API or store data
-        }
     }
 }

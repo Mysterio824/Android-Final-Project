@@ -1,86 +1,32 @@
-package com.androidfinalproject.hacktok.ui.adminManage.components
+package com.androidfinalproject.hacktok.ui.adminManage.reportManagement.component
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.androidfinalproject.hacktok.model.Report
+import com.androidfinalproject.hacktok.ui.adminManage.reportManagement.ReportManagementAction
 import java.text.SimpleDateFormat
-import java.util.*
-
-@Composable
-fun ReportManagementTab(
-    reports: List<Report>,
-    reportCounts: Map<String, Int>,
-    isBanDialogOpen: Boolean,
-    isResolveDialogOpen: Boolean,
-    selectedReport: Report?,
-    onOpenBanDialog: (Report) -> Unit,
-    onCloseBanDialog: () -> Unit,
-    onOpenResolveDialog: (Report) -> Unit,
-    onCloseResolveDialog: () -> Unit,
-    onBanUser: (String, Boolean, Int?) -> Unit,
-    onDeleteContent: (String, String) -> Unit,
-    onResolveReport: (String, String) -> Unit
-) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(top = 16.dp)
-    ) {
-        items(reports) { report ->
-            ReportItem(
-                report = report,
-                reportCount = reportCounts[getReportKey(report)] ?: 1,
-                onBan = { onOpenBanDialog(report) },
-                onDelete = { onDeleteContent(report.targetId, report.type) },
-                onResolve = { onOpenResolveDialog(report) }
-            )
-        }
-    }
-
-    if (isBanDialogOpen && selectedReport != null) {
-        BanUserDialog(
-            userId = selectedReport.targetId,
-            onDismiss = onCloseBanDialog,
-            onBanUser = onBanUser
-        )
-    }
-
-    if (isResolveDialogOpen && selectedReport != null) {
-        ResolveReportDialog(
-            reportId = selectedReport.id ?: "",
-            onDismiss = onCloseResolveDialog,
-            onResolve = onResolveReport
-        )
-    }
-}
-
-private fun getReportKey(report: Report): String {
-    return "${report.type}:${report.targetId}"
-}
+import java.util.Locale
 
 @Composable
 fun ReportItem(
     report: Report,
     reportCount: Int,
-    onBan: () -> Unit,
-    onDelete: () -> Unit,
-    onResolve: () -> Unit
+    onAction: (ReportManagementAction) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val dateFormat = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault())
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp, horizontal = 8.dp),
     ) {
@@ -100,7 +46,7 @@ fun ReportItem(
                 )
 
                 AssistChip(
-                    onClick = {}, // Non-interactive for now; can be removed if no action is needed
+                    onClick = {},
                     label = { Text(report.status.capitalize()) },
                     colors = AssistChipDefaults.assistChipColors(
                         containerColor = when (report.status) {
@@ -171,7 +117,7 @@ fun ReportItem(
                 if (report.status != "resolved") {
                     if (report.type == "user") {
                         Button(
-                            onClick = onBan,
+                            onClick = { onAction(ReportManagementAction.OpenBanUserDialog(report)) },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.errorContainer,
                                 contentColor = MaterialTheme.colorScheme.onErrorContainer
@@ -188,7 +134,7 @@ fun ReportItem(
                         }
                     } else {
                         Button(
-                            onClick = onDelete,
+                            onClick = { onAction(ReportManagementAction.DeleteContent(report.targetId, report.type)) },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.error,
                                 contentColor = MaterialTheme.colorScheme.onError
@@ -206,7 +152,7 @@ fun ReportItem(
                     }
 
                     Button(
-                        onClick = onResolve,
+                        onClick = { onAction(ReportManagementAction.OpenResolveReportDialog(report)) },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = MaterialTheme.colorScheme.onPrimary
@@ -226,124 +172,6 @@ fun ReportItem(
     }
 }
 
-@Composable
-fun BanUserDialog(
-    userId: String,
-    onDismiss: () -> Unit,
-    onBanUser: (String, Boolean, Int?) -> Unit
-) {
-    var isPermanent by remember { mutableStateOf(false) }
-    var banDuration by remember { mutableStateOf("7") }
-    var showError by remember { mutableStateOf(false) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Ban User") },
-        text = {
-            Column {
-                Text("User ID: $userId")
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Checkbox(
-                        checked = isPermanent,
-                        onCheckedChange = { isPermanent = it }
-                    )
-                    Text("Permanent Ban")
-                }
-
-                if (!isPermanent) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    OutlinedTextField(
-                        value = banDuration,
-                        onValueChange = {
-                            banDuration = it
-                            showError = false
-                        },
-                        label = { Text("Ban Duration (days)") },
-                        isError = showError,
-                        supportingText = {
-                            if (showError) {
-                                Text("Please enter a valid number")
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    if (isPermanent) {
-                        onBanUser(userId, true, null)
-                    } else {
-                        try {
-                            val days = banDuration.toInt()
-                            if (days > 0) {
-                                onBanUser(userId, false, days)
-                            } else {
-                                showError = true
-                            }
-                        } catch (e: NumberFormatException) {
-                            showError = true
-                        }
-                    }
-                }
-            ) {
-                Text("Ban User")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        }
-    )
-}
-
-@Composable
-fun ResolveReportDialog(
-    reportId: String,
-    onDismiss: () -> Unit,
-    onResolve: (String, String) -> Unit
-) {
-    var resolutionNote by remember { mutableStateOf("") }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Resolve Report") },
-        text = {
-            Column {
-                Text("Are you sure you want to mark this report as resolved?")
-                Spacer(modifier = Modifier.height(16.dp))
-
-                OutlinedTextField(
-                    value = resolutionNote,
-                    onValueChange = { resolutionNote = it },
-                    label = { Text("Resolution Note (Optional)") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = { onResolve(reportId, resolutionNote) }
-            ) {
-                Text("Resolve")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        }
-    )
-}
-
-// Extension function to capitalize the first letter of a string
 private fun String.capitalize(): String {
     return this.replaceFirstChar {
         if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
