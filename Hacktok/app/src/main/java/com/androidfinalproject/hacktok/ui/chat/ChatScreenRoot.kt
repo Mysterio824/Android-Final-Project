@@ -7,36 +7,27 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.androidfinalproject.hacktok.model.User
+import com.androidfinalproject.hacktok.ui.post.PostDetailAction
 import kotlinx.coroutines.launch
 
 @Composable
 fun ChatScreenRoot(
     navController: NavController,
-    viewModel: ChatViewModel = viewModel()
+    viewModel: ChatViewModel = viewModel(),
+    onNavigateBack: () -> Unit,
+    onNavigateToManageUser: (String?) -> Unit = {}
 ) {
     val state by viewModel.state.collectAsState()
-    val scope = rememberCoroutineScope()
-
-    LaunchedEffect(key1 = Unit) {
-        viewModel.loadInitialMessages()
-    }
 
     ChatScreen(
-        messages = state.messages,
-        currentUserId = state.currentUser.username,
-        onSendMessage = { content ->
-            viewModel.sendMessage(content)
-        },
-        onDeleteMessage = { messageId ->
-            scope.launch {
-                viewModel.deleteMessage(messageId)
+        state = state,
+        onAction = { action ->
+            when (action) {
+                is ChatAction.NavigateBack -> onNavigateBack()
+                is ChatAction.NavigateToManageUser -> onNavigateToManageUser(action.userId)
+                else -> viewModel.onAction(action)
             }
-        },
-        onBackClick = {
-            navController.popBackStack()
-        },
-        onInfoClick = {
-            navController.navigate("manage_user/${state.otherUser.username}")
         }
     )
 }

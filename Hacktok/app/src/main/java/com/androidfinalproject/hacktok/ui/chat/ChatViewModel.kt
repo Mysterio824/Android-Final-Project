@@ -14,6 +14,16 @@ class ChatViewModel : ViewModel() {
     private val _state = MutableStateFlow(ChatState())
     val state = _state.asStateFlow()
 
+    fun  onAction(action: ChatAction){
+        when(action) {
+            is ChatAction.SendMessage -> sendMessage(action.message)
+            is ChatAction.DeleteMessage -> deleteMessage(action.messageId)
+            is ChatAction.LoadInitialMessages -> loadInitialMessages()
+            is ChatAction.NavigateToManageUser -> TODO()
+            ChatAction.NavigateBack-> TODO()
+        }
+    }
+
     fun sendMessage(content: String) {
         if (content.isBlank()) return
 
@@ -36,7 +46,7 @@ class ChatViewModel : ViewModel() {
         }
     }
 
-    fun deleteMessage(messageId: String) {
+    fun deleteMessage(messageId: String?) {
         viewModelScope.launch {
             // Trong thực tế, sẽ xóa tin nhắn trên server tại đây
 

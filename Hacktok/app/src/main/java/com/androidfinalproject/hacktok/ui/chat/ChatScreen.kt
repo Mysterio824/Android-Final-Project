@@ -25,36 +25,37 @@ import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 import com.androidfinalproject.hacktok.ui.currentProfile.component.MessageInput
 import com.androidfinalproject.hacktok.ui.currentProfile.component.ChatTopBar
+import com.androidfinalproject.hacktok.ui.post.PostDetailAction
+import com.androidfinalproject.hacktok.ui.post.PostDetailState
 
 @Composable
 fun ChatScreen(
-    messages: List<Message> = emptyList(),
-    otherUser: User = User(username = "User", email = "user@example.com"),
-    currentUserId: String = "user1",
-    onSendMessage: (String) -> Unit = {},
-    onBackClick: () -> Unit = {},
-    onInfoClick: () -> Unit = {},
-    onDeleteMessage: (String) -> Unit = {}
+    state :ChatState,
+    onAction: (ChatAction) -> Unit,
 ) {
     var messageText by remember { mutableStateOf(TextFieldValue("")) }
+    LaunchedEffect(state.messages) {
+        onAction(ChatAction.LoadInitialMessages)
+    }
+
 
     MainAppTheme {
         Column(modifier = Modifier.fillMaxSize()) {
             ChatTopBar(
-                otherUser = otherUser,
-                onBackClick = onBackClick,
-                onInfoClick = onInfoClick
+                otherUser = state.currentUser,
+                onBackClick = {onAction(ChatAction.NavigateBack)},
+                onInfoClick = {onAction(ChatAction.NavigateToManageUser(state.otherUser.id))}
             )
 
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 reverseLayout = true
             ) {
-                items(messages.sortedByDescending { it.createdAt }) { message ->
+                items(state.messages.sortedByDescending { it.createdAt }) { message ->
                     ChatBubble(
                         message = message,
-                        isCurrentUser = message.senderId == currentUserId,
-                        onDeleteMessage = onDeleteMessage
+                        isCurrentUser = message.senderId == state.currentUser.id,
+                        onDeleteMessage = { onAction(ChatAction.DeleteMessage(message.id)) }
                     )
                 }
             }
@@ -64,7 +65,7 @@ fun ChatScreen(
                 onTextChanged = { messageText = it },
                 onSendClicked = {
                     if (messageText.text.isNotEmpty()) {
-                        onSendMessage(messageText.text)
+                        onAction(ChatAction.SendMessage(messageText.text))
                         messageText = TextFieldValue("")
                     }
                 }
@@ -79,7 +80,7 @@ fun ChatScreen(
 fun ChatBubble(
     message: Message,
     isCurrentUser: Boolean,
-    onDeleteMessage: (String) -> Unit
+    onDeleteMessage: (String?) -> Unit
 ) {
     var showTime by remember { mutableStateOf(false) }
     var showMenu by remember { mutableStateOf(false) }
@@ -198,11 +199,12 @@ fun ChatScreenPreview() {
                 )
             )
 
-            ChatScreen(
-                messages = demoMessages,
-                currentUserId = user1,
-                otherUser = otherUser
-            )
+//            ChatScreen(
+//                messages = demoMessages,
+//                currentUserId = user1,
+//                otherUser = otherUser,
+//
+//            )
         }
     }
 }
