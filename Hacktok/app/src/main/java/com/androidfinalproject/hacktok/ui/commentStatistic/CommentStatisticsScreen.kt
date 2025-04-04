@@ -13,20 +13,12 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.androidfinalproject.hacktok.ui.commentStatistic.component.StatisticCard
 
-data class CommentStatistics(
-    val dailyComments: Int,
-    val monthlyComments: Int,
-    val yearlyComments: Int,
-    val bannedComments: Int
-)
-
 @Composable
 fun CommentStatisticsScreen(
     viewModel: CommentStatisticsViewModel = viewModel()
 ) {
     // Collect state from ViewModel
-    val statistics by viewModel.statistics.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
+    val statistics by viewModel.state.collectAsState()
 
     Column(
         modifier = Modifier
@@ -40,7 +32,7 @@ fun CommentStatisticsScreen(
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        if (isLoading) {
+        if (statistics.isLoading) {
             // Show loading indicator
             Box(
                 modifier = Modifier.fillMaxSize(),
