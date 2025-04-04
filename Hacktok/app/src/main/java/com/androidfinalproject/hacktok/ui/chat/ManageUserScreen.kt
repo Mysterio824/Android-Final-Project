@@ -1,3 +1,4 @@
+// ManageUserScreen.kt
 package com.androidfinalproject.hacktok.ui.chat
 
 import androidx.compose.foundation.background
@@ -108,7 +109,7 @@ fun ManageUserScreen(
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(backgroundColor = Color.Black)
         ) {
-            Text("Blok this user", color = Color.White)
+            Text("Block this user", color = Color.White) // Sửa lỗi chính tả "Blok" thành "Block"
         }
     }
 }

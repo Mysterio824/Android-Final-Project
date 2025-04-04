@@ -19,6 +19,11 @@ class ChatViewModel : ViewModel() {
             is ChatAction.SendMessage -> sendMessage(action.message)
             is ChatAction.DeleteMessage -> deleteMessage(action.messageId)
             is ChatAction.LoadInitialMessages -> loadInitialMessages()
+            is ChatAction.ToggleMute -> toggleMute()
+            is ChatAction.CreateGroup -> createGroup()
+            is ChatAction.FindInChat -> findInChat()
+            is ChatAction.DeleteChat -> deleteChat()
+            is ChatAction.BlockUser -> blockUser()
             is ChatAction.NavigateToManageUser -> TODO()
             ChatAction.NavigateBack-> TODO()
         }
@@ -116,5 +121,45 @@ class ChatViewModel : ViewModel() {
                 createdAt = Date(System.currentTimeMillis() - 3300000)
             )
         )
+    }
+
+    private fun toggleMute() {
+        _state.update { currentState ->
+            currentState.copy(
+                isUserMuted = !currentState.isUserMuted
+            )
+        }
+        // Trong thực tế, cần lưu trạng thái này vào database
+    }
+
+    private fun createGroup() {
+        // Thực hiện logic tạo nhóm
+        // Hiện tại chỉ in log vì chưa có database
+        println("Creating group with user: ${_state.value.otherUser.username}")
+        // Trong thực tế, sẽ chuyển đến màn hình tạo nhóm
+    }
+
+    private fun findInChat() {
+        // Chức năng tìm kiếm trong chat
+        println("Finding in chat with user: ${_state.value.otherUser.username}")
+        // Trong thực tế, sẽ hiển thị UI tìm kiếm
+    }
+
+    private fun deleteChat() {
+        viewModelScope.launch {
+            // Xóa tất cả tin nhắn
+            _state.update { currentState ->
+                currentState.copy(
+                    messages = emptyList()
+                )
+            }
+            // Trong thực tế, sẽ xóa chat trên server
+        }
+    }
+
+    private fun blockUser() {
+        // Thực hiện chức năng block user
+        println("Blocking user: ${_state.value.otherUser.username}")
+        // Trong thực tế, sẽ cập nhật trạng thái block trong database
     }
 }

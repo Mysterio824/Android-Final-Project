@@ -8,5 +8,6 @@ data class ChatState(
     val otherUser: User = User(username = "user2", email = "user2@example.com"),
     val messages: List<Message> = emptyList(),
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val isUserMuted: Boolean = false
 )
