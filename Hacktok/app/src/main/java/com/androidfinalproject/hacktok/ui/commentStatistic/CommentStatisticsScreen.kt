@@ -6,9 +6,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.androidfinalproject.hacktok.ui.commentStatistic.component.StatisticCard
+import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 
 @Composable
 fun CommentStatisticsScreen(
@@ -61,6 +63,31 @@ fun CommentStatisticsScreen(
             ) {
                 Text("Refresh Statistics")
             }
+        }
+    }
+}
+
+
+@Preview(showBackground = true)
+@Composable
+fun CommentStatisticScreenPreview() {
+    val mockState = CommentStatisticsState(
+        isLoading = false,
+        dailyComments = 12,
+        monthlyComments = 320,
+        yearlyComments = 4021,
+        bannedComments = 18
+    )
+    MainAppTheme {
+        Box(
+            modifier = Modifier
+                .width(400.dp)
+                .height(800.dp)
+        ) {
+            CommentStatisticsScreen(
+                state = mockState,
+                onRefresh = {},
+            )
         }
     }
 }
