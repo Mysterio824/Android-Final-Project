@@ -10,10 +10,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 fun UserProfileScreenRoot(
     viewModel: UserProfileViewModel = viewModel(),
     userId: String?,
-    onNavigateBack: () -> Unit,
     onBlockUser: (String?) -> Unit,
     onChatWithFriend: (String?) -> Unit,
-    onGoToPost: (String?) -> Unit
+    onGoToPost: (String?) -> Unit,
+    onNavigateBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 

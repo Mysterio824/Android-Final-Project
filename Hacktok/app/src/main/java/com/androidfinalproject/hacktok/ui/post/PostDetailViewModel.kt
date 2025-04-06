@@ -14,9 +14,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.bson.types.ObjectId
 
-class PostDetailViewModel : ViewModel() {
+class PostDetailViewModel(postId: String) : ViewModel() {
     private val _state = MutableStateFlow(PostDetailState())
     val state: StateFlow<PostDetailState> = _state.asStateFlow()
+
+    init{
+        loadPost(postId)
+    }
 
     fun onAction(action: PostDetailAction) {
         when (action) {

@@ -7,7 +7,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun PostDetailScreenRoot(
-    postId: String? = null,
     viewModel: PostDetailViewModel = viewModel(),
     onNavigateBack: () -> Unit,
     onUserProfileNavigate: (String?) -> Unit = {}
@@ -16,7 +15,6 @@ fun PostDetailScreenRoot(
 
     PostDetailScreen(
         state = state,
-        postId = postId,
         onAction = { action ->
             when (action) {
                 is PostDetailAction.NavigateBack -> onNavigateBack()

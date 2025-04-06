@@ -7,8 +7,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.androidfinalproject.hacktok.ui.auth.component.*
+import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 
 @Composable
 fun LoginScreen(
@@ -82,6 +84,26 @@ fun LoginScreen(
                 )
                 AuthToggle(state, onAction)
             }
+        }
+    }
+}
+
+
+@Preview(showBackground = true)
+@Composable
+private fun LoginScreenPreview() {
+    MainAppTheme {
+        Box(
+            modifier = Modifier
+                .width(400.dp)
+                .height(800.dp)
+        ) {
+            LoginScreen (
+                state = LoginState(
+                    isLoginMode = false
+                ),
+                onAction = {},
+            )
         }
     }
 }

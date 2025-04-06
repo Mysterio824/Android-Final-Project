@@ -7,6 +7,5 @@ sealed class FriendListAction {
     data class AddFriend(val user: User) : FriendListAction()
     data class ChatWithFriend(val user: User) : FriendListAction()
     data class UserClicked(val user: User) : FriendListAction()
-    data object LoadFriends : FriendListAction()
     data object NavigateBack : FriendListAction()
 }

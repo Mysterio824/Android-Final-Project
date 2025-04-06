@@ -8,21 +8,19 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.ui.post.component.*
+import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PostDetailScreen(
     state: PostDetailState,
-    postId: String?,
     onAction: (PostDetailAction) -> Unit,
 ) {
     val scrollState = rememberLazyListState()
-
-    LaunchedEffect(postId) {
-        onAction(PostDetailAction.LoadPost(postId))
-    }
 
     Column(
         modifier = Modifier
@@ -108,5 +106,25 @@ fun PostDetailScreen(
                 onAction(PostDetailAction.SetCommentFocus(isFocused))
             }
         )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PostDetailScreenPreview() {
+    MainAppTheme {
+        Box(
+            modifier = Modifier
+                .width(400.dp)
+                .height(800.dp)
+        ) {
+            PostDetailScreen(
+                state = PostDetailState(
+                    post = MockData.mockPosts.first(),
+                    comments = MockData.mockComments
+                ),
+                onAction = {},
+            )
+        }
     }
 }

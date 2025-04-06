@@ -4,22 +4,39 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 sealed interface MainRoute : Route {
-    class MainGraph {
-        companion object {
-            val route: String
-                get() {
-                    TODO()
-                }
-        }
-
-    }
-
     @Serializable
     data object Graph : MainRoute {
         override val route = "main_graph"
     }
+
     @Serializable
-    data object SearchDashboard : MainRoute {
-        override val route = "search_dashboard"
+    data object PostDetail : MainRoute {
+        override val route = "post_detail"
     }
+
+    @Serializable
+    data object UserDetail : MainRoute {
+        override val route = "user_detail"
+    }
+
+    @Serializable
+    data object FriendList : MainRoute {
+        override val route = "friend_list"
+    }
+
+    @Serializable
+    data object ChatRoom : MainRoute {
+        override val route = "chat_room"
+    }
+
+    @Serializable
+    data object EditProfile : MainRoute {
+        override val route = "edit_profile"
+    }
+
+    @Serializable
+    data object EditPost : MainRoute {
+        override val route = "edit_post"
+    }
+
 }

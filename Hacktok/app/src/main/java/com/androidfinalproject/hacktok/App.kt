@@ -7,16 +7,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.androidfinalproject.hacktok.router.graph.adminNavigation
 import com.androidfinalproject.hacktok.router.graph.authNavigation
-import com.androidfinalproject.hacktok.router.graph.dashboardNavigation
-import com.androidfinalproject.hacktok.router.graph.friendListNavigation
-import com.androidfinalproject.hacktok.router.graph.testGraph
-import com.androidfinalproject.hacktok.router.routes.DashboardRoute
-
-import com.androidfinalproject.hacktok.router.routes.FriendListRoute
 import com.androidfinalproject.hacktok.router.routes.MainRoute
-import com.androidfinalproject.hacktok.ui.search.SearchViewModel
-import com.androidfinalproject.hacktok.router.graph.authNavigation
-import com.androidfinalproject.hacktok.router.graph.friendListNavigation
+import com.androidfinalproject.hacktok.router.graph.mainNavigation
 import com.androidfinalproject.hacktok.router.routes.AdminRoute
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 
@@ -25,15 +17,14 @@ import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 fun App() {
     MainAppTheme {
         val navController = rememberNavController()
-        Log.d("Navigation", "Starting at: ${DashboardRoute.Graph.route}")
+        Log.d("Navigation", "Starting at: ${MainRoute.Graph.route}")
         NavHost(
             navController = navController,
             startDestination = AdminRoute.Graph.route
         ) {
-            adminNavigation(navController)
-            dashboardNavigation(navController)
             authNavigation(navController)
-//            friendListNavigation(navController)
+            adminNavigation(navController)
+            mainNavigation(navController)
         }
 
     }

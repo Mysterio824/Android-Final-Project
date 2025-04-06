@@ -6,7 +6,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun EditProfileScreenRoot(
-    viewModel: EditProfileViewModel
+    viewModel: EditProfileViewModel,
+    onNavigateBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 

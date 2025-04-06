@@ -11,19 +11,18 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.bson.types.ObjectId
 
-class FriendListViewModel : ViewModel() {
+class FriendListViewModel(userId: String) : ViewModel() {
     private val _state = MutableStateFlow(FriendListState())
     val state: StateFlow<FriendListState> = _state.asStateFlow()
 
     init {
-        loadFriends()
+        loadFriends(userId)
     }
 
     fun onAction(action: FriendListAction) {
         when (action) {
             is FriendListAction.SearchQueryChanged -> updateSearchQuery(action.query)
             is FriendListAction.AddFriend -> addFriend(action.user)
-            is FriendListAction.LoadFriends -> loadFriends()
             else -> {}
         }
     }
@@ -55,7 +54,7 @@ class FriendListViewModel : ViewModel() {
         }
     }
 
-    private fun loadFriends() {
+    private fun loadFriends(userId: String) {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
 
