@@ -11,10 +11,6 @@ import androidx.navigation.navigation
 import com.androidfinalproject.hacktok.router.routes.MainRoute
 import com.androidfinalproject.hacktok.ui.post.PostDetailScreenRoot
 import com.androidfinalproject.hacktok.ui.post.PostDetailViewModel
-import com.androidfinalproject.hacktok.ui.search.SearchDashboardScreen
-import com.androidfinalproject.hacktok.ui.search.SearchDashboardScreenRoot
-import com.androidfinalproject.hacktok.ui.search.SearchViewModel
-import org.bson.types.ObjectId
 
 fun NavGraphBuilder.testGraph(
     navController: NavController,
@@ -41,7 +37,7 @@ fun NavGraphBuilder.testGraph(
             }
         ) {
             PostDetailScreenRoot (
-                postId = ObjectId(),
+                postId = "",
                 viewModel = PostDetailViewModel(),
                 onNavigateBack = {},
                 onUserProfileNavigate = {}

@@ -15,13 +15,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.androidfinalproject.hacktok.model.Comment
-import com.androidfinalproject.hacktok.model.User
 
 @Composable
 fun CommentSection(
     comments: List<Comment>,
     isLoading: Boolean,
-    onUserClick: (String) -> Unit
+    onUserClick: (String) -> Unit,
+    onLikeClick: (String?) -> Unit,
+    isLikedByUser: (Comment) -> Boolean
 ) {
     Column(
         modifier = Modifier
@@ -47,7 +48,12 @@ fun CommentSection(
             }
         } else {
             comments.forEach { comment ->
-                CommentItem(comment = comment, onUserClick = onUserClick)
+                CommentItem(
+                    comment = comment,
+                    onUserClick = onUserClick,
+                    onLikeClick = { onLikeClick(comment.id) },
+                    isLikedByUser = isLikedByUser(comment)
+                )
             }
 
             if (comments.isEmpty()) {

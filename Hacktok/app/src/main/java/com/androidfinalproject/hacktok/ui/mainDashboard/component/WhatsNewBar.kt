@@ -2,75 +2,82 @@ package com.androidfinalproject.hacktok.ui.mainDashboard.component
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Send
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun WhatsNewBar(
-    onSearch: (String) -> Unit,
-    onPickImage: () -> Unit,
-    onTakePhoto: () -> Unit,
-    onVoiceInput: () -> Unit,
-    onLocation: () -> Unit
+    query: String,
+    onQueryChange: (String) -> Unit,
+    upload: () -> Unit
 ) {
-    var query by remember { mutableStateOf("") }
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
-        BasicTextField( // ✅ Dùng BasicTextField để loại bỏ màu nền
-            value = query,
-            onValueChange = { query = it },
-            decorationBox = { innerTextField ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp)
-                        .padding(8.dp)
-                ) {
-                    if (query.isEmpty()) {
-                        Text("What's new...", color = Color.Gray)
-                    }
-                    innerTextField()
-                }
-            }
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onPickImage) {
-                Icon(Icons.Filled.Image, contentDescription = "Chọn ảnh")
-            }
+            BasicTextField(
+                value = query,
+                onValueChange = { onQueryChange(it) },
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 8.dp),
+                textStyle = TextStyle(
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = MaterialTheme.typography.bodyLarge.fontSize
+                ),
+                decorationBox = { innerTextField ->
+                    Column {
+                        innerTextField()
+                        if (query.isEmpty()) {
+                            Text(
+                                text = "What's happening?",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
+                        HorizontalDivider(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 4.dp),
+                            color = MaterialTheme.colorScheme.outline,
+                            thickness = 1.dp
+                        )
+                    }
+                },
+                singleLine = true
+            )
 
-            IconButton(onClick = onTakePhoto) {
-                Icon(Icons.Filled.CameraAlt, contentDescription = "Chụp ảnh")
-            }
-
-            IconButton(onClick = onVoiceInput) {
-                Icon(Icons.Filled.Mic, contentDescription = "Voice Input")
-            }
-
-            IconButton(onClick = onLocation) {
-                Icon(Icons.Filled.LocationOn, contentDescription = "Định vị")
+            IconButton(
+                onClick = { if (query.isNotEmpty()) upload() },
+                enabled = query.isNotEmpty(),
+                modifier = Modifier.size(36.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Send,
+                    contentDescription = "Post",
+                    tint = if (query.isNotEmpty()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                )
             }
         }
-        Divider(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            color = Color.Gray.copy(alpha = 0.3f), // ✅ Màu xám nhạt
-            thickness = 0.5.dp // ✅ Độ dày mỏng
+
+        Spacer(modifier = Modifier.height(30.dp))
+
+        HorizontalDivider(
+            modifier = Modifier.fillMaxWidth(),
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+            thickness = 2.dp,
         )
     }
 }

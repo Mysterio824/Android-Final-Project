@@ -8,21 +8,30 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.androidfinalproject.hacktok.model.MockData
+import com.androidfinalproject.hacktok.ui.adminManage.AdminManagementScreen
+import com.androidfinalproject.hacktok.ui.adminManage.AdminManagementState
 import com.androidfinalproject.hacktok.ui.auth.LoginScreen
 import com.androidfinalproject.hacktok.ui.auth.LoginState
-import com.androidfinalproject.hacktok.ui.profile.UserProfileScreen
+import com.androidfinalproject.hacktok.ui.commentStatistic.CommentStatisticsScreen
+import com.androidfinalproject.hacktok.ui.commentStatistic.CommentStatisticsState
+import com.androidfinalproject.hacktok.ui.commentStatistic.CommentStatisticsViewModel
 import com.androidfinalproject.hacktok.ui.post.PostDetailScreen
 import com.androidfinalproject.hacktok.ui.post.PostDetailState
 import com.androidfinalproject.hacktok.ui.search.SearchDashboardScreen
 import com.androidfinalproject.hacktok.ui.search.SearchUiState
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
-import org.bson.types.ObjectId
 import com.androidfinalproject.hacktok.ui.mainDashboard.DashboardScreen
 import com.androidfinalproject.hacktok.ui.currentProfile.CurrentProfileScreen
-import com.androidfinalproject.hacktok.ui.adminManage.AdminManagementViewModel
-import com.androidfinalproject.hacktok.ui.adminManage.components.AdminManagementScreen
+import com.androidfinalproject.hacktok.ui.editProfile.EditProfileScreen
+import com.androidfinalproject.hacktok.ui.editProfile.EditProfileState
+import com.androidfinalproject.hacktok.ui.mainDashboard.DashboardState
+import com.androidfinalproject.hacktok.ui.messageDashboard.MessageDashboardScreen
+import com.androidfinalproject.hacktok.ui.messageDashboard.MessageDashboardState
+import com.androidfinalproject.hacktok.ui.userStatistic.UserStatisticsScreen
+import com.androidfinalproject.hacktok.ui.userStatistic.UserStatisticsState
 
 @Preview(showBackground = true)
 @Composable
@@ -71,7 +80,20 @@ private fun LoginScreenPreview() {
 @Preview(showBackground = true)
 @Composable
 fun PreviewDashboardScreen() {
-    DashboardScreen()
+    MainAppTheme {
+        Box(
+            modifier = Modifier
+                .width(400.dp)
+                .height(800.dp)
+        ) {
+            DashboardScreen(
+                state = DashboardState(
+                    posts = MockData.mockPosts
+                ),
+                onAction = {}
+            )
+        }
+    }
 }
 
 @Preview(showBackground = true)
@@ -84,11 +106,10 @@ private fun PostDetailScreenPreview() {
                 .height(800.dp)
         ) {
             PostDetailScreen(
-                postId = ObjectId(),
+                postId = "",
                 state = PostDetailState(
                     post = MockData.mockPosts.first(),
-                    comments = MockData.mockComments,
-                    isCommentsVisible = true
+                    comments = MockData.mockComments
                 ),
                 onAction = {},
             )
@@ -98,24 +119,42 @@ private fun PostDetailScreenPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun UserProfilePreview() {
+fun EditUserPreview() {
     MainAppTheme {
         Box(
             modifier = Modifier
                 .width(400.dp)
                 .height(800.dp)
         ) {
-            val samplePosts = MockData.mockPosts
+            val user = MockData.mockUsers.first()
 
-            UserProfileScreen(
-                user = MockData.mockUsers.first(),
-                posts = samplePosts,
-                isFriend = false,
-                isBlocked = false,
-                onSendFriendRequest = {},
-                onUnfriend = {},
-                onChat = {},
-                onBlock = {},
+            EditProfileScreen(
+                state = EditProfileState(
+                    username = user.username,
+                    fullName = user.fullName ?: "Unknown",
+                    email = user.email,
+                    bio = user.bio ?: "",
+                    role = user.role,
+                    errorState = emptyMap()
+                ),
+                onAction = {}
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+fun UserStatisticScreenReview() {
+    MainAppTheme {
+        Box(
+            modifier = Modifier
+                .width(400.dp)
+                .height(800.dp)
+        ) {
+            UserStatisticsScreen(
+                state = MockData.sampleUserStatisticsState,
+                onAction = {}
             )
         }
     }
@@ -154,7 +193,55 @@ fun AdminManagementScreenPreview() {
                 .height(800.dp)
         ) {
             AdminManagementScreen(
-                viewModel = AdminManagementViewModel()
+                state = AdminManagementState(
+                    selectedTab = 3
+                ),
+                onAction = {},
+                modifier = Modifier
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ChatHomeScreenPreview() {
+    MainAppTheme {
+        Box(
+            modifier = Modifier
+                .width(400.dp)
+                .height(800.dp)
+        ) {
+            MessageDashboardScreen(
+                state = MessageDashboardState(
+                    userList = MockData.mockUsers,
+
+                ),
+                onAction = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun CommentStatisticScreenPreview() {
+    val mockState = CommentStatisticsState(
+        isLoading = false,
+        dailyComments = 12,
+        monthlyComments = 320,
+        yearlyComments = 4021,
+        bannedComments = 18
+    )
+    MainAppTheme {
+        Box(
+            modifier = Modifier
+                .width(400.dp)
+                .height(800.dp)
+        ) {
+            CommentStatisticsScreen(
+                state = mockState,
+                onRefresh = {},
             )
         }
     }

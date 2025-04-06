@@ -13,7 +13,10 @@ import com.androidfinalproject.hacktok.ui.auth.LoginAction
 import com.androidfinalproject.hacktok.ui.auth.LoginState
 
 @Composable
-fun AuthToggle(state: LoginState, onAction: (LoginAction) -> Unit) {
+fun AuthToggle(
+    state: LoginState,
+    onAction: (LoginAction) -> Unit
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center,
