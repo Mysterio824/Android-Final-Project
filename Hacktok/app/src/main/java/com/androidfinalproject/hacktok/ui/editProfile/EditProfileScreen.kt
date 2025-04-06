@@ -8,13 +8,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.androidfinalproject.hacktok.model.UserRole
-import com.androidfinalproject.hacktok.ui.messageDashboard.component.ProfileImage
+import com.androidfinalproject.hacktok.ui.mainDashboard.messageDashboard.component.ProfileImage
 import com.androidfinalproject.hacktok.ui.editProfile.component.CustomTextField
 import com.androidfinalproject.hacktok.ui.editProfile.component.DropdownField
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.androidfinalproject.hacktok.model.MockData
+import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 
 @Composable
 fun EditProfileScreen(
@@ -102,6 +105,32 @@ fun EditProfileScreen(
             ) {
                 Text("Save")
             }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun EditUserPreview() {
+    MainAppTheme {
+        Box(
+            modifier = Modifier
+                .width(400.dp)
+                .height(800.dp)
+        ) {
+            val user = MockData.mockUsers.first()
+
+            EditProfileScreen(
+                state = EditProfileState(
+                    username = user.username,
+                    fullName = user.fullName ?: "Unknown",
+                    email = user.email,
+                    bio = user.bio ?: "",
+                    role = user.role,
+                    errorState = emptyMap()
+                ),
+                onAction = {}
+            )
         }
     }
 }

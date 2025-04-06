@@ -9,7 +9,7 @@ import org.bson.types.ObjectId
 
 @Composable
 fun FriendListScreenRoot(
-    viewModel: FriendListViewModel = viewModel(),
+    viewModel: FriendListViewModel,
     onNavigateBack: () -> Unit,
     onChatWithFriend: (User) -> Unit,
     onUserProfileView: (User) -> Unit

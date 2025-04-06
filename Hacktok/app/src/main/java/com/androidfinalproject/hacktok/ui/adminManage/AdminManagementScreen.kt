@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.androidfinalproject.hacktok.ui.adminManage.commentManagement.*
 import com.androidfinalproject.hacktok.ui.adminManage.postManagement.PostManagementTabRoot
@@ -17,6 +18,7 @@ import com.androidfinalproject.hacktok.ui.adminManage.reportManagement.ReportMan
 import com.androidfinalproject.hacktok.ui.adminManage.reportManagement.ReportManagementViewModel
 import com.androidfinalproject.hacktok.ui.adminManage.userManagement.UserManagementTabRoot
 import com.androidfinalproject.hacktok.ui.adminManage.userManagement.UserManagementViewModel
+import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 
 @Composable
 fun AdminManagementScreen(
@@ -86,6 +88,27 @@ fun AdminManagementScreen(
             )
             3 -> ReportManagementTabRoot(
                 viewModel = ReportManagementViewModel()
+            )
+        }
+    }
+}
+
+
+@Preview(showBackground = true)
+@Composable
+fun AdminManagementScreenPreview() {
+    MainAppTheme {
+        Box(
+            modifier = Modifier
+                .width(400.dp)
+                .height(800.dp)
+        ) {
+            AdminManagementScreen(
+                state = AdminManagementState(
+                    selectedTab = 3
+                ),
+                onAction = {},
+                modifier = Modifier
             )
         }
     }

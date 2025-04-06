@@ -16,8 +16,11 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.androidfinalproject.hacktok.model.MockData
+import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 import com.androidfinalproject.hacktok.ui.userStatistic.component.*
 
 @Composable
@@ -138,6 +141,24 @@ fun UserStatisticsScreen(
                     DetailedDataCard(state.userStats)
                 }
             }
+        }
+    }
+}
+
+
+@Preview
+@Composable
+fun UserStatisticScreenReview() {
+    MainAppTheme {
+        Box(
+            modifier = Modifier
+                .width(400.dp)
+                .height(800.dp)
+        ) {
+            UserStatisticsScreen(
+                state = MockData.sampleUserStatisticsState,
+                onAction = {}
+            )
         }
     }
 }
