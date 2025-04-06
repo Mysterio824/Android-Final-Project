@@ -8,14 +8,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.ui.adminManage.AdminManagementScreen
 import com.androidfinalproject.hacktok.ui.adminManage.AdminManagementState
 import com.androidfinalproject.hacktok.ui.auth.LoginScreen
 import com.androidfinalproject.hacktok.ui.auth.LoginState
-import com.androidfinalproject.hacktok.ui.commentStatistic.CommentStatistics
 import com.androidfinalproject.hacktok.ui.commentStatistic.CommentStatisticsScreen
+import com.androidfinalproject.hacktok.ui.commentStatistic.CommentStatisticsState
+import com.androidfinalproject.hacktok.ui.commentStatistic.CommentStatisticsViewModel
 import com.androidfinalproject.hacktok.ui.post.PostDetailScreen
 import com.androidfinalproject.hacktok.ui.post.PostDetailState
 import com.androidfinalproject.hacktok.ui.search.SearchDashboardScreen
@@ -224,6 +226,13 @@ fun ChatHomeScreenPreview() {
 @Preview(showBackground = true)
 @Composable
 fun CommentStatisticScreenPreview() {
+    val mockState = CommentStatisticsState(
+        isLoading = false,
+        dailyComments = 12,
+        monthlyComments = 320,
+        yearlyComments = 4021,
+        bannedComments = 18
+    )
     MainAppTheme {
         Box(
             modifier = Modifier
@@ -231,12 +240,8 @@ fun CommentStatisticScreenPreview() {
                 .height(800.dp)
         ) {
             CommentStatisticsScreen(
-                statistics = CommentStatistics(
-                    dailyComments = 100,
-                    monthlyComments = 2000,
-                    yearlyComments = 100000,
-                    bannedComments = 0
-                )
+                state = mockState,
+                onRefresh = {},
             )
         }
     }
