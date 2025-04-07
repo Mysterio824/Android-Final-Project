@@ -16,6 +16,7 @@ import com.androidfinalproject.hacktok.ui.mainDashboard.messageDashboard.Message
 import com.androidfinalproject.hacktok.ui.mainDashboard.messageDashboard.MessageDashboardViewModel
 import com.androidfinalproject.hacktok.ui.mainDashboard.search.SearchViewModel
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
+import androidx.activity.compose.BackHandler
 
 
 @Composable
@@ -23,7 +24,9 @@ fun DashboardScreen(
     state: DashboardState,
     onAction: (DashboardAction) -> Unit
 ) {
-    val userId: String = ""
+    BackHandler {
+        onAction(DashboardAction.OnNavigateBack)
+    }
     Scaffold(
         bottomBar = {
             BottomNavigationBar(
@@ -69,7 +72,7 @@ fun DashboardScreen(
 
                 "Profile" -> {
                     CurrentProfileScreenRoot(
-                        viewModel = CurrentProfileViewModel(userId),
+                        viewModel = CurrentProfileViewModel(state.user.id!!),
                         onFriendListNavigation = { id -> onAction(DashboardAction.OnFriendListNavigate(id)) },
                         onPostClickNavigation = { id -> onAction(DashboardAction.OnPostClick(id)) },
                         onProfileEditNavigation = { onAction(DashboardAction.OnEditProfileNavigate) },

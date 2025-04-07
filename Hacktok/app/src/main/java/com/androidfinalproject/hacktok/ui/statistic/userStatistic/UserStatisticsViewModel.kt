@@ -1,7 +1,8 @@
-package com.androidfinalproject.hacktok.ui.userStatistic
+package com.androidfinalproject.hacktok.ui.statistic.userStatistic
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.androidfinalproject.hacktok.model.MockData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,7 +27,7 @@ class UserStatisticsViewModel : ViewModel() {
             is UserStatisticsAction.SelectTimeframe -> updateTimeframe(action.timeframe)
             is UserStatisticsAction.SetDateRange -> updateDateRange(action.startDate, action.endDate)
             is UserStatisticsAction.RefreshData -> refreshData()
-            UserStatisticsAction.NavigateBack -> TODO()
+            else -> {}
         }
     }
 
@@ -34,30 +35,16 @@ class UserStatisticsViewModel : ViewModel() {
         _state.update { it.copy(isLoading = true, error = null) }
         viewModelScope.launch {
             try {
-                // Simulate API call with delay
                 kotlinx.coroutines.delay(1000)
 
-                // Generate mock data based on current timeframe
-                val mockData = generateMockData(_state.value.timeframe, _state.value.startDate, _state.value.endDate)
-
-                // Calculate total users and new users in period
-                val totalUsers = 5000 // Mock total users
-                val newUsersInPeriod = mockData.sumOf { it.count }
-
-                // Calculate percent change (mock data)
-                val previousPeriodUsers = 420 // Mock previous period new users
-                val percentChange = if (previousPeriodUsers > 0) {
-                    ((newUsersInPeriod - previousPeriodUsers).toFloat() / previousPeriodUsers) * 100
-                } else {
-                    0f
-                }
+                val mockData = MockData.createMockUserStatisticsState()
 
                 _state.update { it.copy(
                     isLoading = false,
-                    userStats = mockData,
-                    totalUsers = totalUsers,
-                    newUsersInPeriod = newUsersInPeriod,
-                    percentChange = percentChange
+                    userStats = mockData.userStats,
+                    totalUsers = mockData.totalUsers,
+                    newUsersInPeriod = mockData.newUsersInPeriod,
+                    percentChange = mockData.percentChange
                 ) }
             } catch (e: Exception) {
                 _state.update { it.copy(isLoading = false, error = e.message) }

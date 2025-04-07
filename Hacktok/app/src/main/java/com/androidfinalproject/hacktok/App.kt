@@ -7,25 +7,20 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.androidfinalproject.hacktok.router.graph.adminNavigation
 import com.androidfinalproject.hacktok.router.graph.authNavigation
-import com.androidfinalproject.hacktok.router.routes.MainRoute
 import com.androidfinalproject.hacktok.router.graph.mainNavigation
-import com.androidfinalproject.hacktok.router.routes.AdminRoute
-import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
+import com.androidfinalproject.hacktok.router.routes.AuthRoute
 
 @Composable
 @Preview
 fun App() {
-    MainAppTheme {
-        val navController = rememberNavController()
-        Log.d("Navigation", "Starting at: ${MainRoute.Graph.route}")
-        NavHost(
-            navController = navController,
-            startDestination = AdminRoute.Graph.route
-        ) {
-            authNavigation(navController)
-            adminNavigation(navController)
-            mainNavigation(navController)
-        }
-
+    val navController = rememberNavController()
+    Log.d("Navigation", "Starting at: ${AuthRoute.Graph.route}")
+    NavHost(
+        navController = navController,
+        startDestination = AuthRoute.Graph.route
+    ) {
+        authNavigation(navController)
+        adminNavigation(navController)
+        mainNavigation(navController)
     }
 }

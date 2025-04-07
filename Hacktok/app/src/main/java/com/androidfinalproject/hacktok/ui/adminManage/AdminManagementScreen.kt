@@ -11,7 +11,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.activity.compose.BackHandler
 import com.androidfinalproject.hacktok.ui.adminManage.commentManagement.*
+import com.androidfinalproject.hacktok.ui.adminManage.component.AdminTabBar
 import com.androidfinalproject.hacktok.ui.adminManage.postManagement.PostManagementTabRoot
 import com.androidfinalproject.hacktok.ui.adminManage.postManagement.PostManagementViewModel
 import com.androidfinalproject.hacktok.ui.adminManage.reportManagement.ReportManagementTabRoot
@@ -26,7 +28,9 @@ fun AdminManagementScreen(
     onAction: (AdminManagementAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val tabs = listOf("Users", "Posts", "Comments", "Reports")
+    BackHandler {
+        onAction(AdminManagementAction.OnNavigateBack)
+    }
 
     Column(
         modifier = modifier
@@ -49,7 +53,7 @@ fun AdminManagementScreen(
             )
             IconButton(
                 onClick = { onAction(AdminManagementAction.NavigateToStatistics) },
-                modifier = Modifier.size(36.dp) // Compact size for balance
+                modifier = Modifier.size(36.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.BarChart,
@@ -59,34 +63,22 @@ fun AdminManagementScreen(
             }
         }
 
-        TabRow(
-            selectedTabIndex = state.selectedTab,
-            containerColor = MaterialTheme.colorScheme.surface,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            tabs.forEachIndexed { index, title ->
-                Tab(
-                    text = { Text(title) },
-                    selected = state.selectedTab == index,
-                    onClick = { onAction(AdminManagementAction.SelectTab(index)) },
-                    modifier = Modifier
-                        .weight(1f) // Distribute space evenly
-                        .widthIn(min = 100.dp) // Minimum width to fit "Comments"
-                )
-            }
-        }
+        AdminTabBar(
+            currentScreen = state.selectedTab,
+            onItemSelected = { tab -> onAction(AdminManagementAction.SelectTab(tab)) }
+        )
 
         when (state.selectedTab) {
-            0 -> UserManagementTabRoot(
+            "Users" -> UserManagementTabRoot(
                 viewModel = UserManagementViewModel()
             )
-            1 -> PostManagementTabRoot(
+            "Posts" -> PostManagementTabRoot(
                 viewModel = PostManagementViewModel()
             )
-            2 -> CommentManagementTabRoot(
+            "Comments" -> CommentManagementTabRoot(
                 viewModel = CommentManagementViewModel()
             )
-            3 -> ReportManagementTabRoot(
+            "Reports" -> ReportManagementTabRoot(
                 viewModel = ReportManagementViewModel()
             )
         }
@@ -105,7 +97,7 @@ fun AdminManagementScreenPreview() {
         ) {
             AdminManagementScreen(
                 state = AdminManagementState(
-                    selectedTab = 3
+                    selectedTab = "Posts"
                 ),
                 onAction = {},
                 modifier = Modifier

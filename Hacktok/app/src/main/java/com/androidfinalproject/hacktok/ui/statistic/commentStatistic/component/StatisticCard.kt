@@ -1,4 +1,4 @@
-package com.androidfinalproject.hacktok.ui.commentStatistic.component
+package com.androidfinalproject.hacktok.ui.statistic.commentStatistic.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row

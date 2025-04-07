@@ -1,4 +1,4 @@
-package com.androidfinalproject.hacktok.ui.commentStatistic
+package com.androidfinalproject.hacktok.ui.statistic.commentStatistic
 
 data class CommentStatisticsState (
     val dailyComments: Int = 0,

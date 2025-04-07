@@ -1,7 +1,8 @@
-package com.androidfinalproject.hacktok.ui.commentStatistic
+package com.androidfinalproject.hacktok.ui.statistic.commentStatistic
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.androidfinalproject.hacktok.ui.statistic.StatisticsAction
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,7 +20,14 @@ class CommentStatisticsViewModel : ViewModel() {
         loadStatistics()
     }
 
-    fun refreshStatistics() {
+    fun onAction(action: CommentStatisticsAction) {
+        when(action) {
+            is CommentStatisticsAction.RefreshData -> refreshStatistics()
+            is CommentStatisticsAction.NavigateBack -> {}
+        }
+    }
+
+    private fun refreshStatistics() {
         loadStatistics()
     }
 

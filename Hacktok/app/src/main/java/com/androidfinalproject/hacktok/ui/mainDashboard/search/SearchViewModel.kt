@@ -1,13 +1,7 @@
 package com.androidfinalproject.hacktok.ui.mainDashboard.search
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.androidfinalproject.hacktok.model.MockData
-import com.androidfinalproject.hacktok.model.Post
-import com.androidfinalproject.hacktok.model.User
-import com.androidfinalproject.hacktok.ui.friendList.FriendListState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

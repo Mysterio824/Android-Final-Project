@@ -13,11 +13,24 @@ fun AdminManagementScreenRoot(
     onPostNavigation: () -> Unit,
     onCommentNavigation: () -> Unit,
     onReportNavigation: () -> Unit,
+    onStatisticNavigation: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     AdminManagementScreen(
         state = state,
-        onAction = viewModel::onAction,
+        onAction = { action ->
+            when(action) {
+                is AdminManagementAction.NavigateToStatistics
+                    -> onStatisticNavigation()
+
+                is AdminManagementAction.OnNavigateBack
+                    -> System.exit(0)
+
+                else -> viewModel.onAction(action)
+            }
+
+        }
+
     )
 }

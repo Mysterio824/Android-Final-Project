@@ -9,4 +9,5 @@ sealed class DashboardAction {
     data class OnFriendListNavigate(val userId: String) : DashboardAction()
     data object OnEditProfileNavigate : DashboardAction()
     data class OnPostEditNavigate(val postId: String) : DashboardAction()
+    object OnNavigateBack : DashboardAction()
 }
