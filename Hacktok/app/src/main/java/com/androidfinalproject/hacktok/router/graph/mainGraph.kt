@@ -131,11 +131,7 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
             val userId = backStackEntry.arguments?.getString("userId")
 
             UserProfileScreenRoot(
-                viewModel = UserProfileViewModel(),
-                userId = userId,
-                onBlockUser = { blockUserId ->
-                    // Handle blocking user logic
-                },
+                viewModel = UserProfileViewModel(userId!!),
                 onChatWithFriend = { friendId ->
                     navController.navigate("${MainRoute.ChatRoom.route}/user/$friendId")
                 },

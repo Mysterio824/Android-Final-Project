@@ -8,34 +8,22 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun UserProfileScreenRoot(
-    viewModel: UserProfileViewModel = viewModel(),
-    userId: String?,
-    onBlockUser: (String?) -> Unit,
+    viewModel: UserProfileViewModel,
     onChatWithFriend: (String?) -> Unit,
     onGoToPost: (String?) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    // Load the profile based on userId
-    LaunchedEffect(userId) {
-        viewModel.loadUserProfile(userId)
-    }
-
-    if (state.user != null) {
-        UserProfileScreen(
-            user = state.user!!,
-            posts = state.posts,
-            isFriend = state.isFriend,
-            isBlocked = state.isBlocked,
-            onSendFriendRequest = { viewModel.onAction(UserProfileAction.AddFriend(userId)) },
-            onUnfriend = { viewModel.onAction(UserProfileAction.Unfriend(userId)) },
-            onChat = { onChatWithFriend(userId) },
-            onBlock = { onBlockUser(userId) }
-        )
-    } else if (state.isLoading) {
-        // Show loading UI
-    } else if (state.error != null) {
-        // Show error UI
-    }
+    UserProfileScreen(
+        state = state,
+        onAction = { action ->
+            when(action) {
+                is UserProfileAction.ChatWithFriend -> onChatWithFriend(state.user!!.id!!)
+                is UserProfileAction.GoToPost -> onGoToPost(action.postId)
+                is UserProfileAction.NavigateBack -> onNavigateBack()
+                else -> viewModel.onAction(action)
+            }
+        }
+    )
 }

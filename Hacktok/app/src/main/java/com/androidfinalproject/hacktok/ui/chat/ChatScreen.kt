@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import com.androidfinalproject.hacktok.model.Message
 import java.util.*
 import com.androidfinalproject.hacktok.model.User
+import com.androidfinalproject.hacktok.ui.chat.component.ChatBubble
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 import com.androidfinalproject.hacktok.ui.currentProfile.component.MessageInput
 import com.androidfinalproject.hacktok.ui.currentProfile.component.ChatTopBar
@@ -70,76 +71,6 @@ fun ChatScreen(
                     }
                 }
             )
-        }
-    }
-}
-
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun ChatBubble(
-    message: Message,
-    isCurrentUser: Boolean,
-    onDeleteMessage: (String?) -> Unit
-) {
-    var showTime by remember { mutableStateOf(false) }
-    var showMenu by remember { mutableStateOf(false) }
-    val clipboardManager = LocalClipboardManager.current
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-            .combinedClickable(
-                onClick = { showTime = !showTime }, // Nhấn để hiển thị thời gian
-                onLongClick = { showMenu = true } // Nhấn giữ để mở menu
-            ),
-        contentAlignment = if (isCurrentUser) Alignment.CenterEnd else Alignment.CenterStart
-    ) {
-        Box(
-            modifier = Modifier
-                .background(
-                    color = if (isCurrentUser) Color.Blue else Color.Gray,
-                    shape = RoundedCornerShape(8.dp)
-                )
-                .padding(12.dp)
-        ) {
-            Column {
-                Text(
-                    text = message.content,
-                    color = Color.White
-                )
-                if (showTime) {
-                    Text(
-                        text = message.createdAt.toString(),
-                        color = Color.White.copy(alpha = 0.7f),
-                        style = MaterialTheme.typography.caption
-                    )
-                }
-            }
-        }
-
-        // Toggle menu khi nhấn giữ tin nhắn
-        DropdownMenu(
-            expanded = showMenu,
-            onDismissRequest = { showMenu = false }
-        ) {
-            DropdownMenuItem(
-                onClick = {
-                    clipboardManager.setText(AnnotatedString(message.content)) // Copy tin nhắn
-                    showMenu = false
-                }
-            ) {
-                Text("Copy")
-            }
-            DropdownMenuItem(
-                onClick = {
-                    message.id?.let { onDeleteMessage(it) } // Xóa tin nhắn
-                    showMenu = false
-                }
-            ) {
-                Text("Delete", color = Color.Red)
-            }
         }
     }
 }

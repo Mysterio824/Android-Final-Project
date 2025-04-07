@@ -11,12 +11,11 @@ import androidx.compose.ui.unit.dp
 import com.androidfinalproject.hacktok.ui.mainDashboard.currentProfile.CurrentProfileScreenRoot
 import com.androidfinalproject.hacktok.ui.mainDashboard.currentProfile.CurrentProfileViewModel
 import com.androidfinalproject.hacktok.ui.mainDashboard.home.HomeScreenRoot
-import com.androidfinalproject.hacktok.ui.mainDashboard.home.HomeScreenViewModel
 import com.androidfinalproject.hacktok.ui.mainDashboard.messageDashboard.MessageDashboardRoot
 import com.androidfinalproject.hacktok.ui.mainDashboard.messageDashboard.MessageDashboardViewModel
-import com.androidfinalproject.hacktok.ui.mainDashboard.search.SearchViewModel
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 import androidx.activity.compose.BackHandler
+import com.androidfinalproject.hacktok.ui.mainDashboard.watchLater.WatchLaterScreenRoot
 
 
 @Composable
@@ -43,7 +42,6 @@ fun DashboardScreen(
             when (state.selectedTab) {
                 "Home" -> {
                     HomeScreenRoot(
-                        viewModel = HomeScreenViewModel(),
                         onUserClick = { id -> onAction(DashboardAction.OnUserClick(id)) },
                         onPostClick = { id -> onAction(DashboardAction.OnPostClick(id)) }
                     )
@@ -51,7 +49,6 @@ fun DashboardScreen(
 
                 "Search" -> {
                     SearchDashboardScreenRoot(
-                        viewModel = SearchViewModel(),
                         onUserClick = { id -> onAction(DashboardAction.OnUserClick(id!!)) },
                         onPostClick = { id -> onAction(DashboardAction.OnPostClick(id!!)) }
                     )
@@ -67,7 +64,10 @@ fun DashboardScreen(
                 }
 
                 "WatchLater" -> {
-                    Text("Watch Later", modifier = Modifier.padding(16.dp))
+                    WatchLaterScreenRoot(
+                        onPostClickNavigation = { id -> onAction(DashboardAction.OnPostClick(id)) },
+                        onUserProfileNavigate = { id -> onAction(DashboardAction.OnUserClick(id)) }
+                    )
                 }
 
                 "Profile" -> {

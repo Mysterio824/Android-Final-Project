@@ -1,54 +1,100 @@
 package com.androidfinalproject.hacktok.ui.mainDashboard.home
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.ui.mainDashboard.home.component.WhatsNewBar
 import com.androidfinalproject.hacktok.ui.post.component.PostContent
+import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 
 @Composable
 fun HomeScreen(
     state: HomeScreenState,
     onAction: (HomeScreenAction) -> Unit
 ) {
-    WhatsNewBar(
-        query = state.query,
-        onQueryChange = { text -> onAction(HomeScreenAction.UpdateStatusText(text)) },
-        upload = { onAction(HomeScreenAction.UploadPost) }
-    )
+    Column {
+        WhatsNewBar(
+            query = state.query,
+            onQueryChange = { text -> onAction(HomeScreenAction.UpdateStatusText(text)) },
+            upload = { onAction(HomeScreenAction.UploadPost) }
+        )
 
-    if (state.isLoading) {
-        CircularProgressIndicator(modifier = Modifier.fillMaxSize())
-    } else {
-        LazyColumn {
-            items(state.posts) { post ->
-                PostContent(
-                    post = post,
-                    onLikeClick = {
-                        onAction(HomeScreenAction.LikePost(post.id.toString()))
-                    },
-                    onCommentClick = {
-                        onAction(HomeScreenAction.OnPostClick(post.id.toString()))
-                    },
-                    onShareClick = {
-                        onAction(HomeScreenAction.SharePost(post.id.toString()))
-                    },
-                    onUserClick = {
-                        onAction(HomeScreenAction.OnUserClick(post.userId))
-                    }
-                )
-                HorizontalDivider(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    color = MaterialTheme.colorScheme.outlineVariant
-                )
+        when {
+            state.isLoading -> {
+                CircularProgressIndicator()
             }
+            state.error != null -> {
+                Text(text = state.error)
+            }
+            state.posts.isEmpty() -> {
+                Text(text = "No posts available")
+            }
+            else -> {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    contentPadding = PaddingValues(vertical = 8.dp)
+                ) {
+                    items(state.posts) { post ->
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RectangleShape
+                        ) {
+                            PostContent(
+                                post = post,
+                                onLikeClick = {
+                                    onAction(HomeScreenAction.LikePost(post.id.toString()))
+                                },
+                                onCommentClick = {
+                                    onAction(HomeScreenAction.OnPostClick(post.id.toString()))
+                                },
+                                onShareClick = {
+                                    onAction(HomeScreenAction.SharePost(post.id.toString()))
+                                },
+                                onUserClick = {
+                                    onAction(HomeScreenAction.OnUserClick(post.userId))
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun WatchLaterScreenPreview() {
+    MainAppTheme {
+        Box(
+            modifier = Modifier
+                .width(400.dp)
+                .height(800.dp)
+        ) {
+            HomeScreen(
+                state = HomeScreenState(
+                    posts = MockData.mockPosts
+                ),
+                onAction = {}
+            )
         }
     }
 }
