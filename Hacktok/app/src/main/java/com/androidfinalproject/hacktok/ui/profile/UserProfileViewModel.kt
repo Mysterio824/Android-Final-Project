@@ -9,15 +9,19 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class UserProfileViewModel : ViewModel() {
+class UserProfileViewModel(userId : String) : ViewModel() {
     private val _state = MutableStateFlow(UserProfileState())
     val state: StateFlow<UserProfileState> = _state.asStateFlow()
 
+    init {
+        loadUserProfile(userId)
+    }
+
     fun onAction(action: UserProfileAction) {
         when (action) {
-            is UserProfileAction.AddFriend -> addFriend(action.userId)
-            is UserProfileAction.Unfriend -> unfriend(action.userId)
-            is UserProfileAction.BlockUser -> blockUser(action.userId)
+            is UserProfileAction.AddFriend -> addFriend(state.value.user!!.id)
+            is UserProfileAction.Unfriend -> unfriend(state.value.user!!.id)
+            is UserProfileAction.BlockUser -> blockUser(state.value.user!!.id)
             is UserProfileAction.RefreshProfile -> loadProfile()
             else -> {}
         }

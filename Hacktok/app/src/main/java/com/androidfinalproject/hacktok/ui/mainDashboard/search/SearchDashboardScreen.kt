@@ -136,7 +136,7 @@ fun SearchDashboardScreenPreview() {
                 .height(800.dp)
         ) {
             val previewState = SearchUiState(
-                selectedTabIndex = 2,
+                selectedTabIndex = 0,
                 users = MockData.mockUsers,
                 filteredUsers = MockData.mockUsers,
                 posts = MockData.mockPosts,

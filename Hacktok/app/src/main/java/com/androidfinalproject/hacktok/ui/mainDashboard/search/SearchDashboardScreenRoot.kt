@@ -1,6 +1,7 @@
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.ui.mainDashboard.search.SearchAction
@@ -9,7 +10,7 @@ import com.androidfinalproject.hacktok.ui.mainDashboard.search.SearchViewModel
 
 @Composable
 fun SearchDashboardScreenRoot(
-    viewModel: SearchViewModel,
+    viewModel: SearchViewModel = viewModel(),
     onUserClick: (String?) -> Unit,
     onPostClick: (String?) -> Unit,
 ) {

@@ -23,18 +23,13 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 @Composable
-fun PostContent(
+fun PostItem(
     post: Post,
     onLikeClick: () -> Unit,
     onCommentClick: () -> Unit,
     onShareClick: () -> Unit,
     onUserClick: (String) -> Unit,
-    onSavePost: () -> Unit = {},
-    onReportPost: () -> Unit = {},
-    onHidePost: () -> Unit = {}
 ) {
-    var showMenu by remember { mutableStateOf(false) }
-
     Column(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.surface)
@@ -76,40 +71,6 @@ fun PostContent(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-            }
-
-            // More button
-            IconButton(onClick = { showMenu = true }) {
-                Icon(
-                    imageVector = Icons.Default.MoreVert,
-                    contentDescription = "More options"
-                )
-                DropdownMenu(
-                    expanded = showMenu,
-                    onDismissRequest = { showMenu = false }
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("Save Post") },
-                        onClick = {
-                            onSavePost()
-                            showMenu = false
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Hide Post") },
-                        onClick = {
-                            onHidePost()
-                            showMenu = false
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Report Post") },
-                        onClick = {
-                            onReportPost()
-                            showMenu = false
-                        }
-                    )
-                }
             }
         }
 

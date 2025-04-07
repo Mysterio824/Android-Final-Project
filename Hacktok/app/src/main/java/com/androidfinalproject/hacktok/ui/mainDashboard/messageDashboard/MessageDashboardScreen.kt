@@ -11,12 +11,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.ui.mainDashboard.messageDashboard.component.UserSelection
 import com.androidfinalproject.hacktok.ui.mainDashboard.messageDashboard.component.ActionButton
 import com.androidfinalproject.hacktok.ui.mainDashboard.messageDashboard.component.SearchBar
 import com.androidfinalproject.hacktok.ui.mainDashboard.messageDashboard.component.ChatList
+import com.androidfinalproject.hacktok.ui.mainDashboard.watchLater.WatchLaterScreen
+import com.androidfinalproject.hacktok.ui.mainDashboard.watchLater.WatchLaterState
+import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 
 @Composable
 fun MessageDashboardScreen (
@@ -73,5 +78,24 @@ fun MessageDashboardScreen (
             ),
             onAction = onAction
         )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MessageDashboardScreenPreview() {
+    MainAppTheme {
+        Box(
+            modifier = Modifier
+                .width(400.dp)
+                .height(800.dp)
+        ) {
+            MessageDashboardScreen(
+                state = MessageDashboardState(
+                    userList = MockData.mockUsers
+                ),
+                onAction = {}
+            )
+        }
     }
 }
