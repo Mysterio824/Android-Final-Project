@@ -8,7 +8,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @Composable
 fun LoginScreenRoot(
     viewModel: LoginViewModel = viewModel(),
-    onLoginSuccess: () -> Unit,
+    onLoginSuccess: (Boolean) -> Unit,
     onForgetPassword: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -19,7 +19,7 @@ fun LoginScreenRoot(
             when (action) {
                 is LoginAction.Submit -> {
                     if (state.emailError == null && state.passwordError == null) {
-                        // TODO
+                        onLoginSuccess(state.email == "admin@gmail.com")
                     }
                 }
 

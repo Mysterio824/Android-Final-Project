@@ -12,6 +12,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
+import com.androidfinalproject.hacktok.router.routes.AdminRoute
 import com.androidfinalproject.hacktok.router.routes.AuthRoute
 import com.androidfinalproject.hacktok.router.routes.MainRoute
 import com.androidfinalproject.hacktok.ui.auth.LoginScreenRoot
@@ -59,10 +60,15 @@ fun NavGraphBuilder.authNavigation(navController: NavController) {
         ) {
             LoginScreenRoot(
                 viewModel = LoginViewModel(),
-                onLoginSuccess = {
-                    navController.navigate(MainRoute.Graph.route) {
-                        // Clear the back stack when logging in
-                        popUpTo(AuthRoute.Graph.route) { inclusive = true }
+                onLoginSuccess = { isAdmin ->
+                    if (isAdmin) {
+                        navController.navigate(AdminRoute.Graph.route) {
+                            popUpTo(AuthRoute.Graph.route) { inclusive = true }
+                        }
+                    } else {
+                        navController.navigate(MainRoute.Graph.route) {
+                            popUpTo(AuthRoute.Graph.route) { inclusive = true }
+                        }
                     }
                 },
                 onForgetPassword = {

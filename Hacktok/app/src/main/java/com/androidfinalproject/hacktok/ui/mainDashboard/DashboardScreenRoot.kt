@@ -16,7 +16,7 @@ fun DashboardScreenRoot(
     onGroupChatNavigate: (String?) -> Unit,
     onFriendListNavigate: (String) -> Unit,
     onEditProfileNavigate: () -> Unit,
-    onPostEditNavigate: (String) -> Unit
+    onPostEditNavigate: (String) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -28,6 +28,7 @@ fun DashboardScreenRoot(
                 is DashboardAction.OnPostClick -> onPostDetailNavigate(action.postId)
                 is DashboardAction.GotoUserChat -> onUserChatNavigate(action.userId)
                 is DashboardAction.GotoGroupChat -> onGroupChatNavigate(action.groupId)
+                is DashboardAction.OnNavigateBack -> System.exit(0)
                 else -> viewModel.onAction(action)
             }
         }

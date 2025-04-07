@@ -1,4 +1,4 @@
-package com.androidfinalproject.hacktok.ui.userStatistic.component
+package com.androidfinalproject.hacktok.ui.statistic.userStatistic.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,7 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.androidfinalproject.hacktok.ui.userStatistic.UserStatPoint
+import com.androidfinalproject.hacktok.ui.statistic.userStatistic.UserStatPoint
 
 
 @Composable

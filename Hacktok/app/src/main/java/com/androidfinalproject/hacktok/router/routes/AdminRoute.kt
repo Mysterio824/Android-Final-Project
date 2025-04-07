@@ -15,22 +15,7 @@ sealed interface AdminRoute : Route {
     }
 
     @Serializable
-    data object CommentStatistic : AdminRoute {
-        override val route = "comment_statistic"
-    }
-
-    @Serializable
-    data object ReportStatistic : AdminRoute {
-        override val route = "report_statistic"
-    }
-
-    @Serializable
-    data object UserStatistic : AdminRoute {
-        override val route = "user_statistic"
-    }
-
-    @Serializable
-    data object PostStatistic : AdminRoute {
-        override val route = "post_statistic"
+    data object Statistic : AdminRoute {
+        override val route = "statistic"
     }
 }

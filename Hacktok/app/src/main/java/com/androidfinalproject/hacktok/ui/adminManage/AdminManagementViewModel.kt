@@ -18,7 +18,7 @@ class AdminManagementViewModel : ViewModel() {
                 }
             }
 
-            is AdminManagementAction.NavigateToStatistics -> {}
+            else -> {}
         }
     }
 }

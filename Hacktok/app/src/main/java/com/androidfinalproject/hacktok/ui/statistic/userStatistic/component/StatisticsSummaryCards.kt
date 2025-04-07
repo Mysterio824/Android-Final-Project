@@ -1,4 +1,4 @@
-package com.androidfinalproject.hacktok.ui.userStatistic.component
+package com.androidfinalproject.hacktok.ui.statistic.userStatistic.component
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
@@ -6,7 +6,7 @@ import androidx.compose.ui.Modifier
 import android.annotation.SuppressLint
 import kotlin.math.abs
 import androidx.compose.ui.unit.dp
-import com.androidfinalproject.hacktok.ui.userStatistic.UserStatisticsState
+import com.androidfinalproject.hacktok.ui.statistic.userStatistic.UserStatisticsState
 
 @Composable
 fun StatisticsSummaryCards(

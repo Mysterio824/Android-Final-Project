@@ -1,4 +1,4 @@
-package com.androidfinalproject.hacktok.ui.userStatistic
+package com.androidfinalproject.hacktok.ui.statistic.userStatistic
 
 sealed class UserStatisticsAction {
     object LoadUserStatistics : UserStatisticsAction()

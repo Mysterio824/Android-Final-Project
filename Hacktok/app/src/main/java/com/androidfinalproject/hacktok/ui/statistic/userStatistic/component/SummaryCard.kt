@@ -1,4 +1,4 @@
-package com.androidfinalproject.hacktok.ui.userStatistic.component
+package com.androidfinalproject.hacktok.ui.statistic.userStatistic.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

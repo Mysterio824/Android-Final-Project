@@ -1,21 +1,21 @@
-package com.androidfinalproject.hacktok.ui.userStatistic
+package com.androidfinalproject.hacktok.ui.statistic
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
-fun UserStatisticsScreenRoot (
-    viewModel: UserStatisticsViewModel,
+fun StatisticsScreenRoot (
+    viewModel: StatisticViewModel,
     onNavigateBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    UserStatisticsScreen(
+    StatisticsScreen(
         state = state,
         onAction = { action ->
             when(action) {
-                is UserStatisticsAction.NavigateBack
+                is StatisticsAction.NavigateBack
                     -> onNavigateBack()
 
                 else -> viewModel.onAction(action)

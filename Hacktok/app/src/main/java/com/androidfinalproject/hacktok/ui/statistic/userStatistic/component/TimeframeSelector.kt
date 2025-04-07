@@ -1,4 +1,4 @@
-package com.androidfinalproject.hacktok.ui.userStatistic.component
+package com.androidfinalproject.hacktok.ui.statistic.userStatistic.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.androidfinalproject.hacktok.ui.userStatistic.Timeframe
+import com.androidfinalproject.hacktok.ui.statistic.userStatistic.Timeframe
 
 @Composable
 fun TimeframeSelector(
