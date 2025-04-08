@@ -8,17 +8,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.androidfinalproject.hacktok.ui.auth.LoginAction
-import com.androidfinalproject.hacktok.ui.auth.LoginState
+import com.androidfinalproject.hacktok.ui.auth.AuthAction
+import com.androidfinalproject.hacktok.ui.auth.AuthState
 
 
 @Composable
 fun LoginButton(
-    state: LoginState,
-    onAction: (LoginAction) -> Unit
+    state: AuthState,
+    onAction: (AuthAction) -> Unit
+
 ) {
     Button(
-        onClick = { onAction(LoginAction.Submit) },
+        onClick = { onAction(AuthAction.Submit) },
         modifier = Modifier.fillMaxWidth(),
         enabled = !state.isLoading
     ) {

@@ -1,6 +1,7 @@
 package com.androidfinalproject.hacktok.ui.auth.component
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
@@ -14,13 +15,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun PasswordInputField(
     value: String,
-    label: String,
-    isError: Boolean,
     errorText: String?,
+    isConfirm: Boolean,
     onValueChange: (String) -> Unit,
     imeAction: ImeAction,
     onImeAction: () -> Unit
@@ -30,17 +32,12 @@ fun PasswordInputField(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text(label) },
-        isError = isError,
-        supportingText = { errorText?.let { Text(it) } },
-        leadingIcon = { Icon(Icons.Default.Lock, contentDescription = label) },
-        trailingIcon = {
-            IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                Icon(
-                    imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                    contentDescription = if (passwordVisible) "Hide password" else "Show password"
-                )
-            }
+        placeholder = { Text(
+                if(isConfirm)
+                    "Password"
+                else
+                    "Confirm Password"
+            )
         },
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         keyboardOptions = KeyboardOptions(
@@ -51,6 +48,32 @@ fun PasswordInputField(
             onDone = { onImeAction() }
         ),
         modifier = Modifier.fillMaxWidth(),
-        singleLine = true
+        singleLine = true,
+        isError = errorText != null,
+        shape = RoundedCornerShape(8.dp),
+        colors = TextFieldDefaults.colors(
+            unfocusedContainerColor = Color.White,
+            focusedContainerColor = Color.White
+        ),
+        trailingIcon = {
+            IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                Icon(
+                    imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                    contentDescription = if (passwordVisible) "Hide password" else "Show password"
+                )
+            }
+        },
+
     )
+
+    if (errorText != null) {
+        Text(
+            text = errorText,
+            color = MaterialTheme.colorScheme.error,
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp)
+        )
+    }
 }

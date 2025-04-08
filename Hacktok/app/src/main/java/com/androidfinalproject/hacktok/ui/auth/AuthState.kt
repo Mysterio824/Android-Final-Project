@@ -1,6 +1,6 @@
 package com.androidfinalproject.hacktok.ui.auth
 
-data class LoginState(
+data class AuthState(
     val email: String = "",
     val password: String = "",
     val confirmPassword: String = "",
@@ -9,5 +9,5 @@ data class LoginState(
     val passwordError: String? = null,
     val confirmPasswordError: String? = null,
     val isLoading: Boolean = false,
-    val navigateToForgotPassword: Boolean = false,
+    val language: String = "English (US)"
 )

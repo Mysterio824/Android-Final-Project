@@ -15,8 +15,7 @@ import androidx.navigation.navigation
 import com.androidfinalproject.hacktok.router.routes.AdminRoute
 import com.androidfinalproject.hacktok.router.routes.AuthRoute
 import com.androidfinalproject.hacktok.router.routes.MainRoute
-import com.androidfinalproject.hacktok.ui.auth.LoginScreenRoot
-import com.androidfinalproject.hacktok.ui.auth.LoginViewModel
+import com.androidfinalproject.hacktok.ui.auth.AuthScreenRoot
 import com.androidfinalproject.hacktok.ui.forgotPassword.ForgotPasswordScreenRoot
 import com.androidfinalproject.hacktok.ui.forgotPassword.ForgotPasswordViewModel
 import com.androidfinalproject.hacktok.ui.resetPassword.ResetPasswordScreenRoot
@@ -58,8 +57,7 @@ fun NavGraphBuilder.authNavigation(navController: NavController) {
                         )
             }
         ) {
-            LoginScreenRoot(
-                viewModel = LoginViewModel(),
+            AuthScreenRoot(
                 onLoginSuccess = { isAdmin ->
                     if (isAdmin) {
                         navController.navigate(AdminRoute.Graph.route) {

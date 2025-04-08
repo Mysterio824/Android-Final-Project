@@ -9,9 +9,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.regex.Pattern
 
-class LoginViewModel : ViewModel() {
-    private val _state = MutableStateFlow(LoginState())
-    val state: StateFlow<LoginState> = _state.asStateFlow()
+class AuthViewModel : ViewModel() {
+    private val _state = MutableStateFlow(AuthState())
+    val state: StateFlow<AuthState> = _state.asStateFlow()
 
     private val emailPattern = Pattern.compile(
         "[a-zA-Z0-9+._%\\-]{1,256}" +
@@ -23,15 +23,15 @@ class LoginViewModel : ViewModel() {
                 ")+"
     )
 
-    fun onAction(action: LoginAction) {
+    fun onAction(action: AuthAction) {
         when (action) {
-            is LoginAction.UpdateEmail -> updateEmail(action.email)
-            is LoginAction.UpdatePassword -> updatePassword(action.password)
-            is LoginAction.UpdateConfirmPassword -> updateConfirmPassword(action.confirmPassword)
-            is LoginAction.ToggleAuthMode -> toggleAuthMode()
-            is LoginAction.Submit -> submitForm()
-            is LoginAction.GoogleSignIn -> signInWithGoogle()
-            is LoginAction.ForgotPassword -> handleForgotPassword()
+            is AuthAction.UpdateEmail -> updateEmail(action.email)
+            is AuthAction.UpdatePassword -> updatePassword(action.password)
+            is AuthAction.UpdateConfirmPassword -> updateConfirmPassword(action.confirmPassword)
+            is AuthAction.ToggleAuthMode -> toggleAuthMode()
+            is AuthAction.Submit -> submitForm()
+            is AuthAction.GoogleSignIn -> signInWithGoogle()
+            else -> {}
         }
     }
 
@@ -81,10 +81,6 @@ class LoginViewModel : ViewModel() {
             kotlinx.coroutines.delay(1000)
             _state.update { it.copy(isLoading = false) }
         }
-    }
-
-    private fun handleForgotPassword() {
-        _state.update { it.copy(navigateToForgotPassword = true) }
     }
 
     private fun validateEmail(email: String): String? {
