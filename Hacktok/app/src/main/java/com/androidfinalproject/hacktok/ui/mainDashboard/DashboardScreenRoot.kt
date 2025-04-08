@@ -6,6 +6,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.androidfinalproject.hacktok.ui.mainDashboard.currentProfile.CurrentProfileAction
 import com.androidfinalproject.hacktok.ui.mainDashboard.messageDashboard.MessageDashboardAction
+import kotlin.system.exitProcess
 
 @Composable
 fun DashboardScreenRoot(
@@ -28,7 +29,8 @@ fun DashboardScreenRoot(
                 is DashboardAction.OnPostClick -> onPostDetailNavigate(action.postId)
                 is DashboardAction.GotoUserChat -> onUserChatNavigate(action.userId)
                 is DashboardAction.GotoGroupChat -> onGroupChatNavigate(action.groupId)
-                is DashboardAction.OnNavigateBack -> System.exit(0)
+                is DashboardAction.OnFriendListNavigate -> onFriendListNavigate(action.userId)
+                is DashboardAction.OnNavigateBack -> exitProcess(0)
                 else -> viewModel.onAction(action)
             }
         }

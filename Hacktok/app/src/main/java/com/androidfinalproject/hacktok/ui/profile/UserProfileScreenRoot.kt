@@ -9,8 +9,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @Composable
 fun UserProfileScreenRoot(
     viewModel: UserProfileViewModel,
-    onChatWithFriend: (String?) -> Unit,
-    onGoToPost: (String?) -> Unit,
+    onChatWithFriend: (String) -> Unit,
+    onGoToPost: (String) -> Unit,
+    onGoToFriendList: (String) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -21,6 +22,7 @@ fun UserProfileScreenRoot(
             when(action) {
                 is UserProfileAction.ChatWithFriend -> onChatWithFriend(state.user!!.id!!)
                 is UserProfileAction.GoToPost -> onGoToPost(action.postId)
+                is UserProfileAction.NavigateFriendList -> onGoToFriendList(action.userId)
                 is UserProfileAction.NavigateBack -> onNavigateBack()
                 else -> viewModel.onAction(action)
             }

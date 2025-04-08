@@ -13,6 +13,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.androidfinalproject.hacktok.router.routes.MainRoute
+import com.androidfinalproject.hacktok.ui.chat.ChatScreenRoot
+import com.androidfinalproject.hacktok.ui.chat.ChatViewModel
 import com.androidfinalproject.hacktok.ui.editProfile.EditProfileScreenRoot
 import com.androidfinalproject.hacktok.ui.editProfile.EditProfileViewModel
 import com.androidfinalproject.hacktok.ui.profile.UserProfileScreenRoot
@@ -132,11 +134,14 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
 
             UserProfileScreenRoot(
                 viewModel = UserProfileViewModel(userId!!),
-                onChatWithFriend = { friendId ->
-                    navController.navigate("${MainRoute.ChatRoom.route}/user/$friendId")
+                onChatWithFriend = { chatId ->
+                    navController.navigate("${MainRoute.ChatRoom.route}/user/$chatId")
                 },
                 onGoToPost = { postId ->
                     navController.navigate("${MainRoute.PostDetail.route}/$postId")
+                },
+                onGoToFriendList = { chatId ->
+                    navController.navigate("${MainRoute.FriendList.route}/$chatId")
                 },
                 onNavigateBack = {
                     navController.popBackStack()
@@ -203,17 +208,16 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
             val chatType = backStackEntry.arguments?.getString("chatType") ?: "user"
             val chatId = backStackEntry.arguments?.getString("chatId")
 
-//            ChatScreenRoot(
-//                viewModel = ChatViewModel(),
-//                chatType = chatType,
-//                chatId = chatId,
-//                onNavigateBack = {
-//                    navController.popBackStack()
-//                },
-//                onUserProfileView = { userId ->
-//                    navController.navigate("${MainRoute.UserDetail.route}/$userId")
-//                }
-//            )
+            ChatScreenRoot(
+                navController = navController,
+                viewModel = ChatViewModel(),
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToManageUser = { userId ->
+                    navController.navigate("${MainRoute.UserDetail.route}/$userId")
+                }
+            )
         }
 
         // Edit Profile Screen
