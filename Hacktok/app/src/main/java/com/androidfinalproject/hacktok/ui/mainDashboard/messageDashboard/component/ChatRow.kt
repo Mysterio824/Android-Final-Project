@@ -42,7 +42,7 @@ fun ChatRow(
                 .padding(vertical = 8.dp)
                 .pointerInput(Unit) {
                     detectTapGestures(
-                        onTap = { /* Open chat */ },
+                        onTap = { onAction(MessageDashboardAction.GoToChat("chat")) },
                         onLongPress = { expanded = true } // Show dropdown on hold
                     )
                 },
@@ -75,7 +75,9 @@ fun ChatRow(
         }
 
         DropdownMenu(
-            modifier = Modifier.width(200.dp).padding(8.dp),
+            modifier = Modifier
+                .width(200.dp)
+                .padding(8.dp),
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {

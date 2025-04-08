@@ -60,7 +60,7 @@ fun CurrentProfileScreen(
                 .background(MaterialTheme.colorScheme.primaryContainer)
         ) {
             Text(
-                text = state.user!!.username.first().toString(),
+                text = state.user.username.first().toString(),
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
@@ -68,14 +68,24 @@ fun CurrentProfileScreen(
             )
         }
 
-        Text(text = state.user!!.username, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-        Text(text = state.user!!.email, fontSize = 16.sp, color = Color.Gray)
+        Text(text = state.user.username, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+        Text(text = state.user.email, fontSize = 16.sp, color = Color.Gray)
 
         Row(
             horizontalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            StatColumn(state.friendCount, "Friends")
-            StatColumn(state.posts.size, "Posts")
+            StatColumn(
+                state.friendCount,
+                "Friends",
+                onClick = {
+                    onAction(CurrentProfileAction.NavigateFriendList)
+                }
+            )
+            StatColumn(
+                state.posts.size,
+                "Posts",
+                onClick = {}
+            )
         }
 
         ActionButton(label = "Edit Profile", onClick = { onAction(CurrentProfileAction.NavigateToProfileEdit) })
