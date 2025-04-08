@@ -1,6 +1,7 @@
 package com.androidfinalproject.hacktok.ui.profile
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -70,6 +71,7 @@ fun UserProfileScreen (
                     }
                     append(" Posts") // Normal text
                 },
+                Modifier.clickable { onAction(UserProfileAction.NavigateFriendList(state.user.id!!)) },
                 fontSize = 16.sp
             )
         }

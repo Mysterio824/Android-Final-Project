@@ -73,7 +73,7 @@ fun DashboardScreen(
                 "Profile" -> {
                     CurrentProfileScreenRoot(
                         viewModel = CurrentProfileViewModel(state.user.id!!),
-                        onFriendListNavigation = { id -> onAction(DashboardAction.OnFriendListNavigate(id)) },
+                        onFriendListNavigation = { onAction(DashboardAction.OnFriendListNavigate(state.user.id!!)) },
                         onPostClickNavigation = { id -> onAction(DashboardAction.OnPostClick(id)) },
                         onProfileEditNavigation = { onAction(DashboardAction.OnEditProfileNavigate) },
                         onPostEditNavigation = { id -> onAction(DashboardAction.OnPostEditNavigate(id)) }

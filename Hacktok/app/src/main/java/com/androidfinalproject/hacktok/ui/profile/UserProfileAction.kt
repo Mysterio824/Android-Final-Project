@@ -7,5 +7,6 @@ sealed class UserProfileAction {
     data class GoToPost(val postId : String) : UserProfileAction()
     data object BlockUser : UserProfileAction()
     data object RefreshProfile : UserProfileAction()
+    data class NavigateFriendList(val userId: String) : UserProfileAction()
     data object NavigateBack : UserProfileAction()
 }
