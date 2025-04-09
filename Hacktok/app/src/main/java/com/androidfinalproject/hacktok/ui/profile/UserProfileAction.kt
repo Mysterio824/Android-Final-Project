@@ -5,6 +5,7 @@ sealed class UserProfileAction {
     data object Unfriend : UserProfileAction()
     data object ChatWithFriend : UserProfileAction()
     data class GoToPost(val postId : String) : UserProfileAction()
+    data class LikePost(val postId: String) : UserProfileAction()
     data object BlockUser : UserProfileAction()
     data object RefreshProfile : UserProfileAction()
     data class NavigateFriendList(val userId: String) : UserProfileAction()

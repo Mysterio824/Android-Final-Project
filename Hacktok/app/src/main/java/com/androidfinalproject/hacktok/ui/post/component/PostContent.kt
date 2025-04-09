@@ -7,171 +7,222 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.Post
+import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 @Composable
 fun PostContent(
     post: Post,
-    onLikeClick: () -> Unit,
-    onCommentClick: () -> Unit,
-    onShareClick: () -> Unit,
-    onUserClick: (String) -> Unit,
-    onSavePost: () -> Unit = {},
-    onReportPost: () -> Unit = {},
-    onHidePost: () -> Unit = {}
+    onPostClick: (String) -> Unit = {},
+    onToggleLike: () -> Unit,
+    onComment: () -> Unit,
+    onShare: () -> Unit,
+    onOptionsClick: () -> Unit,
+    onUserClick: () -> Unit
 ) {
-    var showMenu by remember { mutableStateOf(false) }
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
 
-    Column(
+    Card(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.surface)
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(bottom = 8.dp)
+            .clickable { onPostClick(post.id!!) },
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.background
+        )
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
-                    .size(32.dp)
+                    .size(40.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer)
-                    .clickable { onUserClick(post.userId) },
-                contentAlignment = Alignment.Center
+                    .background(Color.LightGray)
+                    .clickable(onClick = onUserClick)
             ) {
                 Text(
-                    text = MockData.mockUsers.first().username.first().toString().uppercase(),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
+                    text = post.userId.first().toString(),
+                    modifier = Modifier.align(Alignment.Center)
                 )
             }
 
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 8.dp)
+                    .clickable(onClick = onUserClick)
+            ) {
                 Text(
-                    text = MockData.mockUsers.first().username,
-                    style = MaterialTheme.typography.titleMedium,
+                    text = "User ${post.userId}",
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.clickable { onUserClick(post.userId) }
+                    fontSize = 16.sp
                 )
-
-                Text(
-                    text = SimpleDateFormat("MMM dd, yyyy • HH:mm", Locale.getDefault()).format(post.createdAt),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = formatDate(post.createdAt),
+                        color = Color.Gray,
+                        fontSize = 12.sp
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(
+                        imageVector = Icons.Default.Public,
+                        contentDescription = "Privacy: Public",
+                        tint = Color.Gray,
+                        modifier = Modifier.size(12.dp)
+                    )
+                }
             }
 
-            // More button
-            IconButton(onClick = { showMenu = true }) {
+            IconButton(onClick = onOptionsClick) {
                 Icon(
                     imageVector = Icons.Default.MoreVert,
                     contentDescription = "More options"
                 )
-                DropdownMenu(
-                    expanded = showMenu,
-                    onDismissRequest = { showMenu = false }
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("Save Post") },
-                        onClick = {
-                            onSavePost()
-                            showMenu = false
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Hide Post") },
-                        onClick = {
-                            onHidePost()
-                            showMenu = false
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Report Post") },
-                        onClick = {
-                            onReportPost()
-                            showMenu = false
-                        }
-                    )
-                }
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Post content
         Text(
             text = post.content,
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            fontSize = 16.sp
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        if (post.imageLink.isNotEmpty()) {
+            AsyncImage(
+                model = post.imageLink,
+                contentDescription = "Post image",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 200.dp)
+                    .background(Color.White),
+                contentScale = ContentScale.FillHeight,
+            )
+        }
 
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp)
         ) {
-            Button(
-                onClick = onLikeClick,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f)
             ) {
                 Icon(
-                    imageVector = Icons.Default.ThumbUp,
+                    imageVector = Icons.Filled.ThumbUp,
+                    contentDescription = "Likes",
+                    tint = Color(0xFF1877F2),
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = "${post.likeCount}",
+                    color = Color.Gray,
+                    fontSize = 14.sp
+                )
+            }
+
+            Text(
+                text = "${post.commentCount} comments",
+                color = Color.Gray,
+                fontSize = 14.sp
+            )
+        }
+
+        HorizontalDivider()
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            TextButton(
+                onClick = onToggleLike,
+                modifier = Modifier.weight(1f)
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.ThumbUp,
                     contentDescription = "Like"
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(text = "${post.likeCount}")
+                Text("Like")
             }
 
-            Button(
-                onClick = onCommentClick,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            TextButton(
+                onClick = onComment,
+                modifier = Modifier.weight(1f)
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.Comment,
                     contentDescription = "Comment"
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(text = "Comment")
+                Text("Comment")
             }
 
-            Button(
-                onClick = onShareClick,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            TextButton(
+                onClick = onShare,
+                modifier = Modifier.weight(1f)
             ) {
                 Icon(
                     imageVector = Icons.Default.Share,
                     contentDescription = "Share"
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(text = "Share")
+                Text("Share")
             }
+        }
+
+    }
+}
+
+fun formatDate(date: Date): String {
+    val format = SimpleDateFormat("MMM d 'at' h:mm a", Locale.getDefault())
+    return format.format(date)
+}
+
+@Preview
+@Composable
+fun PostPreview(){
+    MainAppTheme {
+        Box{
+            PostContent(
+                post = MockData.mockPosts.first(),
+                onShare = {},
+                onComment = {},
+                onToggleLike = {},
+                onUserClick = {},
+                onOptionsClick = {}
+            )
         }
     }
 }

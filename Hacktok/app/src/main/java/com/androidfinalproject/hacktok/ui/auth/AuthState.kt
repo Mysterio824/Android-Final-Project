@@ -9,5 +9,7 @@ data class AuthState(
     val passwordError: String? = null,
     val confirmPasswordError: String? = null,
     val isLoading: Boolean = false,
-    val language: String = "English (US)"
+    val language: String = "English (US)",
+    val isLoginSuccess: Boolean = false,
+    val isAdmin: Boolean = false
 )

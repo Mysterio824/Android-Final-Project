@@ -1,111 +1,193 @@
 package com.androidfinalproject.hacktok.ui.post
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.androidfinalproject.hacktok.model.MockData
-import com.androidfinalproject.hacktok.ui.post.component.*
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
+import com.androidfinalproject.hacktok.ui.post.component.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PostDetailScreen(
     state: PostDetailState,
-    onAction: (PostDetailAction) -> Unit,
+    onAction: (PostDetailAction) -> Unit
 ) {
-    val scrollState = rememberLazyListState()
+    val commentFocusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .imePadding()
-            .navigationBarsPadding()
-    ) {
-        TopAppBar(
-            title = { Text("Post") },
-            navigationIcon = {
-                IconButton(onClick = { onAction(PostDetailAction.NavigateBack) }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back"
+    var showPostOptionsSheet by remember { mutableStateOf(false) }
+    var showShareOptionsSheet by remember { mutableStateOf(false) }
+    var selectedCommentId by remember { mutableStateOf<String?>(null) }
+
+    var showComments by remember { mutableStateOf(true) }
+
+    val bottomSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = false
+    )
+
+    LaunchedEffect(state.isCommenting) {
+        if (state.isCommenting) {
+            commentFocusRequester.requestFocus()
+            keyboardController?.show()
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Post") },
+                navigationIcon = {
+                    IconButton(onClick = { onAction(PostDetailAction.NavigateBack) }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                item {
+                    state.post?.let { post ->
+                        PostContent(
+                            post = post,
+                            onToggleLike = { onAction(PostDetailAction.ToggleLike) },
+                            onComment = { onAction(PostDetailAction.ToggleCommentInputFocus) },
+                            onShare = { showShareOptionsSheet = true },
+                            onOptionsClick = { showPostOptionsSheet = true },
+                            onUserClick = { onAction(PostDetailAction.OnUserClick(post.userId)) }
+                        )
+
+                        CommentsSectionToggle(
+                            commentCount = post.commentCount,
+                            showComments = showComments,
+                            onToggle = { showComments = !showComments }
+                        )
+                    }
+                }
+
+
+                // Comments section
+                if (showComments) {
+                    // Root level comments
+                    val rootComments = state.comments.filter { it.parentCommentId == null }
+                    items(rootComments) { comment ->
+                        CommentItem(
+                            comment = comment,
+                            allComments = state.comments,
+                            onLikeComment = { commentId -> onAction(PostDetailAction.LikeComment(commentId)) },
+                            onCommentLongPress = { commentId -> selectedCommentId = commentId },
+                            onUserClick = { userId -> onAction(PostDetailAction.OnUserClick(userId)) },
+                            onReplyClick = {
+                                onAction(PostDetailAction.ToggleCommentInputFocus)
+                                // In a real app, you'd also track which comment is being replied to
+                            }
+                        )
+                    }
+                }
+
+                // Loading indicator for comments
+                if (state.isLoadingComments) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("Loading comments...")
+                        }
+                    }
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(70.dp))
+                }
+            }
+
+            CommentInputBar(
+                text = state.commentText,
+                onTextChange = { onAction(PostDetailAction.UpdateCommentText(it)) },
+                onSubmit = { onAction(PostDetailAction.SubmitComment) },
+                focusRequester = commentFocusRequester,
+                modifier = Modifier.align(Alignment.BottomCenter)
+            )
+
+            if (showPostOptionsSheet) {
+                ModalBottomSheet(
+                    onDismissRequest = { showPostOptionsSheet = false },
+                    sheetState = bottomSheetState
+                ) {
+                    PostOptionsContent(
+                        isPostOwner = state.isPostOwner,
+                        onDismiss = { showPostOptionsSheet = false }
                     )
                 }
             }
-        )
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-        ) {
-            LazyColumn(
-                state = scrollState,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                state.post?.let { post ->
-                    item {
-                        PostContent(
-                            post = post,
-                            onLikeClick = { onAction(PostDetailAction.ToggleLike) },
-                            onCommentClick = { onAction(PostDetailAction.ToggleCommentInputFocus) },
-                            onShareClick = { onAction(PostDetailAction.Share) },
-                            onUserClick = { userId -> onAction(PostDetailAction.OnUserClick(userId)) }
-                        )
-                    }
-
-                    item {
-                        HorizontalDivider(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            color = MaterialTheme.colorScheme.outlineVariant
-                        )
-                    }
-                }
-
-                state.error?.let { errorMessage ->
-                    item {
-                        ErrorMessage(message = errorMessage)
-                    }
-                }
-
-                item {
-                    CommentSection(
-                        comments = state.comments,
-                        isLoading = state.isLoadingComments,
-                        onUserClick = { userId -> onAction(PostDetailAction.OnUserClick(userId)) },
-                        onLikeClick = { commentId -> onAction(PostDetailAction.LikeComment(commentId)) },
-                        isLikedByUser = { true }
+            // Share options bottom sheet
+            if (showShareOptionsSheet) {
+                ModalBottomSheet(
+                    onDismissRequest = { showShareOptionsSheet = false },
+                    sheetState = bottomSheetState
+                ) {
+                    ShareOptionsContent(
+                        onDismiss = { showShareOptionsSheet = false }
                     )
                 }
+            }
 
-                item {
-                    Spacer(modifier = Modifier.height(16.dp))
+            // Comment options bottom sheet
+            if (selectedCommentId != null) {
+                ModalBottomSheet(
+                    onDismissRequest = { selectedCommentId = null },
+                    sheetState = bottomSheetState
+                ) {
+                    CommentOptionsContent(
+                        commentId = selectedCommentId,
+                        onDismiss = { selectedCommentId = null }
+                    )
                 }
             }
         }
-
-        CommentInputBar(
-            commentText = state.commentText,
-            onSubmit = {
-                onAction(PostDetailAction.SubmitComment)
-                // Optionally, you can clear focus after submitting
-                // onAction(PostDetailAction.SetCommentFocus(false))
-            },
-            onTextChange = { text ->
-                onAction(PostDetailAction.UpdateCommentText(text))
-            },
-            isFocused = state.isCommenting,
-            onFocusChanged = { isFocused ->
-                // Update ViewModel when focus changes
-                onAction(PostDetailAction.SetCommentFocus(isFocused))
-            }
-        )
     }
 }
 

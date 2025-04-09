@@ -20,20 +20,82 @@ object MockData {
     )
 
     val mockPosts = listOf(
-        Post("1", "Hello world!", "2", likeCount = 10),
+        Post("1", "Hello world!", "2", likeCount = 10, imageLink = "https://scontent.fsgn2-7.fna.fbcdn.net/v/t39.30808-6/489891322_715880880792703_6312706882615243490_n.jpg?_nc_cat=1&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeFozlH7UrDEFkjxJb7sOuyQO8rnOqHE1AE7yuc6ocTUAUOeEh3iImWld92-Du6tFcL9CjWKqdIATKXhgt6E_Ii_&_nc_ohc=XCChQ-I7gCoQ7kNvwE5sDbh&_nc_oc=AdmsBGP86HC1m8Rn352XjvrHRXc5ubimARBUNjviXL2cxS0_4iEfyOqstGiC-xnX9KY&_nc_zt=23&_nc_ht=scontent.fsgn2-7.fna&_nc_gid=9jZ00bprKo-C7-cg_l1ZzA&oh=00_AfG15vnRZyFD8SOtEJGN7pypgugDNN5UbFnT0_jcLyytMA&oe=67FC77C1"),
         Post("2", "Learning Kotlin!", "2", likeCount = 1000),
         Post("3", "Jetpack Compose is fun!", "2", likeCount = 123)
     )
 
     val mockComments = listOf(
-        Comment("1", "Hello world", "10", "1"),
-        Comment("2", "Hello world", "10", "1"),
-        Comment("3", "Hello world", "10", "1"),
-        Comment("4", "Hello world", "10", "1"),
-        Comment("5", "Hello world", "10", "1"),
-        Comment("6", "Great post! I really enjoyed reading this.", "5", "2"),
-        Comment("7", "I have a question about this. Can you elaborate more?", "2", "2"),
-        Comment("8", "This is exactly what I needed to know. Thanks for sharing!", "8", "2")
+        Comment(
+            id = "comment1",
+            content = "This is the first comment on this post!",
+            userId = "user2",
+            postId = "post1",
+            createdAt = Date(System.currentTimeMillis() - 3600000), // 1 hour ago
+            likeCount = 5
+        ),
+
+        Comment(
+            id = "comment2",
+            content = "This is the second comment",
+            userId = "user3",
+            postId = "post1",
+            createdAt = Date(System.currentTimeMillis() - 7200000), // 2 hours ago
+            likeCount = 2
+        ),
+
+        Comment(
+            id = "comment2",
+            content = "This is the second comment",
+            userId = "user3",
+            postId = "post1",
+            createdAt = Date(System.currentTimeMillis() - 7200000), // 2 hours ago
+            likeCount = 2
+        ),
+
+        Comment(
+            id = "comment2",
+            content = "This is the second comment",
+            userId = "user3",
+            postId = "post1",
+            createdAt = Date(System.currentTimeMillis() - 7200000), // 2 hours ago
+            likeCount = 2
+        ),
+
+        Comment(
+            id = "comment2",
+            content = "This is the second comment",
+            userId = "user3",
+            postId = "post1",
+            createdAt = Date(System.currentTimeMillis() - 7200000), // 2 hours ago
+            likeCount = 2
+        ),
+
+        Comment(
+            id = "comment2",
+            content = "This is the second comment",
+            userId = "user3",
+            postId = "post1",
+            createdAt = Date(System.currentTimeMillis() - 7200000), // 2 hours ago
+            likeCount = 2
+        ),
+
+        Comment(
+            id = "reply1",
+            content = "This is a reply to the first comment",
+            userId = "user4",
+            postId = "post1",
+            parentCommentId = "comment1",
+            createdAt = Date(System.currentTimeMillis() - 1800000) // 30 minutes ago
+        ),
+        Comment(
+            id = "reply2",
+            content = "Another reply to the first comment",
+            userId = "user5",
+            postId = "post1",
+            parentCommentId = "comment1",
+            createdAt = Date(System.currentTimeMillis() - 900000) // 15 minutes ago
+        )
     )
 
     // Added mockUserRoles

@@ -1,5 +1,6 @@
 package com.androidfinalproject.hacktok.ui.auth
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -66,11 +67,20 @@ class AuthViewModel : ViewModel() {
             )
         }
 
+
         if (emailError == null && passwordError == null && (currentState.isLoginMode || confirmPasswordError == null)) {
             _state.update { it.copy(isLoading = true) }
             viewModelScope.launch {
                 kotlinx.coroutines.delay(1000)
                 _state.update { it.copy(isLoading = false) }
+            }
+
+            val isAdmin = currentState.email == "admin@gmail.com"
+            _state.update {
+                it.copy(
+                    isLoginSuccess = true,
+                    isAdmin = isAdmin
+                )
             }
         }
     }

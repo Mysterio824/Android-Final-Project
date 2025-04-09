@@ -33,10 +33,7 @@ class PostDetailViewModel(postId: String) : ViewModel() {
             is PostDetailAction.ToggleCommentInputFocus -> toggleCommentInputFocus()
             is PostDetailAction.SetCommentFocus -> setCommentFocus(action.focused)
             is PostDetailAction.LikeComment -> handleLikeComment(action.commentId)
-            is PostDetailAction.NavigateBack,
-            is PostDetailAction.OnUserClick -> {
-                Log.w("PostDetailViewModel", "Navigation action reached ViewModel but should be handled in Root: $action")
-            }
+            else -> {}
         }
     }
 
@@ -61,7 +58,7 @@ class PostDetailViewModel(postId: String) : ViewModel() {
                 val comment = MockData.mockComments
 
 
-                _state.update { it.copy(post = post, comments = comment ) }
+                _state.update { it.copy(post = post, comments = comment, isPostOwner = post.id == user.id) }
             } catch (e: Exception) {
                 _state.update { it.copy(error = "Failed to load post: ${e.message}") }
             }

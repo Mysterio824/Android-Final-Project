@@ -122,10 +122,20 @@ fun UserProfileScreen (
                 items(state.posts) { post ->
                     PostContent(
                         post = post,
-                        onLikeClick = { onAction(UserProfileAction.GoToPost(post.id!!)) },
-                        onCommentClick = { onAction(UserProfileAction.GoToPost(post.id!!)) },
-                        onShareClick = {},
-                        onUserClick = {}
+                        onPostClick = {
+                            onAction(UserProfileAction.GoToPost(post.id!!))
+                        },
+                        onToggleLike = {
+                            onAction(UserProfileAction.LikePost(post.id!!))
+                        },
+                        onUserClick = {
+                            onAction(UserProfileAction.RefreshProfile)
+                        },
+                        onComment = {
+                            onAction(UserProfileAction.GoToPost(post.id!!))
+                        },
+                        onShare = {},
+                        onOptionsClick = {},
                     )
                 }
             }

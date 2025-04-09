@@ -9,5 +9,5 @@ sealed class AuthAction {
     object GoogleSignIn : AuthAction()
     object ForgotPassword : AuthAction()
     data class SelectLanguage(val languageId : String) : AuthAction()
-    object OnLoginSuccess : AuthAction()
+    data class OnLoginSuccess(val isAdmin: Boolean) : AuthAction()
 }

@@ -8,7 +8,9 @@ import androidx.navigation.compose.rememberNavController
 import com.androidfinalproject.hacktok.router.graph.adminNavigation
 import com.androidfinalproject.hacktok.router.graph.authNavigation
 import com.androidfinalproject.hacktok.router.graph.mainNavigation
+import com.androidfinalproject.hacktok.router.graph.testNavigation
 import com.androidfinalproject.hacktok.router.routes.AuthRoute
+import com.androidfinalproject.hacktok.router.routes.MainRoute
 
 @Composable
 @Preview
@@ -17,10 +19,11 @@ fun App() {
     Log.d("Navigation", "Starting at: ${AuthRoute.Graph.route}")
     NavHost(
         navController = navController,
-        startDestination = AuthRoute.Graph.route
+        startDestination = MainRoute.Graph.route
     ) {
         authNavigation(navController)
         adminNavigation(navController)
         mainNavigation(navController)
+        testNavigation(navController)
     }
 }

@@ -23,6 +23,7 @@ class UserProfileViewModel(userId : String) : ViewModel() {
             is UserProfileAction.Unfriend -> unfriend(state.value.user!!.id)
             is UserProfileAction.BlockUser -> blockUser(state.value.user!!.id)
             is UserProfileAction.RefreshProfile -> loadProfile()
+            is UserProfileAction.LikePost -> likePost(action.postId)
             else -> {}
         }
     }
@@ -79,6 +80,10 @@ class UserProfileViewModel(userId : String) : ViewModel() {
                 currentState.copy(isFriend = true)
             }
         }
+    }
+
+    fun likePost(postId: String) {
+        //TODO
     }
 
     private fun unfriend(userId: String?) {
