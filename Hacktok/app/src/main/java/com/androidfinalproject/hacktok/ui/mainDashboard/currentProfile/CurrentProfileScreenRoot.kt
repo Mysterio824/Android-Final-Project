@@ -14,7 +14,8 @@ fun CurrentProfileScreenRoot(
     onPostEditNavigation: (String) -> Unit,
     onProfileEditNavigation: () -> Unit,
     onPostClickNavigation: (String) -> Unit,
-    onFriendListNavigation: () -> Unit
+    onFriendListNavigation: () -> Unit,
+    onNewPostNavigation: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -26,6 +27,7 @@ fun CurrentProfileScreenRoot(
                 is CurrentProfileAction.NavigateToPostEdit -> onPostEditNavigation(action.post.id!!)
                 is CurrentProfileAction.NavigateToProfileEdit -> onProfileEditNavigation()
                 is CurrentProfileAction.NavigateFriendList -> onFriendListNavigation()
+                is CurrentProfileAction.NavigateToNewPost -> onNewPostNavigation()
             }
 
         }

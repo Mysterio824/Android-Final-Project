@@ -7,4 +7,5 @@ sealed class CurrentProfileAction {
     data object NavigateFriendList : CurrentProfileAction()
     data class NavigateToPostEdit(val post: Post) : CurrentProfileAction()
     data object NavigateToProfileEdit : CurrentProfileAction()
+    data object NavigateToNewPost : CurrentProfileAction()
 }
