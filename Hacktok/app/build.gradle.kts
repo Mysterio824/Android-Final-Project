@@ -78,6 +78,7 @@ dependencies {
     implementation(libs.foundation)
     implementation(libs.ui)
     implementation(libs.ui.tooling.preview)
+    implementation("io.coil-kt:coil-compose:2.4.0")
     debugImplementation(libs.ui.tooling)
     androidTestImplementation(libs.ui.test.junit4)
     debugImplementation(libs.ui.test.manifest)
