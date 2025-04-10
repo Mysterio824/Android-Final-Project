@@ -9,8 +9,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.androidfinalproject.hacktok.ui.adminManage.components.*
+import androidx.activity.compose.BackHandler
+import com.androidfinalproject.hacktok.ui.adminManage.commentManagement.*
+import com.androidfinalproject.hacktok.ui.adminManage.component.AdminTabBar
+import com.androidfinalproject.hacktok.ui.adminManage.postManagement.PostManagementTabRoot
+import com.androidfinalproject.hacktok.ui.adminManage.postManagement.PostManagementViewModel
+import com.androidfinalproject.hacktok.ui.adminManage.reportManagement.ReportManagementTabRoot
+import com.androidfinalproject.hacktok.ui.adminManage.reportManagement.ReportManagementViewModel
+import com.androidfinalproject.hacktok.ui.adminManage.userManagement.UserManagementTabRoot
+import com.androidfinalproject.hacktok.ui.adminManage.userManagement.UserManagementViewModel
+import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 
 @Composable
 fun AdminManagementScreen(
@@ -18,7 +28,9 @@ fun AdminManagementScreen(
     onAction: (AdminManagementAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val tabs = listOf("Users", "Posts", "Comments", "Reports")
+    BackHandler {
+        onAction(AdminManagementAction.OnNavigateBack)
+    }
 
     Column(
         modifier = modifier
@@ -41,7 +53,7 @@ fun AdminManagementScreen(
             )
             IconButton(
                 onClick = { onAction(AdminManagementAction.NavigateToStatistics) },
-                modifier = Modifier.size(36.dp) // Compact size for balance
+                modifier = Modifier.size(36.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.BarChart,
@@ -51,111 +63,44 @@ fun AdminManagementScreen(
             }
         }
 
-        TabRow(
-            selectedTabIndex = state.selectedTab,
-            containerColor = MaterialTheme.colorScheme.surface,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            tabs.forEachIndexed { index, title ->
-                Tab(
-                    text = { Text(title) },
-                    selected = state.selectedTab == index,
-                    onClick = { onAction(AdminManagementAction.SelectTab(index)) },
-                    modifier = Modifier
-                        .weight(1f) // Distribute space evenly
-                        .widthIn(min = 100.dp) // Minimum width to fit "Comments"
-                )
-            }
-        }
+        AdminTabBar(
+            currentScreen = state.selectedTab,
+            onItemSelected = { tab -> onAction(AdminManagementAction.SelectTab(tab)) }
+        )
 
         when (state.selectedTab) {
-            0 -> UserManagementTab(
-                users = state.filteredUsers,
-                onUpdateRole = { userId, newRole ->
-                    onAction(AdminManagementAction.UpdateUserRole(userId, newRole))
-                },
-                onDelete = { userId ->
-                    onAction(AdminManagementAction.DeleteUser(userId))
-                },
-                onFilterUsers = { query ->
-                    onAction(AdminManagementAction.FilterUsers(query))
-                }
+            "Users" -> UserManagementTabRoot(
+                viewModel = UserManagementViewModel()
             )
-            1 -> PostManagementTab(
-                posts = state.posts,
-                isCreateDialogOpen = state.isCreatePostDialogOpen,
-                isEditDialogOpen = state.isEditPostDialogOpen,
-                postToEdit = state.postToEdit,
-                onOpenCreateDialog = {
-                    onAction(AdminManagementAction.OpenCreatePostDialog)
-                },
-                onCloseCreateDialog = {
-                    onAction(AdminManagementAction.CloseCreatePostDialog)
-                },
-                onCreatePost = {
-                    onAction(AdminManagementAction.CreatePost)
-                },
-                onOpenEditDialog = { post ->
-                    onAction(AdminManagementAction.OpenEditPostDialog(post))
-                },
-                onCloseEditDialog = {
-                    onAction(AdminManagementAction.CloseEditPostDialog)
-                },
-                onEditPost = { postId, newContent ->
-                    onAction(AdminManagementAction.EditPost(postId, newContent))
-                },
-                onDeletePost = { postId ->
-                    onAction(AdminManagementAction.DeletePost(postId))
-                }
+            "Posts" -> PostManagementTabRoot(
+                viewModel = PostManagementViewModel()
             )
-            2 -> CommentManagementTab(
-                comments = state.comments,
-                isEditDialogOpen = state.isEditCommentDialogOpen,
-                commentToEdit = state.commentToEdit,
-                onOpenEditDialog = { comment ->
-                    onAction(AdminManagementAction.OpenEditCommentDialog(comment))
-                },
-                onCloseEditDialog = {
-                    onAction(AdminManagementAction.CloseEditCommentDialog)
-                },
-                onEditComment = { commentId, newContent ->
-                    onAction(AdminManagementAction.EditComment(commentId, newContent))
-                },
-                onDeleteComment = { commentId ->
-                    onAction(AdminManagementAction.DeleteComment(commentId))
-                }
+            "Comments" -> CommentManagementTabRoot(
+                viewModel = CommentManagementViewModel()
             )
-            3 -> ReportManagementTab(
-                reports = state.reports,
-                reportCounts = state.reportCounts,
-                isBanDialogOpen = state.isBanUserDialogOpen,
-                isResolveDialogOpen = state.isResolveReportDialogOpen,
-                selectedReport = state.selectedReport,
-                onOpenBanDialog = { report ->
-                    onAction(AdminManagementAction.OpenBanUserDialog(report))
-                },
-                onCloseBanDialog = {
-                    onAction(AdminManagementAction.CloseBanUserDialog)
-                },
-                onOpenResolveDialog = { report ->
-                    onAction(AdminManagementAction.OpenResolveReportDialog(report))
-                },
-                onCloseResolveDialog = {
-                    onAction(AdminManagementAction.CloseResolveReportDialog)
-                },
-                onBanUser = { userId, isPermanent, durationDays ->
-                    onAction(AdminManagementAction.BanUser(userId, isPermanent, durationDays))
-                },
-                onDeleteContent = { contentId, contentType ->
-                    when (contentType) {
-                        "post" -> onAction(AdminManagementAction.DeletePost(contentId))
-                        "comment" -> onAction(AdminManagementAction.DeleteComment(contentId))
-                        else -> { /* Do nothing for unsupported types */ }
-                    }
-                },
-                onResolveReport = { reportId, resolutionNote ->
-                    onAction(AdminManagementAction.ResolveReport(reportId, resolutionNote))
-                }
+            "Reports" -> ReportManagementTabRoot(
+                viewModel = ReportManagementViewModel()
+            )
+        }
+    }
+}
+
+
+@Preview(showBackground = true)
+@Composable
+fun AdminManagementScreenPreview() {
+    MainAppTheme {
+        Box(
+            modifier = Modifier
+                .width(400.dp)
+                .height(800.dp)
+        ) {
+            AdminManagementScreen(
+                state = AdminManagementState(
+                    selectedTab = "Posts"
+                ),
+                onAction = {},
+                modifier = Modifier
             )
         }
     }

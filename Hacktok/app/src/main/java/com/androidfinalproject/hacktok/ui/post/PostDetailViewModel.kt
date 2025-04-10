@@ -14,9 +14,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.bson.types.ObjectId
 
-class PostDetailViewModel : ViewModel() {
+class PostDetailViewModel(postId: String) : ViewModel() {
     private val _state = MutableStateFlow(PostDetailState())
     val state: StateFlow<PostDetailState> = _state.asStateFlow()
+
+    init{
+        loadPost(postId)
+    }
 
     fun onAction(action: PostDetailAction) {
         when (action) {
@@ -29,10 +33,7 @@ class PostDetailViewModel : ViewModel() {
             is PostDetailAction.ToggleCommentInputFocus -> toggleCommentInputFocus()
             is PostDetailAction.SetCommentFocus -> setCommentFocus(action.focused)
             is PostDetailAction.LikeComment -> handleLikeComment(action.commentId)
-            is PostDetailAction.NavigateBack,
-            is PostDetailAction.OnUserClick -> {
-                Log.w("PostDetailViewModel", "Navigation action reached ViewModel but should be handled in Root: $action")
-            }
+            else -> {}
         }
     }
 
@@ -57,7 +58,7 @@ class PostDetailViewModel : ViewModel() {
                 val comment = MockData.mockComments
 
 
-                _state.update { it.copy(post = post, comments = comment ) }
+                _state.update { it.copy(post = post, comments = comment, isPostOwner = post.id == user.id) }
             } catch (e: Exception) {
                 _state.update { it.copy(error = "Failed to load post: ${e.message}") }
             }

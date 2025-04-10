@@ -1,10 +1,9 @@
 package com.androidfinalproject.hacktok.ui.mainDashboard
 
-import com.androidfinalproject.hacktok.model.Post
+import com.androidfinalproject.hacktok.model.MockData
+import com.androidfinalproject.hacktok.model.User
 
 data class DashboardState (
-    val query: String = "",
-    val isLoading: Boolean = false,
-    val posts: List<Post> = emptyList(),
-    val error: String? = null
+    val user: User = MockData.mockUsers.first(),
+    val selectedTab: String = "Home"
 )

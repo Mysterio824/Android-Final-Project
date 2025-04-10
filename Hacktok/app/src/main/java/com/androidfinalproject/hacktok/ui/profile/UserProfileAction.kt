@@ -1,11 +1,13 @@
 package com.androidfinalproject.hacktok.ui.profile
 
 sealed class UserProfileAction {
-    data class AddFriend(val userId: String?) : UserProfileAction()
-    data class Unfriend(val userId: String?) : UserProfileAction()
-    data class ChatWithFriend(val userId: String?) : UserProfileAction()
-    data class GoToPost(val postId: String?) : UserProfileAction()
-    data class BlockUser(val userId: String?) : UserProfileAction()
+    data object AddFriend : UserProfileAction()
+    data object Unfriend : UserProfileAction()
+    data object ChatWithFriend : UserProfileAction()
+    data class GoToPost(val postId : String) : UserProfileAction()
+    data class LikePost(val postId: String) : UserProfileAction()
+    data object BlockUser : UserProfileAction()
     data object RefreshProfile : UserProfileAction()
+    data class NavigateFriendList(val userId: String) : UserProfileAction()
     data object NavigateBack : UserProfileAction()
 }

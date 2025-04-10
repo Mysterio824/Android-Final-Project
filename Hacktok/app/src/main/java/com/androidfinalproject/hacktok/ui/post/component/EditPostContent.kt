@@ -25,7 +25,7 @@ fun EditPostContent (
     onEditClick: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxWidth()) {
-        PostContent(
+        PostItem(
             post = post,
             onLikeClick = onLikeClick,
             onCommentClick = onCommentClick,

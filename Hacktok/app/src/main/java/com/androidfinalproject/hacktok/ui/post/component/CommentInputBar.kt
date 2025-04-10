@@ -1,102 +1,76 @@
 package com.androidfinalproject.hacktok.ui.post.component
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun CommentInputBar(
-    commentText: String,
+    text: String,
     onTextChange: (String) -> Unit,
     onSubmit: () -> Unit,
-    isFocused: Boolean = false,
-    onFocusChanged: (Boolean) -> Unit = {}
+    focusRequester: FocusRequester,
+    modifier: Modifier = Modifier
 ) {
-    val focusRequester = remember { FocusRequester() }
-    val focusManager = LocalFocusManager.current
-    val keyboardController = LocalSoftwareKeyboardController.current
-
-    LaunchedEffect(isFocused) {
-        if (isFocused) {
-            focusRequester.requestFocus()
-            keyboardController?.show()
-        } else {
-            focusManager.clearFocus()
-            keyboardController?.hide()
-        }
-    }
-
     Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .imePadding(),
-        shadowElevation = 8.dp,
-        color = MaterialTheme.colorScheme.surface
+        modifier = modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.background,
+        shadowElevation = 8.dp
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .padding(horizontal = 8.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            TextField(
-                value = commentText,
-                onValueChange = { onTextChange(it) },
+            // User avatar
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(Color.LightGray)
+            ) {
+                // In a real app, load current user avatar here
+                Text(
+                    text = "U",
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+
+            // Comment input field
+            OutlinedTextField(
+                value = text,
+                onValueChange = onTextChange,
+                placeholder = { Text("Write a comment...") },
                 modifier = Modifier
                     .weight(1f)
-                    .focusRequester(focusRequester)
-                    .onFocusChanged { focusState ->
-                        if (focusState.isFocused != isFocused) {
-                            onFocusChanged(focusState.isFocused)
-                        }
-                    },
-                placeholder = { Text("Add a comment...") },
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
-                ),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Text,
-                    imeAction = ImeAction.Next
-                ),
-                shape = RoundedCornerShape(24.dp),
+                    .padding(horizontal = 8.dp)
+                    .focusRequester(focusRequester),
+                shape = RoundedCornerShape(20.dp),
                 maxLines = 3
             )
 
-            Spacer(modifier = Modifier.width(8.dp))
-
+            // Send button
             IconButton(
-                onClick = { onSubmit() },
-                enabled = commentText.trim().isNotEmpty()
+                onClick = onSubmit,
+                enabled = text.isNotEmpty()
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.Send,
                     contentDescription = "Send",
-                    tint = if (commentText.trim().isNotEmpty())
-                        MaterialTheme.colorScheme.primary
-                    else
-                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                    tint = if (text.isNotEmpty()) Color(0xFF1877F2) else Color.Gray
                 )
             }
         }

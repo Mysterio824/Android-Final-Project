@@ -7,13 +7,17 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.vector.ImageVector
 
 @Composable
-fun BottomNavigationBar(currentScreen: String, onItemSelected: (String) -> Unit) {
+fun BottomNavigationBar(
+    currentScreen: String,
+    onItemSelected: (String) -> Unit
+) {
     NavigationBar {
         val items = listOf(
+            BottomNavItem("Home", Icons.Filled.Home),
             BottomNavItem("Search", Icons.Filled.Search),
+            BottomNavItem("Chat", Icons.Filled.ChatBubble),
+            BottomNavItem("WatchLater", Icons.Filled.VideoLibrary),
             BottomNavItem("Profile", Icons.Filled.Person),
-            BottomNavItem("Chat", Icons.Filled.Chat),
-            BottomNavItem("Watchlater", Icons.Filled.AccessTime)
         )
 
         items.forEach { item ->
@@ -21,12 +25,12 @@ fun BottomNavigationBar(currentScreen: String, onItemSelected: (String) -> Unit)
                 icon = {
                     Icon(
                         imageVector = item.icon,
-                        contentDescription = item.label
+                        contentDescription = ""
                     )
                 },
-                label = { Text(item.label) },
                 selected = currentScreen == item.label,
-                onClick = { onItemSelected(item.label) }
+                onClick = { onItemSelected(item.label) },
+                alwaysShowLabel = false
             )
         }
     }

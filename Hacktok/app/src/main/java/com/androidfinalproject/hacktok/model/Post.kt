@@ -10,7 +10,9 @@ data class Post(
     @PropertyName("createdAt") val createdAt: Date = Date(),
     @PropertyName("isActive") val isActive: Boolean = true,
     @PropertyName("likeCount") val likeCount: Int = 0, // Số lượt thích
-    @PropertyName("commentCount") val commentCount: Int = 0 // Số lượng bình luận
+    @PropertyName("commentCount") val commentCount: Int = 0, // Số lượng bình luận
+    @PropertyName("imageLink") val imageLink: String = "",
+    @PropertyName("privacy") val privacy: String = ""
 ) {
     // Constructor không tham số cho Firestore
     constructor() : this(null, "", "", Date(), true, 0, 0)

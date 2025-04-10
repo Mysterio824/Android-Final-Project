@@ -1,42 +1,32 @@
 package com.androidfinalproject.hacktok.ui.profile
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.*
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.androidfinalproject.hacktok.R
-import com.androidfinalproject.hacktok.model.User
-import com.androidfinalproject.hacktok.model.Post
-import com.androidfinalproject.hacktok.ui.profile.component.PostCard
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.tooling.preview.Preview
+import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.ui.post.component.PostContent
+import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 
 @Composable
 fun UserProfileScreen (
-    user: User,
-    posts: List<Post>,
-    isFriend: Boolean,
-    isBlocked: Boolean,
-    onSendFriendRequest: () -> Unit,
-    onUnfriend: () -> Unit,
-    onChat: () -> Unit,
-    onBlock: () -> Unit,
+    state : UserProfileState,
+    onAction : (UserProfileAction) -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -52,8 +42,8 @@ fun UserProfileScreen (
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.primaryContainer)
         ) {
-            androidx.compose.material3.Text(
-                text = user.username.first().toString(),
+            Text(
+                text = state.user!!.username.first().toString(),
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
@@ -68,8 +58,8 @@ fun UserProfileScreen (
             verticalArrangement = Arrangement.spacedBy(4.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = user.username, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-            Text(text = user.email, fontSize = 16.sp, color = Color.Gray)
+            Text(text = state.user!!.username, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+            Text(text = state.user.email, fontSize = 16.sp, color = Color.Gray)
             Text(
                 text = buildAnnotatedString {
                     withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
@@ -81,6 +71,7 @@ fun UserProfileScreen (
                     }
                     append(" Posts") // Normal text
                 },
+                Modifier.clickable { onAction(UserProfileAction.NavigateFriendList(state.user.id!!)) },
                 fontSize = 16.sp
             )
         }
@@ -88,10 +79,10 @@ fun UserProfileScreen (
         Spacer(modifier = Modifier.height(16.dp))
 
         // Conditional Buttons
-        if (isBlocked) {
+        if (state.isBlocked) {
             Button(
-                onClick = onBlock,
-                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF50C878)) // Red
+                onClick = { onAction(UserProfileAction.BlockUser) },
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
             ) {
                 Text("Unblock", color = Color.White)
             }
@@ -101,21 +92,23 @@ fun UserProfileScreen (
             Text("You can not see this user's content.", color = Color.Red, fontSize = 16.sp)
         } else {
             Row {
-                if (isFriend) {
-                    Button(onClick = onUnfriend) {
+                if (state.isFriend) {
+                    Button(onClick = { onAction(UserProfileAction.Unfriend) }) {
                         Text("Unfriend", color= Color.White)
                     }
                     Spacer(modifier = Modifier.width(10.dp))
-                    Button(onClick = onChat) {
+                    Button(onClick = { onAction(UserProfileAction.ChatWithFriend) }) {
                         Text("Chat")
                     }
                 } else {
-                    Button(onClick = onSendFriendRequest) {
+                    Button(onClick = { onAction(UserProfileAction.AddFriend) }) {
                         Text("Add Friend")
                     }
                 }
                 Spacer(modifier = Modifier.width(10.dp))
-                Button(onClick = onBlock, colors = ButtonDefaults.buttonColors(Color.Red)) {
+                Button(
+                    onClick = { onAction(UserProfileAction.BlockUser) },
+                    colors = ButtonDefaults.buttonColors(Color.Red)) {
                     Text("Block")
                 }
             }
@@ -126,10 +119,46 @@ fun UserProfileScreen (
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(posts) { post ->
-                    PostContent(post = post, onLikeClick = { /* Handle like click */ }, onCommentClick = { /* Handle comment click */ }, onShareClick = {}, onUserClick = {})
+                items(state.posts) { post ->
+                    PostContent(
+                        post = post,
+                        onPostClick = {
+                            onAction(UserProfileAction.GoToPost(post.id!!))
+                        },
+                        onToggleLike = {
+                            onAction(UserProfileAction.LikePost(post.id!!))
+                        },
+                        onUserClick = {
+                            onAction(UserProfileAction.RefreshProfile)
+                        },
+                        onComment = {
+                            onAction(UserProfileAction.GoToPost(post.id!!))
+                        },
+                        onShare = {},
+                        onOptionsClick = {},
+                    )
                 }
             }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ProfileScreenPreview() {
+    MainAppTheme {
+        Box(
+            modifier = Modifier
+                .width(400.dp)
+                .height(800.dp)
+        ){
+            UserProfileScreen(
+                state = UserProfileState(
+                    user = MockData.mockUsers.first(),
+                    posts = MockData.mockPosts
+                ),
+                onAction = {}
+            )
         }
     }
 }

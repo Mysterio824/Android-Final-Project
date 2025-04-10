@@ -8,72 +8,77 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.androidfinalproject.hacktok.model.UserRole
-import com.androidfinalproject.hacktok.ui.messageDashboard.component.ProfileImage
+import com.androidfinalproject.hacktok.ui.mainDashboard.messageDashboard.component.ProfileImage
 import com.androidfinalproject.hacktok.ui.editProfile.component.CustomTextField
 import com.androidfinalproject.hacktok.ui.editProfile.component.DropdownField
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.androidfinalproject.hacktok.model.MockData
+import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 
 @Composable
 fun EditProfileScreen(
-    viewModel: EditProfileViewModel = viewModel()
+    state: EditProfileState,
+    onAction: (EditProfileAction) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    val username by viewModel.username.collectAsState()
-    val fullName by viewModel.fullName.collectAsState()
-    val email by viewModel.email.collectAsState()
-    val bio by viewModel.bio.collectAsState()
-    val role by viewModel.role.collectAsState()
-    val errorState by viewModel.errorState.collectAsState()
-
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp)
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp)
     ) {
-        Row (
+        Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text("Edit profile", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-            ProfileImage(imageSize = 40.dp, modifier = Modifier.fillMaxWidth(), contentDescription = "Profile image", isActive = false)
+            ProfileImage(
+                imageSize = 40.dp,
+                modifier = Modifier,
+                contentDescription = "Profile image",
+                isActive = false
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         CustomTextField(
             label = "Username",
-            value = username,
-            isError = errorState["username"] ?: false,
-            onValueChange = { viewModel.updateField("username", it) }
+            value = state.username,
+            isError = state.errorState["username"] ?: false,
+            onValueChange = { onAction(EditProfileAction.UpdateField("username", it)) }
         )
 
         CustomTextField(
             label = "Full Name",
-            value = fullName,
-            isError = errorState["fullName"] ?: false,
-            onValueChange = { viewModel.updateField("fullName", it) }
+            value = state.fullName,
+            isError = state.errorState["fullName"] ?: false,
+            onValueChange = { onAction(EditProfileAction.UpdateField("fullName", it)) }
         )
 
         CustomTextField(
             label = "Email",
-            value = email,
-            isError = errorState["email"] ?: false,
-            onValueChange = { viewModel.updateField("email", it) }
+            value = state.email,
+            isError = state.errorState["email"] ?: false,
+            onValueChange = { onAction(EditProfileAction.UpdateField("email", it)) }
         )
 
         CustomTextField(
             label = "Bio",
-            value = bio,
-            isError = errorState["bio"] ?: false,
-            onValueChange = { viewModel.updateField("bio", it) }
+            value = state.bio,
+            isError = state.errorState["bio"] ?: false,
+            onValueChange = { onAction(EditProfileAction.UpdateField("bio", it)) }
         )
 
         DropdownField(
             label = "Role",
-            selectedValue = role.name,
+            selectedValue = state.role.name,
             options = UserRole.entries.map { it.name },
-            onValueChange = { viewModel.updateField("role", it) }
+            onValueChange = { onAction(EditProfileAction.UpdateField("role", it)) }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -84,7 +89,7 @@ fun EditProfileScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Button(
-                onClick = { /* Handle Cancel */ },
+                onClick = { onAction(EditProfileAction.Cancel) },
                 colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray),
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.weight(1f)
@@ -93,15 +98,39 @@ fun EditProfileScreen(
             }
 
             Button(
-                onClick = {
-                    viewModel.saveProfile()
-                },
+                onClick = { onAction(EditProfileAction.SaveProfile) },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF6D00)), // Orange
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.weight(1f)
             ) {
                 Text("Save")
             }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun EditUserPreview() {
+    MainAppTheme {
+        Box(
+            modifier = Modifier
+                .width(400.dp)
+                .height(800.dp)
+        ) {
+            val user = MockData.mockUsers.first()
+
+            EditProfileScreen(
+                state = EditProfileState(
+                    username = user.username,
+                    fullName = user.fullName ?: "Unknown",
+                    email = user.email,
+                    bio = user.bio ?: "",
+                    role = user.role,
+                    errorState = emptyMap()
+                ),
+                onAction = {}
+            )
         }
     }
 }

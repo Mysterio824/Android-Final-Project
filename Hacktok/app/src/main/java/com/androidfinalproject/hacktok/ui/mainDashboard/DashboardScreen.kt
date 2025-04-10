@@ -1,18 +1,21 @@
 package com.androidfinalproject.hacktok.ui.mainDashboard
 
+import SearchDashboardScreenRoot
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.androidfinalproject.hacktok.ui.mainDashboard.component.BottomNavigationBar
-import com.androidfinalproject.hacktok.ui.mainDashboard.component.DashboardTopBar
-import com.androidfinalproject.hacktok.ui.mainDashboard.component.WhatsNewBar
-import com.androidfinalproject.hacktok.ui.post.component.PostContent
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.androidfinalproject.hacktok.ui.mainDashboard.currentProfile.CurrentProfileScreenRoot
+import com.androidfinalproject.hacktok.ui.mainDashboard.currentProfile.CurrentProfileViewModel
+import com.androidfinalproject.hacktok.ui.mainDashboard.home.HomeScreenRoot
+import com.androidfinalproject.hacktok.ui.mainDashboard.messageDashboard.MessageDashboardRoot
+import com.androidfinalproject.hacktok.ui.mainDashboard.messageDashboard.MessageDashboardViewModel
+import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
+import androidx.activity.compose.BackHandler
+import com.androidfinalproject.hacktok.ui.mainDashboard.watchLater.WatchLaterScreenRoot
 
 
 @Composable
@@ -20,48 +23,84 @@ fun DashboardScreen(
     state: DashboardState,
     onAction: (DashboardAction) -> Unit
 ) {
-    var currentScreen by remember { mutableStateOf("Search") }
-
+    BackHandler {
+        onAction(DashboardAction.OnNavigateBack)
+    }
     Scaffold(
-        topBar = { DashboardTopBar { /* Xử lý WhatsNew click */ } },
-        bottomBar = { BottomNavigationBar(currentScreen) { currentScreen = it } }
-    ) { paddingValues ->
-        Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-            WhatsNewBar(
-                query = state.query,
-                onQueryChange = { text -> onAction(DashboardAction.UpdateStatusText(text)) },
-                upload = { onAction(DashboardAction.UploadPost) }
+        bottomBar = {
+            BottomNavigationBar(
+                currentScreen = state.selectedTab,
+                onItemSelected = { tab -> onAction(DashboardAction.SelectTab(tab)) }
             )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            when (state.selectedTab) {
+                "Home" -> {
+                    HomeScreenRoot(
+                        onUserClick = { id -> onAction(DashboardAction.OnUserClick(id)) },
+                        onPostClick = { id -> onAction(DashboardAction.OnPostClick(id)) }
+                    )
+                }
 
+                "Search" -> {
+                    SearchDashboardScreenRoot(
+                        onUserClick = { id -> onAction(DashboardAction.OnUserClick(id!!)) },
+                        onPostClick = { id -> onAction(DashboardAction.OnPostClick(id!!)) }
+                    )
+                }
 
-            if (state.isLoading) {
-                CircularProgressIndicator(modifier = Modifier.fillMaxSize())
-            } else {
-                LazyColumn {
-                    items(state.posts) { post ->
-                        PostContent(
-                            post = post,
-                            onLikeClick = {
-                                onAction(DashboardAction.LikePost(post.id.toString()))
-                            },
-                            onCommentClick = {
-                                onAction(DashboardAction.PostClick(post.id.toString()))
-                            },
-                            onShareClick = {
-                                onAction(DashboardAction.SharePost(post.id.toString()))
-                            },
-                            onUserClick = {
-                                onAction(DashboardAction.UserClick(post.userId.toString()))
-                            }
-                        )
-                        HorizontalDivider(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            color = MaterialTheme.colorScheme.outlineVariant
-                        )
-                    }
+                "Chat" -> {
+                    MessageDashboardRoot(
+                        viewModel = MessageDashboardViewModel(),
+                        onNewChat = { id -> onAction(DashboardAction.GotoUserChat(id!!)) },
+                        onNewGroup = { id -> onAction(DashboardAction.GotoGroupChat(id!!)) },
+                        onGoToChat = { id -> onAction(DashboardAction.GotoUserChat(id!!)) },
+                    )
+                }
+
+                "WatchLater" -> {
+                    WatchLaterScreenRoot(
+                        onPostClickNavigation = { id -> onAction(DashboardAction.OnPostClick(id)) },
+                        onUserProfileNavigate = { id -> onAction(DashboardAction.OnUserClick(id)) }
+                    )
+                }
+
+                "Profile" -> {
+                    CurrentProfileScreenRoot(
+                        viewModel = CurrentProfileViewModel(state.user.id!!),
+                        onFriendListNavigation = { onAction(DashboardAction.OnFriendListNavigate(state.user.id!!)) },
+                        onPostClickNavigation = { id -> onAction(DashboardAction.OnPostClick(id)) },
+                        onProfileEditNavigation = { onAction(DashboardAction.OnEditProfileNavigate) },
+                        onPostEditNavigation = { id -> onAction(DashboardAction.OnPostEditNavigate(id)) }
+                    )
                 }
             }
         }
     }
+}
 
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewDashboardScreen() {
+    MainAppTheme {
+        Box(
+            modifier = Modifier
+                .width(400.dp)
+                .height(800.dp)
+        ) {
+            DashboardScreen(
+                state = DashboardState(
+                    selectedTab = "Profile"
+                    //Home, Search, Chat, WatchLater, Profile
+                ),
+                onAction = {}
+            )
+        }
+    }
 }
