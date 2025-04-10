@@ -22,16 +22,16 @@ fun StatColumn (
         modifier = Modifier.clickable { onClick() }
     ) {
         Text (
+            text = label,
+            color = Color.DarkGray,
+            fontSize = 16.sp
+        )
+
+        Text (
             text = count.toString(),
             color = Color.Black,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold
-        )
-
-        Text (
-            text = label,
-            color = Color.DarkGray,
-            fontSize = 16.sp
         )
     }
 }
