@@ -8,10 +8,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,9 +22,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.androidfinalproject.hacktok.model.Message
-
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -37,60 +38,63 @@ fun ChatBubble(
     var showMenu by remember { mutableStateOf(false) }
     val clipboardManager = LocalClipboardManager.current
 
+    val bubbleColor = if (isCurrentUser) Color(0xFF72BF6A) else Color(0xFFECECEC)
+    val textColor = if (isCurrentUser) Color.White else Color.Black
+    val timeColor = if (isCurrentUser) Color.White.copy(alpha = 0.7f) else Color.DarkGray
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .padding(vertical = 4.dp, horizontal = 8.dp)
             .combinedClickable(
-                onClick = { showTime = !showTime }, // Nhấn để hiển thị thời gian
-                onLongClick = { showMenu = true } // Nhấn giữ để mở menu
+                onClick = { showTime = !showTime },
+                onLongClick = { showMenu = true }
             ),
         contentAlignment = if (isCurrentUser) Alignment.CenterEnd else Alignment.CenterStart
     ) {
         Box(
             modifier = Modifier
                 .background(
-                    color = if (isCurrentUser) Color.Blue else Color.Gray,
-                    shape = RoundedCornerShape(8.dp)
+                    color = bubbleColor,
+                    shape = MaterialTheme.shapes.large
                 )
                 .padding(12.dp)
         ) {
             Column {
                 Text(
                     text = message.content,
-                    color = Color.White
+                    color = textColor,
+                    fontSize = 16.sp
                 )
                 if (showTime) {
                     Text(
                         text = message.createdAt.toString(),
-                        color = Color.White.copy(alpha = 0.7f),
-                        style = MaterialTheme.typography.caption
+                        color = timeColor,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Light
                     )
                 }
             }
         }
 
-        // Toggle menu khi nhấn giữ tin nhắn
         DropdownMenu(
             expanded = showMenu,
             onDismissRequest = { showMenu = false }
         ) {
             DropdownMenuItem(
+                text = { Text("Copy") },
                 onClick = {
-                    clipboardManager.setText(AnnotatedString(message.content)) // Copy tin nhắn
+                    clipboardManager.setText(AnnotatedString(message.content))
                     showMenu = false
                 }
-            ) {
-                Text("Copy")
-            }
+            )
             DropdownMenuItem(
+                text = { Text("Delete", color = Color.Red) },
                 onClick = {
-                    message.id?.let { onDeleteMessage(it) } // Xóa tin nhắn
+                    message.id?.let { onDeleteMessage(it) }
                     showMenu = false
                 }
-            ) {
-                Text("Delete", color = Color.Red)
-            }
+            )
         }
     }
 }

@@ -12,6 +12,13 @@ import java.util.Date
 import java.util.Locale
 
 object MockData {
+
+    val mockMessages = listOf(
+        Message(id = "m1", senderId = "1", content = "Hello!", createdAt = Date()),
+        Message(id = "m2", senderId = "2", content = "Hey there!", createdAt = Date(), isRead = true),
+        Message(id = "m3", senderId = "3", content = "How are you?", createdAt = Date(), replyTo = "m1")
+    )
+
     val mockUsers = listOf(
         User("1", "john", "john@example.com", role = UserRole.USER),
         User("2", "jane_smith", "jane@example.com", role = UserRole.MODERATOR),
