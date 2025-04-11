@@ -1,4 +1,4 @@
-package com.androidfinalproject.hacktok.ui.mainDashboard.friendList
+package com.androidfinalproject.hacktok.ui.friendList
 
 import com.androidfinalproject.hacktok.model.RelationInfo
 import com.androidfinalproject.hacktok.model.User

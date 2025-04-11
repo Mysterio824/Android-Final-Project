@@ -1,4 +1,4 @@
-package com.androidfinalproject.hacktok.ui.mainDashboard.friendList
+package com.androidfinalproject.hacktok.ui.friendList
 
 sealed class FriendListAction {
     data class SearchQueryChanged(val query: String) : FriendListAction()

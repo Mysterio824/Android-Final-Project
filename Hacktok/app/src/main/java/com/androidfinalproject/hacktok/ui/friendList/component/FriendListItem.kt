@@ -1,4 +1,4 @@
-package com.androidfinalproject.hacktok.ui.mainDashboard.friendList.component
+package com.androidfinalproject.hacktok.ui.friendList.component
 
 import androidx.browser.customtabs.CustomTabsService.Relation
 import androidx.compose.foundation.background

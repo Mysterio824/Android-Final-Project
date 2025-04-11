@@ -1,4 +1,4 @@
-package com.androidfinalproject.hacktok.ui.mainDashboard.friendList
+package com.androidfinalproject.hacktok.ui.friendList
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue

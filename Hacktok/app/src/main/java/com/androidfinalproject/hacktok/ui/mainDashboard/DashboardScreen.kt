@@ -10,8 +10,8 @@ import com.androidfinalproject.hacktok.ui.mainDashboard.home.HomeScreenRoot
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 import androidx.activity.compose.BackHandler
 import com.androidfinalproject.hacktok.ui.mainDashboard.component.TopNavigationBar
-import com.androidfinalproject.hacktok.ui.mainDashboard.friendList.FriendListScreenRoot
-import com.androidfinalproject.hacktok.ui.mainDashboard.friendList.FriendListViewModel
+import com.androidfinalproject.hacktok.ui.mainDashboard.friendSuggestion.FriendSuggestionScreenRoot
+import com.androidfinalproject.hacktok.ui.mainDashboard.friendSuggestion.FriendSuggestionViewModel
 import com.androidfinalproject.hacktok.ui.mainDashboard.home.HomeScreenViewModel
 import com.androidfinalproject.hacktok.ui.mainDashboard.watchLater.WatchLaterScreenRoot
 import com.androidfinalproject.hacktok.ui.mainDashboard.watchLater.WatchLaterViewModel
@@ -54,10 +54,10 @@ fun DashboardScreen(
                 }
 
                 "Friends" -> {
-                    FriendListScreenRoot (
-                        viewModel = FriendListViewModel(state.user.id!!),
-                        onUserProfileView = { onAction(DashboardAction.OnUserClick(it)) },
-                        onChatWithFriend = { onAction(DashboardAction.GotoUserChat(it)) },
+                    FriendSuggestionScreenRoot (
+                        viewModel = FriendSuggestionViewModel(state.user),
+                        onUserNavigate = { onAction(DashboardAction.OnUserClick(it)) },
+                        onFriendListNavigate = { onAction(DashboardAction.OnFriendListNavigate(it)) },
                     )
                 }
 

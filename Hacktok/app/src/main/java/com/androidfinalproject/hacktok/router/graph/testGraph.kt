@@ -12,9 +12,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.router.routes.TestRoute
-import com.androidfinalproject.hacktok.ui.mainDashboard.friendList.FriendListAction
-import com.androidfinalproject.hacktok.ui.mainDashboard.friendList.FriendListScreenRoot
-import com.androidfinalproject.hacktok.ui.mainDashboard.friendList.FriendListViewModel
+import com.androidfinalproject.hacktok.ui.friendList.FriendListAction
+import com.androidfinalproject.hacktok.ui.friendList.FriendListScreenRoot
+import com.androidfinalproject.hacktok.ui.friendList.FriendListViewModel
 import com.androidfinalproject.hacktok.ui.post.PostDetailScreenRoot
 import com.androidfinalproject.hacktok.ui.post.PostDetailViewModel
 import com.androidfinalproject.hacktok.ui.statistic.StatisticViewModel

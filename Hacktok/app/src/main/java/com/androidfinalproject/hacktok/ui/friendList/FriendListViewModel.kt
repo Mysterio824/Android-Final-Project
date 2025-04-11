@@ -1,4 +1,4 @@
-package com.androidfinalproject.hacktok.ui.mainDashboard.friendList
+package com.androidfinalproject.hacktok.ui.friendList
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

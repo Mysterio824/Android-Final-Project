@@ -1,6 +1,6 @@
 package com.androidfinalproject.hacktok.ui.mainDashboard.home.component
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -12,10 +12,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
+import coil.compose.rememberAsyncImagePainter
+import com.androidfinalproject.hacktok.R
 
 
 @Composable
@@ -36,15 +37,26 @@ fun WhatsNewBar(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(profilePicUrl)
-                        .crossfade(true)
-                        .build(), contentDescription = "Profile picture", modifier = Modifier
-                        .size(40.dp)
+                // Avatar
+                Box(
+                    modifier = Modifier
+                        .size(45.dp)
                         .clip(CircleShape)
-                        .background(Color.LightGray)
-                )
+                ) {
+                    val painter = rememberAsyncImagePainter(
+                        model = profilePicUrl.takeIf { it.isNotBlank() },
+                        error = painterResource(id = R.drawable.placeholder_profile),
+                        placeholder = painterResource(id = R.drawable.placeholder_profile),
+                        fallback = painterResource(id = R.drawable.placeholder_profile)
+                    )
+
+                    Image(
+                        painter = painter,
+                        contentDescription = "Blank Profile",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                }
 
                 Spacer(modifier = Modifier.width(8.dp))
 

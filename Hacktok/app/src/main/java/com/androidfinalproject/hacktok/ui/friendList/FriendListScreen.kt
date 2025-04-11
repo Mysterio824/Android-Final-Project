@@ -1,4 +1,4 @@
-package com.androidfinalproject.hacktok.ui.mainDashboard.friendList
+package com.androidfinalproject.hacktok.ui.friendList
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,10 +28,10 @@ import androidx.compose.ui.unit.sp
 import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.RelationInfo
 import com.androidfinalproject.hacktok.model.RelationshipStatus
-import com.androidfinalproject.hacktok.ui.mainDashboard.friendList.component.BlockedListItem
-import com.androidfinalproject.hacktok.ui.mainDashboard.friendList.component.FriendListItem
-import com.androidfinalproject.hacktok.ui.mainDashboard.friendList.component.FriendListSearchBar
-import com.androidfinalproject.hacktok.ui.mainDashboard.friendList.component.FriendOptionsContent
+import com.androidfinalproject.hacktok.ui.friendList.component.BlockedListItem
+import com.androidfinalproject.hacktok.ui.friendList.component.FriendListItem
+import com.androidfinalproject.hacktok.ui.friendList.component.FriendListSearchBar
+import com.androidfinalproject.hacktok.ui.friendList.component.FriendOptionsContent
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)

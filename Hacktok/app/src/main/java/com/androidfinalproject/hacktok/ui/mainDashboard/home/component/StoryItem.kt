@@ -1,5 +1,6 @@
 package com.androidfinalproject.hacktok.ui.mainDashboard.home.component
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,10 +16,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberAsyncImagePainter
+import com.androidfinalproject.hacktok.R
 
 @Composable
 fun StoryItem(
@@ -59,13 +64,24 @@ fun StoryItem(
             // Profile picture with blue border (Facebook's active story indicator)
             Box(
                 modifier = Modifier
-                    .padding(start = 8.dp, top = 8.dp)
-                    .size(36.dp)
-                    .border(width = 4.dp, color = Color(0xFF1877F2), shape = CircleShape)
-                    .padding(2.dp)
+                    .size(32.dp)
                     .clip(CircleShape)
-                    .background(Color.LightGray)
-            )
+                    .padding(start = 5.dp, top = 5.dp)
+            ) {
+                val painter = rememberAsyncImagePainter(
+                    model = profileImageUrl.takeIf { it.isNotBlank() },
+                    error = painterResource(id = R.drawable.placeholder_profile),
+                    placeholder = painterResource(id = R.drawable.placeholder_profile),
+                    fallback = painterResource(id = R.drawable.placeholder_profile)
+                )
+
+                Image(
+                    painter = painter,
+                    contentDescription = "Blank Profile",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
 
             // Username at bottom
             Text(
