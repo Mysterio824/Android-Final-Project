@@ -175,10 +175,10 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
                     navController.popBackStack()
                 },
                 onChatWithFriend = { user ->
-                    navController.navigate("${MainRoute.ChatRoom.route}/user/${user.id}")
+                    navController.navigate("${MainRoute.ChatRoom.route}/user/${user}")
                 },
                 onUserProfileView = { user ->
-                    navController.navigate("${MainRoute.UserDetail.route}/${user.id}")
+                    navController.navigate("${MainRoute.UserDetail.route}/${user}")
                 }
             )
         }
