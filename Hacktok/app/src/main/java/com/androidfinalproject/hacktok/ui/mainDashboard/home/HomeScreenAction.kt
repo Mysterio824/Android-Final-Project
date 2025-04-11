@@ -7,4 +7,8 @@ sealed class HomeScreenAction {
     data class SharePost(val postId: String) : HomeScreenAction()
     data class OnUserClick(val userId: String) : HomeScreenAction()
     data class OnPostClick(val postId: String) : HomeScreenAction()
+    data class SelectTab(val tabIndex: Int) : HomeScreenAction()
+    object OnCreatePost : HomeScreenAction()
+    object OnCreateStory : HomeScreenAction()
+    data class OnStoryClick(val storyId: String) : HomeScreenAction()
 }

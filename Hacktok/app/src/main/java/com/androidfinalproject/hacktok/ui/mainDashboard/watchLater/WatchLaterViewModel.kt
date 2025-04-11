@@ -9,12 +9,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class WatchLaterViewModel : ViewModel() {
+class WatchLaterViewModel(userId: String) : ViewModel() {
     private val _state = MutableStateFlow(WatchLaterState())
     val state: StateFlow<WatchLaterState> = _state.asStateFlow()
 
     init {
-        loadSavedPosts()
+        loadSavedPosts(userId)
     }
 
     fun onAction(action: WatchLaterAction) {
@@ -25,7 +25,7 @@ class WatchLaterViewModel : ViewModel() {
         }
     }
 
-    private fun loadSavedPosts() {
+    private fun loadSavedPosts(userId: String) {
         viewModelScope.launch {
             _state.update { currentState ->
                 currentState.copy(
