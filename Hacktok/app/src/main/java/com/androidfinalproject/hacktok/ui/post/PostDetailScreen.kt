@@ -118,7 +118,6 @@ fun PostDetailScreen(
                             onUserClick = { userId -> onAction(PostDetailAction.OnUserClick(userId)) },
                             onReplyClick = {
                                 onAction(PostDetailAction.ToggleCommentInputFocus)
-                                // In a real app, you'd also track which comment is being replied to
                             }
                         )
                     }

@@ -41,8 +41,6 @@ fun PostContent(
     onOptionsClick: () -> Unit,
     onUserClick: () -> Unit
 ) {
-    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
