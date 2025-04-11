@@ -22,8 +22,8 @@ import com.androidfinalproject.hacktok.ui.profile.UserProfileScreenRoot
 import com.androidfinalproject.hacktok.ui.profile.UserProfileViewModel
 import com.androidfinalproject.hacktok.ui.post.PostDetailScreenRoot
 import com.androidfinalproject.hacktok.ui.post.PostDetailViewModel
-import com.androidfinalproject.hacktok.ui.mainDashboard.friendList.FriendListScreenRoot
-import com.androidfinalproject.hacktok.ui.mainDashboard.friendList.FriendListViewModel
+import com.androidfinalproject.hacktok.ui.friendList.FriendListScreenRoot
+import com.androidfinalproject.hacktok.ui.friendList.FriendListViewModel
 import com.androidfinalproject.hacktok.ui.mainDashboard.DashboardScreenRoot
 import com.androidfinalproject.hacktok.ui.mainDashboard.DashboardViewModel
 import com.androidfinalproject.hacktok.ui.messageDashboard.MessageDashboardRoot

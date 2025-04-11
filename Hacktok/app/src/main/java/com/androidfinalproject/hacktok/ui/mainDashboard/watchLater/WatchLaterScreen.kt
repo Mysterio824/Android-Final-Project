@@ -45,6 +45,7 @@ fun WatchLaterScreen(
                     ) {
                         PostContent(
                             post = post,
+
                             onPostClick = {
                                 onAction(WatchLaterAction.OnPostClick(post.id!!))
                             },

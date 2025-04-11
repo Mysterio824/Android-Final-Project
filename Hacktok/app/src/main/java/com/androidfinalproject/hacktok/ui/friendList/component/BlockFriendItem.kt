@@ -1,4 +1,4 @@
-package com.androidfinalproject.hacktok.ui.mainDashboard.friendList.component
+package com.androidfinalproject.hacktok.ui.friendList.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
