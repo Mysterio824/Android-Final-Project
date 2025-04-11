@@ -20,7 +20,7 @@ fun App() {
     Log.d("Navigation", "Starting at: ${AuthRoute.Graph.route}")
     NavHost(
         navController = navController,
-        startDestination = AuthRoute.Graph.route
+        startDestination = MainRoute.Graph.route
     ) {
         authNavigation(navController)
         adminNavigation(navController)

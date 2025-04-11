@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import com.androidfinalproject.hacktok.model.MockData
-import com.androidfinalproject.hacktok.ui.mainDashboard.currentProfile.component.StatColumn
+import com.androidfinalproject.hacktok.ui.currentProfile.component.StatColumn
 import com.androidfinalproject.hacktok.ui.post.component.PostContent
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 import com.androidfinalproject.hacktok.ui.profile.component.IconTextButton
