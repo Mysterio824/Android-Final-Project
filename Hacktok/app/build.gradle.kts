@@ -89,7 +89,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.ui.text.google.fonts)
-    implementation(libs.coil.compose)
+    implementation("io.coil-kt:coil-compose:2.5.0")
 
     implementation(libs.material.icons.extended)
     implementation(libs.androidx.compose.material3.material3)
