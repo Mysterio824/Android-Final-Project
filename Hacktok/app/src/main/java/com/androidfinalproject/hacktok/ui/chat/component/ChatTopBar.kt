@@ -21,7 +21,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.androidfinalproject.hacktok.model.User
-import com.androidfinalproject.hacktok.ui.mainDashboard.messageDashboard.component.ProfileImage
+import com.androidfinalproject.hacktok.ui.messageDashboard.component.ProfileImage
+
 
 @Composable
 fun ChatTopBar(
