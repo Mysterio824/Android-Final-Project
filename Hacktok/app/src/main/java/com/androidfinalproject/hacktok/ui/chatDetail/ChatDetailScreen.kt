@@ -28,7 +28,6 @@ fun ChatDetailScreen(
     onAction: (ChatDetailAction) -> Unit
 ) {
     var isRenameDialogVisible by remember { mutableStateOf(false) }
-    var newGroupName by remember { mutableStateOf(state.group.groupName) }
 
     Column(
         modifier = Modifier
@@ -41,7 +40,9 @@ fun ChatDetailScreen(
                 group = state.group,
                 currentUser = state.currentUser,
                 membersList = state.membersList,
-                onRenameClick = { isRenameDialogVisible = true }
+                onRenameClick = {
+                    isRenameDialogVisible = true
+                }
             )
         } else {
             state.otherUser?.let { user ->
