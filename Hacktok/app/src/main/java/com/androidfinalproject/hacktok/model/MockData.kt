@@ -20,16 +20,33 @@ object MockData {
     )
 
     val mockUsers = listOf(
-        User("1", "john", "john@example.com", role = UserRole.USER),
-        User("2", "jane_smith", "jane@example.com", role = UserRole.MODERATOR),
-        User("3", "bob_jones", "bob@example.com", role = UserRole.ADMIN),
-        User("4", "admin_super", "admin@example.com", role = UserRole.SUPER_ADMIN)
+        User(
+            id = "1",
+            username = "johndoe",
+            email = "john@example.com",
+            fullName = "John Doe",
+            profileImage = "https://randomuser.me/api/portraits/men/1.jpg"
+        ),
+        User(
+            id = "2",
+            username = "janedoe",
+            email = "jane@example.com",
+            fullName = "Jane Doe",
+            profileImage = "https://randomuser.me/api/portraits/women/1.jpg"
+        ),
+        User(
+            id = "3",
+            username = "marksmith",
+            email = "mark@example.com",
+            fullName = "Mark Smith",
+            profileImage = "https://randomuser.me/api/portraits/men/2.jpg"
+        )
     )
 
     val mockPosts = listOf(
-        Post("1", "Hello world!", "2", likeCount = 10, imageLink = "https://scontent.fsgn2-7.fna.fbcdn.net/v/t39.30808-6/489891322_715880880792703_6312706882615243490_n.jpg?_nc_cat=1&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeFozlH7UrDEFkjxJb7sOuyQO8rnOqHE1AE7yuc6ocTUAUOeEh3iImWld92-Du6tFcL9CjWKqdIATKXhgt6E_Ii_&_nc_ohc=XCChQ-I7gCoQ7kNvwE5sDbh&_nc_oc=AdmsBGP86HC1m8Rn352XjvrHRXc5ubimARBUNjviXL2cxS0_4iEfyOqstGiC-xnX9KY&_nc_zt=23&_nc_ht=scontent.fsgn2-7.fna&_nc_gid=9jZ00bprKo-C7-cg_l1ZzA&oh=00_AfG15vnRZyFD8SOtEJGN7pypgugDNN5UbFnT0_jcLyytMA&oe=67FC77C1"),
-        Post("2", "Learning Kotlin!", "2", likeCount = 1000),
-        Post("3", "Jetpack Compose is fun!", "2", likeCount = 123)
+        Post("1", "Hello world!", "2", likeCount = 10, user = mockUsers[2], imageLink = "https://scontent.fsgn2-7.fna.fbcdn.net/v/t39.30808-6/489891322_715880880792703_6312706882615243490_n.jpg?_nc_cat=1&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeFozlH7UrDEFkjxJb7sOuyQO8rnOqHE1AE7yuc6ocTUAUOeEh3iImWld92-Du6tFcL9CjWKqdIATKXhgt6E_Ii_&_nc_ohc=XCChQ-I7gCoQ7kNvwE5sDbh&_nc_oc=AdmsBGP86HC1m8Rn352XjvrHRXc5ubimARBUNjviXL2cxS0_4iEfyOqstGiC-xnX9KY&_nc_zt=23&_nc_ht=scontent.fsgn2-7.fna&_nc_gid=9jZ00bprKo-C7-cg_l1ZzA&oh=00_AfG15vnRZyFD8SOtEJGN7pypgugDNN5UbFnT0_jcLyytMA&oe=67FC77C1"),
+        Post("2", "Learning Kotlin!", "2", likeCount = 1000, user = mockUsers[1]),
+        Post("3", "Jetpack Compose is fun!", "2", likeCount = 123, user = mockUsers.first())
     )
 
     val mockComments = listOf(
@@ -166,6 +183,12 @@ object MockData {
             createdAt = Date(),
             status = "pending"
         )
+    )
+
+    val mockRelations = mapOf(
+        "1" to RelationInfo("1", RelationshipStatus.NONE),
+        "2" to RelationInfo("2", RelationshipStatus.PENDING_OUTGOING),
+        "3" to RelationInfo("3", RelationshipStatus.PENDING_INCOMING)
     )
 
     // Sample data for UserStatisticsState

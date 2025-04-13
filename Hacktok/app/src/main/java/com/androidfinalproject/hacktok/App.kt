@@ -11,6 +11,7 @@ import com.androidfinalproject.hacktok.router.graph.mainNavigation
 import com.androidfinalproject.hacktok.router.graph.testNavigation
 import com.androidfinalproject.hacktok.router.routes.AuthRoute
 import com.androidfinalproject.hacktok.router.routes.MainRoute
+import com.androidfinalproject.hacktok.router.routes.TestRoute
 
 @Composable
 @Preview

@@ -1,5 +1,6 @@
 package com.androidfinalproject.hacktok.ui.post.component
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -18,12 +19,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
+import com.androidfinalproject.hacktok.R
 import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
@@ -41,8 +44,7 @@ fun PostContent(
     onOptionsClick: () -> Unit,
     onUserClick: () -> Unit
 ) {
-    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
-
+    val user = post.user!!
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -59,16 +61,26 @@ fun PostContent(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Avatar
             Box(
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(45.dp)
                     .clip(CircleShape)
-                    .background(Color.LightGray)
                     .clickable(onClick = onUserClick)
             ) {
-                Text(
-                    text = post.userId.first().toString(),
-                    modifier = Modifier.align(Alignment.Center)
+                val imageUrl = user.profileImage
+                val painter = rememberAsyncImagePainter(
+                    model = imageUrl.takeIf { !it.isNullOrBlank() },
+                    error = painterResource(id = R.drawable.placeholder_profile),
+                    placeholder = painterResource(id = R.drawable.placeholder_profile),
+                    fallback = painterResource(id = R.drawable.placeholder_profile)
+                )
+
+                Image(
+                    painter = painter,
+                    contentDescription = "Profile picture of ${user.username}",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
                 )
             }
 
@@ -79,7 +91,7 @@ fun PostContent(
                     .clickable(onClick = onUserClick)
             ) {
                 Text(
-                    text = "User ${post.userId}",
+                    text = user.username,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
                 )

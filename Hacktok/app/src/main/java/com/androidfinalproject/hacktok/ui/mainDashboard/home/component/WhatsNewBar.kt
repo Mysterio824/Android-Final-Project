@@ -1,83 +1,85 @@
 package com.androidfinalproject.hacktok.ui.mainDashboard.home.component
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberAsyncImagePainter
+import com.androidfinalproject.hacktok.R
+
 
 @Composable
 fun WhatsNewBar(
-    query: String,
-    onQueryChange: (String) -> Unit,
-    upload: () -> Unit
+    profilePicUrl: String,
+    onNewPostCLick: () -> Unit,
 ) {
-    Column(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(horizontal = 0.dp, vertical = 0.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        shape = RectangleShape
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            BasicTextField(
-                value = query,
-                onValueChange = { onQueryChange(it) },
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(end = 8.dp),
-                textStyle = TextStyle(
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = MaterialTheme.typography.bodyLarge.fontSize
-                ),
-                decorationBox = { innerTextField ->
-                    Column {
-                        innerTextField()
-                        if (query.isEmpty()) {
-                            Text(
-                                text = "What's happening?",
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                        }
-                        HorizontalDivider(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 4.dp),
-                            color = MaterialTheme.colorScheme.outline,
-                            thickness = 1.dp
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                // Avatar
+                Box(
+                    modifier = Modifier
+                        .size(45.dp)
+                        .clip(CircleShape)
+                ) {
+                    val painter = rememberAsyncImagePainter(
+                        model = profilePicUrl.takeIf { it.isNotBlank() },
+                        error = painterResource(id = R.drawable.placeholder_profile),
+                        placeholder = painterResource(id = R.drawable.placeholder_profile),
+                        fallback = painterResource(id = R.drawable.placeholder_profile)
+                    )
+
+                    Image(
+                        painter = painter,
+                        contentDescription = "Blank Profile",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(40.dp),
+                    shape = RoundedCornerShape(20.dp),
+                    color = Color(0xFFF0F2F5)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .clickable { onNewPostCLick() }
+                    ) {
+                        Text(
+                            text = "What's on your mind?",
+                            color = Color.Gray
                         )
                     }
-                },
-                singleLine = true
-            )
-
-            IconButton(
-                onClick = { if (query.isNotEmpty()) upload() },
-                enabled = query.isNotEmpty(),
-                modifier = Modifier.size(36.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Send,
-                    contentDescription = "Post",
-                    tint = if (query.isNotEmpty()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                )
+                }
             }
         }
-
-        Spacer(modifier = Modifier.height(30.dp))
-
-        HorizontalDivider(
-            modifier = Modifier.fillMaxWidth(),
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-            thickness = 2.dp,
-        )
     }
 }
