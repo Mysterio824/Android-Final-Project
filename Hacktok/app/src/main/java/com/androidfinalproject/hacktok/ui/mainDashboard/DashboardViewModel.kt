@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.model.User
-import com.androidfinalproject.hacktok.ui.mainDashboard.messageDashboard.MessageDashboardAction
+import com.androidfinalproject.hacktok.ui.messageDashboard.MessageDashboardAction
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

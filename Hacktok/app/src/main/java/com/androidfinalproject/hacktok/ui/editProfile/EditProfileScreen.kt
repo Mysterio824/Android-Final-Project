@@ -12,7 +12,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.androidfinalproject.hacktok.model.UserRole
-import com.androidfinalproject.hacktok.ui.mainDashboard.messageDashboard.component.ProfileImage
+import com.androidfinalproject.hacktok.ui.messageDashboard.component.ProfileImage
 import com.androidfinalproject.hacktok.ui.editProfile.component.CustomTextField
 import com.androidfinalproject.hacktok.ui.editProfile.component.DropdownField
 import androidx.lifecycle.viewmodel.compose.viewModel

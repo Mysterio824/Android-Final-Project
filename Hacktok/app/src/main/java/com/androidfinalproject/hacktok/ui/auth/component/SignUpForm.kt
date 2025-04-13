@@ -60,7 +60,7 @@ fun SignUpForm(
     PasswordInputField(
         value = state.confirmPassword,
         errorText = state.confirmPasswordError,
-        onValueChange = { onAction(AuthAction.UpdatePassword(it)) },
+        onValueChange = { onAction(AuthAction.UpdateConfirmPassword(it)) },
         imeAction = ImeAction.Done,
         isConfirm = true,
         onImeAction = {

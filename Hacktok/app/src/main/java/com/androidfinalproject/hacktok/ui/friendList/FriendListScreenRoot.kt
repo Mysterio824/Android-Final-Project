@@ -10,9 +10,8 @@ import org.bson.types.ObjectId
 @Composable
 fun FriendListScreenRoot(
     viewModel: FriendListViewModel,
-    onNavigateBack: () -> Unit,
-    onChatWithFriend: (User) -> Unit,
-    onUserProfileView: (User) -> Unit
+    onChatWithFriend: (String) -> Unit,
+    onUserProfileView: (String) -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -20,9 +19,8 @@ fun FriendListScreenRoot(
         state = state,
         onAction = { action ->
             when (action) {
-                is FriendListAction.NavigateBack -> onNavigateBack()
-                is FriendListAction.ChatWithFriend -> onChatWithFriend(action.user)
-                is FriendListAction.UserClicked -> onUserProfileView(action.user)
+                is FriendListAction.ChatWithFriend -> onChatWithFriend(action.userId)
+                is FriendListAction.UserClicked -> onUserProfileView(action.userId)
                 else -> viewModel.onAction(action)
             }
         }

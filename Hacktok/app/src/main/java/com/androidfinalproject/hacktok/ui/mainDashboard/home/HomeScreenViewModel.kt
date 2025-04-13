@@ -3,14 +3,17 @@ package com.androidfinalproject.hacktok.ui.mainDashboard.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.model.MockData
+import com.androidfinalproject.hacktok.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class HomeScreenViewModel : ViewModel() {
-    private val _state = MutableStateFlow(HomeScreenState())
+class HomeScreenViewModel(curUser: User) : ViewModel() {
+    private val _state = MutableStateFlow(HomeScreenState(
+        user = curUser
+    ))
     val state: StateFlow<HomeScreenState> = _state.asStateFlow()
 
     init {

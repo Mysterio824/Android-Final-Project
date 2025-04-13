@@ -1,21 +1,20 @@
 package com.androidfinalproject.hacktok.ui.mainDashboard
 
-import SearchDashboardScreenRoot
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.ui.Modifier
-import com.androidfinalproject.hacktok.ui.mainDashboard.component.BottomNavigationBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.androidfinalproject.hacktok.ui.mainDashboard.currentProfile.CurrentProfileScreenRoot
-import com.androidfinalproject.hacktok.ui.mainDashboard.currentProfile.CurrentProfileViewModel
 import com.androidfinalproject.hacktok.ui.mainDashboard.home.HomeScreenRoot
-import com.androidfinalproject.hacktok.ui.mainDashboard.messageDashboard.MessageDashboardRoot
-import com.androidfinalproject.hacktok.ui.mainDashboard.messageDashboard.MessageDashboardViewModel
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 import androidx.activity.compose.BackHandler
+import com.androidfinalproject.hacktok.ui.mainDashboard.component.TopNavigationBar
+import com.androidfinalproject.hacktok.ui.mainDashboard.friendSuggestion.FriendSuggestionScreenRoot
+import com.androidfinalproject.hacktok.ui.mainDashboard.friendSuggestion.FriendSuggestionViewModel
+import com.androidfinalproject.hacktok.ui.mainDashboard.home.HomeScreenViewModel
 import com.androidfinalproject.hacktok.ui.mainDashboard.watchLater.WatchLaterScreenRoot
+import com.androidfinalproject.hacktok.ui.mainDashboard.watchLater.WatchLaterViewModel
 
 
 @Composable
@@ -27,10 +26,13 @@ fun DashboardScreen(
         onAction(DashboardAction.OnNavigateBack)
     }
     Scaffold(
-        bottomBar = {
-            BottomNavigationBar(
-                currentScreen = state.selectedTab,
-                onItemSelected = { tab -> onAction(DashboardAction.SelectTab(tab)) }
+        topBar = {
+            TopNavigationBar(
+                currentTab = state.selectedTab,
+                onSearchClick = { onAction(DashboardAction.OnSearchNavigate) },
+                onMessageClick = { onAction(DashboardAction.OnMessageDashboardNavigate) },
+                onUserClick = { onAction(DashboardAction.OnCurrentProfileNavigate) },
+                onTabSelected = { onAction(DashboardAction.SelectTab(it)) }
             )
         }
     ) { paddingValues ->
@@ -42,42 +44,33 @@ fun DashboardScreen(
             when (state.selectedTab) {
                 "Home" -> {
                     HomeScreenRoot(
-                        onUserClick = { id -> onAction(DashboardAction.OnUserClick(id)) },
-                        onPostClick = { id -> onAction(DashboardAction.OnPostClick(id)) }
+                        viewModel = HomeScreenViewModel(state.user),
+                        onUserClick = { onAction(DashboardAction.OnUserClick(it)) },
+                        onPostClick = { onAction(DashboardAction.OnPostClick(it)) },
+                        onStoryClick = { onAction(DashboardAction.OnStoryClick(it)) },
+                        onNewPostNavigate = { onAction(DashboardAction.OnCreatePost) },
+                        onNewStoryNavigate = { onAction(DashboardAction.OnCreateStory) }
                     )
                 }
 
-                "Search" -> {
-                    SearchDashboardScreenRoot(
-                        onUserClick = { id -> onAction(DashboardAction.OnUserClick(id!!)) },
-                        onPostClick = { id -> onAction(DashboardAction.OnPostClick(id!!)) }
-                    )
-                }
-
-                "Chat" -> {
-                    MessageDashboardRoot(
-                        viewModel = MessageDashboardViewModel(),
-                        onNewChat = { id -> onAction(DashboardAction.GotoUserChat(id!!)) },
-                        onNewGroup = { id -> onAction(DashboardAction.GotoGroupChat(id!!)) },
-                        onGoToChat = { id -> onAction(DashboardAction.GotoUserChat(id!!)) },
+                "Friends" -> {
+                    FriendSuggestionScreenRoot (
+                        viewModel = FriendSuggestionViewModel(state.user),
+                        onUserNavigate = { onAction(DashboardAction.OnUserClick(it)) },
+                        onFriendListNavigate = { onAction(DashboardAction.OnFriendListNavigate(it)) },
                     )
                 }
 
                 "WatchLater" -> {
                     WatchLaterScreenRoot(
+                        viewModel = WatchLaterViewModel(state.user.id!!),
                         onPostClickNavigation = { id -> onAction(DashboardAction.OnPostClick(id)) },
                         onUserProfileNavigate = { id -> onAction(DashboardAction.OnUserClick(id)) }
                     )
                 }
 
-                "Profile" -> {
-                    CurrentProfileScreenRoot(
-                        viewModel = CurrentProfileViewModel(state.user.id!!),
-                        onFriendListNavigation = { onAction(DashboardAction.OnFriendListNavigate(state.user.id!!)) },
-                        onPostClickNavigation = { id -> onAction(DashboardAction.OnPostClick(id)) },
-                        onProfileEditNavigation = { onAction(DashboardAction.OnEditProfileNavigate) },
-                        onPostEditNavigation = { id -> onAction(DashboardAction.OnPostEditNavigate(id)) }
-                    )
+                "Notifications" -> {
+                    //TODO
                 }
             }
         }
@@ -96,8 +89,8 @@ fun PreviewDashboardScreen() {
         ) {
             DashboardScreen(
                 state = DashboardState(
-                    selectedTab = "Profile"
-                    //Home, Search, Chat, WatchLater, Profile
+                    selectedTab = "WatchLater"
+                    //Home, Notifications, WatchLater, Friends
                 ),
                 onAction = {}
             )
