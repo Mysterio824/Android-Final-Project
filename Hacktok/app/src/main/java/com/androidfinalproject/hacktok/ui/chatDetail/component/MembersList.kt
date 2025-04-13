@@ -22,13 +22,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.androidfinalproject.hacktok.model.Group
 import com.androidfinalproject.hacktok.model.User
+import com.androidfinalproject.hacktok.ui.chatDetail.ChatDetailAction
 import java.util.Date
 
 @Composable
 fun MembersList(
     membersList: List<User>,
     group: Group,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onMemberAction: ((ChatDetailAction) -> Unit)? = null
 ) {
     LazyColumn(
         modifier = modifier
@@ -37,7 +39,8 @@ fun MembersList(
             MemberItem(
                 user = member,
                 isAdmin = group.admins.contains(member.id),
-                isCreator = member.id == group.creatorId
+                isCreator = member.id == group.creatorId,
+                onMemberAction = onMemberAction
             )
         }
     }
@@ -47,7 +50,8 @@ fun MembersList(
 fun MemberItem(
     user: User,
     isAdmin: Boolean,
-    isCreator: Boolean
+    isCreator: Boolean,
+    onMemberAction: ((ChatDetailAction) -> Unit)? = null
 ) {
     Row(
         modifier = Modifier
@@ -105,7 +109,9 @@ fun MemberItem(
         }
 
         // Three dots menu button
-        IconButton(onClick = { /* No action yet */ }) {
+        IconButton(onClick = {
+            onMemberAction?.invoke(ChatDetailAction.NavigateToUserProfile(user.id))
+        }) {
             Icon(
                 imageVector = Icons.Default.MoreVert,
                 contentDescription = "Menu",

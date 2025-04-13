@@ -106,6 +106,7 @@ fun ChatDetailScreen(
             MembersList(
                 membersList = state.membersList,
                 group = state.group,
+                onMemberAction = onAction,
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
