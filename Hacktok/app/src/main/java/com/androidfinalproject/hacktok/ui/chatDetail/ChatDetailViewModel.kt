@@ -17,7 +17,6 @@ class ChatDetailViewModel(
     private val _state = MutableStateFlow(ChatDetailState())
     val state: StateFlow<ChatDetailState> = _state.asStateFlow()
 
-    // Mock data initialization - In a real app, these would come from repositories/API
     init {
         viewModelScope.launch {
             // Lấy thông tin từ savedStateHandle để biết đây là chat nhóm hay cá nhân

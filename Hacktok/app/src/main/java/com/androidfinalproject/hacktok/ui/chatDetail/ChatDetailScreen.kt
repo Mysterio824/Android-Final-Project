@@ -36,9 +36,7 @@ fun ChatDetailScreen(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Hiển thị header dựa vào loại chat
         if (state.isGroup) {
-            // Group Header
             GroupHeader(
                 group = state.group,
                 currentUser = state.currentUser,
@@ -46,7 +44,6 @@ fun ChatDetailScreen(
                 onRenameClick = { isRenameDialogVisible = true }
             )
         } else {
-            // Individual Chat Header
             state.otherUser?.let { user ->
                 UserHeader(
                     user = user,
@@ -62,7 +59,6 @@ fun ChatDetailScreen(
             horizontalArrangement = Arrangement.spacedBy(24.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Nút tắt/bật thông báo (chung)
             IconButton(onClick = { onAction(ChatDetailAction.ToggleMute) }) {
                 Icon(
                     imageVector = if (state.isUserMuted) Icons.Default.NotificationsOff else Icons.Default.Notifications,
@@ -82,7 +78,6 @@ fun ChatDetailScreen(
                 }
             }
 
-            // Nút tìm kiếm (chung)
             IconButton(onClick = { onAction(ChatDetailAction.FindInChat) }) {
                 Icon(
                     imageVector = Icons.Default.Search,
@@ -128,10 +123,8 @@ fun ChatDetailScreen(
         } else {
             // Đối với chat cá nhân
             state.otherUser?.let { user ->
-                // Các tùy chọn chat cá nhân
                 Spacer(modifier = Modifier.weight(1f))
 
-                // Nút chặn người dùng
                 Button(
                     onClick = { onAction(ChatDetailAction.BlockUser) },
                     modifier = Modifier.fillMaxWidth(),
@@ -142,7 +135,6 @@ fun ChatDetailScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Nút xóa cuộc trò chuyện
                 Button(
                     onClick = { onAction(ChatDetailAction.DeleteChat) },
                     modifier = Modifier.fillMaxWidth(),
@@ -154,7 +146,6 @@ fun ChatDetailScreen(
         }
     }
 
-    // Hộp thoại đổi tên nhóm
     if (isRenameDialogVisible) {
         RenameGroupDialog(
             initialGroupName = state.group.groupName,
@@ -197,14 +188,13 @@ fun GroupChatPreview() {
 
     ChatDetailScreen(
         state = groupState,
-        onAction = {}  // Không cần xử lý action trong preview
+        onAction = {}
     )
 }
 
 @Preview(showBackground = true, widthDp = 360, heightDp = 740, name = "Individual Chat Preview")
 @Composable
 fun IndividualChatPreview() {
-    // Tạo state giả lập cho individual chat
     val individualState = ChatDetailState(
         currentUser = User(id = "user1", username = "User One", email = "user1@example.com"),
         otherUser = User(
@@ -218,6 +208,6 @@ fun IndividualChatPreview() {
 
     ChatDetailScreen(
         state = individualState,
-        onAction = {}  // Không cần xử lý action trong preview
+        onAction = {}
     )
 }
