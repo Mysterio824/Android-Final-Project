@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
@@ -21,7 +20,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -41,11 +39,26 @@ fun GroupChatBubble(
     var showMenu by remember { mutableStateOf(false) }
     val clipboardManager = LocalClipboardManager.current
 
-    // Màu sắc theo đồng bộ với dashboard
-    val bubbleColor = if (isCurrentUser) Color(0xFF72BF6A) else Color(0xFFECECEC)
-    val textColor = if (isCurrentUser) Color.White else Color.Black
-    val timeColor = if (isCurrentUser) Color.White.copy(alpha = 0.7f) else Color.DarkGray
-    val senderNameColor = if (isCurrentUser) Color.White.copy(alpha = 0.9f) else Color(0xFF72BF6A)
+    // Using theme colors
+    val bubbleColor = if (isCurrentUser)
+        MaterialTheme.colorScheme.primary
+    else
+        MaterialTheme.colorScheme.surfaceVariant
+
+    val textColor = if (isCurrentUser)
+        MaterialTheme.colorScheme.onPrimary
+    else
+        MaterialTheme.colorScheme.onSurfaceVariant
+
+    val timeColor = if (isCurrentUser)
+        MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
+    else
+        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+
+    val senderNameColor = if (isCurrentUser)
+        MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f)
+    else
+        MaterialTheme.colorScheme.primary
 
     Box(
         modifier = Modifier
@@ -108,7 +121,7 @@ fun GroupChatBubble(
 
             if (isCurrentUser) {
                 DropdownMenuItem(
-                    text = { Text("Delete", color = Color.Red) },
+                    text = { Text("Delete", color = MaterialTheme.colorScheme.error) },
                     onClick = {
                         message.id?.let { onDeleteMessage(it) }
                         showMenu = false

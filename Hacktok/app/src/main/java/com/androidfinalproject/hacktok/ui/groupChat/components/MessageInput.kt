@@ -16,7 +16,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,22 +29,28 @@ fun MessageInput(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         OutlinedTextField(
             value = text,
             onValueChange = onTextChanged,
-            placeholder = { Text("Nhập tin nhắn...", color = Color.DarkGray, fontSize = 16.sp) },
+            placeholder = {
+                Text(
+                    "Nhập tin nhắn...",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 16.sp
+                )
+            },
             modifier = Modifier
                 .weight(1f),
             shape = MaterialTheme.shapes.large,
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color.LightGray,
-                unfocusedBorderColor = Color.Transparent,
-                cursorColor = Color.DarkGray,
-                unfocusedContainerColor = Color(0xFFECECEC)
+                focusedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                cursorColor = MaterialTheme.colorScheme.onSurface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
             )
         )
 
@@ -57,7 +62,7 @@ fun MessageInput(
                 imageVector = Icons.Default.Send,
                 contentDescription = "Gửi tin nhắn",
                 modifier = Modifier.size(24.dp),
-                tint = Color(0xFF72BF6A)
+                tint = MaterialTheme.colorScheme.primary
             )
         }
     }
