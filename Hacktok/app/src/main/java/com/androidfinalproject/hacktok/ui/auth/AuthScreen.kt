@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -30,12 +31,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.androidfinalproject.hacktok.R
 import com.androidfinalproject.hacktok.ui.auth.component.*
-
+import androidx.compose.foundation.clickable
 
 @Composable
 fun AuthScreen(
-    state: AuthState,
-    onAction: (AuthAction) -> Unit
+    state: AuthUiState,
+    onAction: (AuthAction) -> Unit,
+    onGoogleSignInClicked: () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -43,6 +45,7 @@ fun AuthScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            .clickable(enabled = state.isLoading) { /* Consume clicks when loading */ }
     ) {
         Column(
             modifier = Modifier
@@ -111,7 +114,8 @@ fun AuthScreen(
             }
 
             GoogleSignInButton(
-                onClick = { onAction(AuthAction.GoogleSignIn) }
+                onClick = onGoogleSignInClicked,
+                enabled = !state.isLoading
             )
 
             Spacer(modifier = Modifier.weight(1f))
@@ -119,6 +123,7 @@ fun AuthScreen(
             // Create new account button
             Button(
                 onClick = { onAction(AuthAction.ToggleAuthMode) },
+                enabled = !state.isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
@@ -136,10 +141,13 @@ fun AuthScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
         }
+        
+        // Optional: Show a loading indicator overlay based on uiState.isLoading
+        if (state.isLoading) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        }
     }
 }
-
-
 
 @Preview(showBackground = true)
 @Composable
@@ -147,8 +155,10 @@ fun FacebookAuthScreenPreview() {
     MaterialTheme {
         AuthScreen(
             onAction = {},
-            state = AuthState(
-                isLoginMode = false
+            onGoogleSignInClicked = {},
+            state = AuthUiState(
+                isLoginMode = false,
+                isLoading = true
             )
         )
     }

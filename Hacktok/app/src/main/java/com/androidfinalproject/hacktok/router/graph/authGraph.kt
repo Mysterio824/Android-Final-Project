@@ -21,7 +21,10 @@ import com.androidfinalproject.hacktok.ui.forgotPassword.ForgotPasswordViewModel
 import com.androidfinalproject.hacktok.ui.resetPassword.ResetPasswordScreenRoot
 import com.androidfinalproject.hacktok.ui.resetPassword.ResetPasswordViewModel
 
-fun NavGraphBuilder.authNavigation(navController: NavController) {
+fun NavGraphBuilder.authNavigation(
+    navController: NavController,
+    onGoogleSignInClicked: () -> Unit
+) {
     navigation(
         startDestination = AuthRoute.Login.route,
         route = AuthRoute.Graph.route
@@ -71,7 +74,8 @@ fun NavGraphBuilder.authNavigation(navController: NavController) {
                 },
                 onForgetPassword = {
                     navController.navigate(AuthRoute.ForgotPassword.route)
-                }
+                },
+                onGoogleSignInClicked = onGoogleSignInClicked
             )
         }
 
