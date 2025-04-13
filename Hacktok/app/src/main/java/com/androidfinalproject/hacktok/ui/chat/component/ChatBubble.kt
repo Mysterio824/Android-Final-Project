@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
@@ -38,9 +37,9 @@ fun ChatBubble(
     var showMenu by remember { mutableStateOf(false) }
     val clipboardManager = LocalClipboardManager.current
 
-    val bubbleColor = if (isCurrentUser) Color(0xFF72BF6A) else Color(0xFFECECEC)
-    val textColor = if (isCurrentUser) Color.White else Color.Black
-    val timeColor = if (isCurrentUser) Color.White.copy(alpha = 0.7f) else Color.DarkGray
+    val bubbleColor = if (isCurrentUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
+    val textColor = if (isCurrentUser) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+    val timeColor = if (isCurrentUser) MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
 
     Box(
         modifier = Modifier
@@ -89,7 +88,7 @@ fun ChatBubble(
                 }
             )
             DropdownMenuItem(
-                text = { Text("Delete", color = Color.Red) },
+                text = { Text("Delete", color = MaterialTheme.colorScheme.error) },
                 onClick = {
                     message.id?.let { onDeleteMessage(it) }
                     showMenu = false
