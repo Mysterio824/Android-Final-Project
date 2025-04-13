@@ -3,9 +3,10 @@ package com.androidfinalproject.hacktok.ui.chatDetail.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,15 +35,15 @@ fun GroupHeader(
         // Group icon
         Box(
             modifier = Modifier
-                .size(80.dp)
+                .size(100.dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primaryContainer),
+                .background(Color(0xFF72BF6A).copy(alpha = 0.2f)),
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = group.groupName.first().toString(),
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                fontSize = 24.sp,
+                text = group.groupName.firstOrNull()?.toString() ?: "#",
+                color = Color(0xFF72BF6A),
+                fontSize = 36.sp,
                 fontWeight = FontWeight.Bold
             )
         }
@@ -55,9 +56,11 @@ fun GroupHeader(
         ) {
             Text(
                 text = group.groupName,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
             )
+
             Text(
                 text = "${group.members.size} thành viên",
                 fontSize = 16.sp,
@@ -76,47 +79,18 @@ fun GroupHeader(
 
             // Show rename button if current user is admin
             if (isAdmin) {
-                TextButton(onClick = onRenameClick) {
-                    Text("Đổi tên nhóm", color = MaterialTheme.colorScheme.primary)
+                TextButton(
+                    onClick = onRenameClick,
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = Color(0xFF72BF6A)
+                    )
+                ) {
+                    Text(
+                        "Đổi tên nhóm",
+                        fontWeight = FontWeight.Medium
+                    )
                 }
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GroupHeaderPreview() {
-    val previewGroup = Group(
-        id = "group1",
-        groupName = "Nhóm Preview",
-        description = "Mô tả cho nhóm",
-        creatorId = "user1",
-        members = listOf("user1", "user2", "user3"),
-        admins = listOf("user1"),
-        isPublic = true,
-        createdAt = Date(),
-        coverImage = null
-    )
-
-    val currentUser = User(
-        id = "user1",
-        username = "Preview User",
-        email = "preview@example.com"
-    )
-
-    val membersList = listOf(
-        User(id = "user1", username = "Preview User", email = "preview@example.com"),
-        User(id = "user2", username = "Member 2", email = "member2@example.com"),
-        User(id = "user3", username = "Member 3", email = "member3@example.com")
-    )
-
-    MaterialTheme {
-        GroupHeader(
-            group = previewGroup,
-            currentUser = currentUser,
-            membersList = membersList,
-            onRenameClick = {}
-        )
     }
 }

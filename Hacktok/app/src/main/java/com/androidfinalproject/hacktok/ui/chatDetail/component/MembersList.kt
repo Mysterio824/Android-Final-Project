@@ -5,25 +5,24 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.androidfinalproject.hacktok.model.Group
 import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.ui.chatDetail.ChatDetailAction
-import java.util.Date
 
 @Composable
 fun MembersList(
@@ -42,6 +41,12 @@ fun MembersList(
                 isCreator = member.id == group.creatorId,
                 onMemberAction = onMemberAction
             )
+
+            Divider(
+                color = Color(0xFFECECEC),
+                thickness = 1.dp,
+                modifier = Modifier.padding(start = 52.dp)
+            )
         }
     }
 }
@@ -56,7 +61,7 @@ fun MemberItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // User avatar
@@ -64,12 +69,12 @@ fun MemberItem(
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primaryContainer),
+                .background(Color(0xFF72BF6A).copy(alpha = 0.2f)),
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = user.username.first().toString(),
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                text = user.username.firstOrNull()?.toString() ?: "",
+                color = Color(0xFF72BF6A),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -83,7 +88,8 @@ fun MemberItem(
             Text(
                 text = user.username,
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Medium
+                fontWeight = FontWeight.Medium,
+                color = Color.Black
             )
 
             Row(
@@ -94,15 +100,15 @@ fun MemberItem(
                     Text(
                         text = "Người tạo",
                         fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.primary
+                        color = Color(0xFF72BF6A)
                     )
                 }
 
-                if (isAdmin) {
+                if (isAdmin && !isCreator) {
                     Text(
                         text = "Admin",
                         fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.secondary
+                        color = Color(0xFF72BF6A).copy(alpha = 0.8f)
                     )
                 }
             }
@@ -118,35 +124,5 @@ fun MemberItem(
                 tint = Color.Gray
             )
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun MembersListPreview() {
-    val previewGroup = Group(
-        id = "group1",
-        groupName = "Nhóm Preview",
-        description = "Mô tả cho nhóm",
-        creatorId = "user1",
-        members = listOf("user1", "user2", "user3"),
-        admins = listOf("user1", "user2"),
-        isPublic = true,
-        createdAt = Date(),
-        coverImage = null
-    )
-
-    val membersList = listOf(
-        User(id = "user1", username = "Creator User", email = "creator@example.com"),
-        User(id = "user2", username = "Admin User", email = "admin@example.com"),
-        User(id = "user3", username = "Normal User", email = "normal@example.com")
-    )
-
-    MaterialTheme {
-        MembersList(
-            membersList = membersList,
-            group = previewGroup,
-            modifier = Modifier.height(300.dp)
-        )
     }
 }

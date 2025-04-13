@@ -1,11 +1,21 @@
 package com.androidfinalproject.hacktok.ui.chatDetail.components
 
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun RenameGroupDialog(
@@ -17,41 +27,53 @@ fun RenameGroupDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Đổi tên nhóm") },
+        title = {
+            Text(
+                "Đổi tên nhóm",
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp
+            )
+        },
         text = {
-            TextField(
+            OutlinedTextField(
                 value = newGroupName,
                 onValueChange = { newGroupName = it },
-                label = { Text("Tên nhóm mới") }
+                label = { Text("Tên nhóm mới") },
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFF72BF6A),
+                    unfocusedBorderColor = Color.Gray,
+                    focusedLabelColor = Color(0xFF72BF6A),
+                    cursorColor = Color(0xFF72BF6A)
+                )
             )
         },
         confirmButton = {
             Button(
-                onClick = { onConfirm(newGroupName) }
+                onClick = { onConfirm(newGroupName) },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF72BF6A)
+                ),
+                shape = MaterialTheme.shapes.medium
             ) {
-                Text("Lưu")
+                Text(
+                    "Lưu",
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
             }
         },
         dismissButton = {
-            Button(
-                onClick = onDismiss
+            TextButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = Color.Gray
+                )
             ) {
                 Text("Hủy")
             }
-        }
+        },
+        containerColor = Color.White,
+        titleContentColor = Color.Black,
+        shape = MaterialTheme.shapes.medium
     )
-}
-
-@Preview
-@Composable
-fun RenameGroupDialogPreview() {
-    var showDialog by remember { mutableStateOf(true) }
-
-    if (showDialog) {
-        RenameGroupDialog(
-            initialGroupName = "Nhóm Preview",
-            onDismiss = { showDialog = false },
-            onConfirm = { showDialog = false }
-        )
-    }
 }
