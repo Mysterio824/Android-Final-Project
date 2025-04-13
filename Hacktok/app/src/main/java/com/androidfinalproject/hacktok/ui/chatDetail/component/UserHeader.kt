@@ -14,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,12 +33,12 @@ fun UserHeader(
             modifier = Modifier
                 .size(100.dp)
                 .clip(CircleShape)
-                .background(Color(0xFF72BF6A).copy(alpha = 0.2f)),
+                .background(MaterialTheme.colorScheme.primaryContainer),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = user.username.firstOrNull()?.toString() ?: "",
-                color = Color(0xFF72BF6A),
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
                 fontWeight = FontWeight.Bold,
                 fontSize = 36.sp
             )
@@ -52,7 +51,7 @@ fun UserHeader(
             text = user.username,
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.Black
+            color = MaterialTheme.colorScheme.onSurface
         )
 
         Spacer(modifier = Modifier.height(4.dp))
@@ -61,7 +60,7 @@ fun UserHeader(
         Text(
             text = user.email ?: "",
             fontSize = 14.sp,
-            color = Color.Gray
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -70,13 +69,13 @@ fun UserHeader(
         Button(
             onClick = onViewProfileClick,
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF72BF6A)
+                containerColor = MaterialTheme.colorScheme.primary
             ),
             shape = MaterialTheme.shapes.medium
         ) {
             Text(
                 "Xem hồ sơ",
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
             )
         }

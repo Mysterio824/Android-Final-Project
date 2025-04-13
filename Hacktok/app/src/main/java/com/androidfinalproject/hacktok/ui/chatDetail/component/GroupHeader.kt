@@ -11,7 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -37,12 +36,12 @@ fun GroupHeader(
             modifier = Modifier
                 .size(100.dp)
                 .clip(CircleShape)
-                .background(Color(0xFF72BF6A).copy(alpha = 0.2f)),
+                .background(MaterialTheme.colorScheme.primaryContainer),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = group.groupName.firstOrNull()?.toString() ?: "#",
-                color = Color(0xFF72BF6A),
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
                 fontSize = 36.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -58,13 +57,13 @@ fun GroupHeader(
                 text = group.groupName,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.Black
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             Text(
                 text = "${group.members.size} thành viên",
                 fontSize = 16.sp,
-                color = Color.Gray
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             // Show creator info
@@ -73,7 +72,7 @@ fun GroupHeader(
                 Text(
                     text = "Người tạo: ${creator.username}",
                     fontSize = 14.sp,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -82,7 +81,7 @@ fun GroupHeader(
                 TextButton(
                     onClick = onRenameClick,
                     colors = ButtonDefaults.textButtonColors(
-                        contentColor = Color(0xFF72BF6A)
+                        contentColor = MaterialTheme.colorScheme.primary
                     )
                 ) {
                     Text(

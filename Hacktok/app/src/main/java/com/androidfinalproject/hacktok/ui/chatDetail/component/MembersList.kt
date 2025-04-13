@@ -16,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -43,7 +42,7 @@ fun MembersList(
             )
 
             Divider(
-                color = Color(0xFFECECEC),
+                color = MaterialTheme.colorScheme.surfaceVariant,
                 thickness = 1.dp,
                 modifier = Modifier.padding(start = 52.dp)
             )
@@ -69,12 +68,12 @@ fun MemberItem(
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)
-                .background(Color(0xFF72BF6A).copy(alpha = 0.2f)),
+                .background(MaterialTheme.colorScheme.primaryContainer),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = user.username.firstOrNull()?.toString() ?: "",
-                color = Color(0xFF72BF6A),
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -89,7 +88,7 @@ fun MemberItem(
                 text = user.username,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color.Black
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             Row(
@@ -100,7 +99,7 @@ fun MemberItem(
                     Text(
                         text = "Người tạo",
                         fontSize = 12.sp,
-                        color = Color(0xFF72BF6A)
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
 
@@ -108,7 +107,7 @@ fun MemberItem(
                     Text(
                         text = "Admin",
                         fontSize = 12.sp,
-                        color = Color(0xFF72BF6A).copy(alpha = 0.8f)
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
             }
@@ -121,7 +120,7 @@ fun MemberItem(
             Icon(
                 imageVector = Icons.Default.MoreVert,
                 contentDescription = "Menu",
-                tint = Color.Gray
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }

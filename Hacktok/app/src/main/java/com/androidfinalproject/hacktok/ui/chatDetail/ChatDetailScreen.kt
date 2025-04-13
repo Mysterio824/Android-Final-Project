@@ -3,11 +3,11 @@ package com.androidfinalproject.hacktok.ui.chatDetail
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -42,19 +42,19 @@ fun ChatDetailScreen(
                     navigationIcon = {
                         IconButton(onClick = { onAction(ChatDetailAction.NavigateBack) }) {
                             Icon(
-                                imageVector = Icons.Default.ArrowBack,
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = "Back"
                             )
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.White,
-                        titleContentColor = Color.Black,
-                        navigationIconContentColor = Color.Black
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        titleContentColor = MaterialTheme.colorScheme.onSurface,
+                        navigationIconContentColor = MaterialTheme.colorScheme.onSurface
                     )
                 )
             },
-            containerColor = Color.White
+            containerColor = MaterialTheme.colorScheme.background
         ) { paddingValues ->
             Column(
                 modifier = Modifier
@@ -97,8 +97,9 @@ fun ChatDetailScreen(
                         FilledTonalIconButton(
                             onClick = { onAction(ChatDetailAction.ToggleMute) },
                             colors = IconButtonDefaults.filledTonalIconButtonColors(
-                                containerColor = Color(0xFFECECEC),
-                                contentColor = if (state.isUserMuted) Color.Red else Color(0xFF72BF6A)
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                contentColor = if (state.isUserMuted) MaterialTheme.colorScheme.error
+                                else MaterialTheme.colorScheme.primary
                             )
                         ) {
                             Icon(
@@ -110,7 +111,7 @@ fun ChatDetailScreen(
                         Text(
                             text = if (state.isUserMuted) "Đã tắt âm" else "Thông báo",
                             fontSize = 12.sp,
-                            color = Color.DarkGray
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
 
@@ -124,8 +125,8 @@ fun ChatDetailScreen(
                             FilledTonalIconButton(
                                 onClick = { onAction(ChatDetailAction.CreateGroup) },
                                 colors = IconButtonDefaults.filledTonalIconButtonColors(
-                                    containerColor = Color(0xFFECECEC),
-                                    contentColor = Color(0xFF72BF6A)
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    contentColor = MaterialTheme.colorScheme.primary
                                 )
                             ) {
                                 Icon(
@@ -137,7 +138,7 @@ fun ChatDetailScreen(
                             Text(
                                 text = "Tạo nhóm",
                                 fontSize = 12.sp,
-                                color = Color.DarkGray
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
 
@@ -150,8 +151,8 @@ fun ChatDetailScreen(
                         FilledTonalIconButton(
                             onClick = { onAction(ChatDetailAction.FindInChat) },
                             colors = IconButtonDefaults.filledTonalIconButtonColors(
-                                containerColor = Color(0xFFECECEC),
-                                contentColor = Color(0xFF72BF6A)
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                contentColor = MaterialTheme.colorScheme.primary
                             )
                         ) {
                             Icon(
@@ -163,13 +164,13 @@ fun ChatDetailScreen(
                         Text(
                             text = "Tìm kiếm",
                             fontSize = 12.sp,
-                            color = Color.DarkGray
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
-                Divider(color = Color(0xFFECECEC), thickness = 1.dp)
+                Divider(color = MaterialTheme.colorScheme.surfaceVariant, thickness = 1.dp)
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Different content based on chat type
@@ -185,13 +186,13 @@ fun ChatDetailScreen(
                             text = "Thành viên",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color.Black
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                         Spacer(modifier = Modifier.weight(1f))
                         Text(
                             text = "${state.membersList.size} người",
                             fontSize = 14.sp,
-                            color = Color.Gray
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
 
@@ -212,13 +213,13 @@ fun ChatDetailScreen(
                         onClick = { onAction(ChatDetailAction.LeaveGroup) },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Red
+                            containerColor = MaterialTheme.colorScheme.error
                         ),
                         shape = MaterialTheme.shapes.medium
                     ) {
                         Text(
                             "Rời nhóm",
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.onError,
                             modifier = Modifier.padding(vertical = 4.dp)
                         )
                     }
@@ -231,13 +232,13 @@ fun ChatDetailScreen(
                             onClick = { onAction(ChatDetailAction.BlockUser) },
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color.Red
+                                containerColor = MaterialTheme.colorScheme.error
                             ),
                             shape = MaterialTheme.shapes.medium
                         ) {
                             Text(
                                 "Chặn người dùng",
-                                color = Color.White,
+                                color = MaterialTheme.colorScheme.onError,
                                 modifier = Modifier.padding(vertical = 4.dp)
                             )
                         }
@@ -248,7 +249,7 @@ fun ChatDetailScreen(
                             onClick = { onAction(ChatDetailAction.DeleteChat) },
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = Color.DarkGray
+                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                             ),
                             shape = MaterialTheme.shapes.medium
                         ) {

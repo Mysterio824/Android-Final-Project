@@ -12,7 +12,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -31,7 +30,8 @@ fun RenameGroupDialog(
             Text(
                 "Đổi tên nhóm",
                 fontWeight = FontWeight.Bold,
-                fontSize = 18.sp
+                fontSize = 18.sp,
+                color = MaterialTheme.colorScheme.onSurface
             )
         },
         text = {
@@ -41,10 +41,10 @@ fun RenameGroupDialog(
                 label = { Text("Tên nhóm mới") },
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color(0xFF72BF6A),
-                    unfocusedBorderColor = Color.Gray,
-                    focusedLabelColor = Color(0xFF72BF6A),
-                    cursorColor = Color(0xFF72BF6A)
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    focusedLabelColor = MaterialTheme.colorScheme.primary,
+                    cursorColor = MaterialTheme.colorScheme.primary
                 )
             )
         },
@@ -52,13 +52,14 @@ fun RenameGroupDialog(
             Button(
                 onClick = { onConfirm(newGroupName) },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF72BF6A)
+                    containerColor = MaterialTheme.colorScheme.primary
                 ),
                 shape = MaterialTheme.shapes.medium
             ) {
                 Text(
                     "Lưu",
-                    modifier = Modifier.padding(horizontal = 8.dp)
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
             }
         },
@@ -66,14 +67,14 @@ fun RenameGroupDialog(
             TextButton(
                 onClick = onDismiss,
                 colors = ButtonDefaults.textButtonColors(
-                    contentColor = Color.Gray
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             ) {
                 Text("Hủy")
             }
         },
-        containerColor = Color.White,
-        titleContentColor = Color.Black,
+        containerColor = MaterialTheme.colorScheme.surface,
+        titleContentColor = MaterialTheme.colorScheme.onSurface,
         shape = MaterialTheme.shapes.medium
     )
 }
