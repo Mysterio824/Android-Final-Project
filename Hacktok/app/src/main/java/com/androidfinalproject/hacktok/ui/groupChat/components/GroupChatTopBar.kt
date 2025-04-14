@@ -25,7 +25,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.androidfinalproject.hacktok.model.Group
-import com.androidfinalproject.hacktok.ui.mainDashboard.messageDashboard.component.ProfileImage
 
 @Composable
 fun GroupChatTopBar(
