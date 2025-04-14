@@ -1,4 +1,16 @@
 package com.androidfinalproject.hacktok.ui.newPost
 
-class NewPostState {
+import android.net.Uri
+
+enum class PRIVACY {
+    PUBLIC,
+    FRIENDS,
+    PRIVATE
 }
+
+data class NewPostState (
+    val caption: String = "",
+    val imageUri: Uri? = null,
+    val privacy: PRIVACY = PRIVACY.PUBLIC,
+    val isPosting: Boolean = false,
+)

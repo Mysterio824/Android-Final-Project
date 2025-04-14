@@ -1,6 +1,8 @@
 package com.androidfinalproject.hacktok.ui.newPost
 
-import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -14,9 +16,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -26,11 +29,16 @@ import com.androidfinalproject.hacktok.R
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 
 @Composable
-fun NewPostScreen() {
-    var caption by remember { mutableStateOf(TextFieldValue("")) }
-    var privacy by remember { mutableStateOf("Only me") }
-    var imageUri by remember { mutableStateOf<Uri?>(null) }
+fun NewPostScreen(
+    state: NewPostState,
+    onAction: (NewPostAction) -> Unit
+) {
     var expanded by remember { mutableStateOf(false) }
+    val privacyIcon = when (state.privacy) {
+        PRIVACY.PUBLIC -> R.drawable.ic_public
+        PRIVACY.FRIENDS -> R.drawable.ic_friends
+        PRIVACY.PRIVATE -> R.drawable.ic_lock
+    }
 
     Surface(
         shape = RoundedCornerShape(12.dp),
@@ -45,11 +53,7 @@ fun NewPostScreen() {
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Header
-            Box(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                // Centered title
+            Box(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = "Compose",
                     style = MaterialTheme.typography.headlineSmall,
@@ -57,7 +61,6 @@ fun NewPostScreen() {
                     modifier = Modifier.align(Alignment.Center)
                 )
 
-                // Right-aligned icon
                 IconButton(
                     onClick = { /* Close */ },
                     modifier = Modifier.align(Alignment.CenterEnd)
@@ -67,19 +70,15 @@ fun NewPostScreen() {
             }
 
             HorizontalDivider(
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 thickness = 1.dp,
                 color = Color.LightGray
             )
 
-            // User info with privacy dropdown
             Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Avatar
                 Image(
                     painter = painterResource(id = R.drawable.profile_placeholder),
                     contentDescription = "Avatar",
@@ -91,10 +90,9 @@ fun NewPostScreen() {
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                // Name at top, button at bottom
                 Box(
                     modifier = Modifier
-                        .height(48.dp) // match avatar height
+                        .height(48.dp)
                         .weight(1f)
                 ) {
                     Text(
@@ -109,7 +107,7 @@ fun NewPostScreen() {
                         shape = RoundedCornerShape(4.dp),
                         contentPadding = PaddingValues(horizontal = 8.dp),
                         colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = Color(0xff4267B2),
+                            containerColor = Color(0xFF4267B2),
                             contentColor = Color.White
                         ),
                         border = null,
@@ -118,12 +116,12 @@ fun NewPostScreen() {
                             .align(Alignment.BottomStart)
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_lock),
+                            painter = painterResource(id = privacyIcon),
                             contentDescription = null,
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text(privacy, style = MaterialTheme.typography.bodySmall)
+                        Text(state.privacy.name.lowercase().replaceFirstChar { it.uppercase() }, style = MaterialTheme.typography.bodySmall)
                         Spacer(modifier = Modifier.width(4.dp))
                         Icon(
                             painter = painterResource(id = R.drawable.ic_arrow_drop_down),
@@ -136,25 +134,25 @@ fun NewPostScreen() {
                         expanded = expanded,
                         onDismissRequest = { expanded = false }
                     ) {
-                        listOf("Public", "Friends", "Only me").forEach { option ->
+                        PRIVACY.entries.forEach { option ->
                             DropdownMenuItem(
                                 onClick = {
-                                    privacy = option
+                                    onAction(NewPostAction.UpdatePrivacy(option))
                                     expanded = false
                                 },
                                 text = {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
                                         Icon(
                                             painter = when (option) {
-                                                "Public" -> painterResource(id = R.drawable.ic_public)
-                                                "Friends" -> painterResource(id = R.drawable.ic_friends)
-                                                else -> painterResource(id = R.drawable.ic_lock)
+                                                PRIVACY.PUBLIC -> painterResource(id = R.drawable.ic_public)
+                                                PRIVACY.FRIENDS -> painterResource(id = R.drawable.ic_friends)
+                                                PRIVACY.PRIVATE -> painterResource(id = R.drawable.ic_lock)
                                             },
                                             contentDescription = null,
                                             modifier = Modifier.size(18.dp)
                                         )
                                         Spacer(modifier = Modifier.width(8.dp))
-                                        Text(option)
+                                        Text(option.name.lowercase().replaceFirstChar { it.uppercase() })
                                     }
                                 }
                             )
@@ -163,10 +161,9 @@ fun NewPostScreen() {
                 }
             }
 
-            // Caption
             OutlinedTextField(
-                value = caption,
-                onValueChange = { caption = it },
+                value = state.caption,
+                onValueChange = { onAction(NewPostAction.UpdateCaption(it)) },
                 placeholder = {
                     Text(
                         text = "Harry, what is in your mind?",
@@ -175,9 +172,9 @@ fun NewPostScreen() {
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .defaultMinSize(minHeight = 80.dp), // initial height
-                maxLines = Int.MAX_VALUE, // allow expansion
-                singleLine = false,       // multiline
+                    .defaultMinSize(minHeight = 80.dp),
+                maxLines = Int.MAX_VALUE,
+                singleLine = false,
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent,
@@ -187,28 +184,55 @@ fun NewPostScreen() {
                 )
             )
 
-            // Add to your post section
-            Row(
-                modifier = Modifier
+            if (state.imageUri == null) {
+                IconButton(modifier = Modifier
                     .fillMaxWidth()
                     .background(Color.LightGray, RoundedCornerShape(8.dp))
                     .padding(12.dp),
-                horizontalArrangement = Arrangement.SpaceAround,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = { /* add image */ }) {
+                    onClick = { onAction(NewPostAction.UpdateImage) }) {
                     Icon(painterResource(id = R.drawable.ic_add_photo), contentDescription = "Add an image")
+                }
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                ) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(state.imageUri)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = "Selected image",
+                        modifier = Modifier
+                            .matchParentSize(),
+                        contentScale = ContentScale.Crop
+                    )
+
+                    IconButton(
+                        onClick = { onAction(NewPostAction.RemoveImage) },
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(8.dp)
+                            .background(Color.Black.copy(alpha = 0.4f), CircleShape)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Remove image",
+                            tint = Color.White
+                        )
+                    }
                 }
             }
 
-            // Post button (disabled if caption empty)
             Button(
-                onClick = { /* Đăng bài viết */ },
-                enabled = caption.text.isNotBlank(),
+                onClick = { onAction(NewPostAction.SubmitPost) },
+                enabled = state.caption.isNotBlank() || state.imageUri != null,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (caption.text.isNotBlank()) Color(0xFF4267B2) else Color.LightGray,
+                    containerColor = if (state.caption.isNotBlank() || state.imageUri != null) Color(0xFF4267B2) else Color.LightGray,
                     contentColor = Color.White
                 )
             ) {
@@ -221,13 +245,27 @@ fun NewPostScreen() {
 @Preview(showBackground = true)
 @Composable
 fun MessageDashboardScreenPreview() {
-    MainAppTheme {
-        Box(
-            modifier = Modifier
-                .width(400.dp)
-                .height(800.dp)
-        ) {
-            NewPostScreen()
+    var state by remember { mutableStateOf(NewPostState()) }
+
+    val pickImageLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        if (uri != null) {
+            state = state.copy(imageUri = uri)
         }
+    }
+
+    MainAppTheme {
+        NewPostScreen(
+            state = state,
+            onAction = { action ->
+                when (action) {
+                    is NewPostAction.UpdateCaption -> state = state.copy(caption = action.caption)
+                    is NewPostAction.UpdatePrivacy -> state = state.copy(privacy = action.privacy)
+                    is NewPostAction.UpdateImage -> pickImageLauncher.launch("image/*")
+                    else -> {}
+                }
+            }
+        )
     }
 }
