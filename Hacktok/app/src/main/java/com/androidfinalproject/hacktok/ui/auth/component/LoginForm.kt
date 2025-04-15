@@ -17,11 +17,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.androidfinalproject.hacktok.ui.auth.AuthAction
-import com.androidfinalproject.hacktok.ui.auth.AuthState
+import com.androidfinalproject.hacktok.ui.auth.AuthUiState
 
 @Composable
 fun LoginForm (
-    state : AuthState,
+    state : AuthUiState,
     onAction: (AuthAction) -> Unit,
     focusManager: FocusManager
 ) {
@@ -39,12 +39,10 @@ fun LoginForm (
         errorText = state.passwordError,
         onValueChange = { onAction(AuthAction.UpdatePassword(it)) },
         isConfirm = false,
-        imeAction = if (state.isLoginMode) ImeAction.Done else ImeAction.Next,
+        imeAction = ImeAction.Done,
         onImeAction = {
-            if (state.isLoginMode) {
-                focusManager.clearFocus()
-                onAction(AuthAction.Submit)
-            }
+            focusManager.clearFocus()
+            onAction(AuthAction.Submit)
         }
     )
 

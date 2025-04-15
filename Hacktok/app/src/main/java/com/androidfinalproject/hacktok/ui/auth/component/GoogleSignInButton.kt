@@ -14,9 +14,11 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun GoogleSignInButton(
     onClick: () -> Unit,
+    enabled: Boolean = true
 ) {
     OutlinedButton(
         onClick = { onClick() },
+        enabled = enabled,
         modifier = Modifier
             .fillMaxWidth()
             .height(50.dp),

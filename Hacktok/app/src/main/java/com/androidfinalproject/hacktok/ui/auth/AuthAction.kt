@@ -6,7 +6,7 @@ sealed class AuthAction {
     data class UpdateConfirmPassword(val confirmPassword: String) : AuthAction()
     object ToggleAuthMode : AuthAction()
     object Submit : AuthAction()
-    object GoogleSignIn : AuthAction()
+    data class GoogleSignIn(val idToken: String) : AuthAction()
     object ForgotPassword : AuthAction()
     data class SelectLanguage(val languageId : String) : AuthAction()
     data class OnLoginSuccess(val isAdmin: Boolean) : AuthAction()

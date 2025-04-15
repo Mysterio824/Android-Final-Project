@@ -24,11 +24,11 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.androidfinalproject.hacktok.ui.auth.AuthAction
-import com.androidfinalproject.hacktok.ui.auth.AuthState
+import com.androidfinalproject.hacktok.ui.auth.AuthUiState
 
 @Composable
 fun SignUpForm(
-    state: AuthState,
+    state: AuthUiState,
     onAction: (AuthAction) -> Unit,
     focusManager: FocusManager
 ) {

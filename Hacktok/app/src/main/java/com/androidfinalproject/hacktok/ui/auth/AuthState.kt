@@ -1,6 +1,6 @@
 package com.androidfinalproject.hacktok.ui.auth
 
-data class AuthState(
+data class AuthUiState(
     val email: String = "",
     val password: String = "",
     val confirmPassword: String = "",
