@@ -1,36 +1,35 @@
 package com.androidfinalproject.hacktok.ui.adminManage
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.Modifier
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.androidfinalproject.hacktok.ui.adminManage.userManagement.UserDetailScreen
 
 @Composable
 fun AdminManagementScreenRoot(
-    viewModel: AdminManagementViewModel = viewModel(),
-    onUserNavigation: () -> Unit,
-    onPostNavigation: () -> Unit,
-    onCommentNavigation: () -> Unit,
-    onReportNavigation: () -> Unit,
-    onStatisticNavigation: () -> Unit
+    modifier: Modifier = Modifier
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
+    val navController = rememberNavController()
 
-    AdminManagementScreen(
-        state = state,
-        onAction = { action ->
-            when(action) {
-                is AdminManagementAction.NavigateToStatistics
-                    -> onStatisticNavigation()
-
-                is AdminManagementAction.OnNavigateBack
-                    -> System.exit(0)
-
-                else -> viewModel.onAction(action)
-            }
-
+    NavHost(
+        navController = navController,
+        startDestination = "adminManagement"
+    ) {
+        composable("adminManagement") {
+            AdminManagementScreen(
+                navController = navController,
+                modifier = modifier
+            )
         }
-
-    )
+        composable("userDetail/{userId}") { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId") ?: return@composable
+            UserDetailScreen(
+                userId = userId,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+    }
 }

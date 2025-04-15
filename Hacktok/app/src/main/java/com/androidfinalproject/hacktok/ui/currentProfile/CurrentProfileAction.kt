@@ -9,4 +9,9 @@ sealed class CurrentProfileAction {
     data object NavigateToProfileEdit : CurrentProfileAction()
     data object NavigateToNewPost : CurrentProfileAction()
     object OnNavigateBack : CurrentProfileAction()
+    object OnEditProfile : CurrentProfileAction()
+    object OnCreatePost : CurrentProfileAction()
+    object RetryLoading : CurrentProfileAction()
+    data class OnEditPost(val post: Post) : CurrentProfileAction()
+    data class OnDeletePost(val post: Post) : CurrentProfileAction()
 }

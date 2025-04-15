@@ -78,7 +78,7 @@ fun PostContent(
 
                 Image(
                     painter = painter,
-                    contentDescription = "Profile picture of ${user.username}",
+                    contentDescription = "Profile picture of ${user.username ?: "Unknown User"}",
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
@@ -91,7 +91,7 @@ fun PostContent(
                     .clickable(onClick = onUserClick)
             ) {
                 Text(
-                    text = user.username,
+                    text = user.username ?: "Unknown User",
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
                 )

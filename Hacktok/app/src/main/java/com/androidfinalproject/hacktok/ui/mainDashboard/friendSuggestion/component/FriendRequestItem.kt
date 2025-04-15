@@ -73,7 +73,7 @@ fun FriendRequestItem(
 
                 Image(
                     painter = painter,
-                    contentDescription = "Profile picture of ${user.username}",
+                    contentDescription = "Profile picture of ${user.username ?: "Unknown User"}",
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
@@ -86,7 +86,7 @@ fun FriendRequestItem(
             modifier = Modifier.weight(1f)
         ) {
             Text(
-                text = user.fullName ?: user.username,
+                text = user.fullName ?: user.username ?: "Unknown User",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,

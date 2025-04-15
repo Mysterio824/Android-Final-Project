@@ -1,5 +1,6 @@
 package com.androidfinalproject.hacktok.model
 
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.PropertyName
 import java.util.Date
 
@@ -13,7 +14,7 @@ enum class UserRole {
 
 data class User(
     @PropertyName("id") val id: String? = null,
-    @PropertyName("username") val username: String,
+    @PropertyName("username") val username: String? = null,
     @PropertyName("email") val email: String,
     @PropertyName("profileImage") val profileImage: String? = null,
     @PropertyName("createdAt") val createdAt: Date = Date(),
@@ -29,13 +30,40 @@ data class User(
     @PropertyName("followers") val followers: List<String> = emptyList(),
     @PropertyName("following") val following: List<String> = emptyList(),
     @PropertyName("followerCount") val followerCount: Int = 0,
-    @PropertyName("followingCount") val followingCount: Int = 0
+    @PropertyName("followingCount") val followingCount: Int = 0,
+    val videosCount: Int = 0
 ) {
     // Constructor không tham số cho Firestore
     constructor() : this(
-        null, "", "", null, Date(), true, UserRole.USER, null, null,
-        PrivacySettings(), null, "en", emptyList(), emptyList(), emptyList(), emptyList(), 0, 0
+        null, null, "", null, Date(), true, UserRole.USER, null, null,
+        PrivacySettings(), null, "en", emptyList(), emptyList(), emptyList(), emptyList(), 0, 0, 0
     )
+
+    companion object {
+        fun fromFirebaseUser(firebaseUser: FirebaseUser): User {
+            return User(
+                id = firebaseUser.uid,
+                email = firebaseUser.email ?: "",
+                username = firebaseUser.displayName,
+                profileImage = firebaseUser.photoUrl?.toString(),
+                createdAt = Date(firebaseUser.metadata?.creationTimestamp ?: 0),
+                isActive = true,
+                role = if (firebaseUser.isEmailVerified) UserRole.ADMIN else UserRole.USER,
+                bio = null,
+                fullName = null,
+                privacySettings = PrivacySettings(),
+                lastActive = null,
+                language = "en",
+                friends = emptyList(),
+                blockedUsers = emptyList(),
+                followers = emptyList(),
+                following = emptyList(),
+                followerCount = 0,
+                followingCount = 0,
+                videosCount = 0
+            )
+        }
+    }
 }
 
 data class PrivacySettings(

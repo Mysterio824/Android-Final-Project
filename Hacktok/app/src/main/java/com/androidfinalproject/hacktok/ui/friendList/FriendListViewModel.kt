@@ -77,7 +77,7 @@ class FriendListViewModel(private val currentUserId: String) : ViewModel() {
         _state.update { current ->
             val filtered = if (query.isBlank()) current.users
             else current.users.filter {
-                it.username.contains(query, ignoreCase = true) ||
+                (it.username?.contains(query, ignoreCase = true) ?: false) ||
                         it.email.contains(query, ignoreCase = true)
             }
             current.copy(searchQuery = query, filteredUsers = filtered)

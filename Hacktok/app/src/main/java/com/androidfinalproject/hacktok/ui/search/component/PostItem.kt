@@ -35,7 +35,7 @@ fun PostItem(
     ) {
         // Tên người dùng (username) in đậm
         Text(
-            text = MockData.mockUsers.first().username,
+            text = MockData.mockUsers.first().username ?: "Unknown User",
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 4.dp)

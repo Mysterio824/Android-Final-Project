@@ -55,7 +55,7 @@ fun PostCard(post: Post) {
 //                modifier = Modifier.weight(1f)  // Expands to take remaining space
             ) {
                 Text(
-                    text = MockData.mockUsers.first().username,
+                    text = MockData.mockUsers.first().username ?: "Unknown User",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Start

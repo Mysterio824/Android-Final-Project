@@ -23,7 +23,7 @@ fun UserItem(
     ) {
         // Hiển thị tên người dùng (giống Instagram: tên nổi bật)
         Text(
-            text = user.username,
+            text = user.username ?: "Unknown User",
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(end = 8.dp)

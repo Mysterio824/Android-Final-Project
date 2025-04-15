@@ -1,62 +1,82 @@
 package com.androidfinalproject.hacktok.ui.adminManage.userManagement
 
 import androidx.lifecycle.ViewModel
-import com.androidfinalproject.hacktok.model.MockData
+import androidx.lifecycle.viewModelScope
+import com.androidfinalproject.hacktok.model.User
+import com.androidfinalproject.hacktok.repository.UserRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class UserManagementViewModel : ViewModel() {
-    private val _state = MutableStateFlow(UserManagementState())
-    val state: StateFlow<UserManagementState> = _state.asStateFlow()
+sealed class UserManagementUiState {
+    object Loading : UserManagementUiState()
+    data class Success(val users: List<User>) : UserManagementUiState()
+    data class Error(val message: String) : UserManagementUiState()
+}
+
+@HiltViewModel
+class UserManagementViewModel @Inject constructor(
+    private val userRepository: UserRepository
+) : ViewModel() {
+
+    private val _userManagementState = MutableStateFlow<UserManagementUiState>(UserManagementUiState.Loading)
+    val userManagementState: StateFlow<UserManagementUiState> = _userManagementState.asStateFlow()
+
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    private var allUsers = listOf<User>()
 
     init {
-        _state.update {
-            it.copy(
-                users = MockData.mockUsers,
-                filteredUsers = MockData.mockUsers,
-                availableRoles = MockData.mockUserRoles
-            )
+        loadUsers()
+    }
+
+    fun loadUsers() {
+        viewModelScope.launch {
+            _userManagementState.value = UserManagementUiState.Loading
+            try {
+                // Implement loading all users from repository
+                // For now, using a placeholder
+                _userManagementState.value = UserManagementUiState.Success(allUsers)
+            } catch (e: Exception) {
+                _userManagementState.value = UserManagementUiState.Error(e.message ?: "Unknown error occurred")
+            }
         }
     }
 
-    fun onAction(action: UserManagementAction) {
-        when (action) {
-            is UserManagementAction.UpdateUserRole -> {
-                _state.update { currentState ->
-                    currentState.copy(
-                        users = currentState.users.map { user ->
-                            if (user.id == action.userId) user.copy(role = action.newRole) else user
-                        },
-                        filteredUsers = currentState.filteredUsers.map { user ->
-                            if (user.id == action.userId) user.copy(role = action.newRole) else user
-                        }
-                    )
-                }
+    fun searchUsers(query: String) {
+        _searchQuery.value = query
+        val filteredUsers = allUsers.filter { user ->
+            user.username?.contains(query, ignoreCase = true) == true ||
+            user.email.contains(query, ignoreCase = true) ||
+            user.fullName?.contains(query, ignoreCase = true) == true
+        }
+        _userManagementState.value = UserManagementUiState.Success(filteredUsers)
+    }
+
+    fun deleteUser(userId: String) {
+        viewModelScope.launch {
+            try {
+                userRepository.deleteUser(userId)
+                // Refresh the user list after deletion
+                loadUsers()
+            } catch (e: Exception) {
+                _userManagementState.value = UserManagementUiState.Error(e.message ?: "Failed to delete user")
             }
-            is UserManagementAction.DeleteUser -> {
-                _state.update { currentState ->
-                    currentState.copy(
-                        users = currentState.users.filter { it.id != action.userId },
-                        filteredUsers = currentState.filteredUsers.filter { it.id != action.userId }
-                    )
-                }
-            }
-            is UserManagementAction.FilterUsers -> {
-                _state.update { currentState ->
-                    currentState.copy(
-                        filteredUsers = if (action.query.isBlank()) {
-                            currentState.users
-                        } else {
-                            currentState.users.filter { user ->
-                                user.username.contains(action.query, ignoreCase = true) ||
-                                        user.email.contains(action.query, ignoreCase = true) ||
-                                        user.fullName?.contains(action.query, ignoreCase = true) == true
-                            }
-                        }
-                    )
-                }
+        }
+    }
+
+    fun updateUserRole(userId: String, newRole: String) {
+        viewModelScope.launch {
+            try {
+                userRepository.updateUser(userId, mapOf("role" to newRole))
+                // Refresh the user list after role update
+                loadUsers()
+            } catch (e: Exception) {
+                _userManagementState.value = UserManagementUiState.Error(e.message ?: "Failed to update user role")
             }
         }
     }

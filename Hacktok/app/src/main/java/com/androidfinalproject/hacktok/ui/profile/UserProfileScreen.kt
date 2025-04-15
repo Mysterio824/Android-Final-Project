@@ -48,7 +48,7 @@ fun UserProfileScreen (
                     .background(MaterialTheme.colorScheme.primaryContainer)
             ) {
                 Text(
-                    text = state.user!!.username.first().toString(),
+                    text = state.user!!.username?.firstOrNull()?.toString() ?: "?",
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
@@ -58,7 +58,7 @@ fun UserProfileScreen (
 
             Column {
                 Text(text = state.user?.fullName ?: "Full Name", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-                Text(text = "@" + state.user?.username, fontSize = 16.sp, color = Color.Gray)
+                Text(text = "@" + (state.user?.username ?: "unknown"), fontSize = 16.sp, color = Color.Gray)
             }
         }
 

@@ -102,7 +102,6 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
             exitTransition = { slideFadeOutToLeft() }
         ){
             CurrentProfileScreenRoot (
-                viewModel = CurrentProfileViewModel(""),
                 onPostClickNavigation = { navController.navigate("${MainRoute.PostDetail.route}/$it") },
                 onPostEditNavigation = {navController.navigate("${MainRoute.EditPost.route}/$it") },
                 onNewPostNavigation = {},
@@ -233,9 +232,7 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
             enterTransition = { slideFadeInFromRight() },
             exitTransition = { slideFadeOutToLeft() }
         ) {
-            val userId = "" //chagne later
             EditProfileScreenRoot(
-                viewModel = EditProfileViewModel(userId),
                 onNavigateBack = {
                     navController.popBackStack()
                 }

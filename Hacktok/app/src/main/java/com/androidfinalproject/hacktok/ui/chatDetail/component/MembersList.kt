@@ -72,7 +72,7 @@ fun MemberItem(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = user.username.firstOrNull()?.toString() ?: "",
+                text = user.username?.firstOrNull()?.toString() ?: "?",
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
@@ -85,7 +85,7 @@ fun MemberItem(
             modifier = Modifier.weight(1f)
         ) {
             Text(
-                text = user.username,
+                text = user.username ?: "Unknown User",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurface
