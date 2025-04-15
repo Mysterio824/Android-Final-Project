@@ -18,7 +18,7 @@ data class User(
     @PropertyName("email") val email: String,
     @PropertyName("profileImage") val profileImage: String? = null,
     @PropertyName("createdAt") val createdAt: Date = Date(),
-    @PropertyName("isActive") val isActive: Boolean = true,
+    @PropertyName("active") val isActive: Boolean = true,
     @PropertyName("role") val role: UserRole = UserRole.USER,
     @PropertyName("bio") val bio: String? = null,
     @PropertyName("fullName") val fullName: String? = null,

@@ -28,6 +28,8 @@ import com.androidfinalproject.hacktok.ui.mainDashboard.DashboardScreenRoot
 import com.androidfinalproject.hacktok.ui.mainDashboard.DashboardViewModel
 import com.androidfinalproject.hacktok.ui.messageDashboard.MessageDashboardRoot
 import com.androidfinalproject.hacktok.ui.messageDashboard.MessageDashboardViewModel
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 
 fun NavGraphBuilder.mainNavigation(navController: NavController) {
     navigation(
@@ -164,9 +166,13 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
             exitTransition = { slideFadeOutToRight() }
         ) { backStackEntry ->
             val userId = backStackEntry.arguments?.getString("userId")
+            if (userId == null) {
+                navController.popBackStack()
+                return@composable
+            }
 
             UserProfileScreenRoot(
-                viewModel = UserProfileViewModel(userId!!),
+                viewModel = UserProfileViewModel(userId),
                 onChatWithFriend = { chatId ->
                     navController.navigate("${MainRoute.ChatRoom.route}/user/$chatId")
                 },
