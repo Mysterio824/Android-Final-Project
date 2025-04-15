@@ -1,5 +1,6 @@
 package com.androidfinalproject.hacktok.ui.post.component
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -44,12 +45,17 @@ fun PostContent(
     onOptionsClick: () -> Unit,
     onUserClick: () -> Unit
 ) {
-    val user = post.user!!
+    // Safely handle null user reference
+    val user = post.user
+    if (user == null) {
+        Log.e("PostContent", "Post user is null: ${post.id}")
+    }
+    
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 8.dp)
-            .clickable { onPostClick(post.id!!) },
+            .clickable { post.id?.let { onPostClick(it) } },
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.background
@@ -68,7 +74,7 @@ fun PostContent(
                     .clip(CircleShape)
                     .clickable(onClick = onUserClick)
             ) {
-                val imageUrl = user.profileImage
+                val imageUrl = user?.profileImage
                 val painter = rememberAsyncImagePainter(
                     model = imageUrl.takeIf { !it.isNullOrBlank() },
                     error = painterResource(id = R.drawable.placeholder_profile),
@@ -78,7 +84,7 @@ fun PostContent(
 
                 Image(
                     painter = painter,
-                    contentDescription = "Profile picture of ${user.username ?: "Unknown User"}",
+                    contentDescription = "Profile picture of ${user?.username ?: "Unknown User"}",
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
@@ -91,7 +97,7 @@ fun PostContent(
                     .clickable(onClick = onUserClick)
             ) {
                 Text(
-                    text = user.username ?: "Unknown User",
+                    text = user?.username ?: "Unknown User",
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
                 )

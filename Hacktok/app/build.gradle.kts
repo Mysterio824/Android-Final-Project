@@ -61,13 +61,6 @@ android {
 dependencies {
     implementation (libs.kotlinx.coroutines.core.v164)
     implementation (libs.kotlinx.coroutines.android)
-    implementation(libs.firebase.database)
-    implementation(libs.firebase.auth)
-    implementation(libs.androidx.credentials)
-    implementation(libs.androidx.credentials.play.services.auth)
-    implementation(libs.googleid)
-    implementation(libs.firebase.firestore)
-    //    implementation("androidx.room:room-ktx:2.6.1") nay la cgi z
     // Use the Compose BOM to manage Compose dependency versions.
     val composeBom = platform("androidx.compose:compose-bom:2025.02.00")
     implementation(composeBom)
@@ -120,15 +113,21 @@ dependencies {
     kapt("com.google.dagger:hilt-android-compiler:2.48")
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
     
-    // Google Play Services
-    implementation("com.google.android.gms:play-services-base:18.3.0")
-    implementation("com.google.android.gms:play-services-auth:20.7.0")
-    implementation("com.google.android.gms:play-services-identity:18.0.1")
+    // Google Play Services - Add necessary ones back without versions for BOM management
+    implementation("com.google.android.gms:play-services-auth")
+    // implementation("com.google.android.gms:play-services-base:18.3.0") // Base might be transitively included
+    // implementation("com.google.android.gms:play-services-identity:18.0.1") // Needed?
     
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:32.7.1"))
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.firebase:firebase-analytics-ktx")
+    implementation("com.google.firebase:firebase-database-ktx")
+
+    // Keep Credentials dependencies if needed and compatible, otherwise remove. Check Firebase/GMS docs.
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
 }
 

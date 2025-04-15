@@ -9,6 +9,7 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.firestore.QuerySnapshot
 
 @Singleton
 class UserRepositoryImpl @Inject constructor(
@@ -252,9 +253,23 @@ class UserRepositoryImpl @Inject constructor(
         }
     }
 
+    // Helper function to map QuerySnapshot to List<User> with ID
+    private fun mapSnapshotToUsers(snapshot: QuerySnapshot): List<User> {
+        return snapshot.documents.mapNotNull { document ->
+            try {
+                // Map document data to User object
+                val user = document.toObject(User::class.java)
+                // Explicitly set the ID from the document ID
+                user?.copy(id = document.id)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error parsing user document ${document.id}", e)
+                null
+            }
+        }
+    }
+
     override suspend fun searchUsers(query: String): List<User> {
         return try {
-            // Convert query to lowercase for case-insensitive search
             val lowercaseQuery = query.lowercase()
             
             // Search in username
@@ -278,18 +293,23 @@ class UserRepositoryImpl @Inject constructor(
                 .get()
                 .await()
 
-            // Combine results and remove duplicates
-            val allUsers = (usernameSnapshot.toObjects(User::class.java) +
-                          emailSnapshot.toObjects(User::class.java) +
-                          fullNameSnapshot.toObjects(User::class.java))
-                .distinctBy { it.id }
+            // Use helper function to map results and ensure ID is set
+            val usernameUsers = mapSnapshotToUsers(usernameSnapshot)
+            val emailUsers = mapSnapshotToUsers(emailSnapshot)
+            val fullNameUsers = mapSnapshotToUsers(fullNameSnapshot)
 
-            // Additional filtering for partial matches
-            allUsers.filter { user ->
+            // Combine results and remove duplicates using the now non-null ID
+            (usernameUsers + emailUsers + fullNameUsers).distinctBy { it.id }
+
+            // The final filtering might be unnecessary now if the query is precise enough,
+            // but keep it for now if needed for broader matching.
+            /* 
+            .filter { user ->
                 user.username?.lowercase()?.contains(lowercaseQuery) == true ||
                 user.email.lowercase().contains(lowercaseQuery) ||
                 user.fullName?.lowercase()?.contains(lowercaseQuery) == true
             }
+            */
         } catch (e: Exception) {
             Log.e(TAG, "Error searching users with query: $query", e)
             emptyList()
