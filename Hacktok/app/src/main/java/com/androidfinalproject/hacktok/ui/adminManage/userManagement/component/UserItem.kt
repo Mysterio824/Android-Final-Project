@@ -49,7 +49,7 @@ fun UserItem(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = user.username,
+                        text = user.username ?: "Unknown User",
                         style = MaterialTheme.typography.titleMedium
                     )
                     Text(
@@ -58,7 +58,7 @@ fun UserItem(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "Role: ${user.role}",
+                        text = "Role: ${user.role.name}",
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Text(

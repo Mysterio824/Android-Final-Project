@@ -70,7 +70,7 @@ fun GroupHeader(
             val creator = membersList.find { it.id == group.creatorId }
             if (creator != null) {
                 Text(
-                    text = "Người tạo: ${creator.username}",
+                    text = "Người tạo: ${creator.username ?: "Unknown User"}",
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

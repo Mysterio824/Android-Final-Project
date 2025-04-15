@@ -58,7 +58,9 @@ class SearchViewModel : ViewModel() {
             }
 
             it.copy(
-                filteredUsers = if (_state.value.selectedTabIndex == 0) it.users.filter { user -> user.username.lowercase().contains(query) } else emptyList(),
+                filteredUsers = if (_state.value.selectedTabIndex == 0) it.users.filter { user -> 
+                    user.username?.lowercase()?.contains(query) == true 
+                } else emptyList(),
                 filteredPosts = filteredPosts
             )
         }

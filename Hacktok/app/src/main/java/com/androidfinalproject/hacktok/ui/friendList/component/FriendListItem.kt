@@ -50,7 +50,7 @@ fun FriendListItem(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = user.username.first().toString().uppercase(),
+                text = user.username?.firstOrNull()?.toString()?.uppercase() ?: "?",
                 color = MaterialTheme.colorScheme.primary,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
@@ -63,7 +63,7 @@ fun FriendListItem(
             modifier = Modifier.weight(1f)
         ) {
             Text(
-                text = user.username,
+                text = user.username ?: "Unknown User",
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
                 maxLines = 1,

@@ -34,7 +34,7 @@ class ChatViewModel : ViewModel() {
 
         val newMessage = Message(
             id = UUID.randomUUID().toString(),
-            senderId = _state.value.currentUser.username,
+            senderId = _state.value.currentUser.username ?: "Unknown User",
             content = content,
             createdAt = Date()
         )
@@ -92,8 +92,8 @@ class ChatViewModel : ViewModel() {
     }
 
     private fun createDemoMessages(): List<Message> {
-        val user1 = _state.value.currentUser.username
-        val user2 = _state.value.otherUser.username
+        val user1 = _state.value.currentUser.username ?: "Unknown User"
+        val user2 = _state.value.otherUser.username ?: "Other User"
 
         return listOf(
             Message(
@@ -135,13 +135,13 @@ class ChatViewModel : ViewModel() {
     private fun createGroup() {
         // Thực hiện logic tạo nhóm
         // Hiện tại chỉ in log vì chưa có database
-        println("Creating group with user: ${_state.value.otherUser.username}")
+        println("Creating group with user: ${_state.value.otherUser.username ?: "Unknown User"}")
         // Trong thực tế, sẽ chuyển đến màn hình tạo nhóm
     }
 
     private fun findInChat() {
         // Chức năng tìm kiếm trong chat
-        println("Finding in chat with user: ${_state.value.otherUser.username}")
+        println("Finding in chat with user: ${_state.value.otherUser.username ?: "Unknown User"}")
         // Trong thực tế, sẽ hiển thị UI tìm kiếm
     }
 
@@ -159,7 +159,8 @@ class ChatViewModel : ViewModel() {
 
     private fun blockUser() {
         // Thực hiện chức năng block user
-        println("Blocking user: ${_state.value.otherUser.username}")
+        println("Blocking user: ${_state.value.otherUser.username ?: "Unknown User"}")
+        println("Blocking user: ${_state.value.otherUser.username ?: "Unknown User"}")
         // Trong thực tế, sẽ cập nhật trạng thái block trong database
     }
 }

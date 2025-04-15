@@ -37,7 +37,7 @@ fun UserHeader(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = user.username.firstOrNull()?.toString() ?: "",
+                text = user.username?.firstOrNull()?.toString() ?: "?",
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                 fontWeight = FontWeight.Bold,
                 fontSize = 36.sp
@@ -48,7 +48,7 @@ fun UserHeader(
 
         // User name
         Text(
-            text = user.username,
+            text = user.username ?: "Unknown User",
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
@@ -58,7 +58,7 @@ fun UserHeader(
 
         // Email
         Text(
-            text = user.email ?: "",
+            text = user.email,
             fontSize = 14.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

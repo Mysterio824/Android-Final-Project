@@ -13,8 +13,12 @@ import androidx.navigation.navigation
 import com.androidfinalproject.hacktok.router.routes.AdminRoute
 import com.androidfinalproject.hacktok.ui.adminManage.AdminManagementScreenRoot
 import com.androidfinalproject.hacktok.ui.adminManage.AdminManagementViewModel
-import com.androidfinalproject.hacktok.ui.statistic.StatisticViewModel
 import com.androidfinalproject.hacktok.ui.statistic.StatisticsScreenRoot
+import com.androidfinalproject.hacktok.ui.adminManage.userManagement.UserDetailScreen
+import com.androidfinalproject.hacktok.ui.statistic.StatisticViewModel
+import androidx.compose.runtime.Composable
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
 
 fun NavGraphBuilder.adminNavigation(navController: NavController) {
     navigation(
@@ -52,16 +56,7 @@ fun NavGraphBuilder.adminNavigation(navController: NavController) {
                         )
             }
         ) {
-            AdminManagementScreenRoot (
-                viewModel = AdminManagementViewModel(),
-                onUserNavigation = {},
-                onPostNavigation = {},
-                onCommentNavigation = {},
-                onReportNavigation = {},
-                onStatisticNavigation = {
-                    navController.navigate(AdminRoute.Statistic.route)
-                }
-            )
+            AdminManagementScreenRoot()
         }
 
         composable(
@@ -95,11 +90,45 @@ fun NavGraphBuilder.adminNavigation(navController: NavController) {
                         )
             }
         ) {
-            StatisticsScreenRoot (
+            StatisticsScreenRoot(
                 viewModel = StatisticViewModel(),
-                onNavigateBack = {
-                    navController.popBackStack()
-                }
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(AdminRoute.UserDetail.route) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId") ?: return@composable
+            UserDetailScreen(
+                userId = userId,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+    }
+}
+
+@Composable
+fun AdminGraph(
+    navController: NavHostController,
+    startDestination: String = AdminRoute.AdminDashboard.route
+) {
+    NavHost(
+        navController = navController,
+        startDestination = startDestination
+    ) {
+        composable(AdminRoute.AdminDashboard.route) {
+            AdminManagementScreenRoot()
+        }
+        composable(AdminRoute.Statistic.route) {
+            StatisticsScreenRoot(
+                viewModel = StatisticViewModel(),
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        composable(AdminRoute.UserDetail.route) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId") ?: return@composable
+            UserDetailScreen(
+                userId = userId,
+                onNavigateBack = { navController.popBackStack() }
             )
         }
     }

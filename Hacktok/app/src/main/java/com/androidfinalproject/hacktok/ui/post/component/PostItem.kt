@@ -49,7 +49,7 @@ fun PostItem(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = MockData.mockUsers.first().username.first().toString().uppercase(),
+                    text = MockData.mockUsers.first().username?.firstOrNull()?.toString()?.uppercase() ?: "?",
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
@@ -60,7 +60,7 @@ fun PostItem(
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = MockData.mockUsers.first().username,
+                    text = MockData.mockUsers.first().username ?: "Unknown User",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.clickable { onUserClick(post.userId) }
