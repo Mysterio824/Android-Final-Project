@@ -1,4 +1,4 @@
-package com.androidfinalproject.hacktok.ui.currentProfile.component
+package com.androidfinalproject.hacktok.ui.groupChat.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
@@ -29,7 +29,7 @@ fun MessageInput(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface)
+            .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -38,7 +38,7 @@ fun MessageInput(
             onValueChange = onTextChanged,
             placeholder = {
                 Text(
-                    "Type a message",
+                    "Nhập tin nhắn...",
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 16.sp
                 )
@@ -48,9 +48,9 @@ fun MessageInput(
             shape = MaterialTheme.shapes.large,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
-                unfocusedBorderColor = MaterialTheme.colorScheme.surface,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
                 cursorColor = MaterialTheme.colorScheme.onSurface,
-                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
             )
         )
 
@@ -60,7 +60,7 @@ fun MessageInput(
         ) {
             Icon(
                 imageVector = Icons.Default.Send,
-                contentDescription = "Send message",
+                contentDescription = "Gửi tin nhắn",
                 modifier = Modifier.size(24.dp),
                 tint = MaterialTheme.colorScheme.primary
             )

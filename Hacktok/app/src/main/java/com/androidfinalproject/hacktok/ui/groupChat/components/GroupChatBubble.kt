@@ -1,11 +1,13 @@
-package com.androidfinalproject.hacktok.ui.chat.component
+package com.androidfinalproject.hacktok.ui.groupChat.components
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -18,7 +20,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -28,8 +29,9 @@ import com.androidfinalproject.hacktok.model.Message
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ChatBubble(
+fun GroupChatBubble(
     message: Message,
+    senderName: String,
     isCurrentUser: Boolean,
     onDeleteMessage: (String?) -> Unit
 ) {
@@ -37,9 +39,26 @@ fun ChatBubble(
     var showMenu by remember { mutableStateOf(false) }
     val clipboardManager = LocalClipboardManager.current
 
-    val bubbleColor = if (isCurrentUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
-    val textColor = if (isCurrentUser) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
-    val timeColor = if (isCurrentUser) MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+    // Using theme colors
+    val bubbleColor = if (isCurrentUser)
+        MaterialTheme.colorScheme.primary
+    else
+        MaterialTheme.colorScheme.surfaceVariant
+
+    val textColor = if (isCurrentUser)
+        MaterialTheme.colorScheme.onPrimary
+    else
+        MaterialTheme.colorScheme.onSurfaceVariant
+
+    val timeColor = if (isCurrentUser)
+        MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
+    else
+        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+
+    val senderNameColor = if (isCurrentUser)
+        MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f)
+    else
+        MaterialTheme.colorScheme.primary
 
     Box(
         modifier = Modifier
@@ -60,12 +79,24 @@ fun ChatBubble(
                 .padding(12.dp)
         ) {
             Column {
+                if (!isCurrentUser) {
+                    Text(
+                        text = senderName,
+                        color = senderNameColor,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
+
                 Text(
                     text = message.content,
                     color = textColor,
                     fontSize = 16.sp
                 )
+
                 if (showTime) {
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = message.createdAt.toString(),
                         color = timeColor,
@@ -87,13 +118,16 @@ fun ChatBubble(
                     showMenu = false
                 }
             )
-            DropdownMenuItem(
-                text = { Text("Delete", color = MaterialTheme.colorScheme.error) },
-                onClick = {
-                    message.id?.let { onDeleteMessage(it) }
-                    showMenu = false
-                }
-            )
+
+            if (isCurrentUser) {
+                DropdownMenuItem(
+                    text = { Text("Delete", color = MaterialTheme.colorScheme.error) },
+                    onClick = {
+                        message.id?.let { onDeleteMessage(it) }
+                        showMenu = false
+                    }
+                )
+            }
         }
     }
 }
