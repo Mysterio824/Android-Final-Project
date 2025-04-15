@@ -1,13 +1,24 @@
 package com.androidfinalproject.hacktok.ui.search
 
 import androidx.lifecycle.ViewModel
-import com.androidfinalproject.hacktok.model.MockData
+import androidx.lifecycle.viewModelScope
+import com.androidfinalproject.hacktok.model.Post
+import com.androidfinalproject.hacktok.model.User
+import com.androidfinalproject.hacktok.repository.PostRepository
+import com.androidfinalproject.hacktok.repository.UserRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class SearchViewModel : ViewModel() {
+@HiltViewModel
+class SearchViewModel @Inject constructor(
+    private val userRepository: UserRepository,
+    private val postRepository: PostRepository
+) : ViewModel() {
     private val _state = MutableStateFlow(SearchUiState())
     val state: StateFlow<SearchUiState> = _state.asStateFlow()
 
@@ -16,11 +27,35 @@ class SearchViewModel : ViewModel() {
     }
 
     private fun loadData() {
-        _state.update {
-            it.copy(
-                users = MockData.mockUsers,
-                posts = MockData.mockPosts
-            )
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, error = null) }
+            try {
+                // Load users from repository
+                val users = userRepository.getCurrentUser()?.let { currentUser ->
+                    // Get all users except current user
+                    // Note: In a real app, you might want to implement a proper search API
+                    // This is just a placeholder implementation
+                    listOf(currentUser) // Replace with actual user search
+                } ?: emptyList()
+
+                // Load posts from repository
+                val posts = emptyList<Post>() // Replace with actual post search
+
+                _state.update {
+                    it.copy(
+                        users = users,
+                        posts = posts,
+                        isLoading = false
+                    )
+                }
+            } catch (e: Exception) {
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = "Failed to load data: ${e.message}"
+                    )
+                }
+            }
         }
     }
 
@@ -30,40 +65,96 @@ class SearchViewModel : ViewModel() {
                 _state.update {
                     it.copy(searchQuery = action.query)
                 }
-                filterResults()
+                performSearch()
             }
             is SearchAction.ChangeTab -> {
                 _state.update {
                     it.copy(selectedTabIndex = action.tabIndex)
                 }
-                filterResults()
+                performSearch()
             }
-
             is SearchAction.OnPostClick -> {}
             is SearchAction.OnUserClick -> {}
             else -> {}
         }
     }
 
+    private fun performSearch() {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, error = null) }
+            try {
+                val query = _state.value.searchQuery
+                if (query.isBlank()) {
+                    _state.update {
+                        it.copy(
+                            filteredUsers = emptyList(),
+                            filteredPosts = emptyList(),
+                            isLoading = false
+                        )
+                    }
+                    return@launch
+                }
 
-    private fun filterResults() {
-        val query = _state.value.searchQuery.lowercase()
-
-        _state.update {
-            val filteredPosts = when (_state.value.selectedTabIndex) {
-                1 -> it.posts.filter { post -> post.content.lowercase().contains(query) && post.content.contains("#") }
-                2 -> it.posts.filter { post -> post.content.lowercase().contains(query) && post.content.contains("place") }
-                3 -> it.posts.filter { post -> post.content.lowercase().contains(query) }
-                else -> emptyList()
+                when (_state.value.selectedTabIndex) {
+                    0 -> {
+                        // Search users
+                        val users = userRepository.searchUsers(query)
+                        _state.update {
+                            it.copy(
+                                users = users,
+                                filteredUsers = users,
+                                filteredPosts = emptyList(),
+                                isLoading = false
+                            )
+                        }
+                    }
+                    1 -> {
+                        // Search posts with hashtags
+                        val posts = postRepository.searchPosts(query)
+                            .filter { post -> post.content.contains("#") }
+                        _state.update {
+                            it.copy(
+                                posts = posts,
+                                filteredPosts = posts,
+                                filteredUsers = emptyList(),
+                                isLoading = false
+                            )
+                        }
+                    }
+                    2 -> {
+                        // Search posts with places
+                        val posts = postRepository.searchPosts(query)
+                            .filter { post -> post.content.contains("place") }
+                        _state.update {
+                            it.copy(
+                                posts = posts,
+                                filteredPosts = posts,
+                                filteredUsers = emptyList(),
+                                isLoading = false
+                            )
+                        }
+                    }
+                    3 -> {
+                        // Search all posts
+                        val posts = postRepository.searchPosts(query)
+                        _state.update {
+                            it.copy(
+                                posts = posts,
+                                filteredPosts = posts,
+                                filteredUsers = emptyList(),
+                                isLoading = false
+                            )
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = "Failed to perform search: ${e.message}"
+                    )
+                }
             }
-
-            it.copy(
-                filteredUsers = if (_state.value.selectedTabIndex == 0) it.users.filter { user -> 
-                    user.username?.lowercase()?.contains(query) == true 
-                } else emptyList(),
-                filteredPosts = filteredPosts
-            )
         }
     }
-
 }
