@@ -8,6 +8,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.google.firebase.database.FirebaseDatabase
 
 @Singleton
 class UserRepositoryImpl @Inject constructor(
@@ -241,17 +242,57 @@ class UserRepositoryImpl @Inject constructor(
 
     override suspend fun getVideosCount(): Int {
         return try {
-            val currentUser = firebaseAuth.currentUser
-            if (currentUser != null) {
-                val userDoc = usersCollection.document(currentUser.uid).get().await()
-                val user = userDoc.toObject(User::class.java)
-                user?.videosCount ?: 0
-            } else {
-                0
-            }
+            val currentUser = getCurrentUser() ?: return 0
+            val postsRef = FirebaseDatabase.getInstance().getReference("posts")
+            val snapshot = postsRef.orderByChild("userId").equalTo(currentUser.id).get().await()
+            snapshot.children.count()
         } catch (e: Exception) {
             Log.e(TAG, "Error getting videos count", e)
             0
+        }
+    }
+
+    override suspend fun searchUsers(query: String): List<User> {
+        return try {
+            // Convert query to lowercase for case-insensitive search
+            val lowercaseQuery = query.lowercase()
+            
+            // Search in username
+            val usernameSnapshot = usersCollection
+                .whereGreaterThanOrEqualTo("username", lowercaseQuery)
+                .whereLessThanOrEqualTo("username", lowercaseQuery + "\uf8ff")
+                .get()
+                .await()
+
+            // Search in email
+            val emailSnapshot = usersCollection
+                .whereGreaterThanOrEqualTo("email", lowercaseQuery)
+                .whereLessThanOrEqualTo("email", lowercaseQuery + "\uf8ff")
+                .get()
+                .await()
+
+            // Search in full name
+            val fullNameSnapshot = usersCollection
+                .whereGreaterThanOrEqualTo("fullName", lowercaseQuery)
+                .whereLessThanOrEqualTo("fullName", lowercaseQuery + "\uf8ff")
+                .get()
+                .await()
+
+            // Combine results and remove duplicates
+            val allUsers = (usernameSnapshot.toObjects(User::class.java) +
+                          emailSnapshot.toObjects(User::class.java) +
+                          fullNameSnapshot.toObjects(User::class.java))
+                .distinctBy { it.id }
+
+            // Additional filtering for partial matches
+            allUsers.filter { user ->
+                user.username?.lowercase()?.contains(lowercaseQuery) == true ||
+                user.email.lowercase().contains(lowercaseQuery) ||
+                user.fullName?.lowercase()?.contains(lowercaseQuery) == true
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error searching users with query: $query", e)
+            emptyList()
         }
     }
 } 

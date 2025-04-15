@@ -20,4 +20,5 @@ interface UserRepository {
     suspend fun getFollowersCount(): Int
     suspend fun getFollowingCount(): Int
     suspend fun getVideosCount(): Int
+    suspend fun searchUsers(query: String): List<User>
 } 
