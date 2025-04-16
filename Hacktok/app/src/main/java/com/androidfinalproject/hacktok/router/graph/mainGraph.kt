@@ -30,6 +30,7 @@ import com.androidfinalproject.hacktok.ui.messageDashboard.MessageDashboardRoot
 import com.androidfinalproject.hacktok.ui.messageDashboard.MessageDashboardViewModel
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import com.androidfinalproject.hacktok.router.routes.AuthRoute
 
 fun NavGraphBuilder.mainNavigation(navController: NavController) {
     navigation(
@@ -79,6 +80,12 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
                 onCreateStoryNavigate = {
 
                 },
+                onAuthNavigate = {
+                    navController.navigate(AuthRoute.Graph.route)
+                },
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
             )
         }
 

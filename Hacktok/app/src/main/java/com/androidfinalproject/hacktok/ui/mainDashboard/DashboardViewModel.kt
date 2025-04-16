@@ -31,16 +31,21 @@ class DashboardViewModel @Inject constructor(
     private fun logout() {
         viewModelScope.launch {
             try{
-                Log.e(TAG, "start")
+                Log.d(TAG, "Logout action started")
                 val status = authService.logout()
                 if(!status) {
-                    Log.e(TAG, "Error performing action logout")
+                    Log.e(TAG, "AuthService logout failed")
                 } else{
-                    Log.e(TAG, "complete")
+                    Log.d(TAG, "AuthService logout successful, updating state")
+                    // State update will trigger LaunchedEffect in Root
+                    _state.update {
+                        it.copy(
+                            isLogout = true // Ensure loading is false after logout attempt
+                        )
+                    }
                 }
-
             } catch (e: Exception) {
-                Log.e(TAG, "Error performing action logout: ${e.message}", e)
+                Log.e(TAG, "Error during logout process: ${e.message}", e)
             }
         }
     }

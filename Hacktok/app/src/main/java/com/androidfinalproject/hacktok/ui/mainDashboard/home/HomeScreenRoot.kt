@@ -2,12 +2,13 @@ package com.androidfinalproject.hacktok.ui.mainDashboard.home
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun HomeScreenRoot(
-    viewModel: HomeScreenViewModel = viewModel(),
+    viewModel: HomeScreenViewModel = hiltViewModel(),
     onUserClick: (String) -> Unit,
     onPostClick: (String) -> Unit,
     onStoryClick: (String) -> Unit,

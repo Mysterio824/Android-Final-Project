@@ -45,7 +45,6 @@ fun DashboardScreen(
             when (state.selectedTab) {
                 "Home" -> {
                     HomeScreenRoot(
-                        viewModel = HomeScreenViewModel(state.user),
                         onUserClick = { onAction(DashboardAction.OnUserClick(it)) },
                         onPostClick = { onAction(DashboardAction.OnPostClick(it)) },
                         onStoryClick = { onAction(DashboardAction.OnStoryClick(it)) },
@@ -63,7 +62,6 @@ fun DashboardScreen(
 
                 "WatchLater" -> {
                     WatchLaterScreenRoot(
-                        viewModel = WatchLaterViewModel(state.user.id!!),
                         onPostClickNavigation = { id -> onAction(DashboardAction.OnPostClick(id)) },
                         onUserProfileNavigate = { id -> onAction(DashboardAction.OnUserClick(id)) }
                     )

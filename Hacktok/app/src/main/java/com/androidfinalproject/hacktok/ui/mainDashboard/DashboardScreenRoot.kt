@@ -1,6 +1,7 @@
 package com.androidfinalproject.hacktok.ui.mainDashboard
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -20,9 +21,16 @@ fun DashboardScreenRoot(
     onSearchNavigate: () -> Unit,
     onCreatePostNavigate: () -> Unit,
     onCreateStoryNavigate: () -> Unit,
+    onAuthNavigate: () -> Unit,
     onPostEditNavigate: (String) -> Unit,
+    onNavigateBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(state.isLogout) {
+        if (state.isLogout)
+            onAuthNavigate()
+    }
 
     DashboardScreen(
         state = state,
@@ -37,9 +45,10 @@ fun DashboardScreenRoot(
                 is DashboardAction.OnCreatePost -> onCreatePostNavigate()
                 is DashboardAction.OnCreateStory -> onCreateStoryNavigate()
                 is DashboardAction.OnSearchNavigate -> onSearchNavigate()
+                is DashboardAction.OnPostEditNavigate -> onPostEditNavigate(action.postId)
                 is DashboardAction.OnCurrentProfileNavigate -> onCurrentProfileNavigate()
                 is DashboardAction.OnMessageDashboardNavigate -> onMessageDashBoardNavigate()
-                is DashboardAction.OnNavigateBack -> exitProcess(0)
+                is DashboardAction.OnNavigateBack -> onNavigateBack()
                 else -> viewModel.onAction(action)
             }
         }

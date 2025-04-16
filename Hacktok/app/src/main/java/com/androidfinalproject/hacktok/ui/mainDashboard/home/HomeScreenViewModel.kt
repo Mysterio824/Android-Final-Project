@@ -3,17 +3,20 @@ package com.androidfinalproject.hacktok.ui.mainDashboard.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.model.MockData
-import com.androidfinalproject.hacktok.model.User
+import com.androidfinalproject.hacktok.service.AuthService
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class HomeScreenViewModel(curUser: User) : ViewModel() {
-    private val _state = MutableStateFlow(HomeScreenState(
-        user = curUser
-    ))
+@HiltViewModel
+class HomeScreenViewModel @Inject constructor(
+    private val authService: AuthService
+) : ViewModel() {
+    private val _state = MutableStateFlow(HomeScreenState())
     val state: StateFlow<HomeScreenState> = _state.asStateFlow()
 
     init {
@@ -33,6 +36,10 @@ class HomeScreenViewModel(curUser: User) : ViewModel() {
 
     private fun loadPosts() {
         viewModelScope.launch {
+            _state.update{
+                it.copy(user = authService.getCurrentUser())
+            }
+
             _state.value = _state.value.copy(isLoading = true, error = null)
             try {
                 val mockPosts = MockData.mockPosts

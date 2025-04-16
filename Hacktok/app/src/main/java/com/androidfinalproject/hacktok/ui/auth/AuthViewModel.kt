@@ -118,7 +118,7 @@ class AuthViewModel @Inject constructor(
     }
     
     // --- Methods modifying Core Auth State (_authState) ---
-    fun signInWithGoogle(idToken: String) {
+    private fun signInWithGoogle(idToken: String) {
         Log.d("AuthViewModel", "signInWithGoogle called with token: ${idToken.take(10)}...")
         viewModelScope.launch {
             try {
@@ -154,19 +154,7 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun signOut() {
-        viewModelScope.launch {
-            // _authState.value = AuthState.Loading // Optional: Show loading during sign out
-            try {
-                authRepository.signOut()
-                _authState.value = AuthState.SignedOut
-            } catch (e: Exception) {
-                _authState.value = AuthState.Error(e.message ?: "Unknown Sign Out error")
-            }
-        }
-    }
-
-    fun checkAuthState() {
+    private fun checkAuthState() {
         val currentUser = authRepository.getCurrentUser()
         if (currentUser != null) {
              viewModelScope.launch {

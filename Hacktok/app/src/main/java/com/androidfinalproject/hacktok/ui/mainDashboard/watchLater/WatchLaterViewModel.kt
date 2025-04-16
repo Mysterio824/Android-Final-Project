@@ -3,18 +3,24 @@ package com.androidfinalproject.hacktok.ui.mainDashboard.watchLater
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.model.MockData
+import com.androidfinalproject.hacktok.service.AuthService
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class WatchLaterViewModel(userId: String) : ViewModel() {
+@HiltViewModel
+class WatchLaterViewModel @Inject constructor(
+//    private val postService: PostService
+) : ViewModel() {
     private val _state = MutableStateFlow(WatchLaterState())
     val state: StateFlow<WatchLaterState> = _state.asStateFlow()
 
     init {
-        loadSavedPosts(userId)
+        loadSavedPosts()
     }
 
     fun onAction(action: WatchLaterAction) {
@@ -25,12 +31,12 @@ class WatchLaterViewModel(userId: String) : ViewModel() {
         }
     }
 
-    private fun loadSavedPosts(userId: String) {
+    private fun loadSavedPosts() {
         viewModelScope.launch {
             _state.update { currentState ->
                 currentState.copy(
                     isLoading = true,
-                    error = null
+                    error = null,
                 )
             }
 
