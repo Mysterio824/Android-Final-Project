@@ -1,16 +1,9 @@
 package com.androidfinalproject.hacktok.model
 
+import com.androidfinalproject.hacktok.model.enums.UserRole
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.PropertyName
 import java.util.Date
-
-// Enum for user roles
-enum class UserRole {
-    USER,       // Regular user
-    MODERATOR,  // Content moderator
-    ADMIN,      // Full platform administrator
-    SUPER_ADMIN // Top-level system administrator
-}
 
 data class User(
     @PropertyName("id") val id: String? = null,
@@ -65,9 +58,3 @@ data class User(
         }
     }
 }
-
-data class PrivacySettings(
-    @PropertyName("profileVisibility") val profileVisibility: String = "public",
-    @PropertyName("postVisibility") val postVisibility: String = "public",
-    @PropertyName("allowMessagesFrom") val allowMessagesFrom: String = "everyone"
-)

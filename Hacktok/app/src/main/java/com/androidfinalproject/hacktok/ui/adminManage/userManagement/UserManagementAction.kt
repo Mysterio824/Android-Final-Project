@@ -1,6 +1,6 @@
 package com.androidfinalproject.hacktok.ui.adminManage.userManagement
 
-import com.androidfinalproject.hacktok.model.UserRole
+import com.androidfinalproject.hacktok.model.enums.UserRole
 
 sealed class UserManagementAction {
     data class UpdateUserRole(val userId: String, val newRole: UserRole) : UserManagementAction()

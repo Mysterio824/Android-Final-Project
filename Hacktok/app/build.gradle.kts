@@ -114,7 +114,7 @@ dependencies {
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
     
     // Google Play Services - Add necessary ones back without versions for BOM management
-    implementation("com.google.android.gms:play-services-auth")
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
     // implementation("com.google.android.gms:play-services-base:18.3.0") // Base might be transitively included
     // implementation("com.google.android.gms:play-services-identity:18.0.1") // Needed?
     

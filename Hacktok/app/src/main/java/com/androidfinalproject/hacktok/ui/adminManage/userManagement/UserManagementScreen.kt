@@ -8,6 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.androidfinalproject.hacktok.model.User
+import com.androidfinalproject.hacktok.model.enums.UserRole
 
 @Composable
 fun UserManagementScreen(
@@ -57,7 +58,7 @@ private fun UserList(
     users: List<User>,
     onUserClick: (String) -> Unit,
     onDeleteUser: (String) -> Unit,
-    onUpdateRole: (String, String) -> Unit,
+    onUpdateRole: (String, UserRole) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(modifier = modifier) {
@@ -77,7 +78,7 @@ private fun UserListItem(
     user: User,
     onClick: () -> Unit,
     onDelete: () -> Unit,
-    onUpdateRole: (String) -> Unit,
+    onUpdateRole: (UserRole) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -96,7 +97,7 @@ private fun UserListItem(
                 Button(onClick = onDelete) {
                     Text("Delete")
                 }
-                Button(onClick = { onUpdateRole("ADMIN") }) {
+                Button(onClick = { onUpdateRole(UserRole.ADMIN) }) {
                     Text("Make Admin")
                 }
             }

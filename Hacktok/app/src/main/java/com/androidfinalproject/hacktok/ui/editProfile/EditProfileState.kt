@@ -1,6 +1,6 @@
 package com.androidfinalproject.hacktok.ui.editProfile
 
-import com.androidfinalproject.hacktok.model.UserRole
+import com.androidfinalproject.hacktok.model.enums.UserRole
 
 data class EditProfileState(
     val username: String = "",

@@ -3,7 +3,7 @@ package com.androidfinalproject.hacktok.ui.adminManage.userManagement
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.androidfinalproject.hacktok.model.UserRole
+import com.androidfinalproject.hacktok.model.enums.UserRole
 
 @Composable
 fun UserManagementTabRoot(
@@ -32,7 +32,7 @@ fun UserManagementTabRoot(
                             viewModel.deleteUser(action.userId)
                         }
                         is UserManagementAction.UpdateUserRole -> {
-                            viewModel.updateUserRole(action.userId, action.newRole.name)
+                            viewModel.updateUserRole(action.userId, action.newRole)
                         }
                     }
                 }

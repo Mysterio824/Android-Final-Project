@@ -1,5 +1,8 @@
 package com.androidfinalproject.hacktok.model
 
+import com.androidfinalproject.hacktok.model.enums.NotificationType
+import com.androidfinalproject.hacktok.model.enums.RelationshipStatus
+import com.androidfinalproject.hacktok.model.enums.UserRole
 import com.androidfinalproject.hacktok.ui.statistic.postStatistic.PostDataType
 import com.androidfinalproject.hacktok.ui.statistic.postStatistic.PostStatPoint
 import com.androidfinalproject.hacktok.ui.statistic.postStatistic.PostStatisticsState
@@ -10,6 +13,8 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 object MockData {
 
@@ -120,6 +125,73 @@ object MockData {
             parentCommentId = "comment1",
             createdAt = Date(System.currentTimeMillis() - 900000) // 15 minutes ago
         )
+    )
+    fun getMockNotifications(count: Int = 10): List<Notification> {
+        val notifications = mutableListOf<Notification>()
+
+        // Generate random notifications
+        repeat(count) { index ->
+            val mockNotification = generateRandomNotification(index)
+            notifications.add(mockNotification)
+        }
+
+        // Sort by date (newest first)
+        return notifications.sortedByDescending { it.createdAt }
+    }
+
+
+    fun generateRandomNotification(index: Int): Notification {
+        // Generate a random notification type
+        val types = NotificationType.entries.toTypedArray()
+        val randomType = types[index % types.size]
+
+        // Generate a random date within the last 7 days
+        val randomTimeAgo = (index * 2 + (0..24).random()).toLong()
+        val date = Date(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(randomTimeAgo))
+
+        // Generate a random sender
+        val sender = mockUsers[index % mockUsers.size]
+
+        // Generate content based on type
+        val content = when (randomType) {
+            NotificationType.FRIEND_REQUEST -> "${sender.username} sent you a friend request"
+            NotificationType.FRIEND_ACCEPT -> "${sender.username} accepted your friend request"
+            NotificationType.POST_LIKE -> "${sender.username} liked your post"
+            NotificationType.POST_COMMENT -> "${sender.username} commented on your post: \"${mockComments.random()}\""
+            NotificationType.COMMENT_REPLY -> "${sender.username} replied to your comment: \"${mockComments.random()}\""
+            NotificationType.COMMENT_LIKE -> "${sender.username} liked your comment"
+            NotificationType.ADMIN_NOTIFICATION -> "Important: ${mockAdminMessages.random()}"
+        }
+
+        // Set a random read status (more recent ones are more likely to be unread)
+        val isRead = index > 3 || (0..10).random() > 7
+
+        return Notification(
+            id = UUID.randomUUID().toString(),
+            userId = "user123", // Current user ID
+            type = randomType,
+            senderId = sender.id,
+            senderName = sender.username,
+            senderImage = sender.profileImage,
+            relatedId = if (randomType == NotificationType.FRIEND_REQUEST || randomType == NotificationType.FRIEND_ACCEPT)
+                sender.id
+            else
+                "post${(1..100).random()}",
+            content = content,
+            createdAt = date,
+            isRead = isRead,
+            priority = if (randomType == NotificationType.ADMIN_NOTIFICATION) "high" else "normal"
+        )
+    }
+
+    private val mockAdminMessages = listOf(
+        "Your account has been verified",
+        "New features have been added to the app",
+        "Please update your privacy settings",
+        "Your post has been featured in our weekly highlights",
+        "Security update available",
+        "Welcome to HackTok! Explore the app features.",
+        "Your video is trending!"
     )
 
     // Added mockUserRoles
