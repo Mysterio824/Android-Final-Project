@@ -2,8 +2,7 @@ package com.androidfinalproject.hacktok.ui.editProfile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.androidfinalproject.hacktok.model.User
-import com.androidfinalproject.hacktok.model.UserRole
+import com.androidfinalproject.hacktok.model.enums.UserRole
 import com.androidfinalproject.hacktok.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

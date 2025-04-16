@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.RelationInfo
-import com.androidfinalproject.hacktok.model.RelationshipStatus
+import com.androidfinalproject.hacktok.model.enums.RelationshipStatus
 import com.androidfinalproject.hacktok.ui.friendList.component.BlockedListItem
 import com.androidfinalproject.hacktok.ui.friendList.component.FriendListItem
 import com.androidfinalproject.hacktok.ui.friendList.component.FriendListSearchBar

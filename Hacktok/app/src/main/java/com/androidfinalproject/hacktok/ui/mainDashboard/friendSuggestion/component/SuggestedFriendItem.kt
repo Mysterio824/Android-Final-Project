@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.androidfinalproject.hacktok.R
 import com.androidfinalproject.hacktok.model.RelationInfo
-import com.androidfinalproject.hacktok.model.RelationshipStatus
+import com.androidfinalproject.hacktok.model.enums.RelationshipStatus
 import com.androidfinalproject.hacktok.model.User
 
 @Composable

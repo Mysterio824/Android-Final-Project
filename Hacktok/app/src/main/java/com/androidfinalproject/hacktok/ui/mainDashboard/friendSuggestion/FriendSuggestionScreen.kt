@@ -12,7 +12,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.RelationInfo
-import com.androidfinalproject.hacktok.model.RelationshipStatus
+import com.androidfinalproject.hacktok.model.enums.RelationshipStatus
 import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.ui.mainDashboard.friendSuggestion.component.*
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme

@@ -1,7 +1,7 @@
 package com.androidfinalproject.hacktok.di
 
 import com.androidfinalproject.hacktok.repository.UserRepository
-import com.androidfinalproject.hacktok.repository.UserRepositoryImpl
+import com.androidfinalproject.hacktok.repository.impl.UserRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

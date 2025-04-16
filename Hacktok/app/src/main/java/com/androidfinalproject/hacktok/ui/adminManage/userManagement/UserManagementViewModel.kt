@@ -3,6 +3,7 @@ package com.androidfinalproject.hacktok.ui.adminManage.userManagement
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.model.User
+import com.androidfinalproject.hacktok.model.enums.UserRole
 import com.androidfinalproject.hacktok.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -69,10 +70,10 @@ class UserManagementViewModel @Inject constructor(
         }
     }
 
-    fun updateUserRole(userId: String, newRole: String) {
+    fun updateUserRole(userId: String, newRole: UserRole) {
         viewModelScope.launch {
             try {
-                userRepository.updateUser(userId, mapOf("role" to newRole))
+                userRepository.updateUser(userId, mapOf("role" to newRole.name))
                 // Refresh the user list after role update
                 loadUsers()
             } catch (e: Exception) {

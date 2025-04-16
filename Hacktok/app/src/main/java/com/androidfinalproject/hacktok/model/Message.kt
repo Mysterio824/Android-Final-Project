@@ -20,11 +20,3 @@ data class Message(
                 "isRead=$isRead, isDeleted=$isDeleted)"
     }
 }
-
-data class Media(
-    @PropertyName("type") val type: String = "image", // "image", "video"
-    @PropertyName("url") val url: String = "",
-    @PropertyName("thumbnailUrl") val thumbnailUrl: String? = null
-) {
-    constructor() : this("image", "", null)
-}

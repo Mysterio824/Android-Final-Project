@@ -20,10 +20,3 @@ data class Ad(
                 "impressions=$impressions, createdAt=$createdAt)"
     }
 }
-
-data class TargetAudience(
-    @PropertyName("ageRange") val ageRange: List<Int> = listOf(18, 65),
-    @PropertyName("location") val location: String? = null
-) {
-    constructor() : this(listOf(18, 65), null)
-}

@@ -1,7 +1,7 @@
 package com.androidfinalproject.hacktok.di
 
 import com.androidfinalproject.hacktok.repository.PostRepository
-import com.androidfinalproject.hacktok.repository.PostRepositoryImpl
+import com.androidfinalproject.hacktok.repository.impl.PostRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

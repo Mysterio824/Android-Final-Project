@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.androidfinalproject.hacktok.model.User
-import com.androidfinalproject.hacktok.model.UserRole
+import com.androidfinalproject.hacktok.model.enums.UserRole
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)

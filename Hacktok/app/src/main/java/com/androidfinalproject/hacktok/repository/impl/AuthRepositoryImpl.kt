@@ -1,6 +1,7 @@
-package com.androidfinalproject.hacktok.repository
+package com.androidfinalproject.hacktok.repository.impl
 
 import android.util.Log
+import com.androidfinalproject.hacktok.repository.AuthRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider

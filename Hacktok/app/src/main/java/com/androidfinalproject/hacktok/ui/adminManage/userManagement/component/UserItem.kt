@@ -24,7 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.androidfinalproject.hacktok.model.User
-import com.androidfinalproject.hacktok.model.UserRole
+import com.androidfinalproject.hacktok.model.enums.UserRole
 
 
 @Composable

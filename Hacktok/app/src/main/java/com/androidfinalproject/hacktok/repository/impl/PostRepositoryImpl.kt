@@ -1,7 +1,8 @@
-package com.androidfinalproject.hacktok.repository
+package com.androidfinalproject.hacktok.repository.impl
 
 import android.util.Log
 import com.androidfinalproject.hacktok.model.Post
+import com.androidfinalproject.hacktok.repository.PostRepository
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
