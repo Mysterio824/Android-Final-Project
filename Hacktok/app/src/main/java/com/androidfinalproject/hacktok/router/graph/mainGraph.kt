@@ -197,7 +197,7 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
             val userId = backStackEntry.arguments?.getString("userId")
 
             FriendListScreenRoot(
-                viewModel = FriendListViewModel(userId!!),
+                userId = userId!!,
                 onChatWithFriend = { user ->
                     navController.navigate("${MainRoute.ChatRoom.route}/user/${user}")
                 },

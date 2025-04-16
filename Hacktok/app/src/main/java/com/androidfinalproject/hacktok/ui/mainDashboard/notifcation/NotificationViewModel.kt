@@ -30,7 +30,7 @@ class NotificationViewModel @Inject constructor(
             is NotificationAction.OnMarkAsRead -> markNotificationAsRead(action.notificationId)
             is NotificationAction.OnDeleteNotification -> deleteNotification(action.notificationId)
             is NotificationAction.OnRefresh -> loadNotifications(true)
-            else -> {} // Other actions are handled in the NotificationScreenRoot
+            else -> {}
         }
     }
 

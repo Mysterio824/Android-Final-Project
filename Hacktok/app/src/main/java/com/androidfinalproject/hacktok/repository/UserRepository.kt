@@ -21,4 +21,8 @@ interface UserRepository {
     suspend fun getFollowingCount(): Int
     suspend fun getVideosCount(): Int
     suspend fun searchUsers(query: String): List<User>
+    
+    // New methods required by RelationshipRepository
+    suspend fun getUsersByIds(userIds: List<String>): List<User>
+    suspend fun getAllUsers(): List<User>
 } 

@@ -16,6 +16,7 @@ import com.androidfinalproject.hacktok.ui.mainDashboard.home.HomeScreenViewModel
 import com.androidfinalproject.hacktok.ui.mainDashboard.notifcation.NotificationScreenRoot
 import com.androidfinalproject.hacktok.ui.mainDashboard.watchLater.WatchLaterScreenRoot
 import com.androidfinalproject.hacktok.ui.mainDashboard.watchLater.WatchLaterViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 
 
 @Composable
@@ -56,7 +57,8 @@ fun DashboardScreen(
 
                 "Friends" -> {
                     FriendSuggestionScreenRoot (
-                        viewModel = FriendSuggestionViewModel(state.user),
+                        viewModel = hiltViewModel(),
+                        currentUser = state.user,
                         onUserNavigate = { onAction(DashboardAction.OnUserClick(it)) },
                         onFriendListNavigate = { onAction(DashboardAction.OnFriendListNavigate(it)) },
                     )

@@ -9,13 +9,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Announcement
+import androidx.compose.material.icons.automirrored.filled.Announcement
+import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.ChatBubble
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.PersonAdd
-import androidx.compose.material.icons.filled.Reply
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Icon
@@ -75,7 +75,7 @@ fun NotificationItem(
                         NotificationType.COMMENT_REPLY,
                         NotificationType.COMMENT_LIKE -> notification.relatedId?.let { onPostClick(it) }
                         NotificationType.ADMIN_NOTIFICATION -> {
-                            notification.actionUrl?.let { url ->
+                            notification.actionUrl?.let { _ ->
                                 // Handle action URL
                             }
                         }
@@ -149,12 +149,11 @@ fun NotificationItem(
                 )
             }
 
-            // Actions menu
             IconButton(
                 onClick = { notification.id?.let { onDelete(it) } },
             ) {
                 Icon(
-                    imageVector = Icons.Default.Delete,
+                    imageVector = Icons.Default.Close,
                     contentDescription = "Delete notification",
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -170,9 +169,9 @@ private fun getNotificationTypeIcon(type: NotificationType): ImageVector {
         NotificationType.FRIEND_ACCEPT -> Icons.Default.People
         NotificationType.POST_LIKE -> Icons.Default.Favorite
         NotificationType.POST_COMMENT -> Icons.Default.ChatBubble
-        NotificationType.COMMENT_REPLY -> Icons.Default.Reply
+        NotificationType.COMMENT_REPLY -> Icons.AutoMirrored.Filled.Reply
         NotificationType.COMMENT_LIKE -> Icons.Default.ThumbUp
-        NotificationType.ADMIN_NOTIFICATION -> Icons.Default.Announcement
+        NotificationType.ADMIN_NOTIFICATION -> Icons.AutoMirrored.Filled.Announcement
     }
 }
 
