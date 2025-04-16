@@ -9,6 +9,7 @@ sealed class DashboardAction {
     data class OnFriendListNavigate(val userId: String) : DashboardAction()
     data class OnPostEditNavigate(val postId: String) : DashboardAction()
     data class OnStoryClick(val storyId: String) : DashboardAction()
+    object OnLogout : DashboardAction()
     object OnNavigateBack : DashboardAction()
     object OnMessageDashboardNavigate : DashboardAction()
     object OnCurrentProfileNavigate : DashboardAction()

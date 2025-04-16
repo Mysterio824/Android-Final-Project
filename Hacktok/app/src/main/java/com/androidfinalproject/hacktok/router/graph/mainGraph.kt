@@ -43,7 +43,6 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
             exitTransition = { slideFadeOutToRight() }
         ) {
             DashboardScreenRoot(
-                viewModel = DashboardViewModel(),
                 onUserProfileNavigate = { userId ->
                     navController.navigate("${MainRoute.UserDetail.route}/$userId")
                 },
@@ -172,7 +171,7 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
             }
 
             UserProfileScreenRoot(
-                viewModel = UserProfileViewModel(userId),
+                userId = userId,
                 onChatWithFriend = { chatId ->
                     navController.navigate("${MainRoute.ChatRoom.route}/user/$chatId")
                 },

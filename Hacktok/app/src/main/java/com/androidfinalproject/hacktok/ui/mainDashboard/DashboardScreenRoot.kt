@@ -2,15 +2,13 @@ package com.androidfinalproject.hacktok.ui.mainDashboard
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.androidfinalproject.hacktok.ui.currentProfile.CurrentProfileAction
-import com.androidfinalproject.hacktok.ui.messageDashboard.MessageDashboardAction
 import kotlin.system.exitProcess
 
 @Composable
 fun DashboardScreenRoot(
-    viewModel: DashboardViewModel = viewModel(),
+    viewModel: DashboardViewModel = hiltViewModel(),
     onUserProfileNavigate: (String?) -> Unit = {},
     onPostDetailNavigate: (String?) -> Unit = {},
     onStoryNavigate: (String?) -> Unit = {},

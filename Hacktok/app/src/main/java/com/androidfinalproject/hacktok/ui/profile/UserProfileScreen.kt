@@ -19,6 +19,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import com.androidfinalproject.hacktok.model.MockData
+import com.androidfinalproject.hacktok.model.RelationInfo
+import com.androidfinalproject.hacktok.model.User
+import com.androidfinalproject.hacktok.model.enums.RelationshipStatus
 import com.androidfinalproject.hacktok.ui.currentProfile.component.StatColumn
 import com.androidfinalproject.hacktok.ui.post.component.PostContent
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
@@ -42,16 +45,10 @@ fun UserProfileScreen (
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background, // Match background
+                    containerColor = MaterialTheme.colorScheme.background,
                     titleContentColor = MaterialTheme.colorScheme.onBackground,
                     navigationIconContentColor = MaterialTheme.colorScheme.onBackground
                 )
-                 // Optional: Add actions like report user?
-//                 actions = {
-//                    IconButton(onClick = { /* Report action */ }) {
-//                        Icon(Icons.Default.Flag, contentDescription = "Report User")
-//                    }
-//                 }
             )
         }
     ) { paddingValues ->
@@ -63,7 +60,7 @@ fun UserProfileScreen (
             ) {
                 CircularProgressIndicator()
             }
-            return@Scaffold // Use return@Scaffold inside Scaffold content
+            return@Scaffold
         }
 
         if (state.error != null) {
@@ -91,20 +88,21 @@ fun UserProfileScreen (
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "User not found.", // More specific message
+                    text = "User not found.",
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(16.dp)
                 )
             }
             return@Scaffold
         }
+        
+        val isOwnProfile = state.currentUserId == state.user.id
 
-        // Main content using LazyColumn for scrollable profile + posts
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(MaterialTheme.colorScheme.background), // Ensure background consistency
+                .background(MaterialTheme.colorScheme.background),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Profile Header Item
@@ -117,8 +115,8 @@ fun UserProfileScreen (
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp), // Adjusted padding
-                        horizontalArrangement = Arrangement.spacedBy(16.dp), // Adjusted spacing
+                            .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Box(
@@ -127,209 +125,261 @@ fun UserProfileScreen (
                                 .clip(CircleShape)
                                 .background(MaterialTheme.colorScheme.primaryContainer)
                         ) {
-                             // TODO: Replace with Coil AsyncImage if profileImage is available
+                             // TODO: Replace with Coil AsyncImage
                             Text(
                                 text = state.user.username?.firstOrNull()?.uppercaseChar()?.toString() ?: "?",
                                 color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                fontSize = 32.sp, // Larger text for initial
+                                fontSize = 32.sp,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.align(Alignment.Center)
                             )
                         }
-
-                        // Stats Column (using separate composable below)
                         ProfileStatsRow(state = state, onAction = onAction)
                     }
 
-                    // Name and Username Column (aligned left)
+                    // Name and Username Column
                     Column(
                        modifier = Modifier
                            .fillMaxWidth()
                            .padding(horizontal = 16.dp),
-                       horizontalAlignment = Alignment.Start // Align text left
+                       horizontalAlignment = Alignment.Start
                     ) {
                          Text(
                             text = state.user.fullName ?: state.user.username ?: "User",
-                            style = MaterialTheme.typography.titleLarge, // Use theme typography
+                            style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )
                          Spacer(modifier = Modifier.height(2.dp))
                          Text(
                             text = "@${state.user.username ?: "unknown"}",
-                             style = MaterialTheme.typography.bodyMedium, // Use theme typography
-                            color = MaterialTheme.colorScheme.outline // Use theme color
+                             style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.outline
                          )
                          Spacer(modifier = Modifier.height(8.dp))
                          Text(
-                            state.user.bio ?: "", // Display bio if available
+                            state.user.bio ?: "",
                              style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant, // Use theme color
-                            modifier = Modifier.padding(bottom = 16.dp) // Add padding below bio
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(bottom = 16.dp)
                          )
                     }
 
-
-                    // Action Buttons Row
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp) // Add spacing between buttons
-                    ) {
-                        if (state.isBlocked) {
-                            // TODO: Implement Unblock Action
-                            Button(
-                                onClick = { /* onAction(UserProfileAction.UnblockUser) */ },
-                                modifier = Modifier.weight(1f),
-                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
-                            ) {
-                                Text("Unblock")
-                            }
-                        } else {
-                             if (state.isFriend) {
-                                // Friend Actions (Unfriend, Message)
-                                Button(
-                                    onClick = { onAction(UserProfileAction.Unfriend) },
-                                    modifier = Modifier.weight(1f),
-                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer) // Use container colors
-                                ) {
-                                    Icon(Icons.Default.PersonRemove, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
-                                    Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                                    Text("Friends") // Or Unfriend
-                                }
-                                Button(
-                                    onClick = { onAction(UserProfileAction.ChatWithFriend) },
-                                    modifier = Modifier.weight(1f)
-                                    // Primary color is default
-                                ) {
-                                    Icon(Icons.Default.ChatBubbleOutline, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
-                                    Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                                    Text("Message")
-                                }
-                             } else {
-                                 // Not Friend Action (Add Friend)
-                                Button(
-                                    onClick = { onAction(UserProfileAction.AddFriend) },
-                                    modifier = Modifier.weight(1f)
-                                    // Primary color is default
-                                ) {
-                                     Icon(Icons.Default.PersonAdd, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
-                                     Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                                    Text("Add Friend")
-                                }
-                             }
-                             // Block Button (Always visible unless already blocked)
-                            // Use OutlinedButton for less emphasis
-                            OutlinedButton(
-                                onClick = { onAction(UserProfileAction.BlockUser) },
-                                modifier = Modifier.weight(1f),
-                                border = ButtonDefaults.outlinedButtonBorder.copy(width = 1.dp) // Thinner border
-                            ) {
-                                 Icon(Icons.Default.Block, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
-                                 Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                                Text("Block")
-                            }
-                        }
+                    // Action Buttons Row (Only show if not own profile)
+                    if (!isOwnProfile) {
+                        ProfileActionButtons(state = state, onAction = onAction)
                     }
                     Spacer(modifier = Modifier.height(16.dp))
-                    HorizontalDivider(modifier = Modifier.padding(horizontal = 0.dp)) // Full width divider
-                    // Spacer(modifier = Modifier.height(8.dp)) // Reduced spacer
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = 0.dp))
                 }
             }
 
-            // Posts Section Header (Optional)
-             item {
-                 // Removed explicit "Posts" header, relying on the list content
-                 // Spacer(modifier = Modifier.height(8.dp))
-             }
-
-            // User's Posts
-            if (!state.isBlocked) {
-                if (state.posts.isEmpty() && !state.isLoading) { // Check loading state too
-                    item {
+            // Posts Section
+            // Hide posts if current user is blocked by profile user
+            val showPosts = state.relationshipInfo?.status != RelationshipStatus.BLOCKING
+            
+            if (showPosts) {
+                 if (state.posts.isEmpty() && !state.isLoading) { 
+                     item {
                          Column(
-                            modifier = Modifier.fillMaxWidth().padding(32.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
+                             modifier = Modifier.fillMaxWidth().padding(32.dp),
+                             horizontalAlignment = Alignment.CenterHorizontally,
+                             verticalArrangement = Arrangement.Center
                          ) {
-                            Icon(Icons.Default.Feed, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(48.dp))
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                "No posts yet.",
-                                color = Color.Gray,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
+                             Icon(
+                                 imageVector = Icons.Default.CameraRoll,
+                                 contentDescription = "No Posts",
+                                 modifier = Modifier.size(48.dp),
+                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
+                             )
+                             Spacer(modifier = Modifier.height(8.dp))
+                             Text("No posts yet", style = MaterialTheme.typography.titleMedium)
                          }
-                    }
-                } else {
-                    items(state.posts, key = { post -> post.id ?: post.hashCode() }) { post ->
-                        // Add divider between posts
-                        HorizontalDivider(modifier = Modifier.padding(horizontal = 0.dp))
-                        PostContent(
-                            post = post, // Assumes post.user is populated by ViewModel
-                            onPostClick = { postId ->
-                                onAction(UserProfileAction.GoToPost(postId))
-                            },
-                            onToggleLike = {
-                                // TODO: Implement isLiked state and pass to PostContent
-                                onAction(UserProfileAction.LikePost(post.id ?: ""))
-                            },
-                            onUserClick = {
-                                // Clicking user on their own post - refresh? or do nothing?
-                                // onAction(UserProfileAction.RefreshProfile)
-                            },
-                            onComment = {
-                                onAction(UserProfileAction.GoToPost(post.id ?: "")) // Navigate to post detail for commenting
-                            },
-                            onShare = { /* TODO */ },
-                            onOptionsClick = { /* TODO: Show post options */ },
-                        )
-                    }
-                     item { HorizontalDivider() } // Divider after last post
-                }
-            } else {
-                 item { // Show message if user is blocked
-                      Column(
-                         modifier = Modifier.fillMaxWidth().padding(32.dp),
-                         horizontalAlignment = Alignment.CenterHorizontally,
-                         verticalArrangement = Arrangement.Center
-                      ) {
-                         Icon(Icons.Default.Block, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(48.dp))
-                         Spacer(modifier = Modifier.height(8.dp))
-                         Text(
-                             "You have blocked this user. Unblock to see their posts.",
-                             color = Color.Gray,
-                             style = MaterialTheme.typography.bodyMedium,
-                             textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                     }
+                 } else {
+                     items(state.posts, key = { it.id ?: "" }) {
+                         PostContent(
+                             post = it,
+                             onUserClick = { onAction(UserProfileAction.RefreshProfile) },
+                             onPostClick = { onAction(UserProfileAction.GoToPost(it.id!!)) },
+                             onOptionsClick = { /* TODO: Post options */ },
+                             onToggleLike = { onAction(UserProfileAction.LikePost(it.id!!)) },
+                             onComment = { onAction(UserProfileAction.GoToPost(it.id!!)) },
+                             onShare = { /* TODO: Share post */ }
                          )
-                      }
+                     }
                  }
+            } else {
+                // Show a "Blocked" indicator instead of posts
+                item {
+                    Column(
+                        modifier = Modifier.fillMaxWidth().padding(32.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Block,
+                            contentDescription = "Blocked",
+                            modifier = Modifier.size(48.dp),
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("You have blocked this user", style = MaterialTheme.typography.titleMedium)
+                    }
+                }
             }
-             // Add padding at the bottom of the list
-             item { Spacer(modifier = Modifier.height(16.dp)) }
         }
     }
 }
 
-
-// Extracted stats row for clarity
+// Extracted Action Buttons to a separate composable for clarity
 @Composable
-fun ProfileStatsRow(state: UserProfileState, onAction: (UserProfileAction) -> Unit) {
+private fun ProfileActionButtons(state: UserProfileState, onAction: (UserProfileAction) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        when (state.relationshipInfo?.status) {
+            RelationshipStatus.NONE -> {
+                // Can Send Request
+                Button(
+                    onClick = { onAction(UserProfileAction.SendFriendRequest) },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(Icons.Default.PersonAdd, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
+                    Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                    Text("Add Friend")
+                }
+                BlockButton(modifier = Modifier.weight(1f), onAction = onAction)
+            }
+            RelationshipStatus.PENDING_OUTGOING -> {
+                // Request Sent by Current User
+                Button(
+                    onClick = { onAction(UserProfileAction.CancelFriendRequest) },
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)
+                ) {
+                    Icon(Icons.Default.CancelScheduleSend, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
+                    Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                    Text("Cancel Request")
+                }
+                 BlockButton(modifier = Modifier.weight(1f), onAction = onAction)
+            }
+            RelationshipStatus.PENDING_INCOMING -> {
+                 // Request Received by Current User
+                 Button(
+                     onClick = { onAction(UserProfileAction.AcceptFriendRequest) },
+                     modifier = Modifier.weight(1f),
+                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                 ) {
+                     Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
+                     Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                     Text("Accept")
+                 }
+                 Button(
+                     onClick = { onAction(UserProfileAction.DeclineFriendRequest) },
+                     modifier = Modifier.weight(1f),
+                      colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)
+                 ) {
+                     Icon(Icons.Default.Cancel, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
+                     Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                     Text("Decline")
+                 }
+            }
+            RelationshipStatus.FRIENDS -> {
+                 // Are Friends
+                 Button(
+                     onClick = { onAction(UserProfileAction.Unfriend) },
+                     modifier = Modifier.weight(1f),
+                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)
+                 ) {
+                     Icon(Icons.Default.PersonRemove, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
+                     Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                     Text("Unfriend")
+                 }
+                 Button(
+                     onClick = { onAction(UserProfileAction.ChatWithFriend) },
+                     modifier = Modifier.weight(1f)
+                 ) {
+                     Icon(Icons.Default.ChatBubbleOutline, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
+                     Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                     Text("Message")
+                 }
+                 BlockButton(modifier = Modifier.weight(0.6f), onAction = onAction) // Smaller block button when friends
+            }
+            RelationshipStatus.BLOCKING -> {
+                 // Current User is Blocking Profile User
+                 Button(
+                     onClick = { onAction(UserProfileAction.UnblockUser) },
+                     modifier = Modifier.weight(1f),
+                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer, contentColor = MaterialTheme.colorScheme.onErrorContainer)
+                 ) {
+                     Icon(Icons.Default.CheckCircleOutline, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
+                     Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                     Text("Unblock")
+                 }
+            }
+            RelationshipStatus.BLOCKED -> {
+                 // Current User is Blocked BY Profile User
+                 Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), contentAlignment = Alignment.Center) {
+                     Text(
+                         "You are blocked by this user", 
+                         color = MaterialTheme.colorScheme.error,
+                         style = MaterialTheme.typography.bodyMedium
+                     )
+                 }
+            }
+            null -> {
+                 // No relationship info (e.g., error loading it)
+                 // Optionally show Add Friend or an error indicator
+                  Button(
+                     onClick = { onAction(UserProfileAction.SendFriendRequest) },
+                     modifier = Modifier.weight(1f)
+                 ) {
+                     Icon(Icons.Default.PersonAdd, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
+                     Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                     Text("Add Friend")
+                 }
+                 BlockButton(modifier = Modifier.weight(1f), onAction = onAction)
+            }
+        }
+    }
+}
+
+// Extracted Block Button for reuse
+@Composable
+private fun RowScope.BlockButton(modifier: Modifier = Modifier, onAction: (UserProfileAction) -> Unit) {
+     OutlinedButton(
+        onClick = { onAction(UserProfileAction.BlockUser) },
+        modifier = modifier,
+        border = ButtonDefaults.outlinedButtonBorder.copy(width = 1.dp)
+    ) {
+         Icon(Icons.Default.Block, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
+         Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+        Text("Block")
+    }
+}
+
+// Extracted Stats Row
+@Composable
+private fun RowScope.ProfileStatsRow(state: UserProfileState, onAction: (UserProfileAction) -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly // Distribute space
+        horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         StatColumn(
-             // Use follower/following count if available, otherwise fallback
-             count = state.user?.followerCount ?: 0,
-             label = "Followers",
-             onClick = { state.user?.id?.let { onAction(UserProfileAction.NavigateFriendList(it)) } } // Pass user ID
+            count = state.user?.followerCount ?: 0,
+            label = "Followers",
+            onClick = { state.user?.id?.let { onAction(UserProfileAction.NavigateFriendList(it)) } }
         )
         StatColumn(
-             count = state.user?.followingCount ?: 0,
-             label = "Following",
-             onClick = { state.user?.id?.let { onAction(UserProfileAction.NavigateFriendList(it)) } } // Pass user ID
+            count = state.user?.followingCount ?: 0,
+            label = "Following",
+            onClick = { state.user?.id?.let { onAction(UserProfileAction.NavigateFriendList(it)) } }
         )
         StatColumn(
-            count = state.posts.size, // Count loaded posts
+            count = state.posts.size,
             label = "Posts",
             onClick = { /* Maybe scroll to posts? */ }
         )
@@ -339,14 +389,14 @@ fun ProfileStatsRow(state: UserProfileState, onAction: (UserProfileAction) -> Un
 
 @Preview(showBackground = true, widthDp = 380, heightDp = 800)
 @Composable
-fun ProfileScreenPreview() {
+fun ProfileScreenPreview_Friend() {
     MainAppTheme {
          UserProfileScreen(
             state = UserProfileState(
                 user = MockData.mockUsers.first().copy(bio = "This is a sample bio text.", followerCount = 123, followingCount = 45),
-                posts = MockData.mockPosts.map { it.copy(user = MockData.mockUsers.first()) }, // Ensure user is set for preview
-                isBlocked = false,
-                isFriend = true, // Preview as friend
+                posts = MockData.mockPosts.map { it.copy(user = MockData.mockUsers.first()) },
+                relationshipInfo = RelationInfo(id="otherUser", status=RelationshipStatus.FRIENDS),
+                currentUserId = "currentUser",
                 isLoading = false,
                 error = null
             ),
@@ -357,14 +407,14 @@ fun ProfileScreenPreview() {
 
 @Preview(showBackground = true, widthDp = 380, heightDp = 800)
 @Composable
-fun ProfileScreenNotFriendPreview() {
+fun ProfileScreenPreview_PendingIncoming() {
     MainAppTheme {
          UserProfileScreen(
             state = UserProfileState(
-                user = MockData.mockUsers.first().copy(followerCount = 5, followingCount = 10),
-                posts = MockData.mockPosts.take(1).map { it.copy(user = MockData.mockUsers.first()) },
-                isBlocked = false,
-                isFriend = false, // Preview as not friend
+                user = MockData.mockUsers.first().copy(bio = "", followerCount = 10, followingCount = 5),
+                posts = emptyList(),
+                relationshipInfo = RelationInfo(id="otherUser", status=RelationshipStatus.PENDING_INCOMING),
+                currentUserId = "currentUser",
                 isLoading = false,
                 error = null
             ),
@@ -375,52 +425,52 @@ fun ProfileScreenNotFriendPreview() {
 
 @Preview(showBackground = true, widthDp = 380, heightDp = 800)
 @Composable
-fun ProfileScreenBlockedPreview() {
+fun ProfileScreenPreview_None() {
+    MainAppTheme {
+         UserProfileScreen(
+            state = UserProfileState(
+                user = MockData.mockUsers.first().copy(bio = "Another user", followerCount = 0, followingCount = 0),
+                posts = MockData.mockPosts.take(1).map { it.copy(user = MockData.mockUsers.first()) },
+                relationshipInfo = null, // Or RelationInfo(status=RelationshipStatus.NONE)
+                currentUserId = "currentUser",
+                isLoading = false,
+                error = null
+            ),
+            onAction = {}
+         )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 380, heightDp = 800)
+@Composable
+fun ProfileScreenPreview_Blocking() {
     MainAppTheme {
          UserProfileScreen(
             state = UserProfileState(
                 user = MockData.mockUsers.first(),
-                posts = emptyList(), // No posts shown when blocked
-                isBlocked = true, // Preview as blocked
-                isFriend = false,
-                isLoading = false,
-                error = null
-            ),
-            onAction = {}
-         )
-    }
-}
-
-@Preview(showBackground = true, widthDp = 380, heightDp = 800)
-@Composable
-fun ProfileScreenNoPostsPreview() {
-    MainAppTheme {
-         UserProfileScreen(
-            state = UserProfileState(
-                user = MockData.mockUsers.first().copy(followerCount = 99, followingCount = 1),
-                posts = emptyList(), // Empty post list
-                isBlocked = false,
-                isFriend = true,
-                isLoading = false,
-                error = null
-            ),
-            onAction = {}
-         )
-    }
-}
-
-@Preview(showBackground = true, widthDp = 380, heightDp = 800)
-@Composable
-fun ProfileScreenErrorPreview() {
-    MainAppTheme {
-         UserProfileScreen(
-            state = UserProfileState(
-                user = null,
                 posts = emptyList(),
-                isBlocked = false,
-                isFriend = false,
+                relationshipInfo = RelationInfo(id="otherUser", status=RelationshipStatus.BLOCKING),
+                 currentUserId = "currentUser",
                 isLoading = false,
-                error = "Failed to load profile: Network Error 404" // Example error
+                error = null
+            ),
+            onAction = {}
+         )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 380, heightDp = 800)
+@Composable
+fun ProfileScreenPreview_OwnProfile() {
+    MainAppTheme {
+         UserProfileScreen(
+            state = UserProfileState(
+                user = MockData.mockUsers.first { it.id == "user1" }, // Example user ID
+                posts = MockData.mockPosts.filter { it.userId == "user1" }.map { it.copy(user = MockData.mockUsers.first { u -> u.id == "user1" }) },
+                relationshipInfo = null, // No relationship info for own profile
+                currentUserId = "user1", // Current user ID matches profile user ID
+                isLoading = false,
+                error = null
             ),
             onAction = {}
          )

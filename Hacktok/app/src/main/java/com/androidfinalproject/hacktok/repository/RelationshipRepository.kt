@@ -1,47 +1,45 @@
 package com.androidfinalproject.hacktok.repository
 
 import com.androidfinalproject.hacktok.model.RelationInfo
-import com.androidfinalproject.hacktok.model.User
-import com.androidfinalproject.hacktok.model.enums.RelationshipStatus
 import kotlinx.coroutines.flow.Flow
 
+/**
+ * Repository interface for managing relationship data in the database
+ */
 interface RelationshipRepository {
-    // Get relationships for a user
-    suspend fun getRelationshipsForUser(userId: String): Map<String, RelationInfo>
     
-    // Get friends for a user
-    suspend fun getFriendsForUser(userId: String): List<User>
+    /**
+     * Get a single relationship document by ID
+     */
+    suspend fun getRelationship(relationshipId: String): Map<String, Any>?
     
-    // Get users with friend requests
-    suspend fun getFriendRequestsForUser(userId: String): List<User>
+    /**
+     * Get all relationship documents for a user
+     */
+    suspend fun getRelationshipDocs(userId: String): List<Map<String, Any>>
     
-    // Get friend suggestions
-    suspend fun getFriendSuggestions(userId: String, limit: Int = 10): List<User>
+    /**
+     * Save a relationship document
+     */
+    suspend fun saveRelationship(relationshipId: String, data: Map<String, Any>): Boolean
     
-    // Send a friend request
-    suspend fun sendFriendRequest(fromUserId: String, toUserId: String): Boolean
+    /**
+     * Delete a relationship document
+     */
+    suspend fun deleteRelationship(relationshipId: String): Boolean
     
-    // Cancel a friend request
-    suspend fun cancelFriendRequest(fromUserId: String, toUserId: String): Boolean
+    /**
+     * Get list of hidden suggestion user IDs
+     */
+    suspend fun getHiddenSuggestions(userId: String): List<String>
     
-    // Accept a friend request
-    suspend fun acceptFriendRequest(fromUserId: String, toUserId: String): Boolean
+    /**
+     * Update the list of hidden suggestion user IDs
+     */
+    suspend fun updateHiddenSuggestions(userId: String, hiddenUserIds: List<String>): Boolean
     
-    // Decline a friend request
-    suspend fun declineFriendRequest(fromUserId: String, toUserId: String): Boolean
-    
-    // Block a user
-    suspend fun blockUser(fromUserId: String, toUserId: String): Boolean
-    
-    // Unblock a user
-    suspend fun unblockUser(fromUserId: String, toUserId: String): Boolean
-    
-    // Get relationship status
-    suspend fun getRelationshipStatus(userId1: String, userId2: String): RelationshipStatus
-    
-    // Remove from suggestions
-    suspend fun removeFromSuggestions(userId: String, suggestionId: String): Boolean
-    
-    // Stream of relationship changes
-    fun observeRelationships(userId: String): Flow<Map<String, RelationInfo>>
+    /**
+     * Observe changes to relationships for a user
+     */
+    fun observeRelationships(userId: String): Flow<List<Map<String, Any>>>
 } 

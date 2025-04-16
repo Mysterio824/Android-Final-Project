@@ -3,7 +3,8 @@ package com.androidfinalproject.hacktok.ui.mainDashboard.friendSuggestion
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.model.User
-import com.androidfinalproject.hacktok.repository.RelationshipRepository
+import com.androidfinalproject.hacktok.service.AuthService
+import com.androidfinalproject.hacktok.service.RelationshipService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,24 +15,20 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FriendSuggestionViewModel @Inject constructor(
-    private val relationshipRepository: RelationshipRepository
+    private val relationshipService: RelationshipService,
+    private val authService: AuthService
 ) : ViewModel() {
     private val _state = MutableStateFlow(FriendSuggestionState())
     val state: StateFlow<FriendSuggestionState> = _state.asStateFlow()
-    
-    private var currentUser: User? = null
 
-    fun initialize(user: User) {
-        currentUser = user
-        loadScreen(user.id ?: return)
+    init {
+        loadScreen()
         
         // Observe relationships for real-time updates
-        user.id?.let { userId ->
-            viewModelScope.launch {
-                relationshipRepository.observeRelationships(userId).collect { relations ->
-                    _state.update {
-                        it.copy(relations = relations)
-                    }
+        viewModelScope.launch {
+            relationshipService.observeMyRelationships().collect { relations ->
+                _state.update {
+                    it.copy(relations = relations)
                 }
             }
         }
@@ -47,19 +44,25 @@ class FriendSuggestionViewModel @Inject constructor(
         }
     }
 
-    private fun loadScreen(userId: String) {
+    private fun loadScreen() {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, user = currentUser) }
+            _state.update { it.copy(isLoading = true) }
             
             try {
+                // Get current user
+                val currentUser = authService.getCurrentUser()
+
+                // Update state with current user
+                _state.update { it.copy(user = currentUser) }
+
                 // Get relationships
-                val relations = relationshipRepository.getRelationshipsForUser(userId)
+                val relations = relationshipService.getMyRelationships()
                 
                 // Get friend requests
-                val friendRequests = relationshipRepository.getFriendRequestsForUser(userId)
+                val friendRequests = relationshipService.getMyFriendRequests()
                 
                 // Get friend suggestions
-                val friendSuggestions = relationshipRepository.getFriendSuggestions(userId, 10)
+                val friendSuggestions = relationshipService.getFriendSuggestions(10)
                 
                 _state.update { it.copy(
                     isLoading = false,
@@ -77,14 +80,12 @@ class FriendSuggestionViewModel @Inject constructor(
     }
 
     private fun handleRequest(userId: String, isAccepted: Boolean) {
-        val currentUserId = currentUser?.id ?: return
-        
         viewModelScope.launch {
             try {
                 val success = if (isAccepted) {
-                    relationshipRepository.acceptFriendRequest(currentUserId, userId)
+                    relationshipService.acceptFriendRequest(userId)
                 } else {
-                    relationshipRepository.declineFriendRequest(currentUserId, userId)
+                    relationshipService.declineFriendRequest(userId)
                 }
                 
                 if (!success) {
@@ -99,11 +100,9 @@ class FriendSuggestionViewModel @Inject constructor(
     }
 
     private fun sendFriendRequest(userId: String) {
-        val currentUserId = currentUser?.id ?: return
-        
         viewModelScope.launch {
             try {
-                val success = relationshipRepository.sendFriendRequest(currentUserId, userId)
+                val success = relationshipService.sendFriendRequest(userId)
                 
                 if (!success) {
                     _state.update { it.copy(error = "Failed to send friend request") }
@@ -115,11 +114,9 @@ class FriendSuggestionViewModel @Inject constructor(
     }
 
     private fun unSendRequest(userId: String) {
-        val currentUserId = currentUser?.id ?: return
-        
         viewModelScope.launch {
             try {
-                val success = relationshipRepository.cancelFriendRequest(currentUserId, userId)
+                val success = relationshipService.cancelFriendRequest(userId)
                 
                 if (!success) {
                     _state.update { it.copy(error = "Failed to cancel friend request") }
@@ -131,11 +128,9 @@ class FriendSuggestionViewModel @Inject constructor(
     }
 
     private fun removeFriendSuggestion(userId: String) {
-        val currentUserId = currentUser?.id ?: return
-        
         viewModelScope.launch {
             try {
-                val success = relationshipRepository.removeFromSuggestions(currentUserId, userId)
+                val success = relationshipService.removeFromSuggestions(userId)
                 
                 if (success) {
                     // Remove from the UI

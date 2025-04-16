@@ -9,14 +9,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Message
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.VideoLibrary
 import androidx.compose.material.icons.outlined.Group
 import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -40,6 +37,7 @@ fun TopNavigationBar(
     onSearchClick: () -> Unit,
     onMessageClick: () -> Unit,
     onUserClick: () -> Unit,
+    onLogOut: () -> Unit,
     onTabSelected: (String) -> Unit
 ) {
     val facebookBlue = Color(0xFF1877F2)
@@ -79,15 +77,10 @@ fun TopNavigationBar(
                     Icon(Icons.AutoMirrored.Outlined.Message, contentDescription = "Messenger", tint = Color.Black)
                 }
 
-                IconButton(
-                    onClick = { onUserClick() },
-                    modifier = Modifier
-                        .padding(end = 12.dp)
-                        .size(40.dp)
-                        .background(Color(0xFFE4E6EB), CircleShape)
-                ) {
-                    Icon(Icons.Default.Person, contentDescription = "Profile", tint = Color.Black)
-                }
+                UserDropdownMenu(
+                    onProfileClick = onUserClick,
+                    onLogoutClick = onLogOut
+                )
 
             },
             colors = TopAppBarDefaults.topAppBarColors(
