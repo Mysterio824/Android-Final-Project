@@ -1,4 +1,4 @@
-package com.androidfinalproject.hacktok.ui.post.component
+package com.androidfinalproject.hacktok.ui.commonComponent
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,8 +19,14 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun PostOptionsContent(
     isPostOwner: Boolean,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onReport: () -> Unit
 ) {
+    fun withDismiss(action: () -> Unit): () -> Unit = {
+        onDismiss()
+        action()
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -43,7 +49,7 @@ fun PostOptionsContent(
         OptionItem(
             title = "Report Post",
             description = "This post concerns me",
-            onClick = onDismiss
+            onClick = withDismiss(onReport)
         )
 
         OptionItem(

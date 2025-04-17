@@ -5,22 +5,25 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.model.Comment
 import com.androidfinalproject.hacktok.model.MockData
-import com.androidfinalproject.hacktok.model.Post
-import com.androidfinalproject.hacktok.model.User
+import com.androidfinalproject.hacktok.service.AuthService
+import com.androidfinalproject.hacktok.service.CommentService
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.bson.types.ObjectId
+import javax.inject.Inject
 
-class PostDetailViewModel(postId: String) : ViewModel() {
+@HiltViewModel
+class PostDetailViewModel @Inject constructor(
+//    private val postService: PostService,
+    private val authService: AuthService,
+    private val commentService: CommentService
+) : ViewModel() {
+    private val tag = "PostViewModel"
     private val _state = MutableStateFlow(PostDetailState())
     val state: StateFlow<PostDetailState> = _state.asStateFlow()
-
-    init{
-        loadPost(postId)
-    }
 
     fun onAction(action: PostDetailAction) {
         when (action) {
@@ -33,13 +36,18 @@ class PostDetailViewModel(postId: String) : ViewModel() {
             is PostDetailAction.ToggleCommentInputFocus -> toggleCommentInputFocus()
             is PostDetailAction.SetCommentFocus -> setCommentFocus(action.focused)
             is PostDetailAction.LikeComment -> handleLikeComment(action.commentId)
+            is PostDetailAction.SelectCommentToReply -> selectComment(action.commentId)
+            is PostDetailAction.DeleteComment -> deleteComment(action.commentId)
             else -> {}
         }
     }
 
     private fun toggleCommentInputFocus() {
         _state.update { currentState ->
-            currentState.copy(isCommenting = !currentState.isCommenting)
+            currentState.copy(
+                isCommenting = !currentState.isCommenting,
+                commentIdReply = ""
+            )
         }
     }
 
@@ -50,18 +58,21 @@ class PostDetailViewModel(postId: String) : ViewModel() {
     private fun loadPost(postId: String?) {
         viewModelScope.launch {
             _state.update { it.copy(error = null) }
-
             try {
-                // Mock data
+                Log.d(tag, "here")
+                // Simulate fetching the post
                 val post = MockData.mockPosts.first()
-                val user = MockData.mockUsers.first()
-                val comment = MockData.mockComments
+                val currentUser = authService.getCurrentUser()
+                    ?: throw IllegalStateException("User not found")
 
-
-                _state.update { it.copy(post = post, comments = comment, isPostOwner = post.id == user.id) }
+                Log.d(tag, "username: ${currentUser.username.toString()}")
+                _state.update { it.copy(post = post, currentUser = currentUser) }
             } catch (e: Exception) {
                 _state.update { it.copy(error = "Failed to load post: ${e.message}") }
             }
+        }
+        if(state.value.post != null){
+            loadComments()
         }
     }
 
@@ -70,13 +81,10 @@ class PostDetailViewModel(postId: String) : ViewModel() {
             _state.update { it.copy(isLoadingComments = true, error = null) }
 
             try {
-                // Simulate API call delay
-                kotlinx.coroutines.delay(500)
-
-                // Mock comments
-                val comments = MockData.mockComments
-
-                _state.update { it.copy(comments = comments, isLoadingComments = false) }
+                // Call the service to load comments
+                commentService.getCommentsForPost(state.value.post!!.id!!).collect { comments ->
+                    _state.update { it.copy(comments = comments, isLoadingComments = false) }
+                }
             } catch (e: Exception) {
                 _state.update {
                     it.copy(
@@ -100,28 +108,63 @@ class PostDetailViewModel(postId: String) : ViewModel() {
     }
 
     private fun updateCommentText(text: String) {
-        Log.d("Text:", text)
         _state.update {
             it.copy(commentText = text)
         }
     }
 
+    private fun selectComment(commentId: String) {
+        _state.update { it.copy(commentIdReply = commentId) }
+    }
+
     private fun submitComment() {
         val currentText = _state.value.commentText.trim()
         if (currentText.isNotEmpty()) {
-            val newComment = MockData.mockComments.first()
+            val parenId = _state.value.commentIdReply
 
-            _state.update {
-                it.copy(
-                    comments = listOf(newComment) + it.comments,
-                    commentText = ""
-                )
+            viewModelScope.launch {
+                try {
+                    val newComment : Comment = if (parenId.isEmpty()) {
+                        commentService.addComment(currentText, state.value.post!!.id!!)
+                    } else {
+                        commentService.replyComment(currentText, state.value.commentIdReply)
+                    }.getOrThrow()
+
+                    _state.update {
+                        it.copy(
+                            comments = listOf(newComment) + it.comments,
+                            commentText = ""
+                        )
+                    }
+                } catch (e: Exception) {
+                    _state.update { it.copy(error = "Failed to submit comment: ${e.message}") }
+                }
             }
         }
     }
 
     private fun handleLikeComment(commentId: String?) {
-        //TODO
+        viewModelScope.launch {
+            commentId?.let { id ->
+                try {
+                    commentService.likeComment(id, "user_id_placeholder") // Replace with actual user ID
+                } catch (e: Exception) {
+                    _state.update { it.copy(error = "Failed to like comment: ${e.message}") }
+                }
+            }
+        }
     }
 
+    private fun deleteComment(commentId: String) {
+        viewModelScope.launch {
+            try {
+                commentService.deleteComment(commentId)
+                _state.update {
+                    it.copy(comments = it.comments.filter { comment -> comment.id != commentId })
+                }
+            } catch (e: Exception) {
+                _state.update { it.copy(error = "Failed to delete comment: ${e.message}") }
+            }
+        }
+    }
 }

@@ -1,21 +1,47 @@
 package com.androidfinalproject.hacktok.ui.post.component
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.androidfinalproject.hacktok.model.Comment
+import com.androidfinalproject.hacktok.ui.commonComponent.OptionItem
 
 
 @Composable
 fun CommentOptionsContent(
-    commentId: String?,
-    onDismiss: () -> Unit
+    comment: Comment,
+    onDismiss: () -> Unit,
+    reportComment: () -> Unit,
+    deleteComment: () -> Unit,
+    isCommentOwner: Boolean = false
 ) {
+    val context = LocalContext.current
+
+    fun withDismiss(action: () -> Unit): () -> Unit = {
+        onDismiss()
+        action()
+    }
+
+    val copyTextAction = {
+        comment.content.let { text ->
+            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText("Comment", text)
+            clipboard.setPrimaryClip(clip)
+            Toast.makeText(context, "Comment copied to clipboard", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -30,24 +56,21 @@ fun CommentOptionsContent(
 
         OptionItem(
             title = "Copy Text",
-            onClick = onDismiss
+            onClick = withDismiss(copyTextAction)
         )
 
         OptionItem(
             title = "Report Comment",
             description = "This comment concerns me",
-            onClick = onDismiss
+            onClick = withDismiss(reportComment)
         )
 
-        // If comment owner (would need to check in real app)
-        // OptionItem(
-        //     title = "Edit Comment",
-        //     onClick = onDismiss
-        // )
-        //
-        // OptionItem(
-        //     title = "Delete Comment",
-        //     onClick = onDismiss
-        // )
+        if(isCommentOwner){
+             OptionItem(
+                 title = "Delete Comment",
+                    onClick = withDismiss(deleteComment)
+             )
+        }
+
     }
 }

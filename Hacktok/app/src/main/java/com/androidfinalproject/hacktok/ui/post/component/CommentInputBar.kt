@@ -1,6 +1,8 @@
 package com.androidfinalproject.hacktok.ui.post.component
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,11 +16,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberAsyncImagePainter
+import com.androidfinalproject.hacktok.R
 
 @Composable
 fun CommentInputBar(
     text: String,
+    imageUrl: String?,
     onTextChange: (String) -> Unit,
     onSubmit: () -> Unit,
     focusRequester: FocusRequester,
@@ -38,14 +45,22 @@ fun CommentInputBar(
             // User avatar
             Box(
                 modifier = Modifier
-                    .size(36.dp)
+                    .size(32.dp)
                     .clip(CircleShape)
-                    .background(Color.LightGray)
             ) {
-                // In a real app, load current user avatar here
-                Text(
-                    text = "U",
-                    modifier = Modifier.align(Alignment.Center)
+                val painter = rememberAsyncImagePainter(
+                    model = imageUrl.takeIf { !it.isNullOrBlank() },
+                    error = painterResource(id = R.drawable.placeholder_profile),
+                    placeholder = painterResource(id = R.drawable.placeholder_profile),
+                    fallback = painterResource(id = R.drawable.placeholder_profile),
+                )
+
+                Image(
+                    painter = painter,
+                    contentDescription = "",
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    contentScale = ContentScale.Crop
                 )
             }
 
