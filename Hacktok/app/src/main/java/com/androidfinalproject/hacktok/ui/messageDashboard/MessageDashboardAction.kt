@@ -8,4 +8,5 @@ sealed class MessageDashboardAction {
     data object NewChat : MessageDashboardAction()
     data object NewGroup : MessageDashboardAction()
     object OnNavigateBack : MessageDashboardAction()
+    object Refresh : MessageDashboardAction()
 }

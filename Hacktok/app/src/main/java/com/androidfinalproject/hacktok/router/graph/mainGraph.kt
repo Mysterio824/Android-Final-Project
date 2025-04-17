@@ -34,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import com.androidfinalproject.hacktok.router.routes.AuthRoute
+import androidx.hilt.navigation.compose.hiltViewModel
 
 fun NavGraphBuilder.mainNavigation(navController: NavController) {
     navigation(
@@ -129,12 +130,11 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
             enterTransition = { slideFadeInFromRight() },
             exitTransition = { slideFadeOutToLeft() }
         ){
-            val userId = ""
             MessageDashboardRoot (
-                viewModel = MessageDashboardViewModel(),
+                viewModel = hiltViewModel(),
                 onNewGroup = {},
                 onNewChat = {},
-                onGoToChat = {
+                onGoToChat = { userId ->
                     navController.navigate("${MainRoute.ChatRoom.route}/user/$userId")
                 },
                 onNavigateBack = {
