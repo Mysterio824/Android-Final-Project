@@ -1,0 +1,34 @@
+package com.androidfinalproject.hacktok.ui.storydetail
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+
+@Composable
+fun StoryDetailScreenRoot(
+    navController: NavController,
+    viewModel: StoryDetailViewModel = viewModel(),
+    storyId: String? = null,
+    onClose: () -> Unit,
+    onNavigateToUserProfile: (String?) -> Unit = {}
+) {
+    val state by viewModel.state.collectAsState()
+
+    LaunchedEffect(storyId) {
+        viewModel.onAction(StoryDetailAction.LoadStoryDetails)
+    }
+
+    StoryDetailScreen(
+        state = state,
+        onAction = { action ->
+            when (action) {
+                is StoryDetailAction.CloseStory -> onClose()
+                is StoryDetailAction.NavigateToUserProfile -> onNavigateToUserProfile(action.userId)
+                else -> viewModel.onAction(action)
+            }
+        }
+    )
+}
