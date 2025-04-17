@@ -1,5 +1,6 @@
 package com.androidfinalproject.hacktok.ui.newStory
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -17,18 +18,33 @@ import com.androidfinalproject.hacktok.ui.newPost.PRIVACY
 import com.androidfinalproject.hacktok.ui.newStory.component.StoryEditorScaffold
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun EditTextStoryScreen(
+    viewModel: NewStoryViewModel,
     onClose: () -> Unit
 ) {
     var privacy by remember { mutableStateOf(PRIVACY.PUBLIC) }
     var inputText by remember { mutableStateOf("") }
 
+    // Observe state for successful story creation
+    LaunchedEffect(viewModel.state.value.isStoryCreated) {
+        if (viewModel.state.value.isStoryCreated) {
+            onClose()
+            viewModel.resetState()
+        }
+    }
+
     StoryEditorScaffold(
         privacy = privacy,
-        onPrivacyChange = { privacy = it },
+        onPrivacyChange = {
+            privacy = it
+            viewModel.onAction(NewStoryAction.UpdatePrivacy(it))
+        },
         onClose = onClose,
-        onSend = { /* handle post */ },
+        onSend = {
+            viewModel.onAction(NewStoryAction.CreateTextStory(inputText, privacy))
+        },
         background = {
             Box(
                 modifier = Modifier
@@ -49,14 +65,17 @@ fun EditTextStoryScreen(
         ) {
             TextField(
                 value = inputText,
-                onValueChange = { inputText = it },
+                onValueChange = {
+                    inputText = it
+                    viewModel.onAction(NewStoryAction.UpdateText(it))
+                },
                 placeholder = {
                     Text(
                         text = "Start typing",
                         color = Color.White.copy(alpha = 0.6f),
                         fontSize = 24.sp,
-                        textAlign = TextAlign.Center, // ✅ Center placeholder text
-                        modifier = Modifier.fillMaxWidth() // ✅ Ensure it spans full width to apply centering
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
                     )
                 },
                 textStyle = LocalTextStyle.current.copy(
@@ -75,15 +94,5 @@ fun EditTextStoryScreen(
                 modifier = Modifier.fillMaxWidth()
             )
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun EditTextStoryScreenPreview() {
-    MainAppTheme {
-        EditTextStoryScreen (
-            onClose = {}
-        )
     }
 }

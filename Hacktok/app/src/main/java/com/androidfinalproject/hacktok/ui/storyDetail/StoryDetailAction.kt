@@ -9,5 +9,7 @@ sealed class StoryDetailAction {
     data object PauseStory : StoryDetailAction()
     data object ResumeStory : StoryDetailAction()
     data object ReportStory : StoryDetailAction()
+    data object DeleteStory : StoryDetailAction()
+    data object ViewStory : StoryDetailAction()
     data class NavigateToUserProfile(val userId: String?) : StoryDetailAction()
 }

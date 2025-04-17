@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.model.Media
 import com.androidfinalproject.hacktok.model.Message
 import com.androidfinalproject.hacktok.model.Story
+import com.androidfinalproject.hacktok.ui.newStory.NewStoryViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,6 +33,8 @@ class StoryDetailViewModel : ViewModel() {
             is StoryDetailAction.ResumeStory -> resumeStory()
             is StoryDetailAction.ReportStory -> reportStory()
             is StoryDetailAction.NavigateToUserProfile -> {} // Handled by the parent
+            is StoryDetailAction.DeleteStory -> deleteStory()
+            is StoryDetailAction.ViewStory -> viewStory()
         }
     }
 
@@ -40,13 +43,16 @@ class StoryDetailViewModel : ViewModel() {
             _state.update { it.copy(isLoading = true) }
 
             try {
-                // In a real app, fetch stories from server
-                val mockStories = createMockStories()
+                // Get all stories including ones created by the user
+                val allStories = NewStoryViewModel.globalStories + createMockStories()
+                val activeStories = allStories.filter { story ->
+                    story.expiresAt.after(Date()) // Only show non-expired stories
+                }
 
                 _state.update { currentState ->
                     currentState.copy(
-                        story = mockStories.getOrNull(currentState.currentStoryIndex),
-                        totalStories = mockStories.size,
+                        story = activeStories.getOrNull(currentState.currentStoryIndex),
+                        totalStories = activeStories.size,
                         isLoading = false
                     )
                 }
@@ -58,6 +64,49 @@ class StoryDetailViewModel : ViewModel() {
                         error = "Could not load story: ${e.message}",
                         isLoading = false
                     )
+                }
+            }
+        }
+    }
+
+    private fun deleteStory() {
+        _state.value.story?.let { currentStory ->
+            if (currentStory.userId == _state.value.currentUser.id) {
+                viewModelScope.launch {
+                    try {
+                        // Remove from global stories
+                        NewStoryViewModel.globalStories.removeIf { it.id == currentStory.id }
+
+                        // If there are more stories, move to next one, otherwise close
+                        if (_state.value.totalStories > 1) {
+                            moveToNextStory()
+                        } else {
+                            _state.update { it.copy(story = null) }
+                        }
+                    } catch (e: Exception) {
+                        _state.update { it.copy(error = "Failed to delete story: ${e.message}") }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun viewStory() {
+        _state.value.story?.let { currentStory ->
+            val currentUserId = _state.value.currentUser.id ?: return
+            if (!currentStory.viewerIds.contains(currentUserId)) {
+                viewModelScope.launch {
+                    // In a real app, update story view count on server
+                    val updatedViewerIds = currentStory.viewerIds + currentUserId
+                    val updatedStory = currentStory.copy(viewerIds = updatedViewerIds)
+
+                    // Update in global stories list
+                    val index = NewStoryViewModel.globalStories.indexOfFirst { it.id == currentStory.id }
+                    if (index != -1) {
+                        NewStoryViewModel.globalStories[index] = updatedStory
+                    }
+
+                    _state.update { it.copy(story = updatedStory) }
                 }
             }
         }
@@ -143,9 +192,10 @@ class StoryDetailViewModel : ViewModel() {
         _state.update { currentState ->
             if (currentState.currentStoryIndex < currentState.totalStories - 1) {
                 val newIndex = currentState.currentStoryIndex + 1
+                val stories = NewStoryViewModel.globalStories + createMockStories()
                 currentState.copy(
                     currentStoryIndex = newIndex,
-                    story = createMockStories().getOrNull(newIndex),
+                    story = stories.getOrNull(newIndex),
                     storyProgress = 0f
                 )
             } else {
@@ -160,9 +210,10 @@ class StoryDetailViewModel : ViewModel() {
         _state.update { currentState ->
             if (currentState.currentStoryIndex > 0) {
                 val newIndex = currentState.currentStoryIndex - 1
+                val stories = NewStoryViewModel.globalStories + createMockStories()
                 currentState.copy(
                     currentStoryIndex = newIndex,
-                    story = createMockStories().getOrNull(newIndex),
+                    story = stories.getOrNull(newIndex),
                     storyProgress = 0f
                 )
             } else {
