@@ -1,13 +1,15 @@
 package com.androidfinalproject.hacktok.ui.mainDashboard.friendSuggestion
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.androidfinalproject.hacktok.ui.mainDashboard.DashboardAction
+import com.androidfinalproject.hacktok.model.User
 
 @Composable
 fun FriendSuggestionScreenRoot(
-    viewModel: FriendSuggestionViewModel,
+    viewModel: FriendSuggestionViewModel = hiltViewModel(),
     onUserNavigate: (String) -> Unit,
     onFriendListNavigate: (String) -> Unit,
 ){

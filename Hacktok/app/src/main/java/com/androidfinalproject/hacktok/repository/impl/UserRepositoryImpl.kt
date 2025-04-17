@@ -316,4 +316,44 @@ class UserRepositoryImpl @Inject constructor(
             emptyList()
         }
     }
+
+    override suspend fun getUsersByIds(userIds: List<String>): List<User> {
+        return try {
+            if (userIds.isEmpty()) {
+                return emptyList()
+            }
+            
+            // Firestore has a limit of 10 items for 'in' queries
+            // Split the list into chunks of 10 and query each chunk
+            val users = mutableListOf<User>()
+            
+            userIds.chunked(10).forEach { chunk ->
+                val snapshots = usersCollection
+                    .whereIn("id", chunk)
+                    .get()
+                    .await()
+                
+                users.addAll(mapSnapshotToUsers(snapshots))
+            }
+            
+            return users
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting users by IDs: $userIds", e)
+            emptyList()
+        }
+    }
+    
+    override suspend fun getAllUsers(): List<User> {
+        return try {
+            val snapshot = usersCollection
+                .limit(100) // Limit to prevent loading too many users
+                .get()
+                .await()
+            
+            mapSnapshotToUsers(snapshot)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting all users", e)
+            emptyList()
+        }
+    }
 } 

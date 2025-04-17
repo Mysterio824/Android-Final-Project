@@ -38,7 +38,7 @@ import java.util.Locale
 @Composable
 fun PostContent(
     post: Post,
-    onPostClick: (String) -> Unit = {},
+    onPostClick: () -> Unit = {},
     onToggleLike: () -> Unit,
     onComment: () -> Unit,
     onShare: () -> Unit,
@@ -55,7 +55,7 @@ fun PostContent(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 8.dp)
-            .clickable { post.id?.let { onPostClick(it) } },
+            .clickable { onPostClick() },
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.background

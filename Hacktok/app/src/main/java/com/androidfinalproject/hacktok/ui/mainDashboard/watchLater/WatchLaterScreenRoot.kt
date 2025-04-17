@@ -2,11 +2,12 @@ package com.androidfinalproject.hacktok.ui.mainDashboard.watchLater
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun WatchLaterScreenRoot(
-    viewModel: WatchLaterViewModel = viewModel(),
+    viewModel: WatchLaterViewModel = hiltViewModel(),
     onUserProfileNavigate: (String) -> Unit,
     onPostClickNavigation: (String) -> Unit,
 ) {

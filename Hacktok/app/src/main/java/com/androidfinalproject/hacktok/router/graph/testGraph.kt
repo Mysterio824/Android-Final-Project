@@ -57,7 +57,7 @@ fun NavGraphBuilder.testNavigation(navController: NavController) {
             }
         ) {
             FriendListScreenRoot (
-                viewModel = FriendListViewModel(""),
+                userId = "",
                 onUserProfileView = {},
                 onChatWithFriend = {}
             )

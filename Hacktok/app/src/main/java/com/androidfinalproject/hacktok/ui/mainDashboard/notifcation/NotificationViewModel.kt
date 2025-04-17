@@ -2,21 +2,19 @@ package com.androidfinalproject.hacktok.ui.mainDashboard.notifcation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.androidfinalproject.hacktok.model.MockData
-import com.androidfinalproject.hacktok.repository.NotificationRepository
-import com.androidfinalproject.hacktok.repository.UserRepository
+import com.androidfinalproject.hacktok.service.NotificationService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class NotificationViewModel @Inject constructor(
-    private val notificationRepository: NotificationRepository,
-    private val userRepository: UserRepository
+    private val notificationService: NotificationService
 ) : ViewModel() {
     private val _state = MutableStateFlow(NotificationState())
     val state: StateFlow<NotificationState> = _state.asStateFlow()
@@ -30,15 +28,20 @@ class NotificationViewModel @Inject constructor(
             is NotificationAction.OnMarkAsRead -> markNotificationAsRead(action.notificationId)
             is NotificationAction.OnDeleteNotification -> deleteNotification(action.notificationId)
             is NotificationAction.OnRefresh -> loadNotifications(true)
-            else -> {} // Other actions are handled in the NotificationScreenRoot
+            else -> {}
         }
     }
 
     private fun loadNotifications(forceRefresh: Boolean = false) {
+        if (!forceRefresh && state.value.notifications.isNotEmpty() && !state.value.isLoading) {
+            // Maybe still refresh if data is old?
+            // return
+        }
+        
         viewModelScope.launch {
             try {
                 _state.update { it.copy(isLoading = true, error = null) }
-                val notifications = MockData.getMockNotifications(10)
+                val notifications = notificationService.getMyNotifications()
                 _state.update { it.copy(notifications = notifications, isLoading = false) }
             } catch (e: Exception) {
                 _state.update { it.copy(error = e.message ?: "Failed to load notifications", isLoading = false) }
@@ -49,20 +52,23 @@ class NotificationViewModel @Inject constructor(
     private fun markNotificationAsRead(notificationId: String) {
         viewModelScope.launch {
             try {
-                notificationRepository.markAsRead(notificationId)
-                // Update the local state to reflect the change
-                _state.update { state ->
-                    val updatedNotifications = state.notifications.map { notification ->
-                        if (notification.id == notificationId) {
-                            notification.copy(isRead = true)
-                        } else {
-                            notification
+                val success = notificationService.markNotificationAsRead(notificationId)
+                if (success) {
+                    _state.update { state ->
+                        val updatedNotifications = state.notifications.map { notification ->
+                            if (notification.id == notificationId) {
+                                notification.copy(isRead = true)
+                            } else {
+                                notification
+                            }
                         }
+                        state.copy(notifications = updatedNotifications)
                     }
-                    state.copy(notifications = updatedNotifications)
+                } else {
+                    // Handle failure (e.g., show a snackbar)
                 }
             } catch (e: Exception) {
-                // Handle error if needed
+                _state.update { it.copy(error = "Failed to mark notification as read") }
             }
         }
     }
@@ -70,14 +76,17 @@ class NotificationViewModel @Inject constructor(
     private fun deleteNotification(notificationId: String) {
         viewModelScope.launch {
             try {
-                notificationRepository.deleteNotification(notificationId)
-                // Remove from local state
-                _state.update { state ->
-                    val updatedNotifications = state.notifications.filter { it.id != notificationId }
-                    state.copy(notifications = updatedNotifications)
+                val success = notificationService.deleteNotification(notificationId)
+                if (success) {
+                    _state.update { state ->
+                        val updatedNotifications = state.notifications.filter { it.id != notificationId }
+                        state.copy(notifications = updatedNotifications)
+                    }
+                } else {
+                    // Handle failure
                 }
             } catch (e: Exception) {
-                // Handle error if needed
+                _state.update { it.copy(error = "Failed to delete notification") }
             }
         }
     }

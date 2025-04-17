@@ -30,6 +30,7 @@ import com.androidfinalproject.hacktok.ui.messageDashboard.MessageDashboardRoot
 import com.androidfinalproject.hacktok.ui.messageDashboard.MessageDashboardViewModel
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import com.androidfinalproject.hacktok.router.routes.AuthRoute
 
 fun NavGraphBuilder.mainNavigation(navController: NavController) {
     navigation(
@@ -43,7 +44,6 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
             exitTransition = { slideFadeOutToRight() }
         ) {
             DashboardScreenRoot(
-                viewModel = DashboardViewModel(),
                 onUserProfileNavigate = { userId ->
                     navController.navigate("${MainRoute.UserDetail.route}/$userId")
                 },
@@ -80,6 +80,12 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
                 onCreateStoryNavigate = {
 
                 },
+                onAuthNavigate = {
+                    navController.navigate(AuthRoute.Graph.route)
+                },
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
             )
         }
 
@@ -172,7 +178,7 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
             }
 
             UserProfileScreenRoot(
-                viewModel = UserProfileViewModel(userId),
+                userId = userId,
                 onChatWithFriend = { chatId ->
                     navController.navigate("${MainRoute.ChatRoom.route}/user/$chatId")
                 },
@@ -197,7 +203,7 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
             val userId = backStackEntry.arguments?.getString("userId")
 
             FriendListScreenRoot(
-                viewModel = FriendListViewModel(userId!!),
+                userId = userId!!,
                 onChatWithFriend = { user ->
                     navController.navigate("${MainRoute.ChatRoom.route}/user/${user}")
                 },

@@ -11,7 +11,6 @@ import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 import androidx.activity.compose.BackHandler
 import com.androidfinalproject.hacktok.ui.mainDashboard.component.TopNavigationBar
 import com.androidfinalproject.hacktok.ui.mainDashboard.friendSuggestion.FriendSuggestionScreenRoot
-import com.androidfinalproject.hacktok.ui.mainDashboard.friendSuggestion.FriendSuggestionViewModel
 import com.androidfinalproject.hacktok.ui.mainDashboard.home.HomeScreenViewModel
 import com.androidfinalproject.hacktok.ui.mainDashboard.notifcation.NotificationScreenRoot
 import com.androidfinalproject.hacktok.ui.mainDashboard.watchLater.WatchLaterScreenRoot
@@ -32,6 +31,7 @@ fun DashboardScreen(
                 currentTab = state.selectedTab,
                 onSearchClick = { onAction(DashboardAction.OnSearchNavigate) },
                 onMessageClick = { onAction(DashboardAction.OnMessageDashboardNavigate) },
+                onLogOut = { onAction(DashboardAction.OnLogout) },
                 onUserClick = { onAction(DashboardAction.OnCurrentProfileNavigate) },
                 onTabSelected = { onAction(DashboardAction.SelectTab(it)) }
             )
@@ -45,7 +45,6 @@ fun DashboardScreen(
             when (state.selectedTab) {
                 "Home" -> {
                     HomeScreenRoot(
-                        viewModel = HomeScreenViewModel(state.user),
                         onUserClick = { onAction(DashboardAction.OnUserClick(it)) },
                         onPostClick = { onAction(DashboardAction.OnPostClick(it)) },
                         onStoryClick = { onAction(DashboardAction.OnStoryClick(it)) },
@@ -56,7 +55,6 @@ fun DashboardScreen(
 
                 "Friends" -> {
                     FriendSuggestionScreenRoot (
-                        viewModel = FriendSuggestionViewModel(state.user),
                         onUserNavigate = { onAction(DashboardAction.OnUserClick(it)) },
                         onFriendListNavigate = { onAction(DashboardAction.OnFriendListNavigate(it)) },
                     )
@@ -64,7 +62,6 @@ fun DashboardScreen(
 
                 "WatchLater" -> {
                     WatchLaterScreenRoot(
-                        viewModel = WatchLaterViewModel(state.user.id!!),
                         onPostClickNavigation = { id -> onAction(DashboardAction.OnPostClick(id)) },
                         onUserProfileNavigate = { id -> onAction(DashboardAction.OnUserClick(id)) }
                     )

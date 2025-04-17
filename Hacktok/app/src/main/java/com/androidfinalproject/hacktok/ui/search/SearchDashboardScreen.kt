@@ -9,9 +9,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
+import androidx.compose.material3.TabRowDefaults.SecondaryIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,9 +22,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.model.User
@@ -58,14 +58,14 @@ fun SearchDashboardScreen(
                 modifier = Modifier.size(24.dp)
             ) {
                 Icon(
-                    imageVector = Icons.Default.ArrowBack,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
                     tint = MaterialTheme.colorScheme.onBackground
                 )
             }
             
             Spacer(modifier = Modifier.width(8.dp))
-            
+
             SearchBar(
                 query = state.searchQuery,
                 onQueryChange = { onAction(SearchAction.UpdateQuery(it)) },
@@ -73,12 +73,12 @@ fun SearchDashboardScreen(
                 active = false,
                 onActiveChange = { /* No active state for now */ },
                 placeholder = { Text("Search", color = MaterialTheme.colorScheme.onSurfaceVariant) },
-                leadingIcon = { 
+                leadingIcon = {
                     Icon(
-                        Icons.Default.Search, 
+                        Icons.Default.Search,
                         contentDescription = "Search Icon",
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    ) 
+                    )
                 },
                 modifier = Modifier
                     .weight(1f)
@@ -94,17 +94,7 @@ fun SearchDashboardScreen(
         TabRow(
             selectedTabIndex = state.selectedTabIndex,
             modifier = Modifier.fillMaxWidth(),
-            containerColor = MaterialTheme.colorScheme.background,
-            indicator = { tabPositions ->
-                TabRowDefaults.Indicator(
-                    modifier = Modifier
-                        .tabIndicatorOffset(tabPositions[state.selectedTabIndex])
-                        .padding(horizontal = 16.dp)
-                        .clip(RoundedCornerShape(4.dp)),
-                    height = 3.dp,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
+            containerColor = MaterialTheme.colorScheme.background
         ) {
             tabs.forEachIndexed { index, title ->
                 Tab(
@@ -286,5 +276,20 @@ private fun Modifier.tabIndicatorOffset(
             x = currentTabLeft,
             y = 0
         )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ScreenPreview() {
+    MainAppTheme {
+        Box{
+            SearchDashboardScreen(
+                state = SearchUiState(
+                    selectedTabIndex = 2
+                ),
+                onAction = {}
+            )
+        }
     }
 }
