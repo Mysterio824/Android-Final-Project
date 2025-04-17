@@ -5,19 +5,24 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.ui.post.PostDetailAction
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun ChatScreenRoot(
-    navController: NavController,
-    viewModel: ChatViewModel = viewModel(),
+    userId: String,
+    viewModel: ChatViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit,
     onNavigateToManageUser: (String?) -> Unit = {}
 ) {
+    LaunchedEffect(userId) {
+        viewModel.setUserId(userId)
+    }
+
     val state by viewModel.state.collectAsState()
 
     ChatScreen(

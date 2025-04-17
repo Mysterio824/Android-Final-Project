@@ -29,31 +29,11 @@ fun UserProfileScreenRoot(
     UserProfileScreen(
         state = state,
         onAction = { action ->
-            try {
-                Log.d(TAG, "Action: $action")
-                when(action) {
-                    is UserProfileAction.ChatWithFriend -> {
-                        val uid = state.user?.id
-                        if (uid != null) {
-                            onChatWithFriend(uid)
-                        } else {
-                            Log.e(TAG, "Cannot chat with friend: User ID is null")
-                        }
-                    }
-                    is UserProfileAction.GoToPost -> onGoToPost(action.postId)
-                    is UserProfileAction.NavigateFriendList -> {
-                        val uid = state.user?.id
-                        if (uid != null) {
-                            onGoToFriendList(uid)
-                        } else {
-                            Log.e(TAG, "Cannot navigate to friend list: User ID is null")
-                        }
-                    }
-                    is UserProfileAction.NavigateBack -> onNavigateBack()
-                    else -> viewModel.onAction(action)
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error handling action $action", e)
+            when (action) {
+                is UserProfileAction.NavigateBack -> onNavigateBack()
+                is UserProfileAction.NavigateFriendList -> onGoToFriendList(action.userId)
+                is UserProfileAction.MessageUser -> onChatWithFriend(userId)
+                else -> viewModel.onAction(action)
             }
         }
     )

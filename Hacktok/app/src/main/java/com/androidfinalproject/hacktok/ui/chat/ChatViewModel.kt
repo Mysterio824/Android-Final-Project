@@ -3,164 +3,156 @@ package com.androidfinalproject.hacktok.ui.chat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.model.Message
+import com.androidfinalproject.hacktok.model.User
+import com.androidfinalproject.hacktok.repository.AuthRepository
+import com.androidfinalproject.hacktok.repository.ChatRepository
+import com.androidfinalproject.hacktok.repository.UserRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Date
-import java.util.UUID
+import javax.inject.Inject
 
-class ChatViewModel : ViewModel() {
+@HiltViewModel
+class ChatViewModel @Inject constructor(
+    private val chatRepository: ChatRepository,
+    private val authRepository: AuthRepository,
+    private val userRepository: UserRepository
+) : ViewModel() {
+    private var otherUserId: String? = null
+    
     private val _state = MutableStateFlow(ChatState())
     val state = _state.asStateFlow()
 
-    fun  onAction(action: ChatAction){
-        when(action) {
+    fun setUserId(userId: String) {
+        otherUserId = userId
+        loadChat()
+    }
+
+    private fun loadChat() {
+        val userId = otherUserId ?: return
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+            
+            try {
+                val firebaseUser = authRepository.getCurrentUser()
+                if (firebaseUser == null) {
+                    _state.update { it.copy(error = "Not authenticated", isLoading = false) }
+                    return@launch
+                }
+
+                // Get or create chat
+                val chatId = chatRepository.getOrCreateChat(firebaseUser.uid, userId)
+                
+                // Load other user's data
+                val otherUser = userRepository.getUserById(userId)
+                if (otherUser == null) {
+                    _state.update { it.copy(error = "User not found", isLoading = false) }
+                    return@launch
+                }
+
+                // Convert FirebaseUser to our User model using the companion object method
+                val currentUser = User.fromFirebaseUser(firebaseUser)
+
+                // Update state with user info
+                _state.update { it.copy(
+                    currentUser = currentUser,
+                    otherUser = otherUser,
+                    isLoading = false
+                ) }
+
+                // Load messages
+                chatRepository.getChatMessagesFlow(chatId).collect { messages ->
+                    _state.update { it.copy(messages = messages) }
+                }
+            } catch (e: Exception) {
+                _state.update { it.copy(
+                    error = e.message ?: "An error occurred",
+                    isLoading = false
+                ) }
+            }
+        }
+    }
+
+    fun onAction(action: ChatAction) {
+        when (action) {
             is ChatAction.SendMessage -> sendMessage(action.message)
             is ChatAction.DeleteMessage -> deleteMessage(action.messageId)
-            is ChatAction.LoadInitialMessages -> loadInitialMessages()
+            is ChatAction.LoadInitialMessages -> loadChat()
             is ChatAction.ToggleMute -> toggleMute()
             is ChatAction.CreateGroup -> createGroup()
             is ChatAction.FindInChat -> findInChat()
             is ChatAction.DeleteChat -> deleteChat()
             is ChatAction.BlockUser -> blockUser()
-            is ChatAction.NavigateToManageUser -> TODO()
-            ChatAction.NavigateBack-> TODO()
+            is ChatAction.NavigateToManageUser -> {} // Handled by navigation
+            ChatAction.NavigateBack -> {} // Handled by navigation
         }
     }
 
-    fun sendMessage(content: String) {
+    private fun sendMessage(content: String) {
         if (content.isBlank()) return
 
-        val newMessage = Message(
-            id = UUID.randomUUID().toString(),
-            senderId = _state.value.currentUser.username ?: "Unknown User",
-            content = content,
-            createdAt = Date()
-        )
-
         viewModelScope.launch {
-            // Trong thực tế, sẽ gửi tin nhắn lên server tại đây
-
-            // Cập nhật state với tin nhắn mới
-            _state.update { currentState ->
-                currentState.copy(
-                    messages = currentState.messages + newMessage
-                )
-            }
-        }
-    }
-
-    fun deleteMessage(messageId: String?) {
-        viewModelScope.launch {
-            // Trong thực tế, sẽ xóa tin nhắn trên server tại đây
-
-            // Cập nhật state bằng cách loại bỏ tin nhắn
-            _state.update { currentState ->
-                currentState.copy(
-                    messages = currentState.messages.filter { it.id != messageId }
-                )
-            }
-        }
-    }
-
-    // Hàm mô phỏng việc tải dữ liệu ban đầu
-    fun loadInitialMessages() {
-        viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
-
             try {
-                // Trong thực tế, sẽ tải tin nhắn từ server tại đây
-                // Hiện tại, tạo một số tin nhắn mẫu
-                val demoMessages = createDemoMessages()
+                val currentUser = authRepository.getCurrentUser() ?: return@launch
+                val chatId = chatRepository.getOrCreateChat(currentUser.uid, otherUserId!!)
 
-                _state.update { currentState ->
-                    currentState.copy(
-                        messages = demoMessages,
-                        isLoading = false
-                    )
-                }
+                val message = Message(
+                    senderId = currentUser.uid,
+                    content = content,
+                    createdAt = Date()
+                )
+
+                chatRepository.sendMessage(chatId, message)
             } catch (e: Exception) {
-                _state.update { currentState ->
-                    currentState.copy(
-                        error = "Không thể tải tin nhắn: ${e.message}",
-                        isLoading = false
-                    )
-                }
+                _state.update { it.copy(error = "Failed to send message: ${e.message}") }
             }
         }
     }
 
-    private fun createDemoMessages(): List<Message> {
-        val user1 = _state.value.currentUser.username ?: "Unknown User"
-        val user2 = _state.value.otherUser.username ?: "Other User"
+    private fun deleteMessage(messageId: String?) {
+        if (messageId == null) return
 
-        return listOf(
-            Message(
-                id = UUID.randomUUID().toString(),
-                senderId = user2,
-                content = "Chào bạn, bạn khỏe không?",
-                createdAt = Date(System.currentTimeMillis() - 3600000)
-            ),
-            Message(
-                id = UUID.randomUUID().toString(),
-                senderId = user1,
-                content = "Mình khỏe, còn bạn thì sao?",
-                createdAt = Date(System.currentTimeMillis() - 3500000)
-            ),
-            Message(
-                id = UUID.randomUUID().toString(),
-                senderId = user2,
-                content = "Mình cũng khỏe. Hôm nay bạn đã làm gì?",
-                createdAt = Date(System.currentTimeMillis() - 3400000)
-            ),
-            Message(
-                id = UUID.randomUUID().toString(),
-                senderId = user1,
-                content = "Mình đang code một ứng dụng Android. Còn bạn?",
-                createdAt = Date(System.currentTimeMillis() - 3300000)
-            )
-        )
-    }
-
-    private fun toggleMute() {
-        _state.update { currentState ->
-            currentState.copy(
-                isUserMuted = !currentState.isUserMuted
-            )
+        viewModelScope.launch {
+            try {
+                val currentUser = authRepository.getCurrentUser() ?: return@launch
+                val chatId = chatRepository.getOrCreateChat(currentUser.uid, otherUserId!!)
+                chatRepository.deleteMessage(chatId, messageId)
+            } catch (e: Exception) {
+                _state.update { it.copy(error = "Failed to delete message: ${e.message}") }
+            }
         }
-        // Trong thực tế, cần lưu trạng thái này vào database
-    }
-
-    private fun createGroup() {
-        // Thực hiện logic tạo nhóm
-        // Hiện tại chỉ in log vì chưa có database
-        println("Creating group with user: ${_state.value.otherUser.username ?: "Unknown User"}")
-        // Trong thực tế, sẽ chuyển đến màn hình tạo nhóm
-    }
-
-    private fun findInChat() {
-        // Chức năng tìm kiếm trong chat
-        println("Finding in chat with user: ${_state.value.otherUser.username ?: "Unknown User"}")
-        // Trong thực tế, sẽ hiển thị UI tìm kiếm
     }
 
     private fun deleteChat() {
         viewModelScope.launch {
-            // Xóa tất cả tin nhắn
-            _state.update { currentState ->
-                currentState.copy(
-                    messages = emptyList()
-                )
+            try {
+                val currentUser = authRepository.getCurrentUser() ?: return@launch
+                val chatId = chatRepository.getOrCreateChat(currentUser.uid, otherUserId!!)
+                chatRepository.deleteChat(chatId)
+            } catch (e: Exception) {
+                _state.update { it.copy(error = "Failed to delete chat: ${e.message}") }
             }
-            // Trong thực tế, sẽ xóa chat trên server
         }
     }
 
+    private fun toggleMute() {
+        _state.update { it.copy(isUserMuted = !it.isUserMuted) }
+        // TODO: Implement mute functionality in repository
+    }
+
     private fun blockUser() {
-        // Thực hiện chức năng block user
-        println("Blocking user: ${_state.value.otherUser.username ?: "Unknown User"}")
-        println("Blocking user: ${_state.value.otherUser.username ?: "Unknown User"}")
-        // Trong thực tế, sẽ cập nhật trạng thái block trong database
+        // TODO: Implement block user functionality
+    }
+
+    private fun createGroup() {
+        // TODO: Implement group creation
+    }
+
+    private fun findInChat() {
+        // TODO: Implement chat search
     }
 }
+

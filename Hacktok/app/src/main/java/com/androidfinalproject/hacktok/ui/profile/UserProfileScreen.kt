@@ -164,7 +164,11 @@ fun UserProfileScreen (
 
                     // Action Buttons Row (Only show if not own profile)
                     if (!isOwnProfile) {
-                        ProfileActionButtons(state = state, onAction = onAction)
+                        ProfileActionButtons(
+                            state = state,
+                            onAction = onAction,
+                            isOwnProfile = isOwnProfile
+                        )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                     HorizontalDivider(modifier = Modifier.padding(horizontal = 0.dp))
@@ -231,116 +235,98 @@ fun UserProfileScreen (
 
 // Extracted Action Buttons to a separate composable for clarity
 @Composable
-private fun ProfileActionButtons(state: UserProfileState, onAction: (UserProfileAction) -> Unit) {
+private fun ProfileActionButtons(
+    state: UserProfileState,
+    onAction: (UserProfileAction) -> Unit,
+    isOwnProfile: Boolean
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        // Message Button - Always show for other users
+        if (!isOwnProfile) {
+            OutlinedButton(
+                onClick = { onAction(UserProfileAction.MessageUser) },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
+                Icon(Icons.Default.Message, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
+                Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                Text("Message")
+            }
+        }
+
+        // Friend/Follow Button - Show based on relationship status
         when (state.relationshipInfo?.status) {
-            RelationshipStatus.NONE -> {
-                // Can Send Request
+            RelationshipStatus.FRIENDS -> {
+                OutlinedButton(
+                    onClick = { onAction(UserProfileAction.UnfollowUser) },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(Icons.Default.PersonRemove, contentDescription = null)
+                    Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                    Text("Unfollow")
+                }
+            }
+            RelationshipStatus.PENDING_OUTGOING -> {
+                OutlinedButton(
+                    onClick = { onAction(UserProfileAction.CancelFriendRequest) },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(Icons.Default.HourglassEmpty, contentDescription = null)
+                    Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                    Text("Pending")
+                }
+            }
+            RelationshipStatus.PENDING_INCOMING -> {
+                Row(
+                    modifier = Modifier.weight(1f),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Button(
+                        onClick = { onAction(UserProfileAction.AcceptFriendRequest) },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Accept")
+                    }
+                    OutlinedButton(
+                        onClick = { onAction(UserProfileAction.RejectFriendRequest) },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Reject")
+                    }
+                }
+            }
+            RelationshipStatus.BLOCKING -> {
+                OutlinedButton(
+                    onClick = { onAction(UserProfileAction.UnblockUser) },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(Icons.Default.Block, contentDescription = null)
+                    Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                    Text("Unblock")
+                }
+            }
+            else -> {
                 Button(
                     onClick = { onAction(UserProfileAction.SendFriendRequest) },
                     modifier = Modifier.weight(1f)
                 ) {
-                    Icon(Icons.Default.PersonAdd, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
+                    Icon(Icons.Default.PersonAdd, contentDescription = null)
                     Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                    Text("Add Friend")
+                    Text("Follow")
                 }
-                BlockButton(modifier = Modifier.weight(1f), onAction = onAction)
             }
-            RelationshipStatus.PENDING_OUTGOING -> {
-                // Request Sent by Current User
-                Button(
-                    onClick = { onAction(UserProfileAction.CancelFriendRequest) },
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)
-                ) {
-                    Icon(Icons.Default.CancelScheduleSend, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
-                    Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                    Text("Cancel Request")
-                }
-                 BlockButton(modifier = Modifier.weight(1f), onAction = onAction)
-            }
-            RelationshipStatus.PENDING_INCOMING -> {
-                 // Request Received by Current User
-                 Button(
-                     onClick = { onAction(UserProfileAction.AcceptFriendRequest) },
-                     modifier = Modifier.weight(1f),
-                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                 ) {
-                     Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
-                     Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                     Text("Accept")
-                 }
-                 Button(
-                     onClick = { onAction(UserProfileAction.DeclineFriendRequest) },
-                     modifier = Modifier.weight(1f),
-                      colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)
-                 ) {
-                     Icon(Icons.Default.Cancel, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
-                     Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                     Text("Decline")
-                 }
-            }
-            RelationshipStatus.FRIENDS -> {
-                 // Are Friends
-                 Button(
-                     onClick = { onAction(UserProfileAction.Unfriend) },
-                     modifier = Modifier.weight(1f),
-                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)
-                 ) {
-                     Icon(Icons.Default.PersonRemove, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
-                     Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                     Text("Unfriend")
-                 }
-                 Button(
-                     onClick = { onAction(UserProfileAction.ChatWithFriend) },
-                     modifier = Modifier.weight(1f)
-                 ) {
-                     Icon(Icons.Default.ChatBubbleOutline, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
-                     Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                     Text("Message")
-                 }
-                 BlockButton(modifier = Modifier.weight(0.6f), onAction = onAction) // Smaller block button when friends
-            }
-            RelationshipStatus.BLOCKING -> {
-                 // Current User is Blocking Profile User
-                 Button(
-                     onClick = { onAction(UserProfileAction.UnblockUser) },
-                     modifier = Modifier.weight(1f),
-                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer, contentColor = MaterialTheme.colorScheme.onErrorContainer)
-                 ) {
-                     Icon(Icons.Default.CheckCircleOutline, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
-                     Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                     Text("Unblock")
-                 }
-            }
-            RelationshipStatus.BLOCKED -> {
-                 // Current User is Blocked BY Profile User
-                 Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), contentAlignment = Alignment.Center) {
-                     Text(
-                         "You are blocked by this user", 
-                         color = MaterialTheme.colorScheme.error,
-                         style = MaterialTheme.typography.bodyMedium
-                     )
-                 }
-            }
-            null -> {
-                 // No relationship info (e.g., error loading it)
-                 // Optionally show Add Friend or an error indicator
-                  Button(
-                     onClick = { onAction(UserProfileAction.SendFriendRequest) },
-                     modifier = Modifier.weight(1f)
-                 ) {
-                     Icon(Icons.Default.PersonAdd, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
-                     Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                     Text("Add Friend")
-                 }
-                 BlockButton(modifier = Modifier.weight(1f), onAction = onAction)
-            }
+        }
+
+        // Block Button - Show for non-friends
+        if (!isOwnProfile && state.relationshipInfo?.status != RelationshipStatus.BLOCKING) {
+            BlockButton(modifier = Modifier.weight(1f), onAction = onAction)
         }
     }
 }

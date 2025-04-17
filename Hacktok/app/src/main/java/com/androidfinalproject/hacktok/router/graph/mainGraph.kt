@@ -30,6 +30,9 @@ import com.androidfinalproject.hacktok.ui.messageDashboard.MessageDashboardRoot
 import com.androidfinalproject.hacktok.ui.messageDashboard.MessageDashboardViewModel
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Alignment
+import androidx.compose.material3.Text
+import androidx.compose.ui.Modifier
 import com.androidfinalproject.hacktok.router.routes.AuthRoute
 
 fun NavGraphBuilder.mainNavigation(navController: NavController) {
@@ -226,16 +229,31 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
             val chatType = backStackEntry.arguments?.getString("chatType") ?: "user"
             val chatId = backStackEntry.arguments?.getString("chatId")
 
-            ChatScreenRoot(
-                navController = navController,
-                viewModel = ChatViewModel(),
-                onNavigateBack = {
-                    navController.popBackStack()
-                },
-                onNavigateToManageUser = { userId ->
-                    navController.navigate("${MainRoute.UserDetail.route}/$userId")
+            if (chatId == null) {
+                navController.popBackStack()
+                return@composable
+            }
+
+            when (chatType) {
+                "user" -> ChatScreenRoot(
+                    userId = chatId,
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    },
+                    onNavigateToManageUser = { userId ->
+                        navController.navigate("${MainRoute.UserDetail.route}/$userId")
+                    }
+                )
+                "group" -> {
+                    // TODO: Implement group chat screen
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        Text(
+                            text = "Group chat feature coming soon",
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
                 }
-            )
+            }
         }
 
         // Edit Profile Screen
