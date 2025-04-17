@@ -152,7 +152,7 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
             val postId = backStackEntry.arguments?.getString("postId")
 
             PostDetailScreenRoot(
-                viewModel = PostDetailViewModel(postId!!),
+                postId = postId!!,
                 onNavigateBack = {
                     navController.popBackStack()
                 },

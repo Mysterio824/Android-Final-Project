@@ -1,6 +1,5 @@
-package com.androidfinalproject.hacktok.ui.post.component
+package com.androidfinalproject.hacktok.ui.commonComponent
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -38,24 +37,19 @@ import java.util.Locale
 @Composable
 fun PostContent(
     post: Post,
-    onPostClick: () -> Unit = {},
+    onPostClick: (String) -> Unit = {},
     onToggleLike: () -> Unit,
     onComment: () -> Unit,
     onShare: () -> Unit,
     onOptionsClick: () -> Unit,
     onUserClick: () -> Unit
 ) {
-    // Safely handle null user reference
-    val user = post.user
-    if (user == null) {
-        Log.e("PostContent", "Post user is null: ${post.id}")
-    }
-    
+    val user = post.user!!
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 8.dp)
-            .clickable { onPostClick() },
+            .clickable { onPostClick(post.id!!) },
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.background
@@ -74,7 +68,7 @@ fun PostContent(
                     .clip(CircleShape)
                     .clickable(onClick = onUserClick)
             ) {
-                val imageUrl = user?.profileImage
+                val imageUrl = user.profileImage
                 val painter = rememberAsyncImagePainter(
                     model = imageUrl.takeIf { !it.isNullOrBlank() },
                     error = painterResource(id = R.drawable.placeholder_profile),
@@ -84,7 +78,7 @@ fun PostContent(
 
                 Image(
                     painter = painter,
-                    contentDescription = "Profile picture of ${user?.username ?: "Unknown User"}",
+                    contentDescription = "Profile picture of ${user.username}",
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
@@ -94,12 +88,12 @@ fun PostContent(
                 modifier = Modifier
                     .weight(1f)
                     .padding(start = 8.dp)
-                    .clickable(onClick = onUserClick)
             ) {
                 Text(
-                    text = user?.username ?: "Unknown User",
+                    text = user.username!!,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
+                    fontSize = 16.sp,
+                    modifier = Modifier.clickable(onClick = onUserClick)
                 )
                 Row(
                     verticalAlignment = Alignment.CenterVertically

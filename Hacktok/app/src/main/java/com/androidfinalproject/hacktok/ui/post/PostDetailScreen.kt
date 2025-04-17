@@ -31,7 +31,12 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.androidfinalproject.hacktok.model.Comment
 import com.androidfinalproject.hacktok.model.MockData
+import com.androidfinalproject.hacktok.ui.commonComponent.PostContent
+import com.androidfinalproject.hacktok.ui.commonComponent.PostOptionsContent
+import com.androidfinalproject.hacktok.ui.commonComponent.ReportOptionsContent
+import com.androidfinalproject.hacktok.ui.commonComponent.ShareOptionsContent
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 import com.androidfinalproject.hacktok.ui.post.component.*
 
@@ -46,7 +51,8 @@ fun PostDetailScreen(
 
     var showPostOptionsSheet by remember { mutableStateOf(false) }
     var showShareOptionsSheet by remember { mutableStateOf(false) }
-    var selectedCommentId by remember { mutableStateOf<String?>(null) }
+    var selectedComment by remember { mutableStateOf<Comment?>(null) }
+    var reportTargetId by remember { mutableStateOf<String?>(null) }
 
     var showComments by remember { mutableStateOf(true) }
 
@@ -107,18 +113,16 @@ fun PostDetailScreen(
 
                 // Comments section
                 if (showComments) {
-                    // Root level comments
                     val rootComments = state.comments.filter { it.parentCommentId == null }
                     items(rootComments) { comment ->
                         CommentItem(
                             comment = comment,
+                            isSelected = state.commentIdReply == comment.id,
                             allComments = state.comments,
-                            onLikeComment = { commentId -> onAction(PostDetailAction.LikeComment(commentId)) },
-                            onCommentLongPress = { commentId -> selectedCommentId = commentId },
-                            onUserClick = { userId -> onAction(PostDetailAction.OnUserClick(userId)) },
-                            onReplyClick = {
-                                onAction(PostDetailAction.ToggleCommentInputFocus)
-                            }
+                            onLikeComment = { onAction(PostDetailAction.LikeComment(it)) },
+                            onCommentLongPress = { selectedComment = comment },
+                            onUserClick = { onAction(PostDetailAction.OnUserClick(it)) },
+                            onReplyClick = { onAction(PostDetailAction.SelectCommentToReply(it)) }
                         )
                     }
                 }
@@ -144,6 +148,7 @@ fun PostDetailScreen(
 
             CommentInputBar(
                 text = state.commentText,
+                imageUrl = state.currentUser?.profileImage,
                 onTextChange = { onAction(PostDetailAction.UpdateCommentText(it)) },
                 onSubmit = { onAction(PostDetailAction.SubmitComment) },
                 focusRequester = commentFocusRequester,
@@ -156,8 +161,9 @@ fun PostDetailScreen(
                     sheetState = bottomSheetState
                 ) {
                     PostOptionsContent(
-                        isPostOwner = state.isPostOwner,
-                        onDismiss = { showPostOptionsSheet = false }
+                        isPostOwner = state.currentUser?.id == state.post!!.user!!.id!!,
+                        onDismiss = { showPostOptionsSheet = false },
+                        onReport = { reportTargetId = state.post.id }
                     )
                 }
             }
@@ -175,14 +181,30 @@ fun PostDetailScreen(
             }
 
             // Comment options bottom sheet
-            if (selectedCommentId != null) {
+            if (selectedComment != null) {
                 ModalBottomSheet(
-                    onDismissRequest = { selectedCommentId = null },
+                    onDismissRequest = { selectedComment = null },
                     sheetState = bottomSheetState
                 ) {
                     CommentOptionsContent(
-                        commentId = selectedCommentId,
-                        onDismiss = { selectedCommentId = null }
+                        comment = selectedComment!!,
+                        onDismiss = { selectedComment = null },
+                        deleteComment = { onAction(PostDetailAction.DeleteComment(selectedComment!!.id!!)) },
+                        reportComment = { reportTargetId = selectedComment!!.id },
+                        isCommentOwner = selectedComment!!.userId == state.currentUser?.id
+                    )
+                }
+            }
+
+            // Report options bottom sheet
+            if (reportTargetId != null) {
+                ModalBottomSheet(
+                    onDismissRequest = { reportTargetId = null },
+                    sheetState = bottomSheetState
+                ) {
+                    ReportOptionsContent(
+                        onDismiss = { reportTargetId = null },
+                        onSomeAction = {}
                     )
                 }
             }

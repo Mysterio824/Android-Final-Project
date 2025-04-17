@@ -10,16 +10,25 @@ data class Comment(
     @PropertyName("postId") val postId: String,
     @PropertyName("createdAt") val createdAt: Date = Date(),
     @PropertyName("isReported") val isReported: Boolean = false, // Trạng thái báo cáo
-    @PropertyName("likeCount") val likeCount: Int = 0, // Số lượt thích
+    @PropertyName("userSnapshot") val userSnapshot: UserSnapshot,
+    @PropertyName("likedUserIds") val likedUserIds: List<String> = emptyList(),
     @PropertyName("parentCommentId") val parentCommentId: String? = null, // Hỗ trợ bình luận lồng nhau
-    @PropertyName("replyCount") val replyCount: Int = 0 // Số phản hồi cho bình luận này
+    @PropertyName("replyCount") val replyCount: Int = 0, // Số phản hồi cho bình luận này
+    @PropertyName("updatedAt") val updatedAt: Long? = null,
+    @PropertyName("isEdited") val isEdited: Boolean = false,
+    @PropertyName("isDeleted") val isDeleted: Boolean = false
 ) {
     // Constructor không tham số cho Firestore
-    constructor() : this(null, "", "", "", Date(), false, 0, null, 0)
+    constructor() : this(null, "", "", "", Date(), false,
+        UserSnapshot(),
+        emptyList(), null, 0, null, false, false)
+
+    fun getLikeCount(): Int = likedUserIds.size
 
     override fun toString(): String {
         return "Comment(id=$id, content='$content', userId='$userId', postId='$postId', " +
-                "createdAt=$createdAt, isReported=$isReported, likeCount=$likeCount, " +
-                "parentCommentId=$parentCommentId, replyCount=$replyCount)"
+                "createdAt=$createdAt, isReported=$isReported, likeCount=${getLikeCount()}, " +
+                "parentCommentId=$parentCommentId, replyCount=$replyCount, updatedAt=$updatedAt, " +
+                "isEdited=$isEdited, isDeleted=$isDeleted)"
     }
 }

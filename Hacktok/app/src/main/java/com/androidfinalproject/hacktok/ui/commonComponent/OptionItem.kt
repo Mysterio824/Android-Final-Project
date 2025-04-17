@@ -1,4 +1,4 @@
-package com.androidfinalproject.hacktok.ui.post.component
+package com.androidfinalproject.hacktok.ui.commonComponent
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column

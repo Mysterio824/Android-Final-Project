@@ -13,17 +13,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.RelationInfo
-import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.model.enums.RelationshipStatus
 import com.androidfinalproject.hacktok.ui.currentProfile.component.StatColumn
-import com.androidfinalproject.hacktok.ui.post.component.PostContent
+import com.androidfinalproject.hacktok.ui.commonComponent.PostContent
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -196,11 +194,11 @@ fun UserProfileScreen (
                          }
                      }
                  } else {
-                     items(state.posts, key = { it.id ?: "" }) {
+                     items(state.posts, key = { it.id ?: "" }) { it ->
                          PostContent(
                              post = it,
                              onUserClick = { onAction(UserProfileAction.RefreshProfile) },
-                             onPostClick = { onAction(UserProfileAction.GoToPost(it.id!!)) },
+                             onPostClick = { postId -> onAction(UserProfileAction.GoToPost(postId)) },
                              onOptionsClick = { /* TODO: Post options */ },
                              onToggleLike = { onAction(UserProfileAction.LikePost(it.id!!)) },
                              onComment = { onAction(UserProfileAction.GoToPost(it.id!!)) },

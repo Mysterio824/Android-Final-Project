@@ -59,73 +59,94 @@ object MockData {
             id = "comment1",
             content = "This is the first comment on this post!",
             userId = "user2",
+            userSnapshot = UserSnapshot(
+                username = "cool_user2",
+                profileImage = "https://example.com/profiles/user2.jpg"
+            ),
             postId = "post1",
             createdAt = Date(System.currentTimeMillis() - 3600000), // 1 hour ago
-            likeCount = 5
         ),
-
         Comment(
             id = "comment2",
             content = "This is the second comment",
             userId = "user3",
+            userSnapshot = UserSnapshot(
+                username = "funny_user3",
+                profileImage = "https://example.com/profiles/user3.jpg"
+            ),
             postId = "post1",
             createdAt = Date(System.currentTimeMillis() - 7200000), // 2 hours ago
-            likeCount = 2
         ),
-
         Comment(
-            id = "comment2",
-            content = "This is the second comment",
+            id = "comment3",
+            content = "Same second comment for testing",
             userId = "user3",
+            userSnapshot = UserSnapshot(
+                username = "funny_user3",
+                profileImage = "https://example.com/profiles/user3.jpg"
+            ),
             postId = "post1",
-            createdAt = Date(System.currentTimeMillis() - 7200000), // 2 hours ago
-            likeCount = 2
+            createdAt = Date(System.currentTimeMillis() - 7000000),
         ),
-
         Comment(
-            id = "comment2",
-            content = "This is the second comment",
+            id = "comment4",
+            content = "Yet another second comment",
             userId = "user3",
+            userSnapshot = UserSnapshot(
+                username = "funny_user3",
+                profileImage = "https://example.com/profiles/user3.jpg"
+            ),
             postId = "post1",
-            createdAt = Date(System.currentTimeMillis() - 7200000), // 2 hours ago
-            likeCount = 2
+            createdAt = Date(System.currentTimeMillis() - 6900000),
         ),
-
         Comment(
-            id = "comment2",
-            content = "This is the second comment",
+            id = "comment5",
+            content = "Duplicated for stress testing",
             userId = "user3",
+            userSnapshot = UserSnapshot(
+                username = "funny_user3",
+                profileImage = "https://example.com/profiles/user3.jpg"
+            ),
             postId = "post1",
-            createdAt = Date(System.currentTimeMillis() - 7200000), // 2 hours ago
-            likeCount = 2
+            createdAt = Date(System.currentTimeMillis() - 6800000),
         ),
-
         Comment(
-            id = "comment2",
-            content = "This is the second comment",
+            id = "comment6",
+            content = "Another one from user3",
             userId = "user3",
+            userSnapshot = UserSnapshot(
+                username = "funny_user3",
+                profileImage = "https://example.com/profiles/user3.jpg"
+            ),
             postId = "post1",
-            createdAt = Date(System.currentTimeMillis() - 7200000), // 2 hours ago
-            likeCount = 2
+            createdAt = Date(System.currentTimeMillis() - 6700000),
         ),
-
         Comment(
             id = "reply1",
             content = "This is a reply to the first comment",
             userId = "user4",
+            userSnapshot = UserSnapshot(
+                username = "reply_guy4",
+                profileImage = "https://example.com/profiles/user4.jpg"
+            ),
             postId = "post1",
             parentCommentId = "comment1",
-            createdAt = Date(System.currentTimeMillis() - 1800000) // 30 minutes ago
+            createdAt = Date(System.currentTimeMillis() - 1800000) // 30 mins ago
         ),
         Comment(
             id = "reply2",
             content = "Another reply to the first comment",
             userId = "user5",
+            userSnapshot = UserSnapshot(
+                username = "commentator5",
+                profileImage = "https://example.com/profiles/user5.jpg"
+            ),
             postId = "post1",
             parentCommentId = "comment1",
-            createdAt = Date(System.currentTimeMillis() - 900000) // 15 minutes ago
+            createdAt = Date(System.currentTimeMillis() - 900000) // 15 mins ago
         )
     )
+
     fun getMockNotifications(count: Int = 10): List<Notification> {
         val notifications = mutableListOf<Notification>()
 
@@ -312,7 +333,7 @@ object MockData {
             totalUsers = 1500,           // Total users in the system
             newUsersInPeriod = 1250,     // Sum of counts in userStats (new users in the last 30 days)
             percentChange = 20.0f        // 20% increase in new users compared to the previous period
-        );
+        )
     }
 
     fun createMockPostStatisticsState(): PostStatisticsState {
