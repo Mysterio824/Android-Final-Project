@@ -84,7 +84,8 @@ class NewStoryViewModel : ViewModel() {
                     ),
                     createdAt = now,
                     expiresAt = expiresAt,
-                    viewerIds = emptyList()
+                    viewerIds = emptyList(),
+                    privacy = privacy
                 )
 
                 // In a real app, upload story to server
@@ -131,7 +132,8 @@ class NewStoryViewModel : ViewModel() {
                     ),
                     createdAt = now,
                     expiresAt = expiresAt,
-                    viewerIds = emptyList()
+                    viewerIds = emptyList(),
+                    privacy = privacy
                 )
 
                 // In a real app, upload story to server

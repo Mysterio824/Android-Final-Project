@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.model.Media
 import com.androidfinalproject.hacktok.model.Message
 import com.androidfinalproject.hacktok.model.Story
+import com.androidfinalproject.hacktok.ui.newPost.PRIVACY
 import com.androidfinalproject.hacktok.ui.newStory.NewStoryViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -45,7 +46,8 @@ class StoryDetailViewModel : ViewModel() {
             try {
                 // Get all stories including ones created by the user
                 val allStories = NewStoryViewModel.globalStories + createMockStories()
-                val activeStories = allStories.filter { story ->
+                val filteredStories = filterStoriesByPrivacy(allStories)
+                val activeStories = filteredStories.filter { story ->
                     story.expiresAt.after(Date()) // Only show non-expired stories
                 }
 
@@ -65,6 +67,19 @@ class StoryDetailViewModel : ViewModel() {
                         isLoading = false
                     )
                 }
+            }
+        }
+    }
+
+    private fun filterStoriesByPrivacy(stories: List<Story>): List<Story> {
+        val currentUserId = _state.value.currentUser.id ?: "unknown"
+
+        return stories.filter { story ->
+            when (story.privacy) {
+                PRIVACY.PUBLIC -> true // Public stories are visible to all
+                PRIVACY.PRIVATE -> story.userId == currentUserId // Private stories only visible to owner
+                // Add more privacy options here if needed (e.g., FRIENDS)
+                PRIVACY.FRIENDS -> TODO()
             }
         }
     }
@@ -112,6 +127,7 @@ class StoryDetailViewModel : ViewModel() {
         }
     }
 
+    // Cập nhật mock stories để bao gồm privacy setting
     private fun createMockStories(): List<Story> {
         val now = Date()
         val expiresAt = Date(now.time + 24 * 60 * 60 * 1000) // 24 hours later
@@ -129,7 +145,8 @@ class StoryDetailViewModel : ViewModel() {
                 ),
                 createdAt = Date(System.currentTimeMillis() - 3600000),
                 expiresAt = expiresAt,
-                viewerIds = listOf("user3", "user4")
+                viewerIds = listOf("user3", "user4"),
+                privacy = PRIVACY.PUBLIC
             ),
             Story(
                 id = "2",
@@ -143,7 +160,8 @@ class StoryDetailViewModel : ViewModel() {
                 ),
                 createdAt = Date(System.currentTimeMillis() - 1800000),
                 expiresAt = expiresAt,
-                viewerIds = listOf("user1", "user3")
+                viewerIds = listOf("user1", "user3"),
+                privacy = PRIVACY.PRIVATE // This will only be visible to user2
             ),
             Story(
                 id = "3",
@@ -157,11 +175,13 @@ class StoryDetailViewModel : ViewModel() {
                 ),
                 createdAt = Date(System.currentTimeMillis() - 900000),
                 expiresAt = expiresAt,
-                viewerIds = listOf("user1", "user2")
+                viewerIds = listOf("user1", "user2"),
+                privacy = PRIVACY.PUBLIC
             )
         )
     }
 
+    // Các phương thức còn lại giữ nguyên...
     private fun sendMessage(content: String) {
         if (content.isBlank()) return
 
@@ -192,10 +212,11 @@ class StoryDetailViewModel : ViewModel() {
         _state.update { currentState ->
             if (currentState.currentStoryIndex < currentState.totalStories - 1) {
                 val newIndex = currentState.currentStoryIndex + 1
-                val stories = NewStoryViewModel.globalStories + createMockStories()
+                val allStories = NewStoryViewModel.globalStories + createMockStories()
+                val filteredStories = filterStoriesByPrivacy(allStories)
                 currentState.copy(
                     currentStoryIndex = newIndex,
-                    story = stories.getOrNull(newIndex),
+                    story = filteredStories.getOrNull(newIndex),
                     storyProgress = 0f
                 )
             } else {
@@ -210,10 +231,11 @@ class StoryDetailViewModel : ViewModel() {
         _state.update { currentState ->
             if (currentState.currentStoryIndex > 0) {
                 val newIndex = currentState.currentStoryIndex - 1
-                val stories = NewStoryViewModel.globalStories + createMockStories()
+                val allStories = NewStoryViewModel.globalStories + createMockStories()
+                val filteredStories = filterStoriesByPrivacy(allStories)
                 currentState.copy(
                     currentStoryIndex = newIndex,
-                    story = stories.getOrNull(newIndex),
+                    story = filteredStories.getOrNull(newIndex),
                     storyProgress = 0f
                 )
             } else {
