@@ -105,14 +105,33 @@ class AuthViewModel @Inject constructor(
         }
 
         if (emailError == null && passwordError == null && (currentState.isLoginMode || confirmPasswordError == null)) {
-            _uiState.update { it.copy(isLoading = true) } // Indicate UI loading
-            // TODO: Implement actual email/password sign-in/sign-up logic using AuthRepository
-            // Update _authState accordingly (Success, Error)
-            // For now, just simulate delay and reset loading
+            _uiState.update { it.copy(isLoading = true) }
             viewModelScope.launch {
-                kotlinx.coroutines.delay(1500) 
-                _uiState.update { it.copy(isLoading = false) }
-                // Example: If successful: _authState.value = AuthState.Success
+                try {
+                    val user = if (currentState.isLoginMode) {
+                        authRepository.signInWithEmail(currentState.email, currentState.password)
+                    } else {
+                        authRepository.createUserWithEmail(currentState.email, currentState.password)
+                    }
+
+                    if (user != null) {
+                        val isAdmin = authRepository.isUserAdmin(user.uid)
+                        _uiState.update { it.copy(
+                            isLoginSuccess = true,
+                            isAdmin = isAdmin,
+                            isLoading = false
+                        )}
+                        _authState.value = AuthState.Success(isAdmin = isAdmin)
+                    } else {
+                        _uiState.update { it.copy(isLoading = false) }
+                        _authState.value = AuthState.Error(
+                            if (currentState.isLoginMode) "Sign in failed" else "Account creation failed"
+                        )
+                    }
+                } catch (e: Exception) {
+                    _uiState.update { it.copy(isLoading = false) }
+                    _authState.value = AuthState.Error(e.message ?: "Authentication failed")
+                }
             }
         }
     }
