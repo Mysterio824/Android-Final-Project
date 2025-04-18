@@ -1,5 +1,6 @@
 package com.androidfinalproject.hacktok.ui.newPost
 
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -40,6 +41,8 @@ fun NewPostScreen(
         PRIVACY.FRIENDS -> R.drawable.ic_friends
         PRIVACY.PRIVATE -> R.drawable.ic_lock
     }
+
+    Log.d("PRIVACY", state.privacy.name)
 
     Surface(
         shape = RoundedCornerShape(12.dp),

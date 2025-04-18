@@ -52,12 +52,13 @@ class NewPostViewModel @Inject constructor(
                 viewModelScope.launch {
                     try {
                         val post = postRepository.getPost(action.postId)
+                        Log.d("PRIVACY", post?.privacy.toString())
                         post?.let {
                             _state.value = _state.value.copy(
                                 postId = it.id,
                                 caption = it.content,
                                 imageUri = Uri.parse(it.imageLink),
-                                privacy = state.value.privacy,
+                                privacy = PRIVACY.valueOf(it.privacy.uppercase()),
                                 isEditing = true
                             )
                         } ?: Log.e("EditPost", "Post not found for ID: ${action.postId}")
@@ -123,7 +124,6 @@ class NewPostViewModel @Inject constructor(
                         imageLink = imageLink,
                         privacy = privacy
                     )
-
                     val postId = postRepository.addPost(post)
                     _state.value = _state.value.copy(postSubmitted = true)
                     Log.d("Post", "Post created with ID: $postId")
