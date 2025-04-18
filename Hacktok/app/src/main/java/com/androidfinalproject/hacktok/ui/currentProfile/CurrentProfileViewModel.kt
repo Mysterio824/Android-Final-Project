@@ -90,13 +90,12 @@ class CurrentProfileViewModel @Inject constructor(
             is CurrentProfileAction.RetryLoading -> {
                 loadCurrentUser()
             }
-            is CurrentProfileAction.OnEditPost -> {
-                editPost(action.post.id, action.newContent)
-            }
             is CurrentProfileAction.OnDeletePost -> {
                 deletePost(action.post.id)
             }
-            else -> {} // Handle other actions
+            else -> {
+
+            } // Handle other actions
         }
     }
 }
