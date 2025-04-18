@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import com.androidfinalproject.hacktok.router.routes.AuthRoute
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.androidfinalproject.hacktok.ui.newPost.NewPostScreenRoot
 
 fun NavGraphBuilder.mainNavigation(navController: NavController) {
     navigation(
@@ -69,7 +70,7 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
                     navController.navigate("${MainRoute.EditPost.route}/$postId")
                 },
                 onCreatePostNavigate = {
-
+                    navController.navigate(MainRoute.NewPost.route)
                 },
                 onStoryNavigate = {
 
@@ -259,6 +260,25 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
                 onNavigateBack = {
                     navController.popBackStack()
                 }
+            )
+        }
+
+        composable(
+            route = MainRoute.NewPost.route,
+            enterTransition = { slideFadeInFromRight() },
+            exitTransition = { slideFadeOutToLeft() }
+        ) {
+            NewPostScreenRoot(
+                onClose = {
+                    navController.navigate("dashboard") {
+                        popUpTo("dashboard") { inclusive = true }
+                    }
+                },
+                onPost = {
+                    navController.navigate("dashboard") {
+                        popUpTo("dashboard") { inclusive = true }
+                    }
+                },
             )
         }
 

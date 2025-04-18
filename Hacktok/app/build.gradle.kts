@@ -124,6 +124,7 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.firebase:firebase-analytics-ktx")
     implementation("com.google.firebase:firebase-database-ktx")
+    implementation("com.google.firebase:firebase-storage-ktx")
 
     // Keep Credentials dependencies if needed and compatible, otherwise remove. Check Firebase/GMS docs.
     implementation(libs.androidx.credentials)

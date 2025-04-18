@@ -54,4 +54,8 @@ sealed interface MainRoute : Route {
         override val route = "edit_post"
     }
 
+    @Serializable
+    data object NewPost : MainRoute {
+        override val route = "new_post"
+    }
 }

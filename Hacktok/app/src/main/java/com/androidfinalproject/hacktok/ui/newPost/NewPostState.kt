@@ -13,4 +13,6 @@ data class NewPostState (
     val imageUri: Uri? = null,
     val privacy: PRIVACY = PRIVACY.PUBLIC,
     val isPosting: Boolean = false,
+    val username: String = "",
+    val postSubmitted: Boolean = false
 )
