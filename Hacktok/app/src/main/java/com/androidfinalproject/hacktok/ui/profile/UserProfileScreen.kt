@@ -216,7 +216,7 @@ fun UserProfileScreen (
                              post = it,
                              onUserClick = { onAction(UserProfileAction.RefreshProfile) },
                              onPostClick = { postId -> onAction(UserProfileAction.GoToPost(postId)) },
-                             onOptionsClick = { /* TODO: Post options */ },
+                             onOptionsClick = { selectPostId = it.id },
                              onToggleLike = { onAction(UserProfileAction.LikePost(it.id!!)) },
                              onComment = { onAction(UserProfileAction.GoToPost(it.id!!)) },
                              onShare = { /* TODO: Share post */ }

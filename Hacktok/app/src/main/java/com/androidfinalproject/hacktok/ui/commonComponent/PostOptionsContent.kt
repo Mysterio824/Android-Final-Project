@@ -21,6 +21,8 @@ fun PostOptionsContent(
     isPostOwner: Boolean,
     onDismiss: () -> Unit,
     onReport: () -> Unit,
+    onPostDelete: () -> Unit = {},
+    onPostEdit: () -> Unit = {},
 ) {
     fun withDismiss(action: () -> Unit): () -> Unit = {
         action()
@@ -65,20 +67,20 @@ fun PostOptionsContent(
             OptionItem(
                 title = "Edit Post",
                 icon = Icons.Default.Edit,
-                onClick = onDismiss
+                onClick = withDismiss(onPostEdit)
             )
 
             OptionItem(
                 title = "Delete Post",
                 icon = Icons.Default.Delete,
-                onClick = onDismiss
+                onClick = withDismiss(onPostDelete)
             )
 
-            OptionItem(
-                title = "Change Privacy",
-                icon = Icons.Default.Public,
-                onClick = onDismiss
-            )
+//            OptionItem(
+//                title = "Change Privacy",
+//                icon = Icons.Default.Public,
+//                onClick = onDismiss
+//            )
         }
     }
 }
