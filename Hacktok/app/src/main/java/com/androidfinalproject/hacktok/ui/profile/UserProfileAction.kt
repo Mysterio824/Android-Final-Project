@@ -15,14 +15,11 @@ sealed class UserProfileAction {
     // Navigation/UI Actions
     data object ChatWithFriend : UserProfileAction()
     data class GoToPost(val postId : String) : UserProfileAction()
-    data class NavigateFriendList(val userId: String) : UserProfileAction()
+    data object NavigateFriendList : UserProfileAction()
     data object NavigateBack : UserProfileAction()
     
     // Data Actions
     data class LikePost(val postId: String) : UserProfileAction()
     data object RefreshProfile : UserProfileAction()
-    data object FollowUser : UserProfileAction()
-    data object UnfollowUser : UserProfileAction()
-    data object RejectFriendRequest : UserProfileAction()
     data object MessageUser : UserProfileAction()
 }

@@ -23,8 +23,8 @@ fun PostOptionsContent(
     onReport: () -> Unit
 ) {
     fun withDismiss(action: () -> Unit): () -> Unit = {
-        onDismiss()
         action()
+        onDismiss()
     }
 
     Column(

@@ -76,7 +76,7 @@ class RelationshipRepositoryImpl @Inject constructor(
             return relationships
         } catch (e: Exception) {
             Log.e(TAG, "Error getting relationships for user $userId: ${e.message}")
-            return createMockRelationDocs(userId)
+            return emptyList()
         }
     }
     
@@ -126,134 +126,54 @@ class RelationshipRepositoryImpl @Inject constructor(
     override fun observeRelationships(userId: String): Flow<List<Map<String, Any>>> = callbackFlow {
         val query1 = relationshipsCollection.whereEqualTo("user1Id", userId)
         val query2 = relationshipsCollection.whereEqualTo("user2Id", userId)
-        
-        // Send initial data
-        try {
-            val initialRelations = createMockRelationDocs(userId)
-            trySend(initialRelations)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error sending initial data: ${e.message}")
-            trySend(emptyList())
+
+        // Keep track of the latest results from each query
+        var results1: List<Map<String, Any>>? = null
+        var results2: List<Map<String, Any>>? = null
+
+        // Function to combine and send results
+        fun sendCombinedResults() {
+            val combined = mutableListOf<Map<String, Any>>()
+            results1?.let { combined.addAll(it) }
+            results2?.let { combined.addAll(it) }
+            if (results1 != null && results2 != null) { // Only send when both queries have provided results at least once
+                 trySend(combined.distinctBy { it["id"] }) // Ensure distinct results based on document ID
+            }
         }
-        
+
         val listener1 = query1.addSnapshotListener { snapshot, error ->
             if (error != null) {
                 Log.e(TAG, "Error observing relationships (user1Id): ${error.message}")
+                close(error) // Close the flow on error
                 return@addSnapshotListener
             }
-            
-            if (snapshot != null) {
-                val relations = processSnapshots(userId, snapshot, null)
-                trySend(relations)
-            }
+            results1 = snapshot?.documents?.mapNotNull { doc ->
+                doc.data?.toMutableMap()?.apply {
+                    this["id"] = doc.id
+                    this["isUser1"] = true
+                }
+            } ?: emptyList()
+            sendCombinedResults()
         }
-        
+
         val listener2 = query2.addSnapshotListener { snapshot, error ->
             if (error != null) {
                 Log.e(TAG, "Error observing relationships (user2Id): ${error.message}")
+                close(error) // Close the flow on error
                 return@addSnapshotListener
             }
-            
-            if (snapshot != null) {
-                val relations = processSnapshots(userId, null, snapshot)
-                trySend(relations)
-            }
+            results2 = snapshot?.documents?.mapNotNull { doc ->
+                 doc.data?.toMutableMap()?.apply {
+                    this["id"] = doc.id
+                    this["isUser1"] = false
+                }
+            } ?: emptyList()
+            sendCombinedResults()
         }
-        
+
         awaitClose {
             listener1.remove()
             listener2.remove()
         }
-    }
-    
-    // Helper function to process snapshots
-    private fun processSnapshots(
-        userId: String,
-        snapshot1: com.google.firebase.firestore.QuerySnapshot?,
-        snapshot2: com.google.firebase.firestore.QuerySnapshot?
-    ): List<Map<String, Any>> {
-        val relationships = mutableListOf<Map<String, Any>>()
-        
-        try {
-            // Process snapshot1 (where user is user1)
-            snapshot1?.documents?.forEach { doc ->
-                val data = doc.data
-                if (data != null) {
-                    relationships.add(data.toMutableMap().apply {
-                        this["id"] = doc.id
-                        this["isUser1"] = true
-                    })
-                }
-            }
-            
-            // Process snapshot2 (where user is user2)
-            snapshot2?.documents?.forEach { doc ->
-                val data = doc.data
-                if (data != null) {
-                    relationships.add(data.toMutableMap().apply {
-                        this["id"] = doc.id
-                        this["isUser1"] = false
-                    })
-                }
-            }
-            
-            return relationships
-        } catch (e: Exception) {
-            Log.e(TAG, "Error processing snapshots: ${e.message}")
-            return createMockRelationDocs(userId)
-        }
-    }
-    
-    // Helper method to create mock relationship documents for testing
-    private fun createMockRelationDocs(userId: String): List<Map<String, Any>> {
-        val now = com.google.firebase.Timestamp.now()
-        
-        return listOf(
-            mapOf(
-                "id" to "${minOf(userId, "user1")}_${maxOf(userId, "user1")}",
-                "user1Id" to minOf(userId, "user1"),
-                "user2Id" to maxOf(userId, "user1"),
-                "status" to RelationshipStatus.FRIENDS.toString(),
-                "lastActionByUser1" to (userId < "user1"),
-                "updatedAt" to now,
-                "isUser1" to (userId < "user1")
-            ),
-            mapOf(
-                "id" to "${minOf(userId, "user2")}_${maxOf(userId, "user2")}",
-                "user1Id" to minOf(userId, "user2"),
-                "user2Id" to maxOf(userId, "user2"),
-                "status" to RelationshipStatus.PENDING_OUTGOING.toString(),
-                "lastActionByUser1" to (userId < "user2"),
-                "updatedAt" to now,
-                "isUser1" to (userId < "user2")
-            ),
-            mapOf(
-                "id" to "${minOf(userId, "user3")}_${maxOf(userId, "user3")}",
-                "user1Id" to minOf(userId, "user3"),
-                "user2Id" to maxOf(userId, "user3"),
-                "status" to RelationshipStatus.PENDING_INCOMING.toString(),
-                "lastActionByUser1" to (userId < "user3"),
-                "updatedAt" to now,
-                "isUser1" to (userId < "user3")
-            ),
-            mapOf(
-                "id" to "${minOf(userId, "user4")}_${maxOf(userId, "user4")}",
-                "user1Id" to minOf(userId, "user4"),
-                "user2Id" to maxOf(userId, "user4"),
-                "status" to RelationshipStatus.BLOCKING.toString(),
-                "lastActionByUser1" to (userId < "user4"),
-                "updatedAt" to now,
-                "isUser1" to (userId < "user4")
-            ),
-            mapOf(
-                "id" to "${minOf(userId, "user5")}_${maxOf(userId, "user5")}",
-                "user1Id" to minOf(userId, "user5"),
-                "user2Id" to maxOf(userId, "user5"),
-                "status" to RelationshipStatus.BLOCKED.toString(),
-                "lastActionByUser1" to (userId < "user5"),
-                "updatedAt" to now,
-                "isUser1" to (userId < "user5")
-            )
-        )
     }
 } 

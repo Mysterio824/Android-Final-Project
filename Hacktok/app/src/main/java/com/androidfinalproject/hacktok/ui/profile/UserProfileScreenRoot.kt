@@ -31,7 +31,7 @@ fun UserProfileScreenRoot(
         onAction = { action ->
             when (action) {
                 is UserProfileAction.NavigateBack -> onNavigateBack()
-                is UserProfileAction.NavigateFriendList -> onGoToFriendList(action.userId)
+                is UserProfileAction.NavigateFriendList -> onGoToFriendList(state.user!!.id!!)
                 is UserProfileAction.MessageUser -> onChatWithFriend(userId)
                 else -> viewModel.onAction(action)
             }

@@ -1,5 +1,6 @@
 package com.androidfinalproject.hacktok.ui.friendList
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -127,7 +128,7 @@ fun FriendListScreen(
                     sheetState = bottomSheetState
                 ) {
                     FriendOptionsContent (
-                        onUnFriend = {},
+                        onUnFriend = { onAction(FriendListAction.UnFriend(selectedFriendId!!)) },
                         onChat = { onAction(FriendListAction.ChatWithFriend(selectedFriendId!!)) },
                         onBlock = { onAction(FriendListAction.OnBlockFriend(selectedFriendId!!)) },
                         onDismiss = { selectedFriendId = null }

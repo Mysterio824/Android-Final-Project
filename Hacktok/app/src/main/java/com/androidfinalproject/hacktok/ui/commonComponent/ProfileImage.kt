@@ -1,4 +1,4 @@
-package com.androidfinalproject.hacktok.ui.mainDashboard.notifcation.component
+package com.androidfinalproject.hacktok.ui.commonComponent
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -19,18 +19,17 @@ import com.androidfinalproject.hacktok.R
 
 @Composable
 fun ProfileImage(
-    imageUrl: String,
-    onClick: () -> Unit,
+    imageUrl: String?,
+    onClick: () -> Unit = {},
     size: Dp = 40.dp
 ) {
     Box(
         modifier = Modifier
             .size(size)
             .clip(CircleShape)
-            .clickable(onClick = onClick)
     ) {
         val painter = rememberAsyncImagePainter(
-            model = imageUrl.takeIf { it.isNotBlank() },
+            model = imageUrl.takeIf { it.isNullOrBlank() },
             error = painterResource(id = R.drawable.placeholder_profile),
             placeholder = painterResource(id = R.drawable.placeholder_profile),
             fallback = painterResource(id = R.drawable.placeholder_profile)
@@ -39,7 +38,8 @@ fun ProfileImage(
         Image(
             painter = painter,
             contentDescription = "",
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize()
+                .clickable(onClick = onClick),
             contentScale = ContentScale.Crop
         )
     }

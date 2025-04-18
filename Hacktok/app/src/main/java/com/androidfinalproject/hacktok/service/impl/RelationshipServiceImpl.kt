@@ -29,12 +29,31 @@ class RelationshipServiceImpl @Inject constructor(
     private val TAG = "RelationshipService"
 
     override suspend fun getMyRelationships(): Map<String, RelationInfo> {
-        val currentUserId = getCurrentUserId() ?: return emptyMap()
+        val currentUserId = authService.getCurrentUserId() ?: return emptyMap()
         return getRelationshipsForUser(currentUserId)
     }
 
+    override suspend fun getRelationships(userId: String): Map<String, RelationInfo> {
+        return getRelationshipsForUser(userId)
+    }
+
+    override suspend fun getFriends(userId: String): Map<String, RelationInfo> {
+        return getRelationshipsForUser(userId)
+            .filter { it.value.status == RelationshipStatus.FRIENDS }
+    }
+
+    override suspend fun getRelationship(userId: String): RelationInfo? {
+        val currentUserId = authService.getCurrentUserId() ?: return null
+        if (currentUserId != userId) {
+            val relationships = getMyRelationships()
+            return relationships[userId]
+        } else {
+            return null
+        }
+    }
+
     override suspend fun getMyFriends(): List<User> {
-        val currentUserId = getCurrentUserId() ?: return emptyList()
+        val currentUserId = authService.getCurrentUserId() ?: return emptyList()
         val relationships = getRelationshipsForUser(currentUserId)
         
         // Filter relationships to get only friends
@@ -48,7 +67,7 @@ class RelationshipServiceImpl @Inject constructor(
     }
 
     override suspend fun getMyFriendRequests(): List<User> {
-        val currentUserId = getCurrentUserId() ?: return emptyList()
+        val currentUserId = authService.getCurrentUserId() ?: return emptyList()
         val relationships = getRelationshipsForUser(currentUserId)
         
         // Filter relationships to get only incoming requests
@@ -61,8 +80,20 @@ class RelationshipServiceImpl @Inject constructor(
         return userRepository.getUsersByIds(requestIds)
     }
 
+    override suspend fun getUserFromRelationship(relations: Map<String, RelationInfo>): List<User> {
+        // Filter relationships to get only friends
+        val friendIds = relations
+            .filter { it.value.status == RelationshipStatus.FRIENDS }
+            .keys
+            .toList()
+
+        // Fetch user details for friend IDs
+        return userRepository.getUsersByIds(friendIds)
+    }
+
+
     override suspend fun getFriendSuggestions(limit: Int): List<User> {
-        val currentUserId = getCurrentUserId() ?: return emptyList()
+        val currentUserId = authService.getCurrentUserId() ?: return emptyList()
         
         try {
             // Get existing relationships
@@ -90,9 +121,9 @@ class RelationshipServiceImpl @Inject constructor(
     }
 
     override suspend fun sendFriendRequest(toUserId: String): Boolean {
-        Log.d("start function", "$toUserId")
+        Log.d("start function", toUserId)
 
-        val currentUserId = getCurrentUserId() ?: run {
+        val currentUserId = authService.getCurrentUserId() ?: run {
             Log.d("not found user", "null")
             return false
         }
@@ -119,7 +150,8 @@ class RelationshipServiceImpl @Inject constructor(
     }
 
     override suspend fun cancelFriendRequest(toUserId: String): Boolean {
-        val currentUserId = getCurrentUserId() ?: return false
+        Log.d("RelationshipService", "start unfriend")
+        val currentUserId = authService.getCurrentUserId() ?: return false
         
         // Simply delete the relationship document (sets status to NONE implicitly via createOrUpdate)
         val success = createOrUpdateRelationship(
@@ -128,13 +160,13 @@ class RelationshipServiceImpl @Inject constructor(
             status = RelationshipStatus.NONE, // This will trigger deletion in createOrUpdateRelationship
             lastActionByFromUser = true 
         )
-        // Optional: Delete any pending notification for the recipient? 
-        // This might be complex. Usually, cancelling just removes the ability to accept.
+        Log.d("RelationshipService", "done unfriend")
+
         return success
     }
 
     override suspend fun acceptFriendRequest(fromUserId: String): Boolean {
-        val currentUserId = getCurrentUserId() ?: return false
+        val currentUserId = authService.getCurrentUserId() ?: return false
         
         val success = createOrUpdateRelationship(
             fromUserId = fromUserId, 
@@ -156,7 +188,7 @@ class RelationshipServiceImpl @Inject constructor(
     }
 
     override suspend fun declineFriendRequest(fromUserId: String): Boolean {
-        val currentUserId = getCurrentUserId() ?: return false
+        val currentUserId = authService.getCurrentUserId() ?: return false
         
         // Simply delete the relationship document (sets status to NONE implicitly via createOrUpdate)
          val success = createOrUpdateRelationship(
@@ -170,7 +202,7 @@ class RelationshipServiceImpl @Inject constructor(
     }
 
     override suspend fun blockUser(userId: String): Boolean {
-        val currentUserId = getCurrentUserId() ?: return false
+        val currentUserId = authService.getCurrentUserId() ?: return false
         if (currentUserId == userId) return false // Cannot block self
 
         return createOrUpdateRelationship(
@@ -183,7 +215,7 @@ class RelationshipServiceImpl @Inject constructor(
     }
 
     override suspend fun unblockUser(userId: String): Boolean {
-        val currentUserId = getCurrentUserId() ?: return false
+        val currentUserId = authService.getCurrentUserId() ?: return false
         
         // Set status back to NONE
          return createOrUpdateRelationship(
@@ -196,13 +228,13 @@ class RelationshipServiceImpl @Inject constructor(
     }
 
     override suspend fun getRelationshipStatus(userId: String): RelationshipStatus {
-        val currentUserId = getCurrentUserId() ?: return RelationshipStatus.NONE
+        val currentUserId = authService.getCurrentUserId() ?: return RelationshipStatus.NONE
         val relationships = getRelationshipsForUser(currentUserId)
         return relationships[userId]?.status ?: RelationshipStatus.NONE
     }
 
     override suspend fun removeFromSuggestions(suggestionId: String): Boolean {
-        val currentUserId = getCurrentUserId() ?: return false
+        val currentUserId = authService.getCurrentUserId() ?: return false
         
         try {
             val hiddenSuggestions = relationshipRepository.getHiddenSuggestions(currentUserId).toMutableList()
@@ -223,10 +255,6 @@ class RelationshipServiceImpl @Inject constructor(
         val currentUserId = authService.getCurrentUserIdSync() ?: return emptyFlow()
         return relationshipRepository.observeRelationships(currentUserId)
             .map { mapList -> convertToRelationInfoMap(currentUserId, mapList) }
-    }
-
-    override suspend fun getCurrentUserId(): String? {
-        return authService.getCurrentUserId()
     }
     
     // Helper method to create or update a relationship in the repository
@@ -271,6 +299,8 @@ class RelationshipServiceImpl @Inject constructor(
                 "lastActionByUser1" to finalLastActionByUser1,
                 "updatedAt" to Timestamp.now() // Update timestamp on every action
             )
+            Log.d("RelationshipService", "during unfriend")
+
 
             // If status is NONE, delete the document instead of saving NONE status
             return if (finalStatus == RelationshipStatus.NONE) {

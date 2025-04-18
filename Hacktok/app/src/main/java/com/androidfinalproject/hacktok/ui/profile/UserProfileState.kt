@@ -8,8 +8,9 @@ data class UserProfileState (
     val user: User? = null,
     val posts: List<Post> = emptyList(),
     val relationshipInfo: RelationInfo? = null,
-    val currentUserId: String? = null,
     val isLoading: Boolean = true,
     val error: String? = null,
-    val userIdBeingLoaded: String? = null
+    val userIdBeingLoaded: String? = null,
+    val numberOfFriends: Int = 0,
+    val isOwner: Boolean = false
 )

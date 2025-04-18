@@ -1,8 +1,8 @@
 package com.androidfinalproject.hacktok.ui.mainDashboard.friendSuggestion
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.service.AuthService
 import com.androidfinalproject.hacktok.service.RelationshipService
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -49,27 +49,22 @@ class FriendSuggestionViewModel @Inject constructor(
             _state.update { it.copy(isLoading = true) }
             
             try {
-                // Get current user
                 val currentUser = authService.getCurrentUser()
 
-                // Update state with current user
                 _state.update { it.copy(user = currentUser) }
-
-                // Get relationships
-                val relations = relationshipService.getMyRelationships()
                 
-                // Get friend requests
                 val friendRequests = relationshipService.getMyFriendRequests()
-                
-                // Get friend suggestions
                 val friendSuggestions = relationshipService.getFriendSuggestions(10)
+                val relation = relationshipService.getMyRelationships()
                 
-                _state.update { it.copy(
-                    isLoading = false,
-                    users = friendSuggestions,
-                    incomingRequests = friendRequests,
-                    relations = relations
-                )}
+                // Update state - remove explicit setting of relations
+                _state.update { currentState ->
+                    currentState.copy(
+                        isLoading = false,
+                        users = friendRequests + friendSuggestions,
+                        relations = relation
+                    )
+                }
             } catch (e: Exception) {
                 _state.update { it.copy(
                     isLoading = false,

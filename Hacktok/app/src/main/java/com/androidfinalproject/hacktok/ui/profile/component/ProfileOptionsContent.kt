@@ -1,4 +1,4 @@
-package com.androidfinalproject.hacktok.ui.commonComponent
+package com.androidfinalproject.hacktok.ui.profile.component
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,10 +9,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.androidfinalproject.hacktok.ui.commonComponent.OptionItem
+
 
 @Composable
-fun ShareOptionsContent(
-    onDismiss: () -> Unit
+fun ProfileOptionsContent(
+    onDismiss: () -> Unit,
+    report: () -> Unit,
+    block: () -> Unit,
+    unblock: () -> Unit,
+    seeFriend: () -> Unit,
+    isBlock: Boolean = false
 ) {
     fun withDismiss(action: () -> Unit): () -> Unit = {
         action()
@@ -25,35 +32,33 @@ fun ShareOptionsContent(
             .padding(bottom = 24.dp)
     ) {
         Text(
-            text = "Share",
+            text = "Comment Options",
             fontWeight = FontWeight.Bold,
             fontSize = 18.sp,
             modifier = Modifier.padding(16.dp)
         )
 
         OptionItem(
-            title = "Share to News Feed",
-            onClick = onDismiss
+            title = "Report",
+            onClick = withDismiss(report)
         )
 
-        OptionItem(
-            title = "Share to Your Story",
-            onClick = onDismiss
-        )
+        if(isBlock){
+            OptionItem(
+                title = "Unblock",
+                onClick = withDismiss(unblock)
+            )
+        } else {
+            OptionItem(
+                title = "Block",
+                onClick = withDismiss(block)
+            )
+        }
+
 
         OptionItem(
-            title = "Send in Messenger",
-            onClick = onDismiss
-        )
-
-        OptionItem(
-            title = "Share to a Group",
-            onClick = onDismiss
-        )
-
-        OptionItem(
-            title = "Copy Link",
-            onClick = onDismiss
+            title = "See friendship",
+            onClick = withDismiss(seeFriend)
         )
     }
 }

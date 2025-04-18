@@ -6,6 +6,7 @@ sealed class FriendListAction {
     data class OnAcceptFriendRequest(val userId: String, val isAccepted: Boolean) : FriendListAction()
     data class OnUnBlockFriend(val userId: String) : FriendListAction()
     data class OnBlockFriend(val userId: String) : FriendListAction()
+    data class UnFriend(val userId: String) : FriendListAction()
     data class ChatWithFriend(val userId: String) : FriendListAction()
     data class UserClicked(val userId: String) : FriendListAction()
 }

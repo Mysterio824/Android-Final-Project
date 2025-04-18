@@ -1,8 +1,11 @@
 package com.androidfinalproject.hacktok.ui.friendList
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.model.RelationInfo
+import com.androidfinalproject.hacktok.model.enums.RelationshipStatus
+import com.androidfinalproject.hacktok.service.AuthService
 import com.androidfinalproject.hacktok.service.RelationshipService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,22 +17,19 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FriendListViewModel @Inject constructor(
-    private val relationshipService: RelationshipService
+    private val relationshipService: RelationshipService,
+    private val authService: AuthService
 ) : ViewModel() {
     private val _state = MutableStateFlow(FriendListState())
     val state: StateFlow<FriendListState> = _state.asStateFlow()
 
     init {
-        // Load relationships for the current user automatically
-        loadMyRelationships()
-        
         // Observe relationship changes
         viewModelScope.launch {
             relationshipService.observeMyRelationships().collect { relations ->
                 _state.update {
                     it.copy(relations = relations)
                 }
-                // Reload users when relationships change
                 loadUsersForRelationships(relations)
             }
         }
@@ -45,51 +45,32 @@ class FriendListViewModel @Inject constructor(
             is FriendListAction.SearchQueryChanged -> updateSearchQuery(action.query)
             is FriendListAction.SendFriendRequest -> sendRequest(action.userId, action.isSend)
             is FriendListAction.OnAcceptFriendRequest -> handleFriendRequest(action.userId, action.isAccepted)
+            is FriendListAction.UnFriend -> unfriendUser(action.userId)
             is FriendListAction.OnBlockFriend -> blockFriend(action.userId)
             is FriendListAction.OnUnBlockFriend -> unblockFriend(action.userId)
             else -> {}
         }
     }
 
-    private fun loadMyRelationships() {
-        viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
-
-            try {
-                // Get the current user ID
-                val currentUserId = relationshipService.getCurrentUserId()
-                
-                // Update state with current user ID
-                _state.update { it.copy(currentUserId = currentUserId ?: "") }
-                
-                // Get all relationships for the user
-                val relations = relationshipService.getMyRelationships()
-                _state.update { it.copy(relations = relations) }
-                
-                // Load users for these relationships
-                loadUsersForRelationships(relations)
-            } catch (e: Exception) {
-                _state.update {
-                    it.copy(isLoading = false, error = "Failed to load friends: ${e.message}")
-                }
-            }
-        }
-    }
-    
     private suspend fun loadUsersForRelationships(relations: Map<String, RelationInfo>) {
         try {
-            // Get friends and requests using the service
-            val friends = relationshipService.getMyFriends()
-            val requests = relationshipService.getMyFriendRequests()
+            _state.update { it.copy( isLoading = true ) }
+            var filterRelation: Map<String, RelationInfo> = relations
+
+            if(_state.value.currentUserId == authService.getCurrentUserId()) {
+                filterRelation = relations
+                    .filter { it.value.status == RelationshipStatus.FRIENDS }
+            }
+
+            val users = relationshipService.getUserFromRelationship(filterRelation)
             
-            // Update state with loaded users
             _state.update {
                 it.copy(
-                    users = friends + requests,
+                    users = users,
                     filteredUsers = if (it.searchQuery.isBlank()) {
-                        friends + requests
+                        users
                     } else {
-                        (friends + requests).filter { user ->
+                        (users).filter { user ->
                             (user.username?.contains(it.searchQuery, ignoreCase = true) ?: false) ||
                                     user.email.contains(it.searchQuery, ignoreCase = true)
                         }
@@ -143,7 +124,9 @@ class FriendListViewModel @Inject constructor(
                 }
                 
                 if (!success) {
-                    _state.update { it.copy(error = "Failed to ${if (isAccepted) "accept" else "decline"} friend request") }
+                    _state.update {
+                        it.copy(error = "Failed to ${if (isAccepted) "accept" else "decline"} friend request")
+                    }
                 }
             } catch (e: Exception) {
                 _state.update { it.copy(error = "Error: ${e.message}") }
@@ -173,6 +156,20 @@ class FriendListViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 _state.update { it.copy(error = "Error: ${e.message}") }
+            }
+        }
+    }
+
+    private fun unfriendUser(userId: String) {
+        viewModelScope.launch {
+            try {
+                Log.d("FriendListViewModel", "Unfriend user: $userId")
+                val success = relationshipService.cancelFriendRequest(userId)
+                if (!success) {
+                    _state.update { it.copy(error = "Failed to unfriend user") }
+                }
+            } catch (e: Exception) {
+                _state.update { it.copy(error = "Error unfriending user: ${e.message}") }
             }
         }
     }

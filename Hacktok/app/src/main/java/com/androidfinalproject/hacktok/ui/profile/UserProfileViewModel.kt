@@ -3,18 +3,14 @@ package com.androidfinalproject.hacktok.ui.profile
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.model.RelationInfo
-import com.androidfinalproject.hacktok.model.enums.RelationshipStatus
 import com.androidfinalproject.hacktok.service.AuthService
 import com.androidfinalproject.hacktok.service.RelationshipService
-import com.google.firebase.FirebaseApp
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,6 +18,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.map
 
 @HiltViewModel
 class UserProfileViewModel @Inject constructor(
@@ -36,6 +37,28 @@ class UserProfileViewModel @Inject constructor(
     } catch (e: Exception) {
         Log.e(TAG, "Failed to initialize Firestore", e)
         null
+    }
+
+    private val _profileUserId = MutableStateFlow<String?>(null)
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val relationshipInfoFlow: StateFlow<RelationInfo?> = _profileUserId.flatMapLatest { profileId ->
+        if (profileId == null) {
+            flowOf(null) // No profile loaded, no relationship info
+        } else {
+            relationshipService.observeMyRelationships()
+                .map { relationshipsMap ->
+                    relationshipsMap[profileId] // Extract info for the specific profile user
+                }
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    init {
+        viewModelScope.launch {
+            relationshipInfoFlow.collect { relationInfo ->
+                _state.update { it.copy(relationshipInfo = relationInfo) }
+            }
+        }
     }
 
     fun onAction(action: UserProfileAction) {
@@ -62,11 +85,6 @@ class UserProfileViewModel @Inject constructor(
 
                 if (!success && action !is UserProfileAction.LikePost && action !is UserProfileAction.RefreshProfile) {
                     _state.update { it.copy(error = "Action failed: ${action::class.simpleName}") }
-                } else {
-                    if (action !is UserProfileAction.LikePost && action !is UserProfileAction.RefreshProfile) {
-                         kotlinx.coroutines.delay(200)
-                         loadRelationshipInfo(profileUserId)
-                    }
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error performing action $action: ${e.message}", e)
@@ -91,59 +109,46 @@ class UserProfileViewModel @Inject constructor(
         Log.d(TAG, "Loading user profile for userId: $userId")
         _state.update { it.copy(isLoading = true, error = null, userIdBeingLoaded = userId) }
 
+        // Update the profile user ID being observed
+        _profileUserId.value = userId
+
         viewModelScope.launch {
-            var loadedUser: User? = null
-            var loadedPosts: List<Post> = emptyList()
-            var loadError: String? = null
-            var currentUserId: String? = null
-            var relationshipInfo: RelationInfo? = null
+             val loadedUser: User?
+             val loadedPosts: List<Post>
+             val loadError: String?
 
-            try {
-                currentUserId = authService.getCurrentUserId()
-                
-                coroutineScope { 
-                    val userAndPostsDeferred = async { fetchUserAndPosts(userId) }
-                    val relationshipDeferred = async { 
-                        if (currentUserId != null && currentUserId != userId) {
-                             fetchRelationshipInfo(currentUserId, userId)
-                        } else {
-                             null
-                        }
-                    }
-
-                    val userAndPostsResult = userAndPostsDeferred.await()
-                    loadedUser = userAndPostsResult.first
-                    loadedPosts = userAndPostsResult.second
-                    loadError = if (loadedUser == null && userAndPostsResult.second.isEmpty()) "User not found or failed to load posts" else null
-                    
-                    relationshipInfo = relationshipDeferred.await()
-                }
-
+             try {
+                 // Fetch user and posts, relationship is handled by the flow
+                 val userAndPostsResult = fetchUserAndPosts(userId)
+                 loadedUser = userAndPostsResult.first
+                 loadedPosts = userAndPostsResult.second
+                 loadError = if (loadedUser == null /* && userAndPostsResult.second.isEmpty() */) "User not found" else null // Simplified error check
+                 val relationship = relationshipService.getFriends(userId)
                  if (loadedUser != null) {
-                     Log.d(TAG, "Updating state with User: ${loadedUser?.id}, Posts: ${loadedPosts.size}, Relation: ${relationshipInfo?.status}")
+                     Log.d(TAG, "Updating state with User: ${loadedUser.id}, Posts: ${loadedPosts.size}")
                      _state.update {
                          it.copy(
                             user = loadedUser,
                             posts = loadedPosts,
-                            relationshipInfo = relationshipInfo,
-                            currentUserId = currentUserId,
                             isLoading = false,
-                            error = null, 
-                            userIdBeingLoaded = null
+                            error = null,
+                            userIdBeingLoaded = null,
+                            numberOfFriends = relationship.size,
+                            isOwner = userId == authService.getCurrentUserId()
                         )
                     }
-                } else {
-                     Log.e(TAG, "Final loadedUser is null. Error: ${loadError ?: "Unknown error"}")
-                     _state.update { 
-                         it.copy(
-                             isLoading = false, 
-                             error = loadError ?: "Failed to load profile", 
-                             userIdBeingLoaded = null
-                        ) 
-                    }
-                }
+                 } else {
+                      Log.e(TAG, "Final loadedUser is null. Error: ${loadError ?: "Unknown error"}")
+                      _state.update {
+                          it.copy(
+                              isLoading = false,
+                              error = loadError ?: "Failed to load profile",
+                              userIdBeingLoaded = null
+                         )
+                     }
+                 }
 
-            } catch (e: Exception) {
+             } catch (e: Exception) {
                 Log.e(TAG, "Error loading profile coroutineScope: ${e.message}", e)
                 _state.update { currentState ->
                     currentState.copy(
@@ -152,26 +157,10 @@ class UserProfileViewModel @Inject constructor(
                         userIdBeingLoaded = null
                     )
                 }
-            }
+             }
         }
     }
     
-    private suspend fun loadRelationshipInfo(profileUserId: String) {
-         val currentUserId = authService.getCurrentUserId()
-         if (currentUserId != null && currentUserId != profileUserId) {
-             try {
-                 val relationships = relationshipService.getMyRelationships()
-                 val specificRelation = relationships[profileUserId]
-                 _state.update { it.copy(relationshipInfo = specificRelation) } 
-             } catch (e: Exception) {
-                  Log.e(TAG, "Error reloading relationship info: ${e.message}", e)
-                  _state.update { it.copy(relationshipInfo = null, error = "Failed to update relationship status") }
-             }
-         } else {
-              _state.update { it.copy(relationshipInfo = null) }
-         }
-    }
-
     private suspend fun fetchUserAndPosts(userId: String): Pair<User?, List<Post>> {
         return try {
             if (firestore == null) throw IllegalStateException("Firestore not initialized")
@@ -208,16 +197,6 @@ class UserProfileViewModel @Inject constructor(
         }
     }
     
-    private suspend fun fetchRelationshipInfo(currentUserId: String, profileUserId: String): RelationInfo? {
-         return try {
-             val relationships = relationshipService.getMyRelationships()
-             relationships[profileUserId]
-         } catch (e: Exception) {
-             Log.e(TAG, "Error fetching relationship info between $currentUserId and $profileUserId: ${e.message}")
-             null
-         }
-     }
-
     private fun loadProfile() {
         Log.d(TAG, "Refreshing profile")
         state.value.user?.id?.let { loadUserProfile(it) }

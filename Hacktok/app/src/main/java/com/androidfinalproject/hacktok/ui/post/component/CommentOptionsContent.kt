@@ -29,8 +29,8 @@ fun CommentOptionsContent(
     val context = LocalContext.current
 
     fun withDismiss(action: () -> Unit): () -> Unit = {
-        onDismiss()
         action()
+        onDismiss()
     }
 
     val copyTextAction = {

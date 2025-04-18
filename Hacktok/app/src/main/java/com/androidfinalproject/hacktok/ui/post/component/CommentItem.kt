@@ -30,6 +30,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.androidfinalproject.hacktok.R
 import com.androidfinalproject.hacktok.model.Comment
 import com.androidfinalproject.hacktok.model.MockData
+import com.androidfinalproject.hacktok.ui.commonComponent.ProfileImage
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -69,28 +70,11 @@ fun CommentItem(
             verticalAlignment = Alignment.Top
         ) {
             // User avatar
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(CircleShape)
-            ) {
-                val imageUrl = user.profileImage
-                val painter = rememberAsyncImagePainter(
-                    model = imageUrl.takeIf { !it.isNullOrBlank() },
-                    error = painterResource(id = R.drawable.placeholder_profile),
-                    placeholder = painterResource(id = R.drawable.placeholder_profile),
-                    fallback = painterResource(id = R.drawable.placeholder_profile),
-                )
-
-                Image(
-                    painter = painter,
-                    contentDescription = "Profile picture of ${user.username}",
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clickable { onUserClick(comment.userId) },
-                    contentScale = ContentScale.Crop
-                )
-            }
+            ProfileImage(
+                imageUrl = user.profileImage,
+                onClick = { onUserClick(comment.userId) },
+                size = 32.dp
+            )
 
             // Comment content
             Column(

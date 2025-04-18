@@ -74,7 +74,6 @@ dependencies {
     implementation(libs.foundation)
     implementation(libs.ui)
     implementation(libs.ui.tooling.preview)
-    implementation("io.coil-kt:coil-compose:2.4.0")
     debugImplementation(libs.ui.tooling)
     androidTestImplementation(libs.ui.test.junit4)
     debugImplementation(libs.ui.test.manifest)
@@ -85,7 +84,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.ui.text.google.fonts)
-    implementation("io.coil-kt:coil-compose:2.5.0")
+    implementation("io.coil-kt:coil-compose:2.6.0")
 
     implementation(libs.material.icons.extended)
     implementation(libs.androidx.compose.material3.material3)
@@ -111,15 +110,16 @@ dependencies {
     // Hilt
     implementation("com.google.dagger:hilt-android:2.48")
     kapt("com.google.dagger:hilt-android-compiler:2.48")
-    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
-    
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+
     // Google Play Services - Add necessary ones back without versions for BOM management
-    implementation("com.google.android.gms:play-services-auth:20.7.0")
+    implementation("com.google.android.gms:play-services-auth:21.3.0")
     // implementation("com.google.android.gms:play-services-base:18.3.0") // Base might be transitively included
     // implementation("com.google.android.gms:play-services-identity:18.0.1") // Needed?
     
     // Firebase
-    implementation(platform("com.google.firebase:firebase-bom:32.7.1"))
+    implementation(platform("com.google.firebase:firebase-bom:33.12.0"))
+    implementation("com.google.firebase:firebase-messaging:24.1.1")
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.firebase:firebase-analytics-ktx")

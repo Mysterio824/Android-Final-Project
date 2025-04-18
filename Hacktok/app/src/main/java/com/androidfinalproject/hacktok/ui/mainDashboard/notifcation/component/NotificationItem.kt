@@ -36,6 +36,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.androidfinalproject.hacktok.model.Notification
 import com.androidfinalproject.hacktok.model.enums.NotificationType
+import com.androidfinalproject.hacktok.ui.commonComponent.ProfileImage
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

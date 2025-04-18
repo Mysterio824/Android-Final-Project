@@ -17,8 +17,8 @@ fun ReportOptionsContent(
     onSomeAction: () -> Unit = {}
 ) {
     fun withDismiss(action: () -> Unit): () -> Unit = {
-        onDismiss()
         action()
+        onDismiss()
     }
 
     Column(

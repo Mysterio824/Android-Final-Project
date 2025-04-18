@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
@@ -12,16 +11,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.RelationInfo
 import com.androidfinalproject.hacktok.model.enums.RelationshipStatus
-import com.androidfinalproject.hacktok.ui.currentProfile.component.StatColumn
 import com.androidfinalproject.hacktok.ui.commonComponent.PostContent
+import com.androidfinalproject.hacktok.ui.commonComponent.ProfileImage
+import com.androidfinalproject.hacktok.ui.profile.component.*
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -30,6 +28,11 @@ fun UserProfileScreen (
     state : UserProfileState,
     onAction : (UserProfileAction) -> Unit
 ) {
+    var showProfileOptionsSheet by remember { mutableStateOf(false) }
+    var showResponseOptionsSheet by remember { mutableStateOf(false) }
+    val bottomSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = false
+    )
     Scaffold(
         topBar = {
             TopAppBar(
@@ -93,8 +96,6 @@ fun UserProfileScreen (
             }
             return@Scaffold
         }
-        
-        val isOwnProfile = state.currentUserId == state.user.id
 
         LazyColumn(
             modifier = Modifier
@@ -117,21 +118,11 @@ fun UserProfileScreen (
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(80.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primaryContainer)
-                        ) {
-                             // TODO: Replace with Coil AsyncImage
-                            Text(
-                                text = state.user.username?.firstOrNull()?.uppercaseChar()?.toString() ?: "?",
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                fontSize = 32.sp,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.align(Alignment.Center)
-                            )
-                        }
+                        ProfileImage(
+                            imageUrl = state.user.profileImage,
+                            size = 80.dp,
+                            onClick = { onAction(UserProfileAction.RefreshProfile) }
+                        )
                         ProfileStatsRow(state = state, onAction = onAction)
                     }
 
@@ -163,11 +154,13 @@ fun UserProfileScreen (
                     }
 
                     // Action Buttons Row (Only show if not own profile)
-                    if (!isOwnProfile) {
+                    if (!state.isOwner) {
                         ProfileActionButtons(
                             state = state,
                             onAction = onAction,
-                            isOwnProfile = isOwnProfile
+                            showOption = { showProfileOptionsSheet = true },
+                            showResponse = { showResponseOptionsSheet = true},
+                            isOwnProfile = state.isOwner
                         )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
@@ -198,7 +191,7 @@ fun UserProfileScreen (
                          }
                      }
                  } else {
-                     items(state.posts, key = { it.id ?: "" }) { it ->
+                     items(state.posts, key = { it.id ?: "" }) {
                          PostContent(
                              post = it,
                              onUserClick = { onAction(UserProfileAction.RefreshProfile) },
@@ -230,145 +223,38 @@ fun UserProfileScreen (
                 }
             }
         }
-    }
-}
 
-// Extracted Action Buttons to a separate composable for clarity
-@Composable
-private fun ProfileActionButtons(
-    state: UserProfileState,
-    onAction: (UserProfileAction) -> Unit,
-    isOwnProfile: Boolean
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        // Message Button - Always show for other users
-        if (!isOwnProfile) {
-            OutlinedButton(
-                onClick = { onAction(UserProfileAction.MessageUser) },
-                modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = MaterialTheme.colorScheme.primary
-                )
+        if (showProfileOptionsSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showProfileOptionsSheet = false },
+                sheetState = bottomSheetState
             ) {
-                Icon(Icons.Default.Message, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
-                Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                Text("Message")
+                ProfileOptionsContent(
+                    onDismiss = { showProfileOptionsSheet = false },
+                    report = {  },
+                    seeFriend = { onAction(UserProfileAction.NavigateFriendList) },
+                    block = { onAction(UserProfileAction.BlockUser) },
+                    unblock = { onAction(UserProfileAction.UnblockUser) },
+                    isBlock = state.relationshipInfo?.status != RelationshipStatus.BLOCKING
+                )
             }
         }
 
-        // Friend/Follow Button - Show based on relationship status
-        when (state.relationshipInfo?.status) {
-            RelationshipStatus.FRIENDS -> {
-                OutlinedButton(
-                    onClick = { onAction(UserProfileAction.UnfollowUser) },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Icon(Icons.Default.PersonRemove, contentDescription = null)
-                    Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                    Text("Unfollow")
-                }
+        if (showResponseOptionsSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showResponseOptionsSheet = false },
+                sheetState = bottomSheetState
+            ) {
+                ResponseOptionsContent(
+                    onDismiss = { showResponseOptionsSheet = false },
+                    accept = { onAction(UserProfileAction.AcceptFriendRequest) },
+                    unaccepted = { onAction(UserProfileAction.DeclineFriendRequest) }
+                )
             }
-            RelationshipStatus.PENDING_OUTGOING -> {
-                OutlinedButton(
-                    onClick = { onAction(UserProfileAction.CancelFriendRequest) },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Icon(Icons.Default.HourglassEmpty, contentDescription = null)
-                    Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                    Text("Pending")
-                }
-            }
-            RelationshipStatus.PENDING_INCOMING -> {
-                Row(
-                    modifier = Modifier.weight(1f),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Button(
-                        onClick = { onAction(UserProfileAction.AcceptFriendRequest) },
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text("Accept")
-                    }
-                    OutlinedButton(
-                        onClick = { onAction(UserProfileAction.RejectFriendRequest) },
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text("Reject")
-                    }
-                }
-            }
-            RelationshipStatus.BLOCKING -> {
-                OutlinedButton(
-                    onClick = { onAction(UserProfileAction.UnblockUser) },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Icon(Icons.Default.Block, contentDescription = null)
-                    Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                    Text("Unblock")
-                }
-            }
-            else -> {
-                Button(
-                    onClick = { onAction(UserProfileAction.SendFriendRequest) },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Icon(Icons.Default.PersonAdd, contentDescription = null)
-                    Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                    Text("Follow")
-                }
-            }
-        }
-
-        // Block Button - Show for non-friends
-        if (!isOwnProfile && state.relationshipInfo?.status != RelationshipStatus.BLOCKING) {
-            BlockButton(modifier = Modifier.weight(1f), onAction = onAction)
         }
     }
 }
 
-// Extracted Block Button for reuse
-@Composable
-private fun RowScope.BlockButton(modifier: Modifier = Modifier, onAction: (UserProfileAction) -> Unit) {
-     OutlinedButton(
-        onClick = { onAction(UserProfileAction.BlockUser) },
-        modifier = modifier,
-        border = ButtonDefaults.outlinedButtonBorder.copy(width = 1.dp)
-    ) {
-         Icon(Icons.Default.Block, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
-         Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-        Text("Block")
-    }
-}
-
-// Extracted Stats Row
-@Composable
-private fun RowScope.ProfileStatsRow(state: UserProfileState, onAction: (UserProfileAction) -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-        StatColumn(
-            count = state.user?.followerCount ?: 0,
-            label = "Followers",
-            onClick = { state.user?.id?.let { onAction(UserProfileAction.NavigateFriendList(it)) } }
-        )
-        StatColumn(
-            count = state.user?.followingCount ?: 0,
-            label = "Following",
-            onClick = { state.user?.id?.let { onAction(UserProfileAction.NavigateFriendList(it)) } }
-        )
-        StatColumn(
-            count = state.posts.size,
-            label = "Posts",
-            onClick = { /* Maybe scroll to posts? */ }
-        )
-    }
-}
 
 
 @Preview(showBackground = true, widthDp = 380, heightDp = 800)
@@ -380,7 +266,6 @@ fun ProfileScreenPreview_Friend() {
                 user = MockData.mockUsers.first().copy(bio = "This is a sample bio text.", followerCount = 123, followingCount = 45),
                 posts = MockData.mockPosts.map { it.copy(user = MockData.mockUsers.first()) },
                 relationshipInfo = RelationInfo(id="otherUser", status=RelationshipStatus.FRIENDS),
-                currentUserId = "currentUser",
                 isLoading = false,
                 error = null
             ),
@@ -398,7 +283,6 @@ fun ProfileScreenPreview_PendingIncoming() {
                 user = MockData.mockUsers.first().copy(bio = "", followerCount = 10, followingCount = 5),
                 posts = emptyList(),
                 relationshipInfo = RelationInfo(id="otherUser", status=RelationshipStatus.PENDING_INCOMING),
-                currentUserId = "currentUser",
                 isLoading = false,
                 error = null
             ),
@@ -416,7 +300,6 @@ fun ProfileScreenPreview_None() {
                 user = MockData.mockUsers.first().copy(bio = "Another user", followerCount = 0, followingCount = 0),
                 posts = MockData.mockPosts.take(1).map { it.copy(user = MockData.mockUsers.first()) },
                 relationshipInfo = null, // Or RelationInfo(status=RelationshipStatus.NONE)
-                currentUserId = "currentUser",
                 isLoading = false,
                 error = null
             ),
@@ -434,25 +317,6 @@ fun ProfileScreenPreview_Blocking() {
                 user = MockData.mockUsers.first(),
                 posts = emptyList(),
                 relationshipInfo = RelationInfo(id="otherUser", status=RelationshipStatus.BLOCKING),
-                 currentUserId = "currentUser",
-                isLoading = false,
-                error = null
-            ),
-            onAction = {}
-         )
-    }
-}
-
-@Preview(showBackground = true, widthDp = 380, heightDp = 800)
-@Composable
-fun ProfileScreenPreview_OwnProfile() {
-    MainAppTheme {
-         UserProfileScreen(
-            state = UserProfileState(
-                user = MockData.mockUsers.first { it.id == "user1" }, // Example user ID
-                posts = MockData.mockPosts.filter { it.userId == "user1" }.map { it.copy(user = MockData.mockUsers.first { u -> u.id == "user1" }) },
-                relationshipInfo = null, // No relationship info for own profile
-                currentUserId = "user1", // Current user ID matches profile user ID
                 isLoading = false,
                 error = null
             ),
