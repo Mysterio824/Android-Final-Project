@@ -41,15 +41,18 @@ fun PostContent(
     onToggleLike: () -> Unit,
     onComment: () -> Unit,
     onShare: () -> Unit,
-    onOptionsClick: () -> Unit,
-    onUserClick: () -> Unit
+    onPostDelete: () -> Unit = {},
+    onPostEdit: () -> Unit = {},
+    onUserClick: () -> Unit,
+    currentUserId: String = "",
 ) {
-    val user = post.user!!
+    var expanded by remember { mutableStateOf(false) }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 8.dp)
-            .clickable { onPostClick(post.id!!) },
+            .clickable { post.id?.let { onPostClick(it) } },
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.background
@@ -68,7 +71,7 @@ fun PostContent(
                     .clip(CircleShape)
                     .clickable(onClick = onUserClick)
             ) {
-                val imageUrl = user.profileImage
+                val imageUrl = post.user?.profileImage
                 val painter = rememberAsyncImagePainter(
                     model = imageUrl.takeIf { !it.isNullOrBlank() },
                     error = painterResource(id = R.drawable.placeholder_profile),
@@ -78,7 +81,7 @@ fun PostContent(
 
                 Image(
                     painter = painter,
-                    contentDescription = "Profile picture of ${user.username}",
+                    contentDescription = "Profile picture",
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
@@ -90,7 +93,7 @@ fun PostContent(
                     .padding(start = 8.dp)
             ) {
                 Text(
-                    text = user.username!!,
+                    text = post.user?.username ?: "Unknown User",
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
                     modifier = Modifier.clickable(onClick = onUserClick)
@@ -113,11 +116,37 @@ fun PostContent(
                 }
             }
 
-            IconButton(onClick = onOptionsClick) {
-                Icon(
-                    imageVector = Icons.Default.MoreVert,
-                    contentDescription = "More options"
-                )
+            if (post.userId == currentUserId) {
+                Box {
+                    IconButton(onClick = { expanded = true }) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "More options"
+                        )
+                    }
+
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Edit post") },
+                            onClick = {
+                                expanded = false
+                                // Trigger edit post logic
+                                onPostEdit()
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Delete post") },
+                            onClick = {
+                                expanded = false
+                                // Trigger delete post logic
+                                onPostDelete()
+                            }
+                        )
+                    }
+                }
             }
         }
 
@@ -213,7 +242,6 @@ fun PostContent(
                 Text("Share")
             }
         }
-
     }
 }
 
@@ -233,7 +261,9 @@ fun PostPreview(){
                 onComment = {},
                 onToggleLike = {},
                 onUserClick = {},
-                onOptionsClick = {}
+                onPostDelete = {},
+                onPostEdit = {},
+                currentUserId = ""
             )
         }
     }

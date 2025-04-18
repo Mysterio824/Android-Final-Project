@@ -10,6 +10,7 @@ interface PostRepository {
     suspend fun getPost(postId: String): Post?
     suspend fun getPostsByUser(userId: String): List<Post>
     suspend fun updatePost(postId: String, updates: Map<String, Any>)
+    suspend fun updatePostContentOnly(postId: String, newContent: String, newPrivacy: String, newImageLink: String)
     suspend fun deletePost(postId: String)
     suspend fun incrementLikeCount(postId: String)
     suspend fun searchPosts(query: String): List<Post>

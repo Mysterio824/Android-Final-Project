@@ -36,6 +36,16 @@ class PostRepositoryImpl @Inject constructor(
         postsCollection.document(postId).update(updates).await()
     }
 
+    override suspend fun updatePostContentOnly(postId: String, newContent: String, newPrivacy: String, newImageLink: String) {
+        val updates = mapOf(
+            "content" to newContent,
+            "privacy" to newPrivacy,
+            "imageLink" to newImageLink
+        )
+
+        updatePost(postId, updates)
+    }
+
     override suspend fun deletePost(postId: String) {
         postsCollection.document(postId).delete().await()
     }

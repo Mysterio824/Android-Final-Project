@@ -1,5 +1,6 @@
 package com.androidfinalproject.hacktok.ui.newPost
 
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -34,11 +35,14 @@ fun NewPostScreen(
     onAction: (NewPostAction) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
+
     val privacyIcon = when (state.privacy) {
         PRIVACY.PUBLIC -> R.drawable.ic_public
         PRIVACY.FRIENDS -> R.drawable.ic_friends
         PRIVACY.PRIVATE -> R.drawable.ic_lock
     }
+
+    Log.d("PRIVACY", state.privacy.name)
 
     Surface(
         shape = RoundedCornerShape(12.dp),
@@ -62,7 +66,7 @@ fun NewPostScreen(
                 )
 
                 IconButton(
-                    onClick = { /* Close */ },
+                    onClick = { onAction(NewPostAction.Close) },
                     modifier = Modifier.align(Alignment.CenterEnd)
                 ) {
                     Icon(Icons.Default.Close, contentDescription = "Close")
@@ -96,7 +100,7 @@ fun NewPostScreen(
                         .weight(1f)
                 ) {
                     Text(
-                        text = "Harry Maguire",
+                        text = state.username,
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.align(Alignment.TopStart).offset(y = (-4).dp)
@@ -166,7 +170,7 @@ fun NewPostScreen(
                 onValueChange = { onAction(NewPostAction.UpdateCaption(it)) },
                 placeholder = {
                     Text(
-                        text = "Harry, what is in your mind?",
+                        text = "Hey ${state.username.split(' ').firstOrNull().orEmpty()}, what is in your mind?",
                         textAlign = TextAlign.Start
                     )
                 },
@@ -184,12 +188,13 @@ fun NewPostScreen(
                 )
             )
 
-            if (state.imageUri == null) {
+            if (state.imageUri == null || state.imageUri.toString().isBlank()) {
                 IconButton(modifier = Modifier
                     .fillMaxWidth()
                     .background(Color.LightGray, RoundedCornerShape(8.dp))
                     .padding(12.dp),
-                    onClick = { onAction(NewPostAction.UpdateImage) }) {
+                    onClick = { onAction(NewPostAction.UpdateImage) })
+                {
                     Icon(painterResource(id = R.drawable.ic_add_photo), contentDescription = "Add an image")
                 }
             } else {
@@ -236,7 +241,7 @@ fun NewPostScreen(
                     contentColor = Color.White
                 )
             ) {
-                Text("Post")
+                Text(if (state.isEditing) "Update" else "Post")
             }
         }
     }

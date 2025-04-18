@@ -76,7 +76,7 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
 
                 },
                 onCreateStoryNavigate = {
-                    navController.navigate(MainRoute.NewStory.route)
+
                 },
                 onAuthNavigate = {
                     navController.navigate(AuthRoute.Graph.route)
@@ -262,20 +262,6 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
                 }
             )
         }
-
-        // New Story Screen
-        composable(
-            route = MainRoute.NewStory.route,
-            enterTransition = { slideFadeInFromRight() },
-            exitTransition = { slideFadeOutToLeft() }
-        ) {
-            NewStoryRoot(
-                onNavigateBack = {
-                    navController.popBackStack()
-                }
-            )
-        }
-
 
         // Edit Post Screen
         composable(
