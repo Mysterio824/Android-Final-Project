@@ -19,10 +19,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.androidfinalproject.hacktok.ui.mainDashboard.home.HomeScreenAction
 
 @Composable
 fun StoriesSection(
-    onCreateStory: () -> Unit
+    onCreateStory: () -> Unit,
+    OnStoryClick: (String) -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -73,7 +75,8 @@ fun StoriesSection(
                         profileImageUrl = "https://example.com/profile$index.jpg",
                         storyImageUrl = "https://example.com/story$index.jpg",
                         username = "User $index",
-                        onClick = { /* Handle story click */ }
+                        onClick = { OnStoryClick("story_id_$index")
+                        }
                     )
                 }
             }

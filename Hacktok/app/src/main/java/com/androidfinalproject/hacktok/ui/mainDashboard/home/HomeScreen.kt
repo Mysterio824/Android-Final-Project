@@ -71,7 +71,10 @@ fun HomeScreen(
                     }
 
                     item {
-                        StoriesSection(onCreateStory = { onAction(HomeScreenAction.OnCreateStory) })
+                        StoriesSection(
+                            onCreateStory = {onAction(HomeScreenAction.OnCreateStory)},
+                            OnStoryClick = {onAction(HomeScreenAction.OnStoryClick(it))}
+                        )
                     }
 
                     items(state.posts) { post ->
