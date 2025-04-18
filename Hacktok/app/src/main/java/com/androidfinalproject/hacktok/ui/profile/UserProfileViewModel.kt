@@ -6,11 +6,15 @@ import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.model.RelationInfo
+import com.androidfinalproject.hacktok.model.enums.ReportCause
+import com.androidfinalproject.hacktok.model.enums.ReportType
 import com.androidfinalproject.hacktok.service.AuthService
 import com.androidfinalproject.hacktok.service.RelationshipService
+import com.androidfinalproject.hacktok.service.ReportService
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,7 +31,8 @@ import kotlinx.coroutines.flow.map
 @HiltViewModel
 class UserProfileViewModel @Inject constructor(
     private val relationshipService: RelationshipService,
-    private val authService: AuthService
+    private val authService: AuthService,
+    private val reportService: ReportService
 ) : ViewModel() {
     private val TAG = "UserProfileViewModel"
     private val _state = MutableStateFlow(UserProfileState())
@@ -77,7 +82,13 @@ class UserProfileViewModel @Inject constructor(
                     UserProfileAction.DeclineFriendRequest -> relationshipService.declineFriendRequest(profileUserId)
                     UserProfileAction.BlockUser -> relationshipService.blockUser(profileUserId)
                     UserProfileAction.UnblockUser -> relationshipService.unblockUser(profileUserId)
-                    
+                    is UserProfileAction.SubmitReport
+                        -> submitReport(
+                            action.reportedItemId,
+                            action.reportType,
+                            action.reportCause
+                        )
+
                     is UserProfileAction.LikePost -> { likePost(action.postId); true }
                     UserProfileAction.RefreshProfile -> { loadProfile(); true }
                     else -> true
@@ -204,5 +215,40 @@ class UserProfileViewModel @Inject constructor(
     
     private fun likePost(postId: String) {
         Log.d(TAG, "LikePost action called for postId: $postId (Not Implemented)")
+    }
+
+    private fun submitReport(reportedItemId: String, reportType: ReportType, reportCause: ReportCause) : Boolean {
+        var result = false
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, error = null, userMessage = null) }
+            try {
+                result = reportService.submitReport(
+                    reportedItemId = reportedItemId,
+                    reportType = reportType,
+                    reportCause = reportCause
+                )
+                _state.update { it.copy(isLoading = false, userMessage = "Report submitted successfully.") }
+                launch { clearMessageAfterDelay() }
+            } catch (e: Exception) {
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = "Failed to submit report: ${e.message}"
+                    )
+                }
+                launch { clearErrorAfterDelay() }
+            }
+        }
+        return result
+    }
+
+    private suspend fun clearMessageAfterDelay() {
+        delay(1000)
+        _state.update { it.copy(userMessage = null) }
+    }
+
+    private suspend fun clearErrorAfterDelay() {
+        delay(3000)
+        _state.update { it.copy(error = null) }
     }
 }

@@ -1,5 +1,8 @@
 package com.androidfinalproject.hacktok.ui.profile
 
+import com.androidfinalproject.hacktok.model.enums.ReportCause
+import com.androidfinalproject.hacktok.model.enums.ReportType
+
 sealed class UserProfileAction {
     // Actions initiated by the current user towards the profile user
     data object SendFriendRequest : UserProfileAction()
@@ -22,4 +25,9 @@ sealed class UserProfileAction {
     data class LikePost(val postId: String) : UserProfileAction()
     data object RefreshProfile : UserProfileAction()
     data object MessageUser : UserProfileAction()
+    data class SubmitReport(
+        val reportedItemId: String,
+        val reportType: ReportType,
+        val reportCause: ReportCause
+    ) : UserProfileAction()
 }

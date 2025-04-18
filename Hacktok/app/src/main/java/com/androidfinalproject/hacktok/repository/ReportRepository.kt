@@ -1,39 +1,52 @@
 package com.androidfinalproject.hacktok.repository
 
 import com.androidfinalproject.hacktok.model.Report
-import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.flow.Flow
 
-class ReportRepository {
-    private val db = FirebaseFirestore.getInstance()
-    private val collection = db.collection("reports")
+interface ReportRepository {
+    /**
+     * Adds a new report to the database.
+     * The implementation should handle setting the document ID on the report object.
+     * @param report The report object to add.
+     * @return The ID of the newly created report.
+     * @throws Exception if the operation fails.
+     */
+    suspend fun addReport(report: Report): String
 
-    // Thêm báo cáo mới
-    suspend fun addReport(report: Report): String {
-        val documentRef = collection.add(report).await()
-        collection.document(documentRef.id).update("id", documentRef.id).await()
-        return documentRef.id
-    }
+    /**
+     * Retrieves a report by its ID.
+     * @param reportId The ID of the report to retrieve.
+     * @return The Report object, or null if not found.
+     * @throws Exception if the operation fails.
+     */
+    suspend fun getReport(reportId: String): Report?
 
-    // Lấy báo cáo theo ID
-    suspend fun getReport(reportId: String): Report? {
-        val snapshot = collection.document(reportId).get().await()
-        return snapshot.toObject(Report::class.java)
-    }
+    /**
+     * Retrieves a list of reports with a 'pending' status.
+     * @return A list of pending Report objects.
+     * @throws Exception if the operation fails.
+     */
+    suspend fun getPendingReports(): List<Report>
 
-    // Lấy danh sách báo cáo chưa xử lý
-    suspend fun getPendingReports(): List<Report> {
-        val snapshot = collection.whereEqualTo("status", "pending").get().await()
-        return snapshot.toObjects(Report::class.java)
-    }
+    /**
+     * Updates specific fields of a report.
+     * @param reportId The ID of the report to update.
+     * @param updates A map of field names to their new values.
+     * @throws Exception if the operation fails.
+     */
+    suspend fun updateReport(reportId: String, updates: Map<String, Any>)
 
-    // Cập nhật trạng thái báo cáo
-    suspend fun updateReport(reportId: String, updates: Map<String, Any>) {
-        collection.document(reportId).update(updates).await()
-    }
+    /**
+     * Deletes a report by its ID.
+     * @param reportId The ID of the report to delete.
+     * @throws Exception if the operation fails.
+     */
+    suspend fun deleteReport(reportId: String)
 
-    // Xóa báo cáo
-    suspend fun deleteReport(reportId: String) {
-        collection.document(reportId).delete().await()
-    }
+    /**
+     * Observes the list of pending reports in real-time.
+     * Emits a new list whenever the pending reports change in the database.
+     * @return A Flow emitting lists of pending Report objects.
+     */
+    fun getPendingReportsFlow(): Flow<List<Report>>
 }

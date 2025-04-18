@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.sp
 fun PostOptionsContent(
     isPostOwner: Boolean,
     onDismiss: () -> Unit,
-    onReport: () -> Unit
+    onReport: () -> Unit,
 ) {
     fun withDismiss(action: () -> Unit): () -> Unit = {
         action()

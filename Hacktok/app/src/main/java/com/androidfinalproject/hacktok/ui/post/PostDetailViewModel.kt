@@ -5,8 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.model.Comment
 import com.androidfinalproject.hacktok.model.MockData
+import com.androidfinalproject.hacktok.model.enums.ReportCause
+import com.androidfinalproject.hacktok.model.enums.ReportType
 import com.androidfinalproject.hacktok.service.AuthService
 import com.androidfinalproject.hacktok.service.CommentService
+import com.androidfinalproject.hacktok.service.ReportService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,6 +22,7 @@ import javax.inject.Inject
 class PostDetailViewModel @Inject constructor(
 //    private val postService: PostService,
     private val authService: AuthService,
+    private val reportService: ReportService,
     private val commentService: CommentService
 ) : ViewModel() {
     private val tag = "PostViewModel"
@@ -38,6 +42,7 @@ class PostDetailViewModel @Inject constructor(
             is PostDetailAction.LikeComment -> handleLikeComment(action.commentId)
             is PostDetailAction.SelectCommentToReply -> selectComment(action.commentId)
             is PostDetailAction.DeleteComment -> deleteComment(action.commentId)
+            is PostDetailAction.SubmitReport -> submitReport(action.reportedItemId, action.reportType, action.reportCause)
             else -> {}
         }
     }
@@ -164,6 +169,24 @@ class PostDetailViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 _state.update { it.copy(error = "Failed to delete comment: ${e.message}") }
+            }
+        }
+    }
+
+    private fun submitReport(reportedItemId: String, reportType: ReportType, reportCause: ReportCause) {
+        viewModelScope.launch {
+            try {
+                reportService.submitReport(
+                    reportedItemId = reportedItemId,
+                    reportType = reportType,
+                    reportCause = reportCause
+                )
+            } catch (e: Exception) {
+                _state.update {
+                    it.copy(
+                        error = "Failed to submit report: ${e.message}" // Show error
+                    )
+                }
             }
         }
     }

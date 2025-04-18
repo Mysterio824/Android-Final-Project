@@ -17,8 +17,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.RelationInfo
 import com.androidfinalproject.hacktok.model.enums.RelationshipStatus
+import com.androidfinalproject.hacktok.model.enums.ReportType
 import com.androidfinalproject.hacktok.ui.commonComponent.PostContent
+import com.androidfinalproject.hacktok.ui.commonComponent.PostOptionsContent
 import com.androidfinalproject.hacktok.ui.commonComponent.ProfileImage
+import com.androidfinalproject.hacktok.ui.commonComponent.ReportOptionsContent
 import com.androidfinalproject.hacktok.ui.profile.component.*
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 
@@ -30,10 +33,27 @@ fun UserProfileScreen (
 ) {
     var showProfileOptionsSheet by remember { mutableStateOf(false) }
     var showResponseOptionsSheet by remember { mutableStateOf(false) }
+    var reportTargetId by remember { mutableStateOf<String?>(null) }
+    var selectPostId by remember { mutableStateOf<String?>(null) }
+    var reportType by remember { mutableStateOf<ReportType?>(null) }
+    val snackbarHostState = remember { SnackbarHostState() }
+
     val bottomSheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = false
     )
+
+    LaunchedEffect(state.userMessage, state.error) {
+        if (state.userMessage != null) {
+            snackbarHostState.showSnackbar(message = state.userMessage)
+        }
+        if (state.error != null) {
+            snackbarHostState.showSnackbar(message = state.error)
+        }
+    }
+
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
                 title = { Text(state.user?.username ?: "Profile") },
@@ -160,7 +180,7 @@ fun UserProfileScreen (
                             onAction = onAction,
                             showOption = { showProfileOptionsSheet = true },
                             showResponse = { showResponseOptionsSheet = true},
-                            isOwnProfile = state.isOwner
+                            isOwnProfile = false
                         )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
@@ -173,7 +193,7 @@ fun UserProfileScreen (
             val showPosts = state.relationshipInfo?.status != RelationshipStatus.BLOCKING
             
             if (showPosts) {
-                 if (state.posts.isEmpty() && !state.isLoading) { 
+                 if (state.posts.isEmpty()) {
                      item {
                          Column(
                              modifier = Modifier.fillMaxWidth().padding(32.dp),
@@ -231,11 +251,14 @@ fun UserProfileScreen (
             ) {
                 ProfileOptionsContent(
                     onDismiss = { showProfileOptionsSheet = false },
-                    report = {  },
+                    report = {
+                        reportTargetId = state.user.id
+                        reportType = ReportType.User
+                    },
                     seeFriend = { onAction(UserProfileAction.NavigateFriendList) },
                     block = { onAction(UserProfileAction.BlockUser) },
                     unblock = { onAction(UserProfileAction.UnblockUser) },
-                    isBlock = state.relationshipInfo?.status != RelationshipStatus.BLOCKING
+                    isBlock = state.relationshipInfo?.status == RelationshipStatus.BLOCKING
                 )
             }
         }
@@ -249,6 +272,41 @@ fun UserProfileScreen (
                     onDismiss = { showResponseOptionsSheet = false },
                     accept = { onAction(UserProfileAction.AcceptFriendRequest) },
                     unaccepted = { onAction(UserProfileAction.DeclineFriendRequest) }
+                )
+            }
+        }
+
+        if (reportTargetId != null) {
+            ModalBottomSheet(
+                onDismissRequest = {
+                    reportTargetId = null
+                    reportType = null
+                },
+                sheetState = bottomSheetState
+            ) {
+                ReportOptionsContent(
+                    onDismiss = {
+                        reportTargetId = null
+                        reportType = null
+                    },
+                    targetId = reportTargetId!!,
+                    onReportCauseSelected = { id, cause, type ->
+                        onAction(UserProfileAction.SubmitReport(id, type, cause))
+                    },
+                    type = reportType!!,
+                )
+            }
+        }
+
+        if (selectPostId != null) {
+            ModalBottomSheet(
+                onDismissRequest = { selectPostId = null },
+                sheetState = bottomSheetState
+            ) {
+                PostOptionsContent(
+                    onDismiss = { selectPostId = null },
+                    onReport = { reportTargetId = selectPostId!! },
+                    isPostOwner = false
                 )
             }
         }
