@@ -1,5 +1,6 @@
 package com.androidfinalproject.hacktok.repository.impl
 
+import android.util.Log
 import com.androidfinalproject.hacktok.model.Chat
 import com.androidfinalproject.hacktok.model.Message
 import com.androidfinalproject.hacktok.repository.ChatRepository
@@ -17,10 +18,12 @@ import javax.inject.Singleton
 class ChatRepositoryImpl @Inject constructor(
     private val db: FirebaseFirestore
 ) : ChatRepository {
-
     private val chatsCollection = db.collection("chats")
+    private val TAG = "ChatRepository"
 
+    // Create or get existing chat between two users
     override suspend fun getOrCreateChat(currentUserId: String, otherUserId: String): String {
+        // First try to find existing chat
         val existingChat = chatsCollection
             .whereArrayContains("participants", currentUserId)
             .get()
@@ -31,8 +34,11 @@ class ChatRepositoryImpl @Inject constructor(
                 chat?.participants?.containsAll(listOf(currentUserId, otherUserId)) == true
             }
 
-        if (existingChat != null) return existingChat.id
+        if (existingChat != null) {
+            return existingChat.id
+        }
 
+        // Create new chat if none exists
         val newChat = Chat(
             participants = listOf(currentUserId, otherUserId),
             lastMessage = "",
@@ -44,26 +50,35 @@ class ChatRepositoryImpl @Inject constructor(
         return chatRef.id
     }
 
+    // Get real-time chat messages
     override fun getChatMessagesFlow(chatId: String): Flow<List<Message>> = callbackFlow {
         val messagesRef = chatsCollection.document(chatId).collection("messages")
             .orderBy("createdAt", Query.Direction.DESCENDING)
             .limit(100)
 
         val subscription = messagesRef.addSnapshotListener { snapshot, error ->
-            if (error != null) return@addSnapshotListener
+            if (error != null) {
+                // Handle error
+                return@addSnapshotListener
+            }
+
             val messages = snapshot?.documents?.mapNotNull { doc ->
                 doc.toObject<Message>()?.copy(id = doc.id)
             } ?: emptyList()
+
             trySend(messages)
         }
 
         awaitClose { subscription.remove() }
     }
 
+    // Get real-time chat updates
     override fun getChatFlow(chatId: String): Flow<Chat?> = callbackFlow {
         val subscription = chatsCollection.document(chatId)
             .addSnapshotListener { snapshot, error ->
-                if (error != null) return@addSnapshotListener
+                if (error != null) {
+                    return@addSnapshotListener
+                }
                 val chat = snapshot?.toObject<Chat>()
                 trySend(chat)
             }
@@ -71,27 +86,42 @@ class ChatRepositoryImpl @Inject constructor(
         awaitClose { subscription.remove() }
     }
 
+    // Get user's chats
     override fun getUserChatsFlow(userId: String): Flow<List<Chat>> = callbackFlow {
-        val subscription = chatsCollection
+        Log.d(TAG, "Attempting getUserChatsFlow query for userId: $userId")
+        val query = chatsCollection
             .whereArrayContains("participants", userId)
             .orderBy("lastMessageAt", Query.Direction.DESCENDING)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) return@addSnapshotListener
-                val chats = snapshot?.documents?.mapNotNull { doc ->
-                    doc.toObject<Chat>()
-                } ?: emptyList()
-                trySend(chats)
-            }
 
-        awaitClose { subscription.remove() }
+        Log.d(TAG, "getUserChatsFlow Firestore query constructed for userId: $userId")
+        val subscription = query.addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                Log.e(TAG, "Error listening to user chats flow for userId: $userId", error)
+                // Handle error
+                close(error)
+                return@addSnapshotListener
+            }
+            val chats = snapshot?.documents?.mapNotNull { doc ->
+                doc.toObject<Chat>()
+            } ?: emptyList()
+            Log.d(TAG, "getUserChatsFlow snapshot received for userId: $userId, chats count: ${chats.size}")
+            trySend(chats)
+        }
+
+        awaitClose {
+            Log.d(TAG, "Closing user chats flow listener for userId: $userId")
+            subscription.remove()
+        }
     }
 
+    // Send a message
     override suspend fun sendMessage(chatId: String, message: Message): String {
         val messageRef = chatsCollection.document(chatId)
             .collection("messages")
             .add(message)
             .await()
 
+        // Update chat's last message
         chatsCollection.document(chatId).update(
             mapOf(
                 "lastMessage" to message.content,
@@ -102,6 +132,7 @@ class ChatRepositoryImpl @Inject constructor(
         return messageRef.id
     }
 
+    // Delete a message
     override suspend fun deleteMessage(chatId: String, messageId: String) {
         chatsCollection.document(chatId)
             .collection("messages")
@@ -110,7 +141,9 @@ class ChatRepositoryImpl @Inject constructor(
             .await()
     }
 
+    // Delete a chat
     override suspend fun deleteChat(chatId: String) {
+        // First delete all messages
         val messages = chatsCollection.document(chatId)
             .collection("messages")
             .get()
@@ -120,6 +153,29 @@ class ChatRepositoryImpl @Inject constructor(
             message.reference.delete().await()
         }
 
+        // Then delete the chat document
         chatsCollection.document(chatId).delete().await()
+    }
+
+    // Get user's chats
+    override suspend fun getUserChats(userId: String): List<Chat> {
+        Log.d(TAG, "Attempting getUserChats query for userId: $userId (NO ORDERING - DIAGNOSTIC)")
+        // Temporarily removed orderBy for diagnostics
+        val query = chatsCollection
+            .whereArrayContains("participants", userId)
+        // .orderBy("lastMessageAt", Query.Direction.DESCENDING) // <--- Temporarily commented out
+
+        Log.d(TAG, "getUserChats Firestore query constructed for userId: $userId (NO ORDERING - DIAGNOSTIC)")
+        return try {
+            val snapshot = query.get().await()
+            Log.d(TAG, "getUserChats snapshot received for userId: $userId, documents count: ${snapshot.size()} (NO ORDERING - DIAGNOSTIC)")
+            // Client-side sorting would be needed here if this was permanent
+            snapshot.documents.mapNotNull { doc ->
+                doc.toObject(Chat::class.java)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error fetching user chats for userId: $userId (NO ORDERING - DIAGNOSTIC)", e)
+            emptyList()
+        }
     }
 }

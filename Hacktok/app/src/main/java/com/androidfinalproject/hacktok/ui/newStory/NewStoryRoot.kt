@@ -21,7 +21,7 @@ import androidx.navigation.navArgument
 @Composable
 fun NewStoryRoot() {
     val viewModel: NewStoryViewModel = viewModel()
-    val state = viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsState()
     val navController = rememberNavController()
 
     val context = LocalContext.current
@@ -63,22 +63,27 @@ fun NewStoryRoot() {
                 onAction = { action ->
                     when (action) {
                         is NewStoryAction.GoToImageEditor -> {
+                            viewModel.onAction(action)
                             navController.navigate("edit_image?uri=${Uri.encode(action.imageUri.toString())}")
                         }
                         is NewStoryAction.NewTextStory -> {
+                            viewModel.onAction(action)
                             navController.navigate("edit_text")
                         }
                         else -> {
-
+                            viewModel.onAction(action)
                         }
                     }
                 },
-                state = NewStoryState()
+                state = state
             )
         }
 
         composable("edit_text") {
-            EditTextStoryScreen(onClose = { navController.popBackStack() })
+            EditTextStoryScreen(
+                viewModel = viewModel,
+                onClose = { navController.popBackStack() }
+            )
         }
 
         composable(
@@ -87,7 +92,11 @@ fun NewStoryRoot() {
         ) { backStackEntry ->
             val uriString = backStackEntry.arguments?.getString("uri")
             val imageUri = uriString?.let { Uri.parse(it) }
-            EditImageStoryScreen(imageUri = imageUri, onClose = { navController.popBackStack() })
+            EditImageStoryScreen(
+                viewModel = viewModel,
+                imageUri = imageUri,
+                onClose = { navController.popBackStack() }
+            )
         }
     }
 }
