@@ -2,9 +2,8 @@ package com.androidfinalproject.hacktok.ui.currentProfile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.Post
-import com.androidfinalproject.hacktok.model.User
+import com.androidfinalproject.hacktok.repository.PostRepository
 import com.androidfinalproject.hacktok.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,14 +13,14 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CurrentProfileViewModel @Inject constructor(
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val postRepository: PostRepository
 ) : ViewModel() {
     private val _state = MutableStateFlow<CurrentProfileState>(CurrentProfileState.Loading)
     val state = _state.asStateFlow()
 
     init {
         loadCurrentUser()
-        loadPosts()
     }
 
     fun loadCurrentUser() {
@@ -30,9 +29,11 @@ class CurrentProfileViewModel @Inject constructor(
             try {
                 val user = userRepository.getCurrentUser()
                 if (user != null) {
+                    val userId = user.id ?: return@launch
+                    val posts = postRepository.getPostsByUser(userId)
                     _state.value = CurrentProfileState.Success(
                         user = user,
-                        posts = MockData.mockPosts,
+                        posts = posts,
                         friendCount = 0
                     )
                 } else {
@@ -44,19 +45,14 @@ class CurrentProfileViewModel @Inject constructor(
         }
     }
 
-    fun loadPosts() {
-        // For now, we'll use mock posts
-        if (_state.value is CurrentProfileState.Success) {
-            val currentState = _state.value as CurrentProfileState.Success
-            _state.value = currentState.copy(posts = MockData.mockPosts)
-        }
-    }
-
     fun editPost(postId: String?, newContent: String) {
         viewModelScope.launch {
             try {
-                // Implement your post editing logic here
-                // This could involve a repository call to update the post
+                if (postId != null) {
+                    val updates = mapOf("content" to newContent)
+                    postRepository.updatePost(postId, updates)
+                    loadCurrentUser() // Reload to refresh the posts
+                }
             } catch (e: Exception) {
                 _state.value = CurrentProfileState.Error("Failed to edit post: ${e.message}")
             }
@@ -67,7 +63,8 @@ class CurrentProfileViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 if (postId != null) {
-                    // Implement your post deletion logic here
+                    postRepository.deletePost(postId)
+                    loadCurrentUser() // Reload to refresh the posts
                 } else {
                     _state.value = CurrentProfileState.Error("Cannot delete post: Invalid post ID")
                 }
@@ -92,7 +89,7 @@ class CurrentProfileViewModel @Inject constructor(
                 loadCurrentUser()
             }
             is CurrentProfileAction.OnEditPost -> {
-                // Handle edit post
+                editPost(action.post.id, action.newContent)
             }
             is CurrentProfileAction.OnDeletePost -> {
                 deletePost(action.post.id)

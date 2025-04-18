@@ -12,6 +12,6 @@ sealed class CurrentProfileAction {
     object OnEditProfile : CurrentProfileAction()
     object OnCreatePost : CurrentProfileAction()
     object RetryLoading : CurrentProfileAction()
-    data class OnEditPost(val post: Post) : CurrentProfileAction()
+    data class OnEditPost(val post: Post, val newContent: String) : CurrentProfileAction()
     data class OnDeletePost(val post: Post) : CurrentProfileAction()
 }
