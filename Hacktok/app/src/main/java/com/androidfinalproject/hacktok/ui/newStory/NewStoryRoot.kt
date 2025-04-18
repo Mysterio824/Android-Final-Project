@@ -17,13 +17,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.androidfinalproject.hacktok.ui.post.PostDetailAction
 
 @Composable
-fun NewStoryRoot() {
+fun NewStoryRoot(
+    onNavigateBack: () -> Unit
+    ) {
     val viewModel: NewStoryViewModel = viewModel()
     val state by viewModel.state.collectAsState()
     val navController = rememberNavController()
-
     val context = LocalContext.current
     val images = remember { mutableStateListOf<Uri>() }
     var permissionGranted by remember { mutableStateOf(false) }
@@ -70,6 +72,7 @@ fun NewStoryRoot() {
                             viewModel.onAction(action)
                             navController.navigate("edit_text")
                         }
+                        is NewStoryAction.NavigateBack -> onNavigateBack()
                         else -> {
                             viewModel.onAction(action)
                         }

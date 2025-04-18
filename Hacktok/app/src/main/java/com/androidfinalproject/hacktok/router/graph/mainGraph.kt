@@ -20,6 +20,7 @@ import com.androidfinalproject.hacktok.ui.post.PostDetailScreenRoot
 import com.androidfinalproject.hacktok.ui.friendList.FriendListScreenRoot
 import com.androidfinalproject.hacktok.ui.mainDashboard.DashboardScreenRoot
 import com.androidfinalproject.hacktok.ui.messageDashboard.MessageDashboardRoot
+import com.androidfinalproject.hacktok.ui.newStory.NewStoryRoot
 import com.androidfinalproject.hacktok.ui.messageDashboard.MessageDashboardViewModel
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -75,7 +76,7 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
 
                 },
                 onCreateStoryNavigate = {
-
+                    navController.navigate(MainRoute.NewStory.route)
                 },
                 onAuthNavigate = {
                     navController.navigate(AuthRoute.Graph.route)
@@ -261,6 +262,20 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
                 }
             )
         }
+
+        // New Story Screen
+        composable(
+            route = MainRoute.NewStory.route,
+            enterTransition = { slideFadeInFromRight() },
+            exitTransition = { slideFadeOutToLeft() }
+        ) {
+            NewStoryRoot(
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
 
         // Edit Post Screen
         composable(

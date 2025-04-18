@@ -10,4 +10,5 @@ sealed class NewStoryAction {
     data class UpdateText(val text: String) : NewStoryAction()
     data class CreateImageStory(val imageUri: Uri?, val privacy: PRIVACY) : NewStoryAction()
     data class CreateTextStory(val text: String, val privacy: PRIVACY) : NewStoryAction()
+    data object NavigateBack : NewStoryAction()
 }
