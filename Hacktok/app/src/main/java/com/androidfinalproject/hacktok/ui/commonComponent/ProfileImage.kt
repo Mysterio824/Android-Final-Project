@@ -29,7 +29,7 @@ fun ProfileImage(
             .clip(CircleShape)
     ) {
         val painter = rememberAsyncImagePainter(
-            model = imageUrl.takeIf { it.isNullOrBlank() },
+            model = imageUrl.takeIf { !it.isNullOrBlank() },
             error = painterResource(id = R.drawable.placeholder_profile),
             placeholder = painterResource(id = R.drawable.placeholder_profile),
             fallback = painterResource(id = R.drawable.placeholder_profile)
@@ -38,7 +38,8 @@ fun ProfileImage(
         Image(
             painter = painter,
             contentDescription = "",
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
                 .clickable(onClick = onClick),
             contentScale = ContentScale.Crop
         )

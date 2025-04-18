@@ -44,7 +44,6 @@ fun PostContent(
     onOptionsClick: () -> Unit,
     onUserClick: () -> Unit
 ) {
-    val user = post.user!!
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -74,7 +73,7 @@ fun PostContent(
                     .padding(start = 8.dp)
             ) {
                 Text(
-                    text = user.username!!,
+                    text = post.user?.username ?: "Unknown User",
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
                     modifier = Modifier.clickable(onClick = onUserClick)

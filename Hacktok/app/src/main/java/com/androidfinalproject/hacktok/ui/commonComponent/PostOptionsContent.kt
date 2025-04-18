@@ -47,12 +47,13 @@ fun PostOptionsContent(
             description = "See fewer posts like this",
             onClick = onDismiss
         )
-
-        OptionItem(
-            title = "Report Post",
-            description = "This post concerns me",
-            onClick = withDismiss(onReport)
-        )
+        if (!isPostOwner) {
+            OptionItem(
+                title = "Report Post",
+                description = "This post concerns me",
+                onClick = withDismiss(onReport)
+            )
+        }
 
         OptionItem(
             title = "Save Post",
