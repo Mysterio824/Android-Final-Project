@@ -54,7 +54,6 @@ fun WatchLaterScreen(
                                  onAction(WatchLaterAction.OnCommentClick(post.id!!))
                             },
                             onShare = {},
-                            onOptionsClick = {},
                         )
                     }
                 }

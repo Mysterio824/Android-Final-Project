@@ -70,7 +70,7 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
                     navController.navigate("${MainRoute.EditPost.route}/$postId")
                 },
                 onCreatePostNavigate = {
-                    navController.navigate(MainRoute.NewPost.route)
+                    navController.navigate(MainRoute.NewPost.BASE_ROUTE)
                 },
                 onStoryNavigate = {
 
@@ -109,8 +109,12 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
         ){
             CurrentProfileScreenRoot (
                 onPostClickNavigation = { navController.navigate("${MainRoute.PostDetail.route}/$it") },
-                onPostEditNavigation = {navController.navigate("${MainRoute.EditPost.route}/$it") },
-                onNewPostNavigation = {},
+                onPostEditNavigation = { postId ->
+                    navController.navigate("${MainRoute.NewPost.BASE_ROUTE}?postId=$postId")
+                },
+                onNewPostNavigation = {
+                    navController.navigate(MainRoute.NewPost.BASE_ROUTE)
+                },
                 onFriendListNavigation = { navController.navigate("${MainRoute.FriendList.route}/$it") },
                 onProfileEditNavigation = { navController.navigate(MainRoute.EditProfile.route) },
                 onNavigateBack = {
@@ -264,11 +268,21 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
         }
 
         composable(
-            route = MainRoute.NewPost.route,
+            route = "${MainRoute.NewPost.BASE_ROUTE}?postId={postId}",
+            arguments = listOf(
+                navArgument("postId") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            ),
             enterTransition = { slideFadeInFromRight() },
             exitTransition = { slideFadeOutToLeft() }
-        ) {
+        ) { backStackEntry ->
+            val postId = backStackEntry.arguments?.getString("postId")
+
             NewPostScreenRoot(
+                postId = postId,
                 onClose = {
                     navController.navigate("dashboard") {
                         popUpTo("dashboard") { inclusive = true }

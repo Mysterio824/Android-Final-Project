@@ -8,6 +8,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.repository.PostRepository
+import com.androidfinalproject.hacktok.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,10 +27,18 @@ import kotlinx.coroutines.withContext
 class NewPostViewModel @Inject constructor(
     private val auth: FirebaseAuth,
     private val postRepository: PostRepository,
+    private val userRepository: UserRepository,
     application: Application,
 ) : AndroidViewModel(application) {
     private val _state = MutableStateFlow(NewPostState())
     val state: StateFlow<NewPostState> = _state
+
+    init {
+        viewModelScope.launch {
+            val user = userRepository.getCurrentUser()
+            _state.value = _state.value.copy(username = user?.fullName ?: "Unknown")
+        }
+    }
 
     fun onAction(action: NewPostAction) {
         when (action) {
@@ -39,7 +48,27 @@ class NewPostViewModel @Inject constructor(
             is NewPostAction.SubmitPost -> submitPost()
             is NewPostAction.UpdateImageUri -> _state.value = _state.value.copy(imageUri = action.uri)
             is NewPostAction.ClearSubmissionState -> _state.value = _state.value.copy(postSubmitted = false)
-            else -> Unit
+            is NewPostAction.LoadPostForEditing -> {
+                viewModelScope.launch {
+                    try {
+                        val post = postRepository.getPost(action.postId)
+                        post?.let {
+                            _state.value = _state.value.copy(
+                                postId = it.id,
+                                caption = it.content,
+                                imageUri = Uri.parse(it.imageLink),
+                                privacy = state.value.privacy,
+                                isEditing = true
+                            )
+                        } ?: Log.e("EditPost", "Post not found for ID: ${action.postId}")
+                    } catch (e: Exception) {
+                        Log.e("EditPost", "Failed to load post for editing", e)
+                    }
+                }
+            }
+            else -> {
+
+            }
         }
     }
 
@@ -59,7 +88,7 @@ class NewPostViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                val imageLink = if (imageUri != null) {
+                val imageLink = if (imageUri != null && imageUri.toString().startsWith("content://")) {
                     val tempFile = copyUriToTempFile(context, imageUri)
                     if (tempFile == null || !tempFile.exists()) {
                         Log.e("Upload", "Temp file is null or doesn't exist.")
@@ -69,19 +98,36 @@ class NewPostViewModel @Inject constructor(
                             tempFile.delete()
                         } ?: ""
                     }
-                } else ""
+                } else {
+                    imageUri?.toString() ?: ""
+                }
 
-                val post = Post(
-                    content = caption,
-                    userId = userId,
-                    imageLink = imageLink,
-                    privacy = privacy
-                )
+                if (state.value.isEditing) {
+                    val postId = state.value.postId
+                    if (!postId.isNullOrBlank()) {
+                        postRepository.updatePostContentOnly(
+                            postId = postId,
+                            newContent = caption,
+                            newPrivacy = privacy,
+                            newImageLink = imageLink
+                        )
+                        _state.value = _state.value.copy(postSubmitted = true)
+                        Log.d("Post", "Post updated: $postId")
+                    } else {
+                        Log.e("Post", "Editing mode but no post ID provided.")
+                    }
+                } else {
+                    val post = Post(
+                        content = caption,
+                        userId = userId,
+                        imageLink = imageLink,
+                        privacy = privacy
+                    )
 
-                val postId = postRepository.addPost(post)
-                _state.value = _state.value.copy(postSubmitted = true)
-
-                Log.d("Post", "Post created with ID: $postId")
+                    val postId = postRepository.addPost(post)
+                    _state.value = _state.value.copy(postSubmitted = true)
+                    Log.d("Post", "Post created with ID: $postId")
+                }
             } catch (e: Exception) {
                 Log.e("Post", "Failed to submit post", e)
             }

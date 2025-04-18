@@ -97,7 +97,7 @@ fun NewPostScreen(
                         .weight(1f)
                 ) {
                     Text(
-                        text = state.username.ifBlank { "Unknown" },
+                        text = state.username,
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.align(Alignment.TopStart).offset(y = (-4).dp)
@@ -167,7 +167,7 @@ fun NewPostScreen(
                 onValueChange = { onAction(NewPostAction.UpdateCaption(it)) },
                 placeholder = {
                     Text(
-                        text = "Hey ${state.username.ifBlank { "Unknown" }}, what is in your mind?",
+                        text = "Hey ${state.username.split(' ').firstOrNull().orEmpty()}, what is in your mind?",
                         textAlign = TextAlign.Start
                     )
                 },
@@ -185,7 +185,7 @@ fun NewPostScreen(
                 )
             )
 
-            if (state.imageUri == null) {
+            if (state.imageUri == null || state.imageUri.toString().isBlank()) {
                 IconButton(modifier = Modifier
                     .fillMaxWidth()
                     .background(Color.LightGray, RoundedCornerShape(8.dp))
@@ -238,7 +238,7 @@ fun NewPostScreen(
                     contentColor = Color.White
                 )
             ) {
-                Text("Post")
+                Text(if (state.isEditing) "Update" else "Post")
             }
         }
     }

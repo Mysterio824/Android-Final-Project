@@ -3,6 +3,7 @@ package com.androidfinalproject.hacktok.ui.newPost
 import android.net.Uri
 
 sealed class NewPostAction {
+    data class LoadPostForEditing(val postId: String) : NewPostAction()
     data class UpdateCaption(val caption: String) : NewPostAction()
     data class UpdatePrivacy(val privacy: PRIVACY) : NewPostAction()
     data object UpdateImage : NewPostAction()

@@ -1,5 +1,6 @@
 package com.androidfinalproject.hacktok.ui.currentProfile
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -8,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -107,15 +107,22 @@ fun CurrentProfileScreen(
                                 friendCount = successState.friendCount
                             )
                         }
-                        items(successState.posts) { post ->
+                        items(successState.posts.filter { !it.id.isNullOrBlank() }) { post ->
                             PostContent(
                                 post = post,
                                 onPostClick = { /* Handle post click */ },
                                 onToggleLike = { /* Handle like toggle */ },
                                 onComment = { /* Handle comment */ },
                                 onShare = { /* Handle share */ },
-                                onOptionsClick = { /* Handle options click */ },
-                                onUserClick = { /* Handle user click */ }
+                                onPostDelete = {
+                                    viewModel.onAction(CurrentProfileAction.OnDeletePost(post))
+                                },
+                                onPostEdit = {
+                                    Log.d("HELLO", "CLICK")
+                                    onNavigateToEditPost(post)
+                                },
+                                onUserClick = { /* Handle user click */ },
+                                currentUserId = successState.user.id ?: "",
                             )
                         }
                     }

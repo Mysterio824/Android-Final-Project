@@ -55,7 +55,12 @@ sealed interface MainRoute : Route {
     }
 
     @Serializable
-    data object NewPost : MainRoute {
-        override val route = "new_post"
+    data class NewPost(val postId: String? = null) : MainRoute {
+        override val route: String
+            get() = if (postId != null) "$BASE_ROUTE?postId=$postId" else BASE_ROUTE
+
+        companion object {
+            const val BASE_ROUTE = "new_post"
+        }
     }
 }

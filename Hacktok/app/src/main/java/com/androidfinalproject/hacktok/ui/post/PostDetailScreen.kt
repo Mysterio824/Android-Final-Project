@@ -98,7 +98,7 @@ fun PostDetailScreen(
                             onToggleLike = { onAction(PostDetailAction.ToggleLike) },
                             onComment = { onAction(PostDetailAction.ToggleCommentInputFocus) },
                             onShare = { showShareOptionsSheet = true },
-                            onOptionsClick = { showPostOptionsSheet = true },
+                            onPostDelete = { showPostOptionsSheet = true },
                             onUserClick = { onAction(PostDetailAction.OnUserClick(post.userId)) }
                         )
 

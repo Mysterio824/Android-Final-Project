@@ -41,9 +41,13 @@ fun PostContent(
     onToggleLike: () -> Unit,
     onComment: () -> Unit,
     onShare: () -> Unit,
-    onOptionsClick: () -> Unit,
-    onUserClick: () -> Unit
+    onPostDelete: () -> Unit = {},
+    onPostEdit: () -> Unit = {},
+    onUserClick: () -> Unit,
+    currentUserId: String = "",
 ) {
+    var expanded by remember { mutableStateOf(false) }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -112,11 +116,37 @@ fun PostContent(
                 }
             }
 
-            IconButton(onClick = onOptionsClick) {
-                Icon(
-                    imageVector = Icons.Default.MoreVert,
-                    contentDescription = "More options"
-                )
+            if (post.userId == currentUserId) {
+                Box {
+                    IconButton(onClick = { expanded = true }) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "More options"
+                        )
+                    }
+
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Edit post") },
+                            onClick = {
+                                expanded = false
+                                // Trigger edit post logic
+                                onPostEdit()
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Delete post") },
+                            onClick = {
+                                expanded = false
+                                // Trigger delete post logic
+                                onPostDelete()
+                            }
+                        )
+                    }
+                }
             }
         }
 
@@ -231,7 +261,9 @@ fun PostPreview(){
                 onComment = {},
                 onToggleLike = {},
                 onUserClick = {},
-                onOptionsClick = {}
+                onPostDelete = {},
+                onPostEdit = {},
+                currentUserId = ""
             )
         }
     }

@@ -1,5 +1,6 @@
 package com.androidfinalproject.hacktok.ui.currentProfile
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.model.Post
@@ -64,6 +65,7 @@ class CurrentProfileViewModel @Inject constructor(
             try {
                 if (postId != null) {
                     postRepository.deletePost(postId)
+                    Log.d("CurrentProfileViewModel", "Post deleted successfully")
                     loadCurrentUser() // Reload to refresh the posts
                 } else {
                     _state.value = CurrentProfileState.Error("Cannot delete post: Invalid post ID")

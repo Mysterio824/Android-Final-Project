@@ -16,12 +16,19 @@ import androidx.core.content.PermissionChecker
 
 @Composable
 fun NewPostScreenRoot(
+    postId: String? = null,
     viewModel: NewPostViewModel = hiltViewModel(),
     onClose: () -> Unit,
     onPost: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
+
+    LaunchedEffect(postId) {
+        if (!postId.isNullOrBlank()) {
+            viewModel.onAction(NewPostAction.LoadPostForEditing(postId))
+        }
+    }
 
     // 📸 Image picker launcher
     val pickImageLauncher = rememberLauncherForActivityResult(
