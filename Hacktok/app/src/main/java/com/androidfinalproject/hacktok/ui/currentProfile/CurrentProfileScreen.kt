@@ -23,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.ui.commonComponent.PostContent
+import com.androidfinalproject.hacktok.ui.commonComponent.ProfileImage
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 import androidx.hilt.navigation.compose.hiltViewModel
 
@@ -59,58 +60,64 @@ fun CurrentProfileScreen(
             }
         }
     ) { paddingValues ->
-        when (state) {
-            is CurrentProfileState.Loading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
-            is CurrentProfileState.Error -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            when (state) {
+                is CurrentProfileState.Loading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = "Error: ${(state as CurrentProfileState.Error).message}",
-                            color = MaterialTheme.colorScheme.error
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = { viewModel.onAction(CurrentProfileAction.RetryLoading) }) {
-                            Text("Retry")
+                        CircularProgressIndicator()
+                    }
+                }
+                is CurrentProfileState.Error -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "Error: ${(state as CurrentProfileState.Error).message}",
+                                color = MaterialTheme.colorScheme.error
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Button(onClick = { viewModel.onAction(CurrentProfileAction.RetryLoading) }) {
+                                Text("Retry")
+                            }
                         }
                     }
                 }
-            }
-            is CurrentProfileState.Success -> {
-                val successState = state as CurrentProfileState.Success
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                ) {
-                    item {
-                        ProfileHeader(
-                            user = successState.user,
-                            friendCount = successState.friendCount
-                        )
-                    }
-                    items(successState.posts) { post ->
-                        PostContent(
-                            post = post,
-                            onPostClick = { /* Handle post click */ },
-                            onToggleLike = { /* Handle like toggle */ },
-                            onComment = { /* Handle comment */ },
-                            onShare = { /* Handle share */ },
-                            onOptionsClick = { /* Handle options click */ },
-                            onUserClick = { /* Handle user click */ }
-                        )
+                is CurrentProfileState.Success -> {
+                    val successState = state as CurrentProfileState.Success
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues)
+                    ) {
+                        item {
+                            ProfileHeader(
+                                user = successState.user,
+                                friendCount = successState.friendCount
+                            )
+                        }
+                        items(successState.posts) { post ->
+                            PostContent(
+                                post = post,
+                                onPostClick = { /* Handle post click */ },
+                                onToggleLike = { /* Handle like toggle */ },
+                                onComment = { /* Handle comment */ },
+                                onShare = { /* Handle share */ },
+                                onOptionsClick = { /* Handle options click */ },
+                                onUserClick = { /* Handle user click */ }
+                            )
+                        }
                     }
                 }
             }
@@ -130,12 +137,11 @@ private fun ProfileHeader(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Profile Image
-        Surface(
-            modifier = Modifier.size(120.dp),
-            shape = MaterialTheme.shapes.medium
-        ) {
-            // Add profile image here
-        }
+        ProfileImage(
+            imageUrl = user.profileImage,
+            size = 120.dp,
+            onClick = {}
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 

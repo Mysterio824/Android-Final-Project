@@ -130,5 +130,7 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
+
+    implementation("com.google.accompanist:accompanist-permissions:0.32.0")
 }
 
