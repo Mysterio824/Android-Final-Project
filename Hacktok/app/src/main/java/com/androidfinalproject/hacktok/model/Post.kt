@@ -8,7 +8,7 @@ data class Post(
     @PropertyName("content") val content: String,
     @PropertyName("userId") val userId: String, // Tham chiếu đến user trong collection "users"
     @PropertyName("createdAt") val createdAt: Date = Date(),
-    @PropertyName("isActive") val isActive: Boolean = true,
+    @PropertyName("active") val isActive: Boolean = true,
     @PropertyName("likeCount") val likeCount: Int = 0, // Số lượt thích
     @PropertyName("commentCount") val commentCount: Int = 0, // Số lượng bình luận
     @PropertyName("imageLink") val imageLink: String = "",

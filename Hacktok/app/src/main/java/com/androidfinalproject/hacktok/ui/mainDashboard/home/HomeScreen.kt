@@ -88,7 +88,7 @@ fun HomeScreen(
                                 onUserClick = { onAction(HomeScreenAction.OnUserClick(post.userId)) },
                                 onComment = { onAction(HomeScreenAction.OnPostClick(post.id!!)) },
                                 onShare = { onAction(HomeScreenAction.SharePost(post.id!!)) },
-                                onOptionsClick = {}
+                                onPostDelete = {}
                             )
                         }
                         Spacer(modifier = Modifier.height(8.dp))
