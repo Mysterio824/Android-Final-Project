@@ -14,5 +14,6 @@ data class PostDetailState(
     val isShare: Boolean = false,
     val isCommenting: Boolean = false,
     val error: String? = null,
-    val commentIdReply: String = ""
+    val commentIdReply: String = "",
+    val userMessage: String? = null
 )

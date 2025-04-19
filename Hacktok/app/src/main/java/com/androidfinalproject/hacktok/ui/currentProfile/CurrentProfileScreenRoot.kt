@@ -5,7 +5,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.androidfinalproject.hacktok.ui.friendList.FriendListAction
 import com.androidfinalproject.hacktok.ui.mainDashboard.home.HomeScreenAction
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ActivityContext
@@ -19,13 +21,22 @@ fun CurrentProfileScreenRoot(
     onFriendListNavigation: (String) -> Unit,
     onProfileEditNavigation: () -> Unit,
     onNavigateBack: () -> Unit,
+    viewModel: CurrentProfileViewModel = hiltViewModel()
 ) {
-    val viewModel: CurrentProfileViewModel = hiltViewModel()
-    
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
     CurrentProfileScreen(
-        onNavigateBack = onNavigateBack,
-        onNavigateToEditProfile = onProfileEditNavigation,
-        onNavigateToNewPost = onNewPostNavigation,
-        onNavigateToEditPost = { post -> onPostEditNavigation(post.id ?: "") }
+        state = state,
+        onAction = {action ->
+            when(action) {
+                is CurrentProfileAction.OnNavigateBack -> onNavigateBack()
+                is CurrentProfileAction.NavigateToProfileEdit -> onProfileEditNavigation()
+                is CurrentProfileAction.NavigateToNewPost -> onNewPostNavigation()
+                is CurrentProfileAction.NavigateToPostEdit -> onPostEditNavigation(action.postId)
+                is CurrentProfileAction.OnPostClick -> onPostClickNavigation(action.post.id!!)
+                is CurrentProfileAction.NavigateFriendList -> onFriendListNavigation(action.userId)
+                else -> viewModel.onAction(action)
+            }
+        },
     )
 }

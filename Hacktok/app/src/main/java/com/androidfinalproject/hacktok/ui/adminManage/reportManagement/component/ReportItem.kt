@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.androidfinalproject.hacktok.model.Report
+import com.androidfinalproject.hacktok.model.enums.ReportType
 import com.androidfinalproject.hacktok.ui.adminManage.reportManagement.ReportManagementAction
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -65,7 +66,7 @@ fun ReportItem(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Type: ${report.type.capitalize()}",
+                        text = "Type: ${report.type!!.name.capitalize()}",
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Text(
@@ -115,7 +116,7 @@ fun ReportItem(
                 horizontalArrangement = Arrangement.End
             ) {
                 if (report.status != "resolved") {
-                    if (report.type == "user") {
+                    if (report.type == ReportType.User) {
                         Button(
                             onClick = { onAction(ReportManagementAction.OpenBanUserDialog(report)) },
                             colors = ButtonDefaults.buttonColors(
@@ -134,7 +135,7 @@ fun ReportItem(
                         }
                     } else {
                         Button(
-                            onClick = { onAction(ReportManagementAction.DeleteContent(report.targetId, report.type)) },
+                            onClick = { onAction(ReportManagementAction.DeleteContent(report.targetId, report.type!!)) },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.error,
                                 contentColor = MaterialTheme.colorScheme.onError
@@ -147,7 +148,7 @@ fun ReportItem(
                                 modifier = Modifier.size(ButtonDefaults.IconSize)
                             )
                             Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                            Text("Delete ${report.type.capitalize()}")
+                            Text("Delete ${report.type!!.name.capitalize()}")
                         }
                     }
 

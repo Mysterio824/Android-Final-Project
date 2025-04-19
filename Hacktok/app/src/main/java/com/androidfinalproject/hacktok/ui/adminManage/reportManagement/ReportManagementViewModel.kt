@@ -44,9 +44,9 @@ class ReportManagementViewModel : ViewModel() {
                 _state.update { it.copy(isResolveReportDialogOpen = false, selectedReport = null) }
             }
             is ReportManagementAction.DeleteContent -> {
-                _state.update { it.copy(
-                    reports = it.reports.filter { it.targetId != action.contentId || it.type != action.contentType }
-                ) }
+//                _state.update { it.copy(
+//                    reports = it.reports.filter { it.targetId != action.contentId || it.type != action.contentType }
+//                ) }
             }
             is ReportManagementAction.SetStatusFilter -> {
                 _state.update { it.copy(statusFilter = action.filter) }

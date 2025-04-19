@@ -41,13 +41,9 @@ fun PostContent(
     onToggleLike: () -> Unit,
     onComment: () -> Unit,
     onShare: () -> Unit,
-    onPostDelete: () -> Unit = {},
-    onPostEdit: () -> Unit = {},
-    onUserClick: () -> Unit,
-    currentUserId: String = "",
+    onOptionsClick: () -> Unit,
+    onUserClick: () -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) }
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -65,27 +61,11 @@ fun PostContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Avatar
-            Box(
-                modifier = Modifier
-                    .size(45.dp)
-                    .clip(CircleShape)
-                    .clickable(onClick = onUserClick)
-            ) {
-                val imageUrl = post.user?.profileImage
-                val painter = rememberAsyncImagePainter(
-                    model = imageUrl.takeIf { !it.isNullOrBlank() },
-                    error = painterResource(id = R.drawable.placeholder_profile),
-                    placeholder = painterResource(id = R.drawable.placeholder_profile),
-                    fallback = painterResource(id = R.drawable.placeholder_profile)
-                )
-
-                Image(
-                    painter = painter,
-                    contentDescription = "Profile picture",
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-            }
+            ProfileImage(
+                imageUrl = post.user?.profileImage,
+                size = 45.dp,
+                onClick = onUserClick
+            )
 
             Column(
                 modifier = Modifier
@@ -116,37 +96,11 @@ fun PostContent(
                 }
             }
 
-            if (post.userId == currentUserId) {
-                Box {
-                    IconButton(onClick = { expanded = true }) {
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = "More options"
-                        )
-                    }
-
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("Edit post") },
-                            onClick = {
-                                expanded = false
-                                // Trigger edit post logic
-                                onPostEdit()
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Delete post") },
-                            onClick = {
-                                expanded = false
-                                // Trigger delete post logic
-                                onPostDelete()
-                            }
-                        )
-                    }
-                }
+            IconButton(onClick = onOptionsClick) {
+                Icon(
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = "More options"
+                )
             }
         }
 
@@ -242,6 +196,7 @@ fun PostContent(
                 Text("Share")
             }
         }
+
     }
 }
 
@@ -261,9 +216,7 @@ fun PostPreview(){
                 onComment = {},
                 onToggleLike = {},
                 onUserClick = {},
-                onPostDelete = {},
-                onPostEdit = {},
-                currentUserId = ""
+                onOptionsClick = {}
             )
         }
     }

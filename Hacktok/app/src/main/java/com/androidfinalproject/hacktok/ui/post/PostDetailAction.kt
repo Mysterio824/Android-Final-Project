@@ -1,5 +1,8 @@
 package com.androidfinalproject.hacktok.ui.post
 
+import com.androidfinalproject.hacktok.model.enums.ReportCause
+import com.androidfinalproject.hacktok.model.enums.ReportType
+
 sealed class PostDetailAction {
     data class OnUserClick(val userId: String?) : PostDetailAction()
     //post action
@@ -7,6 +10,12 @@ sealed class PostDetailAction {
     data object LoadComments : PostDetailAction()
     data object ToggleLike : PostDetailAction()
     data object Share : PostDetailAction()
+    data class SubmitReport(
+        val reportedItemId: String,
+        val reportType: ReportType,
+        val reportCause: ReportCause
+    ) : PostDetailAction()
+
     //input comment action
     data object ToggleCommentInputFocus : PostDetailAction()
     data class UpdateCommentText(val text: String) : PostDetailAction()

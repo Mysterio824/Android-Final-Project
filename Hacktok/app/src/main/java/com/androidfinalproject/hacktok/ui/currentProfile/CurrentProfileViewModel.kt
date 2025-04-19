@@ -3,7 +3,6 @@ package com.androidfinalproject.hacktok.ui.currentProfile
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.repository.PostRepository
 import com.androidfinalproject.hacktok.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,7 +23,7 @@ class CurrentProfileViewModel @Inject constructor(
         loadCurrentUser()
     }
 
-    fun loadCurrentUser() {
+    private fun loadCurrentUser() {
         viewModelScope.launch {
             _state.value = CurrentProfileState.Loading
             try {
@@ -46,7 +45,7 @@ class CurrentProfileViewModel @Inject constructor(
         }
     }
 
-    fun editPost(postId: String?, newContent: String) {
+    private fun editPost(postId: String?, newContent: String) {
         viewModelScope.launch {
             try {
                 if (postId != null) {
@@ -60,7 +59,7 @@ class CurrentProfileViewModel @Inject constructor(
         }
     }
 
-    fun deletePost(postId: String?) {
+    private fun deletePost(postId: String?) {
         viewModelScope.launch {
             try {
                 if (postId != null) {
@@ -91,7 +90,7 @@ class CurrentProfileViewModel @Inject constructor(
                 loadCurrentUser()
             }
             is CurrentProfileAction.OnDeletePost -> {
-                deletePost(action.post.id)
+                deletePost(action.postId)
             }
             else -> {
 

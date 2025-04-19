@@ -9,12 +9,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
+import com.androidfinalproject.hacktok.model.enums.ReportType
+import com.androidfinalproject.hacktok.model.enums.ReportCause
 
 @Composable
 fun ReportOptionsContent(
     onDismiss: () -> Unit,
-    onSomeAction: () -> Unit = {}
+    targetId: String,
+    onReportCauseSelected: (String, ReportCause, ReportType) -> Unit,
+    type: ReportType
 ) {
     fun withDismiss(action: () -> Unit): () -> Unit = {
         action()
@@ -33,9 +36,13 @@ fun ReportOptionsContent(
             modifier = Modifier.padding(16.dp)
         )
 
-        OptionItem(
-            title = "something",
-            onClick = withDismiss(onSomeAction)
-        )
+        ReportCause.entries.filter { cause ->
+            cause.applicableTypes.contains(type)
+        }.forEach { cause ->
+            OptionItem(
+                title = cause.description,
+                onClick = withDismiss { onReportCauseSelected(targetId, cause, type) }
+            )
+        }
     }
 }

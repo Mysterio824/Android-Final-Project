@@ -12,5 +12,6 @@ data class UserProfileState (
     val error: String? = null,
     val userIdBeingLoaded: String? = null,
     val numberOfFriends: Int = 0,
-    val isOwner: Boolean = false
+    val isOwner: Boolean = false,
+    val userMessage: String? = null
 )

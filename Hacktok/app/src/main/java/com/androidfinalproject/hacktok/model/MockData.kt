@@ -223,60 +223,7 @@ object MockData {
         UserRole.SUPER_ADMIN
     )
 
-    val mockReport = listOf(
-        // Report on a post
-        Report(
-            id = "r1",
-            reportedBy = "1", // john (USER)
-            type = "post",
-            targetId = "1", // "Hello world!" post
-            reason = "Inappropriate content",
-            createdAt = Date(),
-            status = "pending"
-        ),
-        Report(
-            id = "r2",
-            reportedBy = "2", // jane_smith (MODERATOR)
-            type = "post",
-            targetId = "2", // "Learning Kotlin!" post
-            reason = "Spam",
-            createdAt = Date(),
-            status = "resolved",
-            resolvedBy = "3", // bob_jones (ADMIN)
-            resolutionNote = "Post removed due to excessive self-promotion."
-        ),
-        // Report on a comment
-        Report(
-            id = "r3",
-            reportedBy = "3", // bob_jones (ADMIN)
-            type = "comment",
-            targetId = "6", // "Great post! I really enjoyed reading this."
-            reason = "Offensive language",
-            createdAt = Date(),
-            status = "pending"
-        ),
-        Report(
-            id = "r4",
-            reportedBy = "1", // john (USER)
-            type = "comment",
-            targetId = "7", // "I have a question about this. Can you elaborate more?"
-            reason = "Harassment",
-            createdAt = Date(),
-            status = "resolved",
-            resolvedBy = "4", // admin_super (SUPER_ADMIN)
-            resolutionNote = "Comment hidden and user warned."
-        ),
-        // Report on a user
-        Report(
-            id = "r5",
-            reportedBy = "2", // jane_smith (MODERATOR)
-            type = "user",
-            targetId = "1", // john (USER)
-            reason = "Repeated rule violations",
-            createdAt = Date(),
-            status = "pending"
-        )
-    )
+    val mockReport = emptyList<Report>()
 
     val mockRelations = mapOf(
         "1" to RelationInfo("1", RelationshipStatus.NONE),

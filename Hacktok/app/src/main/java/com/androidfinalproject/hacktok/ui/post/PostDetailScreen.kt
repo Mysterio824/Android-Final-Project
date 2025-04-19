@@ -16,6 +16,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -33,6 +35,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.androidfinalproject.hacktok.model.Comment
 import com.androidfinalproject.hacktok.model.MockData
+import com.androidfinalproject.hacktok.model.enums.ReportType
 import com.androidfinalproject.hacktok.ui.commonComponent.PostContent
 import com.androidfinalproject.hacktok.ui.commonComponent.PostOptionsContent
 import com.androidfinalproject.hacktok.ui.commonComponent.ReportOptionsContent
@@ -53,14 +56,23 @@ fun PostDetailScreen(
     var showShareOptionsSheet by remember { mutableStateOf(false) }
     var selectedComment by remember { mutableStateOf<Comment?>(null) }
     var reportTargetId by remember { mutableStateOf<String?>(null) }
+    var reportType by remember { mutableStateOf<ReportType?>(null) }
 
     var showComments by remember { mutableStateOf(true) }
+
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val bottomSheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = false
     )
 
-    LaunchedEffect(state.isCommenting) {
+    LaunchedEffect(state.userMessage, state.error) {
+        if (state.userMessage != null) {
+            snackbarHostState.showSnackbar(message = state.userMessage)
+        }
+        if (state.error != null) {
+            snackbarHostState.showSnackbar(message = state.error)
+        }
         if (state.isCommenting) {
             commentFocusRequester.requestFocus()
             keyboardController?.show()
@@ -80,7 +92,9 @@ fun PostDetailScreen(
                     }
                 }
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        modifier = Modifier.fillMaxSize()
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -98,7 +112,7 @@ fun PostDetailScreen(
                             onToggleLike = { onAction(PostDetailAction.ToggleLike) },
                             onComment = { onAction(PostDetailAction.ToggleCommentInputFocus) },
                             onShare = { showShareOptionsSheet = true },
-                            onPostDelete = { showPostOptionsSheet = true },
+                            onOptionsClick = { showPostOptionsSheet = true },
                             onUserClick = { onAction(PostDetailAction.OnUserClick(post.userId)) }
                         )
 
@@ -163,7 +177,10 @@ fun PostDetailScreen(
                     PostOptionsContent(
                         isPostOwner = state.currentUser?.id == state.post!!.user!!.id!!,
                         onDismiss = { showPostOptionsSheet = false },
-                        onReport = { reportTargetId = state.post.id }
+                        onReport = {
+                            reportTargetId = state.post.id
+                            reportType = ReportType.Post
+                        }
                     )
                 }
             }
@@ -190,7 +207,10 @@ fun PostDetailScreen(
                         comment = selectedComment!!,
                         onDismiss = { selectedComment = null },
                         deleteComment = { onAction(PostDetailAction.DeleteComment(selectedComment!!.id!!)) },
-                        reportComment = { reportTargetId = selectedComment!!.id },
+                        reportComment = {
+                            reportTargetId = selectedComment!!.id
+                            reportType = ReportType.Comment
+                        },
                         isCommentOwner = selectedComment!!.userId == state.currentUser?.id
                     )
                 }
@@ -199,12 +219,22 @@ fun PostDetailScreen(
             // Report options bottom sheet
             if (reportTargetId != null) {
                 ModalBottomSheet(
-                    onDismissRequest = { reportTargetId = null },
+                    onDismissRequest = {
+                        reportTargetId = null
+                        reportType = null
+                    },
                     sheetState = bottomSheetState
                 ) {
                     ReportOptionsContent(
-                        onDismiss = { reportTargetId = null },
-                        onSomeAction = {}
+                        onDismiss = {
+                            reportTargetId = null
+                            reportType = null
+                        },
+                        targetId = reportTargetId!!,
+                        onReportCauseSelected = { id, cause, type ->
+                            onAction(PostDetailAction.SubmitReport(id, type, cause))
+                        },
+                        type = reportType!!,
                     )
                 }
             }

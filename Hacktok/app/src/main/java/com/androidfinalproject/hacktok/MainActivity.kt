@@ -7,9 +7,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
@@ -23,7 +21,6 @@ import com.androidfinalproject.hacktok.ui.auth.AuthAction
 import com.androidfinalproject.hacktok.ui.auth.AuthViewModel
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 import com.androidfinalproject.hacktok.utils.GooglePlayServicesHelper
-import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions

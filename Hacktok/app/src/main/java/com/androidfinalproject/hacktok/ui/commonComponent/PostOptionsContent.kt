@@ -20,7 +20,9 @@ import androidx.compose.ui.unit.sp
 fun PostOptionsContent(
     isPostOwner: Boolean,
     onDismiss: () -> Unit,
-    onReport: () -> Unit
+    onReport: () -> Unit,
+    onPostDelete: () -> Unit = {},
+    onPostEdit: () -> Unit = {},
 ) {
     fun withDismiss(action: () -> Unit): () -> Unit = {
         action()
@@ -45,12 +47,13 @@ fun PostOptionsContent(
             description = "See fewer posts like this",
             onClick = onDismiss
         )
-
-        OptionItem(
-            title = "Report Post",
-            description = "This post concerns me",
-            onClick = withDismiss(onReport)
-        )
+        if (!isPostOwner) {
+            OptionItem(
+                title = "Report Post",
+                description = "This post concerns me",
+                onClick = withDismiss(onReport)
+            )
+        }
 
         OptionItem(
             title = "Save Post",
@@ -65,20 +68,20 @@ fun PostOptionsContent(
             OptionItem(
                 title = "Edit Post",
                 icon = Icons.Default.Edit,
-                onClick = onDismiss
+                onClick = withDismiss(onPostEdit)
             )
 
             OptionItem(
                 title = "Delete Post",
                 icon = Icons.Default.Delete,
-                onClick = onDismiss
+                onClick = withDismiss(onPostDelete)
             )
 
-            OptionItem(
-                title = "Change Privacy",
-                icon = Icons.Default.Public,
-                onClick = onDismiss
-            )
+//            OptionItem(
+//                title = "Change Privacy",
+//                icon = Icons.Default.Public,
+//                onClick = onDismiss
+//            )
         }
     }
 }

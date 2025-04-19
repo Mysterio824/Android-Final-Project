@@ -1,6 +1,7 @@
 package com.androidfinalproject.hacktok.ui.currentProfile
 
 import android.util.Log
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,53 +10,52 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.androidfinalproject.hacktok.model.Post
+import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.ui.commonComponent.PostContent
 import com.androidfinalproject.hacktok.ui.commonComponent.ProfileImage
-import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
-import androidx.hilt.navigation.compose.hiltViewModel
+import com.androidfinalproject.hacktok.ui.commonComponent.PostOptionsContent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CurrentProfileScreen(
-    onNavigateBack: () -> Unit,
-    onNavigateToEditProfile: () -> Unit,
-    onNavigateToNewPost: () -> Unit,
-    onNavigateToEditPost: (Post) -> Unit,
-    viewModel: CurrentProfileViewModel = hiltViewModel()
+    state: CurrentProfileState,
+    onAction: (CurrentProfileAction) -> Unit
 ) {
-    val state by viewModel.state.collectAsState()
+    var selectPostId by remember { mutableStateOf<String?>(null) }
+
+    val bottomSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = false
+    )
 
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text("Profile") },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    IconButton(onClick = { onAction(CurrentProfileAction.OnNavigateBack) }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
-                    IconButton(onClick = onNavigateToEditProfile) {
+                    IconButton(onClick = { onAction(CurrentProfileAction.NavigateToProfileEdit) }) {
                         Icon(Icons.Default.Edit, contentDescription = "Edit Profile")
                     }
                 }
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onNavigateToNewPost) {
+            FloatingActionButton(onClick = { onAction(CurrentProfileAction.NavigateToNewPost) }) {
                 Icon(Icons.Default.Add, contentDescription = "Create Post")
             }
         }
@@ -84,18 +84,17 @@ fun CurrentProfileScreen(
                             verticalArrangement = Arrangement.Center
                         ) {
                             Text(
-                                text = "Error: ${(state as CurrentProfileState.Error).message}",
+                                text = "Error: ${(state).message}",
                                 color = MaterialTheme.colorScheme.error
                             )
                             Spacer(modifier = Modifier.height(16.dp))
-                            Button(onClick = { viewModel.onAction(CurrentProfileAction.RetryLoading) }) {
+                            Button(onClick = { onAction(CurrentProfileAction.RetryLoading) }) {
                                 Text("Retry")
                             }
                         }
                     }
                 }
                 is CurrentProfileState.Success -> {
-                    val successState = state as CurrentProfileState.Success
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
@@ -103,30 +102,39 @@ fun CurrentProfileScreen(
                     ) {
                         item {
                             ProfileHeader(
-                                user = successState.user,
-                                friendCount = successState.friendCount
+                                user = state.user,
+                                friendCount = state.friendCount,
+                                onFriendListCLick = { onAction(CurrentProfileAction.NavigateFriendList(state.user.id!!)) }
                             )
                         }
-                        items(successState.posts.filter { !it.id.isNullOrBlank() }) { post ->
+                        items(state.posts.filter { !it.id.isNullOrBlank() }) { post ->
                             PostContent(
                                 post = post,
-                                onPostClick = { /* Handle post click */ },
+                                onPostClick = { onAction(CurrentProfileAction.OnPostClick(post)) },
                                 onToggleLike = { /* Handle like toggle */ },
-                                onComment = { /* Handle comment */ },
+                                onComment = { onAction(CurrentProfileAction.OnPostClick(post)) },
                                 onShare = { /* Handle share */ },
-                                onPostDelete = {
-                                    viewModel.onAction(CurrentProfileAction.OnDeletePost(post))
-                                },
-                                onPostEdit = {
-                                    Log.d("HELLO", "CLICK")
-                                    onNavigateToEditPost(post)
-                                },
-                                onUserClick = { /* Handle user click */ },
-                                currentUserId = successState.user.id ?: "",
+                                onOptionsClick = { selectPostId = post.id },
+                                onUserClick = { onAction(CurrentProfileAction.OnUserClick(post.userId)) },
                             )
                         }
                     }
                 }
+            }
+        }
+
+        if (selectPostId != null) {
+            ModalBottomSheet(
+                onDismissRequest = { selectPostId = null },
+                sheetState = bottomSheetState
+            ) {
+                PostOptionsContent(
+                    onDismiss = { selectPostId = null },
+                    onReport = {},
+                    isPostOwner = true,
+                    onPostEdit = { onAction(CurrentProfileAction.NavigateToPostEdit(selectPostId!!)) },
+                    onPostDelete = { onAction(CurrentProfileAction.OnDeletePost(selectPostId!!)) }
+                )
             }
         }
     }
@@ -135,7 +143,8 @@ fun CurrentProfileScreen(
 @Composable
 private fun ProfileHeader(
     user: com.androidfinalproject.hacktok.model.User,
-    friendCount: Int
+    friendCount: Int,
+    onFriendListCLick: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -164,7 +173,8 @@ private fun ProfileHeader(
         // Friend Count
         Text(
             text = "$friendCount Friends",
-            style = MaterialTheme.typography.bodyLarge
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.clickable { onFriendListCLick() }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -174,25 +184,5 @@ private fun ProfileHeader(
             text = user.bio ?: "No bio available",
             style = MaterialTheme.typography.bodyMedium
         )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun CurrentProfileScreenPreview() {
-    MainAppTheme {
-        Box(
-            modifier = Modifier
-                .width(400.dp)
-                .height(800.dp)
-        ) {
-            CurrentProfileScreen(
-                onNavigateBack = {},
-                onNavigateToEditProfile = {},
-                onNavigateToNewPost = {},
-                onNavigateToEditPost = {},
-                viewModel = hiltViewModel()
-            )
-        }
     }
 }
