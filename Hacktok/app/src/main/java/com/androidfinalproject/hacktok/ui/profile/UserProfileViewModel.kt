@@ -8,6 +8,7 @@ import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.model.RelationInfo
 import com.androidfinalproject.hacktok.model.enums.ReportCause
 import com.androidfinalproject.hacktok.model.enums.ReportType
+import com.androidfinalproject.hacktok.repository.PostShareRepository
 import com.androidfinalproject.hacktok.service.AuthService
 import com.androidfinalproject.hacktok.service.RelationshipService
 import com.androidfinalproject.hacktok.service.ReportService
@@ -32,7 +33,8 @@ import kotlinx.coroutines.flow.map
 class UserProfileViewModel @Inject constructor(
     private val relationshipService: RelationshipService,
     private val authService: AuthService,
-    private val reportService: ReportService
+    private val reportService: ReportService,
+    private val postShareRepository: PostShareRepository
 ) : ViewModel() {
     private val TAG = "UserProfileViewModel"
     private val _state = MutableStateFlow(UserProfileState())
@@ -70,6 +72,27 @@ class UserProfileViewModel @Inject constructor(
         val profileUserId = state.value.user?.id ?: run {
             Log.e(TAG, "User ID is null, cannot perform action: $action")
             return
+        }
+
+        when (action) {
+            is UserProfileAction.DismissShareDialog -> _state.update { it.copy(showShareDialog = false) }
+            is UserProfileAction.UpdateShareCaption -> _state.update { it.copy(shareCaption = action.caption) }
+            is UserProfileAction.UpdateSharePrivacy -> _state.update { it.copy(sharePrivacy = action.privacy) }
+            is UserProfileAction.UpdateSharePost -> _state.update { it.copy(sharePost = action.post, showShareDialog = true) }
+            is UserProfileAction.OnSharePost -> {
+                viewModelScope.launch {
+                    try {
+                        postShareRepository.sharePost(
+                            postId = action.post.id ?: return@launch,
+                            caption = action.caption,
+                            privacy = action.privacy.name,
+                        )
+                    } catch (e: Exception) {
+                        Log.d("ERROR", e.toString())
+                    }
+                }
+            }
+            else -> {}
         }
         
         viewModelScope.launch {
