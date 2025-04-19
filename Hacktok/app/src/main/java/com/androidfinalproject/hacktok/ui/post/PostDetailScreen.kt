@@ -31,8 +31,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.androidfinalproject.hacktok.R
 import com.androidfinalproject.hacktok.model.Comment
 import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.enums.ReportType
@@ -40,6 +42,8 @@ import com.androidfinalproject.hacktok.ui.commonComponent.PostContent
 import com.androidfinalproject.hacktok.ui.commonComponent.PostOptionsContent
 import com.androidfinalproject.hacktok.ui.commonComponent.ReportOptionsContent
 import com.androidfinalproject.hacktok.ui.commonComponent.ShareOptionsContent
+import com.androidfinalproject.hacktok.ui.commonComponent.SharePostDialog
+import com.androidfinalproject.hacktok.ui.currentProfile.CurrentProfileAction
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 import com.androidfinalproject.hacktok.ui.post.component.*
 
@@ -108,6 +112,7 @@ fun PostDetailScreen(
                 item {
                     state.post?.let { post ->
                         PostContent(
+                            fullName = state.currentUser?.fullName ?: "",
                             post = post,
                             onToggleLike = { onAction(PostDetailAction.ToggleLike) },
                             onComment = { onAction(PostDetailAction.ToggleCommentInputFocus) },
@@ -194,9 +199,22 @@ fun PostDetailScreen(
                     sheetState = bottomSheetState
                 ) {
                     ShareOptionsContent(
+                        onShareToFeed = { onAction(PostDetailAction.ShowShareDialog) },
                         onDismiss = { showShareOptionsSheet = false }
                     )
                 }
+            }
+
+            if (state.showShareDialog) {
+                SharePostDialog(
+                    userName = state.currentUser?.fullName ?: "Unknown",
+                    userAvatar = painterResource(id = R.drawable.profile_placeholder), // Replace with actual avatar if you have it
+                    onDismiss = { onAction(PostDetailAction.DismissShareDialog) },
+                    onSubmit = { caption, privacy ->
+                        onAction(PostDetailAction.OnSharePost(post = state.post!!, caption = caption, privacy = privacy))
+                        onAction(PostDetailAction.DismissShareDialog)
+                    }
+                )
             }
 
             // Comment options bottom sheet

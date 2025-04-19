@@ -36,6 +36,7 @@ import java.util.Locale
 
 @Composable
 fun PostContent(
+    fullName: String? = null,
     post: Post,
     onPostClick: (String) -> Unit = {},
     onToggleLike: () -> Unit,
@@ -73,7 +74,7 @@ fun PostContent(
                     .padding(start = 8.dp)
             ) {
                 Text(
-                    text = post.user?.username ?: "Unknown User",
+                    text = fullName ?: "",
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
                     modifier = Modifier.clickable(onClick = onUserClick)

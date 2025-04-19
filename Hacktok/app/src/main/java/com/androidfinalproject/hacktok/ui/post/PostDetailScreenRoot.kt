@@ -5,6 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.androidfinalproject.hacktok.repository.PostRepository
 
 @Composable
 fun PostDetailScreenRoot(
@@ -14,6 +15,7 @@ fun PostDetailScreenRoot(
     onUserProfileNavigate: (String?) -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
     LaunchedEffect(postId) {
         viewModel.onAction(PostDetailAction.LoadPost(postId))
     }

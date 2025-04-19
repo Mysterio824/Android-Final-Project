@@ -12,7 +12,8 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun ShareOptionsContent(
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onShareToFeed: () -> Unit = {},
 ) {
     fun withDismiss(action: () -> Unit): () -> Unit = {
         action()
@@ -33,7 +34,10 @@ fun ShareOptionsContent(
 
         OptionItem(
             title = "Share to News Feed",
-            onClick = onDismiss
+            onClick = {
+                onShareToFeed()
+                onDismiss()
+            }
         )
 
         OptionItem(

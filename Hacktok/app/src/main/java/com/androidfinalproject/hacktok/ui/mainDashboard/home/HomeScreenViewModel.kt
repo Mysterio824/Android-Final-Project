@@ -1,5 +1,6 @@
 package com.androidfinalproject.hacktok.ui.mainDashboard.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.model.MockData
@@ -17,12 +18,14 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.androidfinalproject.hacktok.model.Story
+import com.androidfinalproject.hacktok.repository.PostShareRepository
 
 @HiltViewModel
 class HomeScreenViewModel @Inject constructor(
     private val authService: AuthService,
     private val postRepository: PostRepository,
-    private val reportService: ReportService
+    private val reportService: ReportService,
+    private val postShareRepository: PostShareRepository
 ) : ViewModel() {
     private val _state = MutableStateFlow(HomeScreenState())
     val state: StateFlow<HomeScreenState> = _state.asStateFlow()
@@ -33,6 +36,23 @@ class HomeScreenViewModel @Inject constructor(
 
     fun onAction(action: HomeScreenAction) {
         when (action) {
+            is HomeScreenAction.OnSharePost -> {
+                viewModelScope.launch {
+                    try {
+                        postShareRepository.sharePost(
+                            postId = action.post.id ?: return@launch,
+                            caption = action.caption,
+                            privacy = action.privacy.name,
+                        )
+                    } catch (e: Exception) {
+                        Log.d("ERROR", e.toString())
+                    }
+                }
+            }
+            is HomeScreenAction.UpdateSharePrivacy -> _state.update { it.copy(sharePrivacy = action.privacy) }
+            is HomeScreenAction.UpdateShareCaption -> _state.update { it.copy(shareCaption = action.caption) }
+            is HomeScreenAction.UpdateSharePost -> _state.update { it.copy(sharePost = action.post, showShareDialog = true) }
+            is HomeScreenAction.DismissShareDialog -> _state.update { it.copy(showShareDialog = false) }
             is HomeScreenAction.LikePost -> likePost(action.postId)
             is HomeScreenAction.SharePost -> sharePost(action.postId)
             is HomeScreenAction.SubmitReport -> submitReport(

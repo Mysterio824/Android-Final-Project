@@ -1,7 +1,9 @@
 package com.androidfinalproject.hacktok.ui.profile
 
+import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.model.enums.ReportCause
 import com.androidfinalproject.hacktok.model.enums.ReportType
+import com.androidfinalproject.hacktok.ui.newPost.PRIVACY
 
 sealed class UserProfileAction {
     // Actions initiated by the current user towards the profile user
@@ -30,4 +32,12 @@ sealed class UserProfileAction {
         val reportType: ReportType,
         val reportCause: ReportCause
     ) : UserProfileAction()
+
+    // Share actions
+    data object ShowShareDialog : UserProfileAction()
+    data object DismissShareDialog : UserProfileAction()
+    data class UpdateSharePost(val post: Post) : UserProfileAction()
+    data class UpdateSharePrivacy(val privacy: PRIVACY) : UserProfileAction()
+    data class UpdateShareCaption(val caption: String) : UserProfileAction()
+    data class OnSharePost(val post: Post, val caption: String, val privacy: PRIVACY) : UserProfileAction()
 }

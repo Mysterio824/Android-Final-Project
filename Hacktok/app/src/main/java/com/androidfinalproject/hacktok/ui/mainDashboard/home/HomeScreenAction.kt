@@ -1,7 +1,9 @@
 package com.androidfinalproject.hacktok.ui.mainDashboard.home
 
+import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.model.enums.ReportCause
 import com.androidfinalproject.hacktok.model.enums.ReportType
+import com.androidfinalproject.hacktok.ui.newPost.PRIVACY
 
 sealed class HomeScreenAction {
     data class LikePost(val postId: String) : HomeScreenAction()
@@ -16,4 +18,11 @@ sealed class HomeScreenAction {
         val reportType: ReportType,
         val reportCause: ReportCause
     ) : HomeScreenAction()
+    data object ShowShareDialog : HomeScreenAction()
+    data class UpdateSharePost(val post: Post) : HomeScreenAction()
+    data class UpdateSharePrivacy(val privacy: PRIVACY) : HomeScreenAction()
+    data class UpdateShareCaption(val caption: String) : HomeScreenAction()
+    data class OnSharePost(val post: Post, val caption: String, val privacy: PRIVACY) : HomeScreenAction()
+    data object DismissShareDialog : HomeScreenAction()
+
 }

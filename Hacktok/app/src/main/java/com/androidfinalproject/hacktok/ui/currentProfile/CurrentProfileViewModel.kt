@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.repository.PostRepository
+import com.androidfinalproject.hacktok.repository.PostShareRepository
 import com.androidfinalproject.hacktok.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +15,8 @@ import javax.inject.Inject
 @HiltViewModel
 class CurrentProfileViewModel @Inject constructor(
     private val userRepository: UserRepository,
-    private val postRepository: PostRepository
+    private val postRepository: PostRepository,
+    private val postShareRepository: PostShareRepository,
 ) : ViewModel() {
     private val _state = MutableStateFlow<CurrentProfileState>(CurrentProfileState.Loading)
     val state = _state.asStateFlow()
@@ -91,6 +93,60 @@ class CurrentProfileViewModel @Inject constructor(
             }
             is CurrentProfileAction.OnDeletePost -> {
                 deletePost(action.postId)
+            }
+            is CurrentProfileAction.ShowShareDialog -> {
+                val current = _state.value
+                if (current is CurrentProfileState.Success) {
+                    _state.value = current.copy(showShareDialog = true)
+                }
+            }
+            is CurrentProfileAction.UpdatePrivacy -> {
+                val current = _state.value
+                if (current is CurrentProfileState.Success) {
+                    _state.value = current.copy(sharePrivacy = action.privacy)
+                }
+            }
+            is CurrentProfileAction.UpdateSharePost -> {
+                val current = _state.value
+                if (current is CurrentProfileState.Success) {
+                    _state.value = current.copy(
+                        postToShare = action.post,
+                        showShareDialog = true
+                    )
+                }
+            }
+            is CurrentProfileAction.UpdateShareCaption -> {
+                val current = _state.value
+                if (current is CurrentProfileState.Success) {
+                    _state.value = current.copy(shareCaption = action.caption)
+                }
+            }
+            is CurrentProfileAction.DismissShareDialog -> {
+                val current = _state.value
+                if (current is CurrentProfileState.Success) {
+                    _state.value = current.copy(
+                        showShareDialog = false,
+                        shareCaption = "",
+                        postToShare = null
+                    )
+                }
+            }
+            is CurrentProfileAction.OnSharePost -> {
+                val current = _state.value
+                if (current is CurrentProfileState.Success) {
+                    viewModelScope.launch {
+                        try {
+                            postShareRepository.sharePost(
+                                postId = action.post.id ?: return@launch,
+                                caption = action.caption,
+                                privacy = action.privacy.name,
+                            )
+                            loadCurrentUser() // Reload after share
+                        } catch (e: Exception) {
+                            _state.value = CurrentProfileState.Error("Failed to share post: ${e.message}")
+                        }
+                    }
+                }
             }
             else -> {
 
