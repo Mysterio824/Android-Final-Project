@@ -59,6 +59,7 @@ class NewStoryViewModel : ViewModel() {
             is NewStoryAction.CreateTextStory -> {
                 createTextStory(action.text, action.privacy)
             }
+            else -> {}
         }
     }
 

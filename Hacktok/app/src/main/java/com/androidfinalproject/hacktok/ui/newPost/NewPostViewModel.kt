@@ -52,7 +52,6 @@ class NewPostViewModel @Inject constructor(
                 viewModelScope.launch {
                     try {
                         val post = postRepository.getPost(action.postId)
-                        Log.d("PRIVACY", post?.privacy.toString())
                         post?.let {
                             _state.value = _state.value.copy(
                                 postId = it.id,

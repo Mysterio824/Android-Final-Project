@@ -47,7 +47,7 @@ fun DashboardScreen(
                         onPostClick = { onAction(DashboardAction.OnPostClick(it)) },
                         onStoryClick = { onAction(DashboardAction.OnStoryClick(it)) },
                         onNewPostNavigate = { onAction(DashboardAction.OnCreatePost) },
-                        onNewStoryNavigate = { onAction(DashboardAction.OnCreateStory) }
+                        onCreateStoryNavigate = { onAction(DashboardAction.OnCreateStory) }
                     )
                 }
 

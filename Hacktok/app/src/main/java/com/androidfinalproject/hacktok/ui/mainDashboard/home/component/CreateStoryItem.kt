@@ -1,6 +1,7 @@
 package com.androidfinalproject.hacktok.ui.mainDashboard.home.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,7 +35,8 @@ fun CreateStoryItem(
     Card(
         modifier = Modifier
             .width(110.dp)
-            .height(180.dp),
+            .height(180.dp)
+            .clickable { onCreateStory() },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {

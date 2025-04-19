@@ -20,6 +20,7 @@ import com.androidfinalproject.hacktok.ui.post.PostDetailScreenRoot
 import com.androidfinalproject.hacktok.ui.friendList.FriendListScreenRoot
 import com.androidfinalproject.hacktok.ui.mainDashboard.DashboardScreenRoot
 import com.androidfinalproject.hacktok.ui.messageDashboard.MessageDashboardRoot
+import com.androidfinalproject.hacktok.ui.newStory.NewStoryRoot
 import com.androidfinalproject.hacktok.ui.messageDashboard.MessageDashboardViewModel
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -88,6 +89,35 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
         }
 
         composable(
+            route = "${MainRoute.NewPost.BASE_ROUTE}?postId={postId}",
+            arguments = listOf(
+                navArgument("postId") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            ),
+            enterTransition = { slideFadeInFromRight() },
+            exitTransition = { slideFadeOutToLeft() }
+        ) { backStackEntry ->
+            val postId = backStackEntry.arguments?.getString("postId")
+
+            NewPostScreenRoot(
+                postId = postId,
+                onClose = {
+                    navController.navigate("dashboard") {
+                        popUpTo("dashboard") { inclusive = true }
+                    }
+                },
+                onPost = {
+                    navController.navigate("dashboard") {
+                        popUpTo("dashboard") { inclusive = true }
+                    }
+                },
+            )
+        }
+
+        composable(
             route = MainRoute.Search.route,
             enterTransition = { slideFadeInFromRight() },
             exitTransition = { slideFadeOutToLeft() }
@@ -112,9 +142,7 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
                 onPostEditNavigation = { postId ->
                     navController.navigate("${MainRoute.NewPost.BASE_ROUTE}?postId=$postId")
                 },
-                onNewPostNavigation = {
-                    navController.navigate(MainRoute.NewPost.BASE_ROUTE)
-                },
+                onNewPostNavigation = { navController.navigate(MainRoute.NewPost.BASE_ROUTE) },
                 onFriendListNavigation = { navController.navigate("${MainRoute.FriendList.route}/$it") },
                 onProfileEditNavigation = { navController.navigate(MainRoute.EditProfile.route) },
                 onNavigateBack = {
@@ -264,35 +292,6 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
                 onNavigateBack = {
                     navController.popBackStack()
                 }
-            )
-        }
-
-        composable(
-            route = "${MainRoute.NewPost.BASE_ROUTE}?postId={postId}",
-            arguments = listOf(
-                navArgument("postId") {
-                    type = NavType.StringType
-                    nullable = true
-                    defaultValue = null
-                }
-            ),
-            enterTransition = { slideFadeInFromRight() },
-            exitTransition = { slideFadeOutToLeft() }
-        ) { backStackEntry ->
-            val postId = backStackEntry.arguments?.getString("postId")
-
-            NewPostScreenRoot(
-                postId = postId,
-                onClose = {
-                    navController.navigate("dashboard") {
-                        popUpTo("dashboard") { inclusive = true }
-                    }
-                },
-                onPost = {
-                    navController.navigate("dashboard") {
-                        popUpTo("dashboard") { inclusive = true }
-                    }
-                },
             )
         }
 

@@ -57,7 +57,7 @@ fun NewStoryScreen(
 
             // Left-aligned Close Button
             IconButton(
-                onClick = { /* close */ },
+                onClick = { onAction(NewStoryAction.NavigateBack) },
                 modifier = Modifier.align(Alignment.CenterStart)
             ) {
                 Icon(Icons.Default.Close, contentDescription = null, tint = Color.White)
