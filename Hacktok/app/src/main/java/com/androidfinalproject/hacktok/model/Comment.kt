@@ -25,6 +25,8 @@ data class Comment(
 
     fun getLikeCount(): Int = likedUserIds.size
 
+    fun isLiked(userId: String): Boolean = likedUserIds.contains(userId)
+
     override fun toString(): String {
         return "Comment(id=$id, content='$content', userId='$userId', postId='$postId', " +
                 "createdAt=$createdAt, isReported=$isReported, likeCount=${getLikeCount()}, " +

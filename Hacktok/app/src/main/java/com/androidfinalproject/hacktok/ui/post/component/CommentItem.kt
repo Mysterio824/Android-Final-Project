@@ -7,12 +7,10 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -20,14 +18,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.rememberAsyncImagePainter
-import com.androidfinalproject.hacktok.R
 import com.androidfinalproject.hacktok.model.Comment
 import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.ui.commonComponent.ProfileImage
@@ -43,9 +37,11 @@ fun CommentItem(
     isSelected: Boolean = false,
     allComments: List<Comment>,
     onLikeComment: (String?) -> Unit,
+    onUnLikeComment: (String?) -> Unit,
     onCommentLongPress: (String?) -> Unit,
     onUserClick: (String) -> Unit,
-    onReplyClick: (String) -> Unit
+    onReplyClick: (String) -> Unit,
+    currentUserId: String
 ) {
     val replies = allComments.filter { it.parentCommentId == comment.id }
     val user = comment.userSnapshot
@@ -112,18 +108,33 @@ fun CommentItem(
                     modifier = Modifier.padding(start = 0.dp, top = 0.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    TextButton(
-                        onClick = { onLikeComment(comment.id) },
-                        modifier = Modifier.height(20.dp),
-                        contentPadding = PaddingValues(horizontal = 4.dp)
-                    ) {
-                        Text(
-                            text = "Like",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Gray
-                        )
-                    }
+                     if(comment.isLiked(currentUserId)){
+                         TextButton(
+                             onClick = { onUnLikeComment(comment.id) },
+                             modifier = Modifier.height(20.dp),
+                             contentPadding = PaddingValues(horizontal = 4.dp)
+                         ) {
+                             Text(
+                                 text = "like",
+                                 fontSize = 12.sp,
+                                 fontWeight = FontWeight.Bold,
+                                 color = Color.Blue
+                             )
+                         }
+                    } else {
+                        TextButton(
+                            onClick = { onLikeComment(comment.id) },
+                            modifier = Modifier.height(20.dp),
+                            contentPadding = PaddingValues(horizontal = 4.dp)
+                        ) {
+                            Text(
+                                text = "Like",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Gray
+                            )
+                        }
+                     }
 
                     if (comment.getLikeCount() > 0) {
                         Text(
@@ -196,7 +207,9 @@ fun CommentItem(
                                     onLikeComment = onLikeComment,
                                     onCommentLongPress = onCommentLongPress,
                                     onUserClick = onUserClick,
-                                    onReplyClick = onReplyClick
+                                    onUnLikeComment = onUnLikeComment,
+                                    onReplyClick = onReplyClick,
+                                    currentUserId = currentUserId
                                 )
                             }
                         }
@@ -229,8 +242,10 @@ private fun PreviewComponent() {
             onUserClick = {},
             onLikeComment = {},
             onCommentLongPress = {},
+            onUnLikeComment = {},
             onReplyClick = {},
-            allComments = emptyList()
+            allComments = emptyList(),
+            currentUserId = ""
         )
     }
 }
