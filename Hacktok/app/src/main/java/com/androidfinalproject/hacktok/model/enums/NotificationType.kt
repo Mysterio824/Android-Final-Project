@@ -7,5 +7,5 @@ enum class NotificationType {
     POST_COMMENT,
     COMMENT_REPLY,
     COMMENT_LIKE,
-    ADMIN_NOTIFICATION
+    ADMIN_NOTIFICATION,
 }

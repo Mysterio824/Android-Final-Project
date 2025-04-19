@@ -40,7 +40,6 @@ class CommentRepositoryImpl @Inject constructor(
     override fun observeCommentsForPost(
         postId: String,
         parentCommentId: String?,
-        limit: Int,
         sortAscending: Boolean
     ): Flow<Result<List<Comment>>> = callbackFlow {
         try {
@@ -49,17 +48,10 @@ class CommentRepositoryImpl @Inject constructor(
             // Create the query differently based on whether we need top-level comments or replies
             val query = commentsCollection
                 .whereEqualTo("postId", postId)
-                .orderBy("createdAt", Query.Direction.ASCENDING)
-            
-            // Apply limit if needed
-            val limitedQuery = if (limit > 0) {
-                query.limit(limit.toLong())
-            } else {
-                query
-            }
+                .orderBy("createdAt", Query.Direction.DESCENDING)
             
             // Add the snapshot listener for real-time updates
-            val listener = limitedQuery.addSnapshotListener { snapshot, error ->
+            val listener = query.addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     Log.e(TAG, "Error observing comments: ${error.message}", error)
                     trySend(Result.failure(error))

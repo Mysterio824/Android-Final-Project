@@ -43,7 +43,7 @@ interface NotificationService {
      *
      * @return A Flow emitting the list of notifications whenever changes occur.
      */
-    fun observeMyNotifications(): Flow<List<Notification>>
+    suspend fun observeMyNotifications(): Flow<List<Notification>>
 
     /**
      * Marks a specific notification as read for the currently logged-in user.

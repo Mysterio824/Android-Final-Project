@@ -18,7 +18,6 @@ interface CommentRepository {
     fun observeCommentsForPost(
         postId: String,
         parentCommentId: String? = null,
-        limit: Int = 50,
         sortAscending: Boolean = false
     ): Flow<Result<List<Comment>>>
     

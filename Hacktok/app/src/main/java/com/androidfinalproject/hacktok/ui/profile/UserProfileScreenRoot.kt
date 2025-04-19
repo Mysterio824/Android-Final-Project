@@ -33,6 +33,7 @@ fun UserProfileScreenRoot(
                 is UserProfileAction.NavigateBack -> onNavigateBack()
                 is UserProfileAction.NavigateFriendList -> onGoToFriendList(state.user!!.id!!)
                 is UserProfileAction.MessageUser -> onChatWithFriend(userId)
+                is UserProfileAction.GoToPost -> onGoToPost(action.postId)
                 else -> viewModel.onAction(action)
             }
         }

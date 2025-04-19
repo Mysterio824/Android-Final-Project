@@ -1,133 +1,117 @@
 package com.androidfinalproject.hacktok
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.content.Context
-import android.content.Intent
-import android.media.RingtoneManager
 import android.util.Log
-import androidx.core.app.NotificationCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import com.androidfinalproject.hacktok.repository.UserRepository
-import com.androidfinalproject.hacktok.service.AuthService
+import com.androidfinalproject.hacktok.service.FcmService
+import com.androidfinalproject.hacktok.service.NotificationService
+import com.androidfinalproject.hacktok.utils.TokenManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.SetOptions
 
 @AndroidEntryPoint
-class MyFirebaseMessagingService : FirebaseMessagingService() {
+open class AndroidEntryPointFirebaseMessagingService : FirebaseMessagingService(){
 
-    @Inject
-    lateinit var userRepository: UserRepository
-
-    @Inject
-    lateinit var authService: AuthService
+    // Inject the FcmServiceImpl (as FcmService)
+    @Inject lateinit var fcmService: FcmService
+    // Inject NotificationService if you want to store history upon receiving
+    @Inject lateinit var notificationService: NotificationService
 
     private val serviceJob = SupervisorJob()
+    // Use Main dispatcher if immediately calling UI-related things,
+    // but IO is often better for background processing like storing tokens/history
     private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
 
     private val TAG = "MyFirebaseMsgService"
 
+
     override fun onNewToken(token: String) {
         super.onNewToken(token)
-        Log.d(TAG, "Refreshed token: $token")
-        sendRegistrationToServer(token)
-    }
+        Log.i(TAG, "FCM Token Refreshed: ${token.take(10)}...")
 
-    override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        super.onMessageReceived(remoteMessage)
-        Log.d(TAG, "From: ${remoteMessage.from}")
+        // 1. Immediately save to SharedPreferences cache
+        TokenManager.saveTokenToPreferences(applicationContext, token)
 
-        remoteMessage.data.isNotEmpty().let {
-            Log.d(TAG, "Message data payload: " + remoteMessage.data)
-            handleDataMessage(remoteMessage.data)
-        }
-
-        remoteMessage.notification?.let {
-            Log.d(TAG, "Message Notification Body: ${it.body}")
-            sendNotification(it.title ?: "Notification", it.body ?: "", null)
-        }
-    }
-
-    private fun handleDataMessage(data: Map<String, String>) {
-        val type = data["type"]
-        val title = data["title"]
-        val body = data["body"]
-        val postId = data["postId"]
-
-        if (title == null || body == null) {
-            Log.e(TAG, "Received message with missing title or body in data payload")
-            return
-        }
-
-        sendNotification(title, body, postId)
-    }
-
-    private fun sendRegistrationToServer(token: String?) {
+        // 2. Launch a coroutine to store the token in Firestore via FcmService
         serviceScope.launch {
             try {
-                val userId = authService.getCurrentUserId()
-
-                if (userId != null && token != null) {
-                    val db = FirebaseFirestore.getInstance()
-                    val userDocRef = db.collection("users").document(userId)
-
-                    userDocRef.set(mapOf("fcmToken" to token), SetOptions.merge())
-                        .addOnSuccessListener { Log.d(TAG, "FCM Token successfully written to Firestore for user $userId") }
-                        .addOnFailureListener { e -> Log.e(TAG, "Error writing FCM Token to Firestore", e) }
-
-                } else {
-                    Log.w(TAG, "Cannot update FCM token: User not logged in or token is null.")
-                }
+                Log.d(TAG, "Calling fcmService.storeToken() after token refresh...")
+                // Ensure FcmService is properly injected via Hilt
+                fcmService.storeToken() // Call the suspend function
+                Log.d(TAG, "fcmService.storeToken() completed after refresh.")
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to send FCM token to Firestore", e)
+                Log.e(TAG, "Error calling fcmService.storeToken after refresh", e)
+                // Consider retry logic or error reporting
             }
         }
     }
 
-    private fun sendNotification(messageTitle: String, messageBody: String, postId: String?) {
-        val intent = Intent(this, MainActivity::class.java)
-        if (postId != null) {
-            intent.putExtra("postId", postId)
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-        } else {
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+
+    override fun onMessageReceived(remoteMessage: RemoteMessage) {
+        super.onMessageReceived(remoteMessage)
+        Log.d(TAG, "FCM Message Received! From: ${remoteMessage.from}")
+
+        // Log entire message for debugging
+        // Log.d(TAG, "Message Data payload: ${remoteMessage.data}")
+        // remoteMessage.notification?.let { Log.d(TAG, "Message Notification payload: Title=${it.title}, Body=${it.body}") }
+
+        // Prioritize Data Payload (more reliable for background handling)
+        if (remoteMessage.data.isNotEmpty()) {
+            Log.d(TAG, "Processing message data payload: ${remoteMessage.data}")
+            handleDataMessage(remoteMessage.data)
         }
-
-        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE)
-
-        val channelId = resources.getString(R.string.default_notification_channel_id)
-        val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-        val notificationBuilder = NotificationCompat.Builder(this, channelId)
-                .setSmallIcon(R.drawable.ic_stat_ic_notification)
-                .setContentTitle(messageTitle)
-                .setContentText(messageBody)
-                .setAutoCancel(true)
-                .setSound(defaultSoundUri)
-                .setContentIntent(pendingIntent)
-
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        val name = resources.getString(R.string.default_notification_channel_name)
-        val description = resources.getString(R.string.default_notification_channel_description)
-        val importance = NotificationManager.IMPORTANCE_DEFAULT
-        val channel = NotificationChannel(channelId, name, importance)
-        channel.description = description
-        notificationManager.createNotificationChannel(channel)
-
-        val notificationId = System.currentTimeMillis().toInt()
-        notificationManager.notify(notificationId, notificationBuilder.build())
+        // Handle Notification Payload (if app is in foreground)
+        // You might choose to ignore this if data payload contains same info
+        else if (remoteMessage.notification != null) {
+            Log.d(TAG, "Processing message notification payload (app likely foreground).")
+            val notification = remoteMessage.notification!!
+            // Construct a data map if needed, or use defaults
+            val data = mapOf(
+                "title" to (notification.title ?: "Notification"),
+                "body" to (notification.body ?: "")
+                // Add other fields if available/needed
+            )
+            handleDataMessage(data) // Reuse data handling logic
+        } else {
+            Log.w(TAG, "Received empty FCM message.")
+        }
     }
+
+
+    private fun handleDataMessage(data: Map<String, String>) {
+        val title = data["title"] ?: "Notification" // Provide default title
+        val body = data["body"] ?: "" // Provide default body
+        val notificationDocId = data["notificationDocId"] // Get history ID if sent from backend
+
+        Log.d(TAG, "Handling data message: Title='$title', Body='$body', Data=$data")
+
+        // Optional: Store/Update notification history using NotificationService
+        // This might be redundant if sender already created it, but useful
+        // if you want to mark it as "delivered" or store FCM specific info.
+        // serviceScope.launch {
+        //     val type = NotificationType.valueOf(data["type"] ?: NotificationType.UNKNOWN.name)
+        //     notificationService.createOrUpdateNotificationFromFcm(
+        //         docId = notificationDocId, // Pass ID if available
+        //         recipientUserId = // Need recipient ID - might need to add to FCM data payload
+        //         senderId = data["senderId"],
+        //         type = type,
+        //         relatedItemId = data["itemId"],
+        //         content = body
+        //         // Add delivery timestamp etc.
+        //     )
+        // }
+
+        // Display the notification using FcmServiceImpl's method
+        fcmService.showNotification(title, body, data)
+    }
+
 
     override fun onDestroy() {
         super.onDestroy()
-        serviceJob.cancel()
+        serviceJob.cancel() // Cancel coroutines when service is destroyed
     }
 }

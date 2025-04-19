@@ -2,6 +2,7 @@ package com.androidfinalproject.hacktok
 
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -17,6 +18,7 @@ import com.androidfinalproject.hacktok.router.graph.authNavigation
 import com.androidfinalproject.hacktok.router.graph.mainNavigation
 import com.androidfinalproject.hacktok.router.graph.testNavigation
 import com.androidfinalproject.hacktok.router.routes.AuthRoute
+import com.androidfinalproject.hacktok.service.FcmService
 import com.androidfinalproject.hacktok.ui.auth.AuthAction
 import com.androidfinalproject.hacktok.ui.auth.AuthViewModel
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
@@ -27,6 +29,10 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
+import android.os.Build
+import androidx.core.content.ContextCompat
+import android.Manifest
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -37,6 +43,9 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var googleSignInClient: GoogleSignInClient
     private lateinit var authViewModel: AuthViewModel
+
+    @Inject
+    lateinit var fcmService: FcmService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -90,7 +99,15 @@ class MainActivity : ComponentActivity() {
                     testNavigation(navController)
                 }
             }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED
+            ) {
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
         }
+
     }
     
     /**
@@ -143,6 +160,16 @@ class MainActivity : ComponentActivity() {
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error handling Google Sign-In result", e)
+        }
+    }
+
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            Log.d("MainActivity", "Notification permission granted")
+        } else {
+            Log.d("MainActivity", "Notification permission denied")
         }
     }
 }

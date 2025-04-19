@@ -1,10 +1,14 @@
 package com.androidfinalproject.hacktok.ui.auth
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.repository.AuthRepository
+import com.androidfinalproject.hacktok.service.FcmService
+import com.androidfinalproject.hacktok.utils.FcmDiagnosticTool
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,7 +28,9 @@ sealed class AuthState {
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val fcmService: FcmService,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
     // StateFlow for core authentication status
     private val _authState = MutableStateFlow<AuthState>(AuthState.Initial)
@@ -122,6 +128,9 @@ class AuthViewModel @Inject constructor(
                             isLoading = false
                         )}
                         _authState.value = AuthState.Success(isAdmin = isAdmin)
+                        
+                        // Initialize FCM after login success
+                        initializeFcm()
                     } else {
                         _uiState.update { it.copy(isLoading = false) }
                         _authState.value = AuthState.Error(
@@ -160,6 +169,9 @@ class AuthViewModel @Inject constructor(
                     // Important: Set auth state after UI state is updated
                     _authState.value = AuthState.Success(isAdmin = isAdmin)
                     Log.d("AuthViewModel", "Set AuthState to Success(isAdmin=$isAdmin)")
+                    
+                    // Initialize FCM after login success
+                    initializeFcm()
                 } else {
                     Log.e("AuthViewModel", "Firebase Sign-In failed: User is null after repository call")
                     _authState.value = AuthState.Error("Google Sign-In failed: User is null")
@@ -180,14 +192,42 @@ class AuthViewModel @Inject constructor(
                 // Consider showing loading state while checking admin status
                 // _authState.value = AuthState.Loading 
                 try {
+                    initializeFcm()
                     val isAdmin = authRepository.isUserAdmin(currentUser.uid)
                     _authState.value = AuthState.Success(isAdmin = isAdmin)
+
+                    // Initialize FCM for already logged-in user
                 } catch (e: Exception) {
                      _authState.value = AuthState.Error("Failed to check user status: ${e.message}")
                 }
              }
         } else {
             _authState.value = AuthState.SignedOut
+        }
+    }
+    
+    /**
+     * Initialize FCM token and start listening for notifications
+     */
+    private fun initializeFcm() {
+        Log.d("AuthViewModel", "Initializing FCM after successful login")
+        
+        // First initialize the FCM service normally
+        fcmService.initialize()
+        
+        // Then run FCM diagnostic to ensure token is properly stored
+        viewModelScope.launch {
+            try {
+                // Wait a bit to allow normal initialization to finish
+                kotlinx.coroutines.delay(2000)
+                
+                // Run the diagnostic tool to verify and fix token issues
+                FcmDiagnosticTool.runDiagnostic(context)
+                
+                Log.d("AuthViewModel", "FCM diagnostic scheduled")
+            } catch (e: Exception) {
+                Log.e("AuthViewModel", "Error scheduling FCM diagnostic", e)
+            }
         }
     }
     

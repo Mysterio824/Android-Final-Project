@@ -3,6 +3,7 @@ package com.androidfinalproject.hacktok.repository
 import com.androidfinalproject.hacktok.model.Notification
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.tasks.await
 
 interface NotificationRepository {
@@ -20,4 +21,6 @@ interface NotificationRepository {
 
     // Xóa thông báo
     suspend fun deleteNotification(notificationId: String)
+
+    fun observeNotifications(userId: String): Flow<Result<List<Notification>>>
 }
