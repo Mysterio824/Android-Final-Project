@@ -18,7 +18,8 @@ data class Notification(
     @PropertyName("actionUrl") val actionUrl: String? = null,
     @PropertyName("priority") val priority: String = "normal" // "high", "normal"
 ) {
-//    constructor() : this(null, "", "", "", "", Date(), false, null, "normal")
+    constructor() : this(null, "", NotificationType.ADMIN_NOTIFICATION,
+        null, null, null, null, "")
 
     override fun toString(): String {
         return "Notification(id=$id, userId='$userId', type='$type', content='$content', " +

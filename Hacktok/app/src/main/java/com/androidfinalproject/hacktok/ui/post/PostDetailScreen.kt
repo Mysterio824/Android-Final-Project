@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -43,7 +44,6 @@ import com.androidfinalproject.hacktok.ui.commonComponent.PostOptionsContent
 import com.androidfinalproject.hacktok.ui.commonComponent.ReportOptionsContent
 import com.androidfinalproject.hacktok.ui.commonComponent.ShareOptionsContent
 import com.androidfinalproject.hacktok.ui.commonComponent.SharePostDialog
-import com.androidfinalproject.hacktok.ui.currentProfile.CurrentProfileAction
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 import com.androidfinalproject.hacktok.ui.post.component.*
 
@@ -51,10 +51,12 @@ import com.androidfinalproject.hacktok.ui.post.component.*
 @Composable
 fun PostDetailScreen(
     state: PostDetailState,
-    onAction: (PostDetailAction) -> Unit
+    onAction: (PostDetailAction) -> Unit,
+    commentId: String? = null
 ) {
     val commentFocusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
+    val listState = rememberLazyListState()
 
     var showPostOptionsSheet by remember { mutableStateOf(false) }
     var showShareOptionsSheet by remember { mutableStateOf(false) }
@@ -81,6 +83,13 @@ fun PostDetailScreen(
             commentFocusRequester.requestFocus()
             keyboardController?.show()
         }
+        commentId?.let { id ->
+            val index = state.comments.indexOfFirst { it.id == id && it.parentCommentId == null }
+            if (index != -1) {
+                listState.animateScrollToItem(index + 1)
+            }
+        }
+
     }
 
     Scaffold(
@@ -106,6 +115,7 @@ fun PostDetailScreen(
                 .padding(paddingValues)
         ) {
             LazyColumn(
+                state = listState,
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
@@ -133,7 +143,7 @@ fun PostDetailScreen(
                 // Comments section
                 if (showComments) {
                     val rootComments = state.comments.filter { it.parentCommentId == null }
-                    items(rootComments) { comment ->
+                    items(rootComments, key = { it.id!! }) { comment ->
                         CommentItem(
                             comment = comment,
                             isSelected = state.commentIdReply == comment.id,

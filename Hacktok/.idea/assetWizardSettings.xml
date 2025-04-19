@@ -25,7 +25,6 @@
                                               <map>
                                                 <entry key="color" value="000000" />
                                                 <entry key="imagePath" value="C:\Users\ASUS\AppData\Local\Temp\ic_android_black_24dp.xml" />
-                                                <entry key="opacityPercent" value="60" />
                                               </map>
                                             </option>
                                           </PersistentState>
@@ -80,7 +79,7 @@
                                             <option name="values">
                                               <map>
                                                 <entry key="color" value="000000" />
-                                                <entry key="imagePath" value="C:\Users\ASUS\Desktop\sample.png" />
+                                                <entry key="imagePath" value="C:\Users\ASUS\Downloads\HackTok_logo.png" />
                                               </map>
                                             </option>
                                           </PersistentState>
@@ -108,11 +107,6 @@
                                           </PersistentState>
                                         </value>
                                       </entry>
-                                    </map>
-                                  </option>
-                                  <option name="values">
-                                    <map>
-                                      <entry key="outputName" value="sample" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -281,6 +275,29 @@
                                 </PersistentState>
                               </value>
                             </entry>
+                          </map>
+                        </option>
+                      </PersistentState>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </PersistentState>
+          </value>
+        </entry>
+        <entry key="vectorWizard">
+          <value>
+            <PersistentState>
+              <option name="children">
+                <map>
+                  <entry key="vectorAssetStep">
+                    <value>
+                      <PersistentState>
+                        <option name="values">
+                          <map>
+                            <entry key="assetSourceType" value="FILE" />
+                            <entry key="outputName" value="hacktok_logo" />
+                            <entry key="sourceFile" value="C:\Users\ASUS\Downloads\hacktok_logo.svg" />
                           </map>
                         </option>
                       </PersistentState>

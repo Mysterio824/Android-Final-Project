@@ -44,7 +44,7 @@ class PostDetailViewModel @Inject constructor(
                             privacy = action.privacy.name,
                         )
                     } catch (e: Exception) {
-                        Log.d("ERROR", e.toString())
+                        Log.e("ERROR", e.toString())
                     }
                 }
             }
@@ -113,7 +113,6 @@ class PostDetailViewModel @Inject constructor(
                 commentService.observeCommentsForPost(
                     postId = postId,
                     parentCommentId = null, // Only top-level comments
-                    limit = 100
                 )
                     .catch { error ->
                         Log.e(tag, "Error in comment flow", error)
@@ -127,7 +126,6 @@ class PostDetailViewModel @Inject constructor(
                     .collect { result ->
                         result.fold(
                             onSuccess = { comments ->
-                                Log.d(tag, "Successfully loaded ${comments.size} comments")
                                 _state.update {
                                     it.copy(
                                         comments = comments,

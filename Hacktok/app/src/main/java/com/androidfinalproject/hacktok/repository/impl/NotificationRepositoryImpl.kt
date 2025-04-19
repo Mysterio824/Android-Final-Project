@@ -1,16 +1,61 @@
 package com.androidfinalproject.hacktok.repository.impl
 
+import android.util.Log
 import com.androidfinalproject.hacktok.model.Notification
 import com.androidfinalproject.hacktok.repository.NotificationRepository
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class NotificationRepositoryImpl @Inject constructor(
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
 ) : NotificationRepository {
     private val collection = firestore.collection("notifications")
+    private val TAG = "NotificationRepository"
+
+    override fun observeNotifications(userId: String): Flow<List<Notification>> = callbackFlow {
+        Log.d(TAG, "Setting up notification listener for user: $userId")
+        val query = collection.whereEqualTo("userId", userId)
+            .orderBy("createdAt", Query.Direction.ASCENDING)
+
+        val listener = query.addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                Log.e(TAG, "Error listening for notification updates for user $userId: ${error.message}", error)
+                close(error)
+                return@addSnapshotListener
+            }
+
+            if (snapshot == null) {
+                 Log.w(TAG, "Received null snapshot for user $userId notification query.")
+                 return@addSnapshotListener
+            }
+
+            try {
+                val allNotifications = snapshot.documents.mapNotNull { doc ->
+                    try {
+                        doc.toObject(Notification::class.java)?.copy(id = doc.id)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error parsing notification document ${doc.id}: ${e.message}", e)
+                        null
+                    }
+                }
+                Log.d(TAG, "Emitting ${allNotifications.size} notifications for user $userId")
+                trySend(allNotifications)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error processing notification snapshot for user $userId: ${e.message}", e)
+                trySend(emptyList())
+            }
+        }
+
+        awaitClose {
+            Log.d(TAG, "Closing notification listener for user: $userId")
+            listener.remove()
+        }
+    }
 
     // Thêm thông báo mới
     override suspend fun addNotification(notification: Notification): String {
@@ -25,10 +70,9 @@ class NotificationRepositoryImpl @Inject constructor(
         return snapshot.toObject(Notification::class.java)
     }
 
-    // Lấy danh sách thông báo của một người dùng
     override suspend fun getNotificationsByUser(userId: String): List<Notification> {
         val snapshot = collection.whereEqualTo("userId", userId)
-            .orderBy("createdAt", Query.Direction.DESCENDING).get().await()
+            .orderBy("createdAt", Query.Direction.ASCENDING).get().await()
         return snapshot.toObjects(Notification::class.java)
     }
 

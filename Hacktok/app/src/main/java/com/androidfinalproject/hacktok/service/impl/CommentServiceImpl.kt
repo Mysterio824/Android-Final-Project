@@ -24,7 +24,7 @@ class CommentServiceImpl @Inject constructor(
     private val commentRepository: CommentRepository,
     private val userRepository: UserRepository,
     private val postRepository: PostRepository,
-    private val fcmService: FcmService
+    private val fcmService: FcmService,
 ) : CommentService {
 
     private val TAG = "CommentServiceImpl"
@@ -41,22 +41,17 @@ class CommentServiceImpl @Inject constructor(
     override fun observeCommentsForPost(
         postId: String,
         parentCommentId: String?,
-        limit: Int,
         sortAscending: Boolean
     ): Flow<Result<List<Comment>>> {
-        Log.d(TAG, "Starting observeCommentsForPost - postId: $postId, parentComment: $parentCommentId, limit: $limit")
-        
         return commentRepository.observeCommentsForPost(
             postId = postId,
             parentCommentId = parentCommentId,
-            limit = limit,
             sortAscending = sortAscending
         )
         .onEach { result ->
             when {
                 result.isSuccess -> {
                     val comments = result.getOrNull() ?: emptyList()
-                    Log.d(TAG, "Successfully received ${comments.size} comments for post $postId")
                 }
                 result.isFailure -> {
                     val error = result.exceptionOrNull()
@@ -75,7 +70,7 @@ class CommentServiceImpl @Inject constructor(
                     )
                 } catch (e: Exception) {
                     Log.e(TAG, "Error sorting comments", e)
-                    comments // Return unsorted if sorting fails
+                    comments
                 }
             }
         }
@@ -117,15 +112,13 @@ class CommentServiceImpl @Inject constructor(
                 postRepository.updatePost(postId, mapOf("commentCount" to post.commentCount + 1))
                 
                 // Send notification to post owner (if not the same user)
-                if (post.userId != user.id) {
-                    serviceScope.launch {
-                        fcmService.sendInteractionNotification(
-                            recipientUserId = post.userId,
-                            senderUserId = user.id,
-                            notificationType = NotificationType.POST_COMMENT,
-                            itemId = postId
-                        )
-                    }
+                serviceScope.launch {
+                    fcmService.sendInteractionNotification(
+                        recipientUserId = post.userId,
+                        senderUserId = user.id,
+                        notificationType = NotificationType.POST_COMMENT,
+                        itemId = postId
+                    )
                 }
             }
 
@@ -183,6 +176,14 @@ class CommentServiceImpl @Inject constructor(
                         notificationType = NotificationType.COMMENT_REPLY,
                         itemId = parentId
                     )
+                    post!!.id?.let {
+                        fcmService.sendInteractionNotification(
+                            recipientUserId = post.userId,
+                            senderUserId = user.id,
+                            notificationType = NotificationType.POST_COMMENT,
+                            itemId = it
+                        )
+                    }
                 }
             }
 
@@ -269,8 +270,7 @@ class CommentServiceImpl @Inject constructor(
 
             // If this is a parent comment, we should handle child comments
             if (comment.replyCount > 0) {
-                // For simplicity, we're not handling children deletion here
-                // In a real app, you would either delete all children or mark this as deleted
+                //TODO
             }
 
             // Delete the comment

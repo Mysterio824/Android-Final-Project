@@ -4,15 +4,15 @@ import android.util.Log
 import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.repository.UserRepository
 import com.androidfinalproject.hacktok.service.AuthService
+import com.androidfinalproject.hacktok.service.FcmService
 import com.google.firebase.auth.FirebaseAuth
-import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class AuthServiceImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
 ) : AuthService {
 
     private val TAG = "AuthService"
@@ -53,6 +53,7 @@ class AuthServiceImpl @Inject constructor(
     override suspend fun logout(): Boolean {
         return try {
             firebaseAuth.signOut()
+//            fcmService.removeFcmToken()
             true
         } catch (e: Exception) {
             Log.e(TAG, "Error signing out: ${e.message}")

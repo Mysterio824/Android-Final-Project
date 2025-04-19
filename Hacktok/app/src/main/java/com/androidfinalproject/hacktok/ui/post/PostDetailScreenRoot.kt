@@ -11,6 +11,7 @@ import com.androidfinalproject.hacktok.repository.PostRepository
 fun PostDetailScreenRoot(
     viewModel: PostDetailViewModel = hiltViewModel(),
     postId: String,
+    commentId: String? = null,
     onNavigateBack: () -> Unit,
     onUserProfileNavigate: (String?) -> Unit = {}
 ) {

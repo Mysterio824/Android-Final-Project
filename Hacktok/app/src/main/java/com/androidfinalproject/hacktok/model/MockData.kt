@@ -161,7 +161,7 @@ object MockData {
     }
 
 
-    fun generateRandomNotification(index: Int): Notification {
+    private fun generateRandomNotification(index: Int): Notification {
         // Generate a random notification type
         val types = NotificationType.entries.toTypedArray()
         val randomType = types[index % types.size]

@@ -20,32 +20,23 @@ class NotificationViewModel @Inject constructor(
     val state: StateFlow<NotificationState> = _state.asStateFlow()
 
     init {
-        loadNotifications()
+        viewModelScope.launch {
+            try {
+                _state.update { it.copy(isLoading = true, error = null) }
+                notificationService.observeMyNotifications().collect{notifications ->
+                    _state.update { it.copy(notifications = notifications, isLoading = false) }
+                }
+            } catch (e: Exception) {
+                _state.update { it.copy(error = e.message ?: "Failed to load notifications", isLoading = false) }
+            }
+        }
     }
 
     fun onAction(action: NotificationAction) {
         when (action) {
             is NotificationAction.OnMarkAsRead -> markNotificationAsRead(action.notificationId)
             is NotificationAction.OnDeleteNotification -> deleteNotification(action.notificationId)
-            is NotificationAction.OnRefresh -> loadNotifications(true)
             else -> {}
-        }
-    }
-
-    private fun loadNotifications(forceRefresh: Boolean = false) {
-        if (!forceRefresh && state.value.notifications.isNotEmpty() && !state.value.isLoading) {
-            // Maybe still refresh if data is old?
-            // return
-        }
-        
-        viewModelScope.launch {
-            try {
-                _state.update { it.copy(isLoading = true, error = null) }
-                val notifications = notificationService.getMyNotifications()
-                _state.update { it.copy(notifications = notifications, isLoading = false) }
-            } catch (e: Exception) {
-                _state.update { it.copy(error = e.message ?: "Failed to load notifications", isLoading = false) }
-            }
         }
     }
 

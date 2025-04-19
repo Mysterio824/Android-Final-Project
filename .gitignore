@@ -11,6 +11,8 @@
 /.idea/deploymentTargetSelector.xml
 /.idea/vcs.xml
 /.idea/runConfigurations.xml
+node_modules/
+package-lock.json
 
 # macOS system files
 .DS_Store

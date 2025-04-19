@@ -114,17 +114,19 @@ dependencies {
 
     // Google Play Services - Add necessary ones back without versions for BOM management
     implementation("com.google.android.gms:play-services-auth:21.3.0")
+    implementation("com.google.android.gms:play-services-base:18.7.0")
     // implementation("com.google.android.gms:play-services-base:18.3.0") // Base might be transitively included
     // implementation("com.google.android.gms:play-services-identity:18.0.1") // Needed?
     
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:33.12.0"))
-    implementation("com.google.firebase:firebase-messaging:24.1.1")
+    implementation("com.google.firebase:firebase-messaging-ktx")
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.firebase:firebase-analytics-ktx")
     implementation("com.google.firebase:firebase-database-ktx")
     implementation("com.google.firebase:firebase-storage-ktx")
+    implementation("com.google.firebase:firebase-functions-ktx")
 
     // Keep Credentials dependencies if needed and compatible, otherwise remove. Check Firebase/GMS docs.
     implementation(libs.androidx.credentials)
@@ -132,5 +134,8 @@ dependencies {
     implementation(libs.googleid)
 
     implementation("com.google.accompanist:accompanist-permissions:0.32.0")
+
+    // OkHttp for network communication
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
 }
 

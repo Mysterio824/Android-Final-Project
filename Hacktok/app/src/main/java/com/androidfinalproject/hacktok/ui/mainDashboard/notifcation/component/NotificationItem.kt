@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import com.androidfinalproject.hacktok.model.Notification
 import com.androidfinalproject.hacktok.model.enums.NotificationType
 import com.androidfinalproject.hacktok.ui.commonComponent.ProfileImage
+import com.androidfinalproject.hacktok.ui.mainDashboard.notifcation.NotificationAction
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -47,6 +48,7 @@ fun NotificationItem(
     notification: Notification,
     onUserClick: (String) -> Unit,
     onPostClick: (String) -> Unit,
+    onCommentClick: (String) -> Unit,
     onMarkAsRead: (String) -> Unit,
     onDelete: (String) -> Unit
 ) {
@@ -69,12 +71,12 @@ fun NotificationItem(
                 .clickable {
                     notification.id?.let { onMarkAsRead(it) }
                     when (notification.type) {
-                        NotificationType.FRIEND_REQUEST,
+                        NotificationType.FRIEND_REQUEST -> notification.senderId?.let { onUserClick(it) }
                         NotificationType.FRIEND_ACCEPT -> notification.senderId?.let { onUserClick(it) }
-                        NotificationType.POST_LIKE,
+                        NotificationType.POST_LIKE -> notification.relatedId?.let { onPostClick(it) }
                         NotificationType.POST_COMMENT -> notification.relatedId?.let { onPostClick(it) }
-                        NotificationType.COMMENT_REPLY,
-                        NotificationType.COMMENT_LIKE -> notification.relatedId?.let { onPostClick(it) }
+                        NotificationType.COMMENT_REPLY -> notification.relatedId?.let { onCommentClick(it) }
+                        NotificationType.COMMENT_LIKE -> notification.relatedId?.let { onCommentClick(it) }
                         NotificationType.ADMIN_NOTIFICATION -> {
                             notification.actionUrl?.let { _ ->
                                 // Handle action URL

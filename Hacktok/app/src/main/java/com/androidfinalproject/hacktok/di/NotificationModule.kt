@@ -23,8 +23,8 @@ abstract class NotificationModule {
     @Binds
     @Singleton
     abstract fun bindNotificationService(notificationServiceImpl: NotificationServiceImpl): NotificationService
-    
+
     @Binds
     @Singleton
     abstract fun bindFcmService(fcmServiceImpl: FcmServiceImpl): FcmService
-} 
+}

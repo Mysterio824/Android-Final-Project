@@ -1,6 +1,7 @@
 package com.androidfinalproject.hacktok.service.impl
 
 import android.util.Log
+import com.androidfinalproject.hacktok.model.Comment
 import com.androidfinalproject.hacktok.model.Notification
 import com.androidfinalproject.hacktok.model.enums.NotificationType
 import com.androidfinalproject.hacktok.repository.NotificationRepository
@@ -8,8 +9,11 @@ import com.androidfinalproject.hacktok.repository.UserRepository // To get sende
 import com.androidfinalproject.hacktok.service.AuthService
 import com.androidfinalproject.hacktok.service.NotificationService
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -92,20 +96,24 @@ class NotificationServiceImpl @Inject constructor(
         }
     }
 
-    override fun observeMyNotifications(): Flow<List<Notification>> {
-        // TODO: Implement observation using callbackFlow in Repository or Service
-        // For now, returning a flow that emits the current list once
-        return flow {
-            emit(getMyNotifications())
+    override suspend fun observeMyNotifications(): Flow<List<Notification>> {
+        val currentUserId = authService.getCurrentUserId()
+        return if (currentUserId != null) {
+            // Call the repository's observeNotifications method
+            notificationRepository.observeNotifications(currentUserId)
+                .catch { e -> 
+                    // Log error and emit empty list if the flow fails
+                    Log.e(TAG, "Error observing notifications for user $currentUserId: ${e.message}", e)
+                    emit(emptyList())
+                }
+        } else {
+            // Return an empty flow if user is not logged in
+            Log.w(TAG, "User not logged in, cannot observe notifications.")
+            emptyFlow()
         }
-        // Alternatively, return emptyFlow() if observation is not yet supported
-        // return emptyFlow()
     }
 
     override suspend fun markNotificationAsRead(notificationId: String): Boolean {
-        // We don't necessarily need the current user ID here as the repository
-        // operates directly on the notificationId which should be unique.
-        // However, adding a check could prevent accidental marking if needed, but complicates the interface.
         return try {
             notificationRepository.markAsRead(notificationId)
             true
