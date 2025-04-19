@@ -138,7 +138,8 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
             exitTransition = { slideFadeOutToLeft() }
         ){
             CurrentProfileScreenRoot (
-                onPostClickNavigation = { navController.navigate("${MainRoute.PostDetail.route}/$it") },
+                onPostClickNavigation = {
+                    navController.navigate("${MainRoute.PostDetail.route}/$it") },
                 onPostEditNavigation = { postId ->
                     navController.navigate("${MainRoute.NewPost.BASE_ROUTE}?postId=$postId")
                 },

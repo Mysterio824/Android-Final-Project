@@ -19,12 +19,17 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.androidfinalproject.hacktok.R
 import com.androidfinalproject.hacktok.model.MockData
+import com.androidfinalproject.hacktok.model.Post
+import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.ui.commonComponent.PostContent
 import com.androidfinalproject.hacktok.ui.commonComponent.ProfileImage
 import com.androidfinalproject.hacktok.ui.commonComponent.PostOptionsContent
+import com.androidfinalproject.hacktok.ui.commonComponent.SharePostDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,6 +37,7 @@ fun CurrentProfileScreen(
     state: CurrentProfileState,
     onAction: (CurrentProfileAction) -> Unit
 ) {
+
     var selectPostId by remember { mutableStateOf<String?>(null) }
 
     val bottomSheetState = rememberModalBottomSheetState(
@@ -110,18 +116,36 @@ fun CurrentProfileScreen(
                         items(state.posts.filter { !it.id.isNullOrBlank() }) { post ->
                             PostContent(
                                 post = post,
+                                fullName = state.user.fullName,
                                 onPostClick = { onAction(CurrentProfileAction.OnPostClick(post)) },
                                 onToggleLike = { /* Handle like toggle */ },
                                 onComment = { onAction(CurrentProfileAction.OnPostClick(post)) },
-                                onShare = { /* Handle share */ },
+                                onShare = {
+                                    onAction(CurrentProfileAction.UpdateSharePost(post))
+                                },
                                 onOptionsClick = { selectPostId = post.id },
                                 onUserClick = { onAction(CurrentProfileAction.OnUserClick(post.userId)) },
                             )
                         }
                     }
+
+                    if (state.showShareDialog && state.postToShare != null) {
+                        SharePostDialog(
+                            userName = state.user.fullName ?: "Unknown",
+                            userAvatar = painterResource(id = R.drawable.profile_placeholder), // Replace with actual avatar if you have it
+                            onDismiss = { onAction(CurrentProfileAction.DismissShareDialog) },
+                            onSubmit = { caption, privacy ->
+                                // Handle the share logic here, e.g., call onAction
+                                onAction(CurrentProfileAction.OnSharePost(post = state.postToShare, caption = caption, privacy = privacy))
+                                onAction(CurrentProfileAction.DismissShareDialog)
+                            }
+                        )
+                    }
                 }
             }
         }
+
+
 
         if (selectPostId != null) {
             ModalBottomSheet(
@@ -142,7 +166,7 @@ fun CurrentProfileScreen(
 
 @Composable
 private fun ProfileHeader(
-    user: com.androidfinalproject.hacktok.model.User,
+    user: User,
     friendCount: Int,
     onFriendListCLick: () -> Unit,
 ) {

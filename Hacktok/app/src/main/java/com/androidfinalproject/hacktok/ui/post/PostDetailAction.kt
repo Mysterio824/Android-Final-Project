@@ -1,7 +1,9 @@
 package com.androidfinalproject.hacktok.ui.post
 
+import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.model.enums.ReportCause
 import com.androidfinalproject.hacktok.model.enums.ReportType
+import com.androidfinalproject.hacktok.ui.newPost.PRIVACY
 
 sealed class PostDetailAction {
     data class OnUserClick(val userId: String?) : PostDetailAction()
@@ -26,6 +28,8 @@ sealed class PostDetailAction {
     data class UnLikeComment(val commentId: String?) : PostDetailAction()
     data class SelectCommentToReply(val commentId: String) : PostDetailAction()
     data class DeleteComment(val commentId: String) : PostDetailAction()
-
+    data object ShowShareDialog : PostDetailAction()
+    data object DismissShareDialog : PostDetailAction()
+    data class OnSharePost(val post: Post, val caption: String, val privacy: PRIVACY) : PostDetailAction()
     data object NavigateBack : PostDetailAction()
 }

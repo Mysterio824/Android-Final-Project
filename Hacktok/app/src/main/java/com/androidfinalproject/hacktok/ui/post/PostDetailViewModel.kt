@@ -7,9 +7,11 @@ import com.androidfinalproject.hacktok.model.Comment
 import com.androidfinalproject.hacktok.model.enums.ReportCause
 import com.androidfinalproject.hacktok.model.enums.ReportType
 import com.androidfinalproject.hacktok.repository.PostRepository
+import com.androidfinalproject.hacktok.repository.PostShareRepository
 import com.androidfinalproject.hacktok.service.AuthService
 import com.androidfinalproject.hacktok.service.CommentService
 import com.androidfinalproject.hacktok.service.ReportService
+import com.androidfinalproject.hacktok.ui.currentProfile.CurrentProfileState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +23,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PostDetailViewModel @Inject constructor(
+    private val postShareRepository: PostShareRepository,
     private val postRepository: PostRepository,
     private val authService: AuthService,
     private val reportService: ReportService,
@@ -32,6 +35,21 @@ class PostDetailViewModel @Inject constructor(
 
     fun onAction(action: PostDetailAction) {
         when (action) {
+            is PostDetailAction.OnSharePost -> {
+                viewModelScope.launch {
+                    try {
+                        postShareRepository.sharePost(
+                            postId = action.post.id ?: return@launch,
+                            caption = action.caption,
+                            privacy = action.privacy.name,
+                        )
+                    } catch (e: Exception) {
+                        Log.d("ERROR", e.toString())
+                    }
+                }
+            }
+            is PostDetailAction.DismissShareDialog -> _state.update { it.copy(showShareDialog = false) }
+            is PostDetailAction.ShowShareDialog -> _state.update { it.copy(showShareDialog = true) }
             is PostDetailAction.LoadPost -> loadPost(action.postId)
             is PostDetailAction.LoadComments -> loadComments()
             is PostDetailAction.ToggleLike -> toggleLike()
@@ -85,7 +103,7 @@ class PostDetailViewModel @Inject constructor(
             _state.update { it.copy(error = "Cannot load comments: post ID is missing") }
             return
         }
-        
+
         viewModelScope.launch {
             Log.d(tag, "Starting to load comments for post: $postId")
             _state.update { it.copy(isLoadingComments = true, error = null) }
@@ -97,38 +115,38 @@ class PostDetailViewModel @Inject constructor(
                     parentCommentId = null, // Only top-level comments
                     limit = 100
                 )
-                .catch { error ->
-                    Log.e(tag, "Error in comment flow", error)
-                    _state.update { 
-                        it.copy(
-                            isLoadingComments = false,
-                            error = "Failed to load comments: ${error.message}"
-                        ) 
-                    }
-                }
-                .collect { result ->
-                    result.fold(
-                        onSuccess = { comments ->
-                            Log.d(tag, "Successfully loaded ${comments.size} comments")
-                            _state.update { 
-                                it.copy(
-                                    comments = comments, 
-                                    isLoadingComments = false, 
-                                    error = null
-                                ) 
-                            }
-                        },
-                        onFailure = { error ->
-                            Log.e(tag, "Error loading comments", error)
-                            _state.update { 
-                                it.copy(
-                                    isLoadingComments = false,
-                                    error = "Failed to load comments: ${error.message}"
-                                ) 
-                            }
+                    .catch { error ->
+                        Log.e(tag, "Error in comment flow", error)
+                        _state.update {
+                            it.copy(
+                                isLoadingComments = false,
+                                error = "Failed to load comments: ${error.message}"
+                            )
                         }
-                    )
-                }
+                    }
+                    .collect { result ->
+                        result.fold(
+                            onSuccess = { comments ->
+                                Log.d(tag, "Successfully loaded ${comments.size} comments")
+                                _state.update {
+                                    it.copy(
+                                        comments = comments,
+                                        isLoadingComments = false,
+                                        error = null
+                                    )
+                                }
+                            },
+                            onFailure = { error ->
+                                Log.e(tag, "Error loading comments", error)
+                                _state.update {
+                                    it.copy(
+                                        isLoadingComments = false,
+                                        error = "Failed to load comments: ${error.message}"
+                                    )
+                                }
+                            }
+                        )
+                    }
             } catch (e: Exception) {
                 Log.e(tag, "Exception in loadComments", e)
                 _state.update {
@@ -196,12 +214,12 @@ class PostDetailViewModel @Inject constructor(
             Log.e(tag, "Cannot like comment: comment ID is null")
             return
         }
-        
+
         viewModelScope.launch {
             try {
                 if(isLiking) commentService.likeComment(commentId)
                 else commentService.unlikeComment(commentId)
-                
+
                 // The likes will be updated automatically through the observeCommentsForPost Flow
             } catch (e: Exception) {
                 Log.e(tag, "Error liking comment", e)
