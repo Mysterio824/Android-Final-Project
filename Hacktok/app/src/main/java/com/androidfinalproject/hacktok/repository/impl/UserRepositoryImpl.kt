@@ -356,4 +356,16 @@ class UserRepositoryImpl @Inject constructor(
             emptyList()
         }
     }
+
+    override suspend fun updateUserFcmToken(userId: String, token: String?) {
+        try {
+            val updates = mapOf("fcmToken" to token) // Field name in Firestore
+            usersCollection.document(userId).update(updates).await()
+            Log.d("UserRepository", "FCM token updated for user $userId")
+        } catch (e: Exception) {
+            // Handle error appropriately (log, throw custom exception, etc.)
+            Log.e("UserRepository", "Error updating FCM token for user $userId", e)
+            throw Exception("Failed to update FCM token: ${e.message}", e)
+        }
+    }
 } 

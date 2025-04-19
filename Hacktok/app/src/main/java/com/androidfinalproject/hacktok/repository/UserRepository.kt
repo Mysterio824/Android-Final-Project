@@ -21,7 +21,8 @@ interface UserRepository {
     suspend fun getFollowingCount(): Int
     suspend fun getVideosCount(): Int
     suspend fun searchUsers(query: String): List<User>
-    
+    suspend fun updateUserFcmToken(userId: String, token: String?) // Add this
+
     // New methods required by RelationshipRepository
     suspend fun getUsersByIds(userIds: List<String>): List<User>
     suspend fun getAllUsers(): List<User>

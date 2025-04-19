@@ -134,9 +134,11 @@ fun PostDetailScreen(
                             isSelected = state.commentIdReply == comment.id,
                             allComments = state.comments,
                             onLikeComment = { onAction(PostDetailAction.LikeComment(it)) },
+                            onUnLikeComment = { onAction(PostDetailAction.UnLikeComment(it)) },
                             onCommentLongPress = { selectedComment = comment },
                             onUserClick = { onAction(PostDetailAction.OnUserClick(it)) },
-                            onReplyClick = { onAction(PostDetailAction.SelectCommentToReply(it)) }
+                            onReplyClick = { onAction(PostDetailAction.SelectCommentToReply(it)) },
+                            currentUserId = state.currentUser!!.id!!
                         )
                     }
                 }

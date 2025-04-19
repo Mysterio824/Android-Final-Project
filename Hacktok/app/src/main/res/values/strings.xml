@@ -1,3 +1,6 @@
 <resources>
-    <string name="app_name">HackTok</string>
+    <string name="app_name">Hacktok</string>
+    <string name="default_notification_channel_id" translatable="false">Default Channel</string>
+    <string name="default_notification_channel_name" translatable="true">General Notifications</string>
+    <string name="default_notification_channel_description" translatable="true">Notifications for likes, comments, etc.</string> <!-- Add this -->
 </resources>
