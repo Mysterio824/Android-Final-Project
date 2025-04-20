@@ -11,6 +11,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.QuerySnapshot
+import java.util.LinkedList
 
 @Singleton
 class UserRepositoryImpl @Inject constructor(
@@ -19,6 +20,10 @@ class UserRepositoryImpl @Inject constructor(
 ) : UserRepository {
     private val TAG = "UserRepository"
     private val usersCollection = firestore.collection("users")
+    
+    // Search history - store in memory
+    private val searchHistoryLimit = 10
+    private val searchHistory = LinkedList<String>()
 
     override suspend fun addUser(user: User): String {
         val documentRef = usersCollection.add(user).await()
@@ -273,44 +278,16 @@ class UserRepositoryImpl @Inject constructor(
         return try {
             val lowercaseQuery = query.lowercase()
             
-            // Search in username
-            val usernameSnapshot = usersCollection
-                .whereGreaterThanOrEqualTo("username", lowercaseQuery)
-                .whereLessThanOrEqualTo("username", lowercaseQuery + "\uf8ff")
-                .get()
-                .await()
-
-            // Search in email
-            val emailSnapshot = usersCollection
-                .whereGreaterThanOrEqualTo("email", lowercaseQuery)
-                .whereLessThanOrEqualTo("email", lowercaseQuery + "\uf8ff")
-                .get()
-                .await()
-
-            // Search in full name
-            val fullNameSnapshot = usersCollection
-                .whereGreaterThanOrEqualTo("fullName", lowercaseQuery)
-                .whereLessThanOrEqualTo("fullName", lowercaseQuery + "\uf8ff")
-                .get()
-                .await()
-
-            // Use helper function to map results and ensure ID is set
-            val usernameUsers = mapSnapshotToUsers(usernameSnapshot)
-            val emailUsers = mapSnapshotToUsers(emailSnapshot)
-            val fullNameUsers = mapSnapshotToUsers(fullNameSnapshot)
-
-            // Combine results and remove duplicates using the now non-null ID
-            (usernameUsers + emailUsers + fullNameUsers).distinctBy { it.id }
-
-            // The final filtering might be unnecessary now if the query is precise enough,
-            // but keep it for now if needed for broader matching.
-            /* 
-            .filter { user ->
+            // Get all users first
+            val allUsers = getAllUsers()
+            
+            // Filter users in memory
+            allUsers.filter { user ->
                 user.username?.lowercase()?.contains(lowercaseQuery) == true ||
                 user.email.lowercase().contains(lowercaseQuery) ||
-                user.fullName?.lowercase()?.contains(lowercaseQuery) == true
+                user.fullName?.lowercase()?.contains(lowercaseQuery) == true ||
+                user.bio?.lowercase()?.contains(lowercaseQuery) == true
             }
-            */
         } catch (e: Exception) {
             Log.e(TAG, "Error searching users with query: $query", e)
             emptyList()
@@ -366,6 +343,94 @@ class UserRepositoryImpl @Inject constructor(
             // Handle error appropriately (log, throw custom exception, etc.)
             Log.e("UserRepository", "Error updating FCM token for user $userId", e)
             throw Exception("Failed to update FCM token: ${e.message}", e)
+        }
+    }
+
+    // Search history implementation
+    override suspend fun addSearchQuery(query: String) {
+        try {
+            // Remove if already exists to avoid duplicates
+            searchHistory.remove(query)
+            
+            // Add to the front of the list
+            searchHistory.addFirst(query)
+            
+            // Keep only the most recent queries
+            while (searchHistory.size > searchHistoryLimit) {
+                searchHistory.removeLast()
+            }
+            
+            // Store in Firestore for persistence across app restarts
+            val currentUser = firebaseAuth.currentUser
+            if (currentUser != null) {
+                try {
+                    // First check if user document exists
+                    val userDoc = usersCollection.document(currentUser.uid).get().await()
+                    if (userDoc.exists()) {
+                        usersCollection.document(currentUser.uid)
+                            .update("searchHistory", searchHistory.toList())
+                            .await()
+                    } else {
+                        Log.d(TAG, "User document not found, cannot save search history")
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error saving search history", e)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error in addSearchQuery", e)
+        }
+    }
+    
+    override suspend fun getSearchHistory(): List<String> {
+        try {
+            val currentUser = firebaseAuth.currentUser
+            if (currentUser != null) {
+                try {
+                    val userDoc = usersCollection.document(currentUser.uid).get().await()
+                    if (userDoc.exists()) {
+                        val user = userDoc.toObject(User::class.java)
+                        
+                        @Suppress("UNCHECKED_CAST")
+                        val storedHistory = user?.searchHistory
+                        
+                        if (storedHistory != null && storedHistory.isNotEmpty()) {
+                            // Update local cache
+                            searchHistory.clear()
+                            searchHistory.addAll(storedHistory)
+                            
+                            Log.d(TAG, "Retrieved search history: ${storedHistory.joinToString()}")
+                        } else {
+                            Log.d(TAG, "No search history found in user document")
+                        }
+                    } else {
+                        Log.d(TAG, "User document not found, returning empty search history")
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error loading search history from Firestore", e)
+                }
+            } else {
+                Log.d(TAG, "No current user, returning empty search history")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error in getSearchHistory", e)
+        }
+        
+        return searchHistory.toList()
+    }
+    
+    override suspend fun clearSearchHistory() {
+        searchHistory.clear()
+        
+        val currentUser = firebaseAuth.currentUser
+        if (currentUser != null) {
+            try {
+                usersCollection.document(currentUser.uid)
+                    .update("searchHistory", emptyList<String>())
+                    .await()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error clearing search history", e)
+            }
         }
     }
 } 

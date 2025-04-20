@@ -49,6 +49,7 @@ fun NotificationScreen(
                     notifications = state.notifications,
                     onUserClick = { userId -> onAction(NotificationAction.OnUserClick(userId)) },
                     onPostClick = { postId -> onAction(NotificationAction.OnPostClick(postId)) },
+                    onCommentClick = { commentId -> onAction(NotificationAction.OnCommentClick(commentId)) },
                     onMarkAsRead = { notificationId -> onAction(NotificationAction.OnMarkAsRead(notificationId)) },
                     onDelete = { notificationId -> onAction(NotificationAction.OnDeleteNotification(notificationId)) },
                     modifier = Modifier.fillMaxSize()

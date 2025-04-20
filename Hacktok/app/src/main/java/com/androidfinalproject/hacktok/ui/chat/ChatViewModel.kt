@@ -1,7 +1,12 @@
 package com.androidfinalproject.hacktok.ui.chat
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import android.content.Context
+import android.net.Uri
+import android.util.Log
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.androidfinalproject.hacktok.model.Media
 import com.androidfinalproject.hacktok.model.Message
 import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.repository.AuthRepository
@@ -12,6 +17,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.asRequestBody
+import org.json.JSONObject
+import java.io.File
 import java.util.Date
 import javax.inject.Inject
 
@@ -19,8 +31,9 @@ import javax.inject.Inject
 class ChatViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
     private val authRepository: AuthRepository,
-    private val userRepository: UserRepository
-) : ViewModel() {
+    private val userRepository: UserRepository,
+    application: Application
+) : AndroidViewModel(application) {
     private var otherUserId: String? = null
     
     private val _state = MutableStateFlow(ChatState())
@@ -79,6 +92,7 @@ class ChatViewModel @Inject constructor(
     fun onAction(action: ChatAction) {
         when (action) {
             is ChatAction.SendMessage -> sendMessage(action.message)
+            is ChatAction.SendImage -> sendImage(action.imageUri)
             is ChatAction.DeleteMessage -> deleteMessage(action.messageId)
             is ChatAction.LoadInitialMessages -> loadChat()
             is ChatAction.ToggleMute -> toggleMute()
@@ -109,6 +123,90 @@ class ChatViewModel @Inject constructor(
             } catch (e: Exception) {
                 _state.update { it.copy(error = "Failed to send message: ${e.message}") }
             }
+        }
+    }
+
+    private fun sendImage(imageUri: String) {
+        viewModelScope.launch {
+            try {
+                val currentUser = authRepository.getCurrentUser() ?: return@launch
+                val chatId = chatRepository.getOrCreateChat(currentUser.uid, otherUserId!!)
+
+                // Upload image to Cloudinary
+                val imageUrl = uploadToCloudinary(imageUri) ?: run {
+                    _state.update { it.copy(error = "Failed to upload image") }
+                    return@launch
+                }
+
+                val message = Message(
+                    senderId = currentUser.uid,
+                    content = "",
+                    createdAt = Date(),
+                    media = Media(
+                        type = "image",
+                        url = imageUrl
+                    )
+                )
+
+                chatRepository.sendMessage(chatId, message)
+            } catch (e: Exception) {
+                _state.update { it.copy(error = "Failed to send image: ${e.message}") }
+            }
+        }
+    }
+
+    private suspend fun uploadToCloudinary(imageUri: String): String? = withContext(Dispatchers.IO) {
+        try {
+            val context = getApplication<Application>().applicationContext
+            val uri = Uri.parse(imageUri)
+            val tempFile = copyUriToTempFile(context, uri) ?: return@withContext null
+
+            val cloudName = "dbeximude"
+            val uploadPreset = "Kotlin"
+
+            val client = OkHttpClient()
+            val requestBody = MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("file", tempFile.name, tempFile.asRequestBody("image/*".toMediaTypeOrNull()))
+                .addFormDataPart("upload_preset", uploadPreset)
+                .build()
+
+            val request = Request.Builder()
+                .url("https://api.cloudinary.com/v1_1/$cloudName/image/upload")
+                .post(requestBody)
+                .build()
+
+            val response = client.newCall(request).execute()
+            val responseBody = response.body?.string()
+            
+            tempFile.delete()
+
+            if (response.isSuccessful && responseBody != null) {
+                val json = JSONObject(responseBody)
+                val url = json.getString("secure_url")
+                Log.d("Cloudinary", "✅ Uploaded to: $url")
+                url
+            } else {
+                Log.e("Cloudinary", "Upload failed: ${response.code} ${response.message}")
+                null
+            }
+        } catch (e: Exception) {
+            Log.e("Cloudinary", "Upload exception", e)
+            null
+        }
+    }
+
+    private fun copyUriToTempFile(context: Context, uri: Uri): File? {
+        return try {
+            val inputStream = context.contentResolver.openInputStream(uri)
+            val tempFile = File.createTempFile("image", ".jpg", context.cacheDir)
+            tempFile.outputStream().use { output ->
+                inputStream?.copyTo(output)
+            }
+            tempFile
+        } catch (e: Exception) {
+            Log.e("ChatViewModel", "Error creating temp file", e)
+            null
         }
     }
 
@@ -143,16 +241,16 @@ class ChatViewModel @Inject constructor(
         // TODO: Implement mute functionality in repository
     }
 
-    private fun blockUser() {
-        // TODO: Implement block user functionality
-    }
-
     private fun createGroup() {
         // TODO: Implement group creation
     }
 
     private fun findInChat() {
         // TODO: Implement chat search
+    }
+
+    private fun blockUser() {
+        // TODO: Implement block user functionality
     }
 }
 

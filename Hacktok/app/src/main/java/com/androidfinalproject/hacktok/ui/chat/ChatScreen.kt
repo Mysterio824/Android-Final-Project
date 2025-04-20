@@ -14,8 +14,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.ui.chat.component.ChatBubble
+import com.androidfinalproject.hacktok.ui.chat.component.MessageInput
 import com.androidfinalproject.hacktok.ui.currentProfile.component.ChatTopBar
-import com.androidfinalproject.hacktok.ui.currentProfile.component.MessageInput
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 
 @Composable
@@ -48,7 +48,8 @@ fun ChatScreen(
                             onAction(ChatAction.SendMessage(messageText.text))
                             messageText = TextFieldValue("")
                         }
-                    }
+                    },
+                    onAction = onAction
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }

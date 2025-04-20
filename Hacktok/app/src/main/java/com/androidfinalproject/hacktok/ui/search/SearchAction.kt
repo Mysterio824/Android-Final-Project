@@ -9,4 +9,10 @@ sealed class SearchAction {
     data class OnUserClick(val user: User) : SearchAction()
     data class OnPostClick(val post: Post) : SearchAction()
     object OnNavigateBack : SearchAction()
+    
+    // Search history actions
+    object LoadSearchHistory : SearchAction()
+    object ClearSearchHistory : SearchAction()
+    data class OnHistoryItemClick(val query: String) : SearchAction()
+    object ToggleSearchHistoryVisibility : SearchAction()
 }

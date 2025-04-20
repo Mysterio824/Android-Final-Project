@@ -2,6 +2,7 @@ package com.androidfinalproject.hacktok.ui.chat
 
 sealed class ChatAction {
     data class SendMessage(val message: String) : ChatAction()
+    data class SendImage(val imageUri: String) : ChatAction()
     data class DeleteMessage(val messageId: String?) : ChatAction()
     data object LoadInitialMessages : ChatAction()
     data object ToggleMute : ChatAction()

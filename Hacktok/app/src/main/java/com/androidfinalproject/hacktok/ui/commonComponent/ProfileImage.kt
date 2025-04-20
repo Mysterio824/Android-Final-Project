@@ -1,8 +1,10 @@
 package com.androidfinalproject.hacktok.ui.commonComponent
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -16,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.androidfinalproject.hacktok.R
 
-
 @Composable
 fun ProfileImage(
     imageUrl: String?,
@@ -26,7 +27,9 @@ fun ProfileImage(
     Box(
         modifier = Modifier
             .size(size)
+            .aspectRatio(1f)
             .clip(CircleShape)
+            .background(androidx.compose.material3.MaterialTheme.colorScheme.surface)
     ) {
         val painter = rememberAsyncImagePainter(
             model = imageUrl.takeIf { !it.isNullOrBlank() },
@@ -37,7 +40,7 @@ fun ProfileImage(
 
         Image(
             painter = painter,
-            contentDescription = "",
+            contentDescription = "Profile Image",
             modifier = Modifier
                 .fillMaxSize()
                 .clickable(onClick = onClick),
