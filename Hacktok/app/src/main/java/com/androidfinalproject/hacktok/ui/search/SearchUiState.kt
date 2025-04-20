@@ -12,4 +12,6 @@ data class SearchUiState(
     val selectedTabIndex: Int = 0,
     val isLoading: Boolean = false,
     val error: String? = null,
+    val searchHistory: List<String> = emptyList(),
+    val showSearchHistory: Boolean = true
 )

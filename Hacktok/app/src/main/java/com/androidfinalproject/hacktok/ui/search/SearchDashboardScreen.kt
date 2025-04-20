@@ -10,10 +10,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.SecondaryIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,6 +39,11 @@ fun SearchDashboardScreen(
     onAction: (SearchAction) -> Unit,
 ) {
     val tabs = listOf("Accounts", "Tags", "Places", "Posts")
+    
+    // Load search history when the screen is first displayed
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        onAction(SearchAction.LoadSearchHistory)
+    }
     
     BackHandler {
         onAction(SearchAction.OnNavigateBack)
@@ -90,79 +98,178 @@ fun SearchDashboardScreen(
             ) {}
         }
 
-        // Tab Row with custom indicator
-        TabRow(
-            selectedTabIndex = state.selectedTabIndex,
-            modifier = Modifier.fillMaxWidth(),
-            containerColor = MaterialTheme.colorScheme.background
-        ) {
-            tabs.forEachIndexed { index, title ->
-                Tab(
-                    selected = state.selectedTabIndex == index,
-                    onClick = { onAction(SearchAction.ChangeTab(index)) },
-                    text = { 
-                        Text(
-                            title, 
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontWeight = if (state.selectedTabIndex == index) 
-                                    FontWeight.Bold else FontWeight.Normal
-                            )
-                        ) 
-                    },
-                    selectedContentColor = MaterialTheme.colorScheme.primary,
-                    unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+        // Display search history when query is empty
+        if (state.searchQuery.isEmpty()) {
+            SearchHistorySection(
+                searchHistory = state.searchHistory,
+                onHistoryItemClick = { query -> onAction(SearchAction.OnHistoryItemClick(query)) },
+                onClearHistory = { onAction(SearchAction.ClearSearchHistory) }
+            )
+        } else {
+            // Tab Row with custom indicator
+            TabRow(
+                selectedTabIndex = state.selectedTabIndex,
+                modifier = Modifier.fillMaxWidth(),
+                containerColor = MaterialTheme.colorScheme.background
+            ) {
+                tabs.forEachIndexed { index, title ->
+                    Tab(
+                        selected = state.selectedTabIndex == index,
+                        onClick = { onAction(SearchAction.ChangeTab(index)) },
+                        text = { 
+                            Text(
+                                title, 
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontWeight = if (state.selectedTabIndex == index) 
+                                        FontWeight.Bold else FontWeight.Normal
+                                )
+                            ) 
+                        },
+                        selectedContentColor = MaterialTheme.colorScheme.primary,
+                        unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
-        }
 
-        // Content
-        Box(modifier = Modifier.fillMaxSize()) {
-            when {
-                state.isLoading -> {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        CircularProgressIndicator(
-                            color = MaterialTheme.colorScheme.primary
-                        )
+            // Content
+            Box(modifier = Modifier.fillMaxSize()) {
+                when {
+                    state.isLoading -> {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            CircularProgressIndicator(
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
-                }
-                state.error != null -> {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        Text(
-                            text = state.error,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
+                    state.error != null -> {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            Text(
+                                text = state.error,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
                     }
-                }
-                else -> {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(vertical = 8.dp)
-                    ) {
-                        when (state.selectedTabIndex) {
-                            0 -> items(state.filteredUsers) { user ->
-                                UserSearchItem(
-                                    user = user,
-                                    onClick = { onAction(SearchAction.OnUserClick(user)) }
-                                )
-                            }
-                            1, 2, 3 -> items(state.filteredPosts) { post ->
-                                PostSearchItem(
-                                    post = post,
-                                    onClick = { onAction(SearchAction.OnPostClick(post)) }
-                                )
+                    else -> {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(vertical = 8.dp)
+                        ) {
+                            when (state.selectedTabIndex) {
+                                0 -> items(state.filteredUsers) { user ->
+                                    UserSearchItem(
+                                        user = user,
+                                        onClick = { onAction(SearchAction.OnUserClick(user)) }
+                                    )
+                                }
+                                1, 2, 3 -> items(state.filteredPosts) { post ->
+                                    PostSearchItem(
+                                        post = post,
+                                        onClick = { onAction(SearchAction.OnPostClick(post)) }
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+fun SearchHistorySection(
+    searchHistory: List<String>,
+    onHistoryItemClick: (String) -> Unit,
+    onClearHistory: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "Lịch sử tìm kiếm",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            
+            if (searchHistory.isNotEmpty()) {
+                TextButton(onClick = onClearHistory) {
+                    Text(
+                        text = "Xóa tất cả",
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        if (searchHistory.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 32.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Không có lịch sử tìm kiếm",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        } else {
+            LazyColumn {
+                items(searchHistory) { query ->
+                    SearchHistoryItem(
+                        query = query,
+                        onClick = { onHistoryItemClick(query) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun SearchHistoryItem(
+    query: String,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = Icons.Default.History,
+            contentDescription = "Search History",
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(20.dp)
+        )
+        
+        Spacer(modifier = Modifier.width(16.dp))
+        
+        Text(
+            text = query,
+            style = MaterialTheme.typography.bodyMedium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
+        )
     }
 }
 

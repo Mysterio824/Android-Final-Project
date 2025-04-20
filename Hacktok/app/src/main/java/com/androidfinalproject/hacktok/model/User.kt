@@ -24,12 +24,13 @@ data class User(
     @PropertyName("following") val following: List<String> = emptyList(),
     @PropertyName("followerCount") val followerCount: Int = 0,
     @PropertyName("followingCount") val followingCount: Int = 0,
+    @PropertyName("searchHistory") val searchHistory: List<String> = emptyList(),
     val videosCount: Int = 0
 ) {
     // Constructor không tham số cho Firestore
     constructor() : this(
         null, null, "", null, Date(), true, UserRole.USER, null, null,
-        PrivacySettings(), null, "en", emptyList(), emptyList(), emptyList(), emptyList(), 0, 0, 0
+        PrivacySettings(), null, "en", emptyList(), emptyList(), emptyList(), emptyList(), 0, 0, emptyList(), 0
     )
 
     companion object {
@@ -53,6 +54,7 @@ data class User(
                 following = emptyList(),
                 followerCount = 0,
                 followingCount = 0,
+                searchHistory = emptyList(),
                 videosCount = 0
             )
         }

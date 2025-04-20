@@ -21,12 +21,24 @@ fun SearchDashboardScreenRoot(
         state = state,
         onAction = { action ->
             when (action) {
-                is SearchAction.OnPostClick -> onPostClick(action.post.id)
+                is SearchAction.OnPostClick -> {
+                    // First save the search term to history
+                    viewModel.onAction(action)
+                    // Then navigate to post
+                    onPostClick(action.post.id)
+                }
                 is SearchAction.OnUserClick -> {
+                    // First save the search term to history
+                    viewModel.onAction(action)
                     Log.d(TAG, "Navigating to User Profile with userId: ${action.user.id}")
                     onUserClick(action.user.id)
                 }
-                is SearchAction.OnNavigateBack -> onNavigateBack()
+                is SearchAction.OnNavigateBack -> {
+                    // First save the search term to history
+                    viewModel.onAction(action)
+                    // Then navigate back
+                    onNavigateBack()
+                }
                 else -> viewModel.onAction(action)
             }
         }
