@@ -2,32 +2,55 @@ package com.androidfinalproject.hacktok.ui.storydetail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.androidfinalproject.hacktok.model.Media
 import com.androidfinalproject.hacktok.model.Message
 import com.androidfinalproject.hacktok.model.Story
-import com.androidfinalproject.hacktok.ui.newPost.PRIVACY
-import com.androidfinalproject.hacktok.ui.newStory.NewStoryViewModel
+import com.androidfinalproject.hacktok.model.UserSnapshot
+import com.androidfinalproject.hacktok.repository.UserRepository
+import com.androidfinalproject.hacktok.service.StoryService
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Date
 import java.util.UUID
+import javax.inject.Inject
 
-class StoryDetailViewModel : ViewModel() {
+@HiltViewModel
+class StoryDetailViewModel @Inject constructor(
+    private val storyService: StoryService,
+    private val userRepository: UserRepository
+) : ViewModel() {
     private val _state = MutableStateFlow(StoryDetailState())
     val state = _state.asStateFlow()
 
     private var storyProgressJob: Job? = null
     private val storyDuration = 5000L // 5 seconds per story
 
+    private var storiesCache = listOf<Story>()
+    private var currentUserId: String? = null
+
+    init {
+        viewModelScope.launch {
+            // Initialize current user
+            try {
+                val user = userRepository.getCurrentUser()
+                currentUserId = user?.id
+                _state.update { it.copy(currentUser = user ?: UserSnapshot()) }
+            } catch (e: Exception) {
+                _state.update { it.copy(error = "Failed to load user: ${e.message}") }
+            }
+        }
+    }
+
     fun onAction(action: StoryDetailAction) {
         when (action) {
             is StoryDetailAction.SendMessage -> sendMessage(action.message)
             is StoryDetailAction.CloseStory -> {} // Handled by the parent
-            is StoryDetailAction.LoadStoryDetails -> loadStoryDetails()
+            is StoryDetailAction.LoadStoryDetails -> loadStoryDetails(action.userId)
             is StoryDetailAction.NextStory -> moveToNextStory()
             is StoryDetailAction.PreviousStory -> moveToPreviousStory()
             is StoryDetailAction.PauseStory -> pauseStory()
@@ -35,159 +58,138 @@ class StoryDetailViewModel : ViewModel() {
             is StoryDetailAction.ReportStory -> reportStory()
             is StoryDetailAction.NavigateToUserProfile -> {} // Handled by the parent
             is StoryDetailAction.DeleteStory -> deleteStory()
-            is StoryDetailAction.ViewStory -> viewStory()
+            is StoryDetailAction.ViewStory -> viewStory(action.storyId)
+            else -> {}
         }
     }
 
-    fun loadStoryDetails() {
+    fun loadStoryDetails(userId: String? = null) {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
             try {
-                // Get all stories including ones created by the user
-                val allStories = NewStoryViewModel.globalStories + createMockStories()
-                val filteredStories = filterStoriesByPrivacy(allStories)
-                val activeStories = filteredStories.filter { story ->
-                    story.expiresAt.after(Date()) // Only show non-expired stories
-                }
+                // If we have a specific user ID, get their stories
+                if (userId != null) {
+                    storyService.observeUserStories(userId).collectLatest { result ->
+                        if (result.isSuccess) {
+                            val stories = result.getOrNull() ?: emptyList()
+                            storiesCache = stories.filter { it.expiresAt.after(Date()) }
 
-                _state.update { currentState ->
-                    currentState.copy(
-                        story = activeStories.getOrNull(currentState.currentStoryIndex),
-                        totalStories = activeStories.size,
-                        isLoading = false
-                    )
-                }
+                            _state.update { currentState ->
+                                currentState.copy(
+                                    story = storiesCache.getOrNull(currentState.currentStoryIndex),
+                                    totalStories = storiesCache.size,
+                                    isLoading = false
+                                )
+                            }
 
-                startStoryProgressTimer()
+                            // View the current story
+                            state.value.story?.let { it.id?.let { it1 -> viewStory(it1) } }
+
+                            // Start the timer for story progress
+                            startStoryProgressTimer()
+                        } else {
+                            _state.update {
+                                it.copy(
+                                    error = "Failed to load stories: ${result.exceptionOrNull()?.message}",
+                                    isLoading = false
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    // Get active stories from user or for everyone
+                    storyService.observeActiveStories(
+                        forCurrentUserOnly = false,
+                        filterByPrivacy = true
+                    ).collectLatest { result ->
+                        if (result.isSuccess) {
+                            val stories = result.getOrNull() ?: emptyList()
+                            storiesCache = stories
+
+                            _state.update { currentState ->
+                                currentState.copy(
+                                    story = storiesCache.getOrNull(currentState.currentStoryIndex),
+                                    totalStories = storiesCache.size,
+                                    isLoading = false
+                                )
+                            }
+
+                            // View the current story
+                            state.value.story?.let { it.id?.let { it1 -> viewStory(it1) } }
+
+                            // Start the timer for story progress
+                            startStoryProgressTimer()
+                        } else {
+                            _state.update {
+                                it.copy(
+                                    error = "Failed to load stories: ${result.exceptionOrNull()?.message}",
+                                    isLoading = false
+                                )
+                            }
+                        }
+                    }
+                }
             } catch (e: Exception) {
                 _state.update { currentState ->
                     currentState.copy(
-                        error = "Could not load story: ${e.message}",
+                        error = "Could not load stories: ${e.message}",
                         isLoading = false
                     )
                 }
-            }
-        }
-    }
-
-    private fun filterStoriesByPrivacy(stories: List<Story>): List<Story> {
-        val currentUserId = _state.value.currentUser.id ?: "unknown"
-
-        return stories.filter { story ->
-            when (story.privacy) {
-                PRIVACY.PUBLIC -> true // Public stories are visible to all
-                PRIVACY.PRIVATE -> story.userId == currentUserId // Private stories only visible to owner
-                // Add more privacy options here if needed (e.g., FRIENDS)
-                PRIVACY.FRIENDS -> TODO()
             }
         }
     }
 
     private fun deleteStory() {
         _state.value.story?.let { currentStory ->
-            if (currentStory.userId == _state.value.currentUser.id) {
-                viewModelScope.launch {
-                    try {
-                        // Remove from global stories
-                        NewStoryViewModel.globalStories.removeIf { it.id == currentStory.id }
+            viewModelScope.launch {
+                try {
+                    val result = currentStory.id?.let { storyService.deleteStory(it) }
 
-                        // If there are more stories, move to next one, otherwise close
-                        if (_state.value.totalStories > 1) {
-                            moveToNextStory()
+                    if (result != null) {
+                        if (result.isSuccess) {
+                            // If there are more stories, move to next one, otherwise close
+                            if (_state.value.totalStories > 1) {
+                                moveToNextStory()
+                            } else {
+                                _state.update { it.copy(story = null) }
+                            }
                         } else {
-                            _state.update { it.copy(story = null) }
+                            _state.update {
+                                it.copy(error = "Failed to delete story: ${result.exceptionOrNull()?.message}")
+                            }
                         }
-                    } catch (e: Exception) {
-                        _state.update { it.copy(error = "Failed to delete story: ${e.message}") }
                     }
+                } catch (e: Exception) {
+                    _state.update { it.copy(error = "Failed to delete story: ${e.message}") }
                 }
             }
         }
     }
 
-    private fun viewStory() {
-        _state.value.story?.let { currentStory ->
-            val currentUserId = _state.value.currentUser.id ?: return
-            if (!currentStory.viewerIds.contains(currentUserId)) {
-                viewModelScope.launch {
-                    // In a real app, update story view count on server
-                    val updatedViewerIds = currentStory.viewerIds + currentUserId
-                    val updatedStory = currentStory.copy(viewerIds = updatedViewerIds)
+    private fun viewStory(storyId: String?) {
+        viewModelScope.launch {
+            try {
+                val result = storyService.viewStory(storyId.toString())
 
-                    // Update in global stories list
-                    val index = NewStoryViewModel.globalStories.indexOfFirst { it.id == currentStory.id }
-                    if (index != -1) {
-                        NewStoryViewModel.globalStories[index] = updatedStory
-                    }
-
-                    _state.update { it.copy(story = updatedStory) }
+                if (result.isFailure) {
+                    // Log error but don't update UI - non-critical operation
+                    println("Failed to mark story as viewed: ${result.exceptionOrNull()?.message}")
                 }
+            } catch (e: Exception) {
+                println("Error viewing story: ${e.message}")
             }
         }
     }
 
-    // Cập nhật mock stories để bao gồm privacy setting
-    private fun createMockStories(): List<Story> {
-        val now = Date()
-        val expiresAt = Date(now.time + 24 * 60 * 60 * 1000) // 24 hours later
-
-        return listOf(
-            Story(
-                id = "1",
-                userId = "user2",
-                userName = "user2",
-                userAvatar = null,
-                media = Media(
-                    type = "image",
-                    url = "https://example.com/story1.jpg",
-                    thumbnailUrl = "https://example.com/story1_thumb.jpg"
-                ),
-                createdAt = Date(System.currentTimeMillis() - 3600000),
-                expiresAt = expiresAt,
-                viewerIds = listOf("user3", "user4"),
-                privacy = PRIVACY.PUBLIC
-            ),
-            Story(
-                id = "2",
-                userId = "user2",
-                userName = "user2",
-                userAvatar = null,
-                media = Media(
-                    type = "image",
-                    url = "https://example.com/story2.jpg",
-                    thumbnailUrl = "https://example.com/story2_thumb.jpg"
-                ),
-                createdAt = Date(System.currentTimeMillis() - 1800000),
-                expiresAt = expiresAt,
-                viewerIds = listOf("user1", "user3"),
-                privacy = PRIVACY.PRIVATE // This will only be visible to user2
-            ),
-            Story(
-                id = "3",
-                userId = "user3",
-                userName = "user3",
-                userAvatar = "https://example.com/avatar3.jpg",
-                media = Media(
-                    type = "video",
-                    url = "https://example.com/story3.mp4",
-                    thumbnailUrl = "https://example.com/story3_thumb.jpg"
-                ),
-                createdAt = Date(System.currentTimeMillis() - 900000),
-                expiresAt = expiresAt,
-                viewerIds = listOf("user1", "user2"),
-                privacy = PRIVACY.PUBLIC
-            )
-        )
-    }
-
-    // Các phương thức còn lại giữ nguyên...
     private fun sendMessage(content: String) {
         if (content.isBlank()) return
+        val currentStory = _state.value.story ?: return
 
         val newMessage = Message(
             id = UUID.randomUUID().toString(),
-            senderId = _state.value.currentUser.id ?: "unknown",
+            senderId = currentUserId ?: "unknown",
             content = content,
             createdAt = Date(),
             isRead = false,
@@ -197,9 +199,8 @@ class StoryDetailViewModel : ViewModel() {
         )
 
         viewModelScope.launch {
-            // In a real app, send message to server
-
-            // Update state with new message
+            // In a real app, send message to server or messaging service
+            // For now, just update local state
             _state.update { currentState ->
                 currentState.copy(
                     messages = currentState.messages + newMessage
@@ -212,11 +213,9 @@ class StoryDetailViewModel : ViewModel() {
         _state.update { currentState ->
             if (currentState.currentStoryIndex < currentState.totalStories - 1) {
                 val newIndex = currentState.currentStoryIndex + 1
-                val allStories = NewStoryViewModel.globalStories + createMockStories()
-                val filteredStories = filterStoriesByPrivacy(allStories)
                 currentState.copy(
                     currentStoryIndex = newIndex,
-                    story = filteredStories.getOrNull(newIndex),
+                    story = storiesCache.getOrNull(newIndex),
                     storyProgress = 0f
                 )
             } else {
@@ -224,6 +223,10 @@ class StoryDetailViewModel : ViewModel() {
             }
         }
 
+        // View the new story
+        state.value.story?.let { viewStory(it.id) }
+
+        // Restart the timer
         restartStoryProgressTimer()
     }
 
@@ -231,11 +234,9 @@ class StoryDetailViewModel : ViewModel() {
         _state.update { currentState ->
             if (currentState.currentStoryIndex > 0) {
                 val newIndex = currentState.currentStoryIndex - 1
-                val allStories = NewStoryViewModel.globalStories + createMockStories()
-                val filteredStories = filterStoriesByPrivacy(allStories)
                 currentState.copy(
                     currentStoryIndex = newIndex,
-                    story = filteredStories.getOrNull(newIndex),
+                    story = storiesCache.getOrNull(newIndex),
                     storyProgress = 0f
                 )
             } else {
@@ -243,6 +244,10 @@ class StoryDetailViewModel : ViewModel() {
             }
         }
 
+        // View the new story
+        state.value.story?.let { viewStory(it.id) }
+
+        // Restart the timer
         restartStoryProgressTimer()
     }
 
@@ -300,8 +305,17 @@ class StoryDetailViewModel : ViewModel() {
     }
 
     private fun reportStory() {
-        // In a real app, report story to server
-        println("Reporting story: ${_state.value.story?.id}")
+        // In a real app, implement reporting functionality
+        _state.value.story?.let { currentStory ->
+            // Show success message
+            _state.update { it.copy(reportSuccessMessage = "Story reported successfully") }
+
+            // Clear message after a short delay
+            viewModelScope.launch {
+                delay(3000)
+                _state.update { it.copy(reportSuccessMessage = null) }
+            }
+        }
     }
 
     override fun onCleared() {

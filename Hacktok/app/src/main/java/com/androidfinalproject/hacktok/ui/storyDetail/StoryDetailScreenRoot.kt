@@ -9,6 +9,7 @@ import androidx.navigation.NavController
 
 @Composable
 fun StoryDetailScreenRoot(
+    userId :String?=null,
     navController: NavController,
     viewModel: StoryDetailViewModel = viewModel(),
     storyId: String? = null,
@@ -18,7 +19,7 @@ fun StoryDetailScreenRoot(
     val state by viewModel.state.collectAsState()
 
     LaunchedEffect(storyId) {
-        viewModel.onAction(StoryDetailAction.LoadStoryDetails)
+        viewModel.onAction(StoryDetailAction.LoadStoryDetails(userId))
     }
 
     StoryDetailScreen(

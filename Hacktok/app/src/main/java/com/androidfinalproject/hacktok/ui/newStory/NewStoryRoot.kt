@@ -11,6 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -23,7 +24,7 @@ import com.androidfinalproject.hacktok.ui.post.PostDetailAction
 fun NewStoryRoot(
     onNavigateBack: () -> Unit
     ) {
-    val viewModel: NewStoryViewModel = viewModel()
+    val viewModel: NewStoryViewModel = hiltViewModel()
     val state by viewModel.state.collectAsState()
     val navController = rememberNavController()
     val context = LocalContext.current

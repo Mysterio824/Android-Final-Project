@@ -5,11 +5,7 @@ import com.androidfinalproject.hacktok.model.Story
 import com.androidfinalproject.hacktok.model.User
 
 data class StoryDetailState(
-    val currentUser: User = User(
-        id = "user1",
-        username = "user1",
-        email = "user1@example.com"
-    ),
+    val currentUser: Any = User(),
     val story: Story? = null,
     val currentStoryIndex: Int = 0,
     val totalStories: Int = 0,
@@ -17,5 +13,6 @@ data class StoryDetailState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val isStoryPaused: Boolean = false,
-    val storyProgress: Float = 0f
+    val storyProgress: Float = 0f,
+    val reportSuccessMessage: String? = null
 )

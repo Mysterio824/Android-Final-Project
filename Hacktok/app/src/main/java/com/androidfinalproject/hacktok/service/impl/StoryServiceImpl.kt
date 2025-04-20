@@ -4,10 +4,10 @@ import android.util.Log
 import com.androidfinalproject.hacktok.model.Media
 import com.androidfinalproject.hacktok.model.Story
 import com.androidfinalproject.hacktok.model.UserSnapshot
-import com.androidfinalproject.hacktok.model.enums.NotificationType
+//import com.androidfinalproject.hacktok.model.enums.NotificationType
 import com.androidfinalproject.hacktok.repository.StoryRepository
 import com.androidfinalproject.hacktok.repository.UserRepository
-import com.androidfinalproject.hacktok.service.FcmService
+//import com.androidfinalproject.hacktok.service.FcmService
 import com.androidfinalproject.hacktok.service.StoryService
 import com.androidfinalproject.hacktok.ui.newPost.PRIVACY
 import kotlinx.coroutines.CoroutineScope
@@ -25,7 +25,7 @@ import javax.inject.Singleton
 class StoryServiceImpl @Inject constructor(
     private val storyRepository: StoryRepository,
     private val userRepository: UserRepository,
-    private val fcmService: FcmService
+//    private val fcmService: FcmService
 ) : StoryService {
     private val TAG = "StoryServiceImpl"
     private val serviceScope = CoroutineScope(Dispatchers.IO)
@@ -60,9 +60,9 @@ class StoryServiceImpl @Inject constructor(
                 ?: return Result.failure(IllegalStateException("Failed to create story"))
 
             // Notify followers about new story
-            serviceScope.launch {
-                notifyFollowersAboutNewStory(user.id)
-            }
+//            serviceScope.launch {
+//                notifyFollowersAboutNewStory(user.id)
+//            }
 
             Result.success(createdStory)
         } catch (e: Exception) {
@@ -250,23 +250,23 @@ class StoryServiceImpl @Inject constructor(
         }
     }
 
-    private suspend fun notifyFollowersAboutNewStory(userId: String) {
-        try {
-            // Get user's followers
-            val user = userRepository.getUserById(userId)
-            val followers = user?.followers ?: return
-
-            // Notify each follower about new story
-            for (followerId in followers) {
-                fcmService.sendInteractionNotification(
-                    recipientUserId = followerId,
-                    senderUserId = userId,
-                    notificationType = NotificationType.NEW_STORY,
-                    itemId = userId // Using userId as the item ID for stories
-                )
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error notifying followers about new story", e)
-        }
-    }
+//    private suspend fun notifyFollowersAboutNewStory(userId: String) {
+//        try {
+//            // Get user's followers
+//            val user = userRepository.getUserById(userId)
+//            val followers = user?.followers ?: return
+//
+//            // Notify each follower about new story
+//            for (followerId in followers) {
+//                fcmService.sendInteractionNotification(
+//                    recipientUserId = followerId,
+//                    senderUserId = userId,
+//                    notificationType = NotificationType.NEW_STORY,
+//                    itemId = userId // Using userId as the item ID for stories
+//                )
+//            }
+//        } catch (e: Exception) {
+//            Log.e(TAG, "Error notifying followers about new story", e)
+//        }
+//    }
 }

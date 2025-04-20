@@ -1,30 +1,41 @@
 package com.androidfinalproject.hacktok.ui.newStory
 
+import android.app.Application
+import android.content.Context
 import android.net.Uri
+import android.util.Log
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.model.Media
 import com.androidfinalproject.hacktok.model.Story
+import com.androidfinalproject.hacktok.service.StoryService
 import com.androidfinalproject.hacktok.ui.newPost.PRIVACY
+import dagger.hilt.android.internal.Contexts.getApplication
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.asRequestBody
+import org.json.JSONObject
+import java.io.File
 import java.util.Date
-import java.util.UUID
+import javax.inject.Inject
 
-class NewStoryViewModel : ViewModel() {
+@HiltViewModel
+class NewStoryViewModel @Inject constructor(
+    application: Application,
+    private val storyService: StoryService
+) : AndroidViewModel(application) {
     private val _state = MutableStateFlow(NewStoryState())
     val state: StateFlow<NewStoryState> = _state
-
-    // Current user's ID - replace with actual user data
-    private val currentUserId = "user1"
-    private val currentUserName = "user1"
-
-    // Create a global list to store stories
-    companion object {
-        val globalStories = mutableListOf<Story>()
-    }
 
     fun onAction(action: NewStoryAction) {
         when (action) {
@@ -59,6 +70,9 @@ class NewStoryViewModel : ViewModel() {
             is NewStoryAction.CreateTextStory -> {
                 createTextStory(action.text, action.privacy)
             }
+            is NewStoryAction.ResetState -> {
+                resetState()
+            }
             else -> {}
         }
     }
@@ -70,35 +84,84 @@ class NewStoryViewModel : ViewModel() {
             _state.update { it.copy(isLoading = true) }
 
             try {
-                val now = Date()
-                val expiresAt = Date(now.time + 24 * 60 * 60 * 1000) // 24 hours later
+                val context = getApplication<Application>().applicationContext
+                val tempFile = copyUriToTempFile(context, imageUri)
 
-                val story = Story(
-                    id = UUID.randomUUID().toString(),
-                    userId = currentUserId,
-                    userName = currentUserName,
-                    userAvatar = null,
-                    media = Media(
-                        type = "image",
-                        url = imageUri.toString(),
-                        thumbnailUrl = imageUri.toString() // For real app, generate thumbnail
-                    ),
-                    createdAt = now,
-                    expiresAt = expiresAt,
-                    viewerIds = emptyList(),
+                if (tempFile == null || !tempFile.exists()) {
+                    _state.update {
+                        it.copy(isLoading = false, error = "Không thể đọc tệp hình ảnh")
+                    }
+                    return@launch
+                }
+
+                val imageUrl = uploadToCloudinary(tempFile)
+                tempFile.delete()
+
+                if (imageUrl.isNullOrBlank()) {
+                    _state.update {
+                        it.copy(isLoading = false, error = "Tải ảnh lên thất bại")
+                    }
+                    return@launch
+                }
+
+                val media = Media(
+                    type = "image",
+                    url = imageUrl,
+                    thumbnailUrl = imageUrl // Có thể sinh thumbnail riêng nếu muốn
+                )
+
+                val result = storyService.createStory(media, privacy)
+
+                if (result.isSuccess) {
+                    _state.update {
+                        it.copy(isLoading = false, isStoryCreated = true, error = null)
+                    }
+                } else {
+                    _state.update {
+                        it.copy(isLoading = false, error = result.exceptionOrNull()?.message)
+                    }
+                }
+
+            } catch (e: Exception) {
+                _state.update {
+                    it.copy(isLoading = false, error = e.message)
+                }
+            }
+        }
+    }
+    private fun createTextStory(text: String, privacy: PRIVACY) {
+        if (text.isBlank()) return
+
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+
+            try {
+                val media = Media(
+                    type = "text",
+                    url = text, // For text stories, store text content in url field
+                    thumbnailUrl = "" // No thumbnail for text
+                )
+
+                val result = storyService.createStory(
+                    media = media,
                     privacy = privacy
                 )
 
-                // In a real app, upload story to server
-                // For this example, add to global list
-                globalStories.add(story)
-
-                _state.update { currentState ->
-                    currentState.copy(
-                        isLoading = false,
-                        isStoryCreated = true,
-                        error = null
-                    )
+                if (result.isSuccess) {
+                    _state.update { currentState ->
+                        currentState.copy(
+                            isLoading = false,
+                            isStoryCreated = true,
+                            error = null
+                        )
+                    }
+                } else {
+                    _state.update { currentState ->
+                        currentState.copy(
+                            isLoading = false,
+                            error = result.exceptionOrNull()?.message ?: "Failed to create story"
+                        )
+                    }
                 }
             } catch (e: Exception) {
                 _state.update { currentState ->
@@ -110,51 +173,49 @@ class NewStoryViewModel : ViewModel() {
             }
         }
     }
+    private suspend fun uploadToCloudinary(file: File): String? = withContext(Dispatchers.IO) {
+        val cloudName = "dbeximude"
+        val uploadPreset = "Kotlin"
 
-    private fun createTextStory(text: String, privacy: PRIVACY) {
-        if (text.isBlank()) return
+        val requestBody = MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart("file", file.name, file.asRequestBody("image/*".toMediaTypeOrNull()))
+            .addFormDataPart("upload_preset", uploadPreset)
+            .build()
 
-        viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
+        val request = Request.Builder()
+            .url("https://api.cloudinary.com/v1_1/$cloudName/image/upload")
+            .post(requestBody)
+            .build()
 
-            try {
-                val now = Date()
-                val expiresAt = Date(now.time + 24 * 60 * 60 * 1000) // 24 hours later
-
-                val story = Story(
-                    id = UUID.randomUUID().toString(),
-                    userId = currentUserId,
-                    userName = currentUserName,
-                    userAvatar = null,
-                    media = Media(
-                        type = "text",
-                        url = text, // For text stories, store text content
-                        thumbnailUrl = "" // No thumbnail for text
-                    ),
-                    createdAt = now,
-                    expiresAt = expiresAt,
-                    viewerIds = emptyList(),
-                    privacy = privacy
-                )
-
-                // In a real app, upload story to server
-                globalStories.add(story)
-
-                _state.update { currentState ->
-                    currentState.copy(
-                        isLoading = false,
-                        isStoryCreated = true,
-                        error = null
-                    )
-                }
-            } catch (e: Exception) {
-                _state.update { currentState ->
-                    currentState.copy(
-                        isLoading = false,
-                        error = e.message ?: "Failed to create story"
-                    )
-                }
+        return@withContext try {
+            val client = OkHttpClient()
+            val response = client.newCall(request).execute()
+            if (response.isSuccessful) {
+                val json = JSONObject(response.body?.string() ?: "")
+                val url = json.getString("secure_url")
+                Log.d("Cloudinary", "✅ Uploaded to: $url")
+                url
+            } else {
+                Log.e("Cloudinary", "Upload failed: ${response.code} ${response.message}")
+                null
             }
+        } catch (e: Exception) {
+            Log.e("Cloudinary", "Upload exception", e)
+            null
+        }
+    }
+    private fun copyUriToTempFile(context: Context, uri: Uri): File? {
+        return try {
+            val inputStream = context.contentResolver.openInputStream(uri) ?: return null
+            val tempFile = File.createTempFile("story_upload_", ".jpg", context.cacheDir)
+            tempFile.outputStream().use { outputStream ->
+                inputStream.copyTo(outputStream)
+            }
+            tempFile
+        } catch (e: Exception) {
+            Log.e("Cloudinary", "Failed to copy URI to temp file", e)
+            null
         }
     }
 
