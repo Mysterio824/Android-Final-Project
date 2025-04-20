@@ -122,7 +122,7 @@ fun PostDetailScreen(
                 item {
                     state.post?.let { post ->
                         PostContent(
-                            fullName = state.currentUser?.fullName ?: "",
+                            fullName = state.postUser?.fullName ?: "",
                             post = post,
                             onToggleLike = { onAction(PostDetailAction.ToggleLike) },
                             onComment = { onAction(PostDetailAction.ToggleCommentInputFocus) },

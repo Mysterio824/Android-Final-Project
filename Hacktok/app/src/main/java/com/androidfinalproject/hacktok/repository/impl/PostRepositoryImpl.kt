@@ -3,8 +3,10 @@ package com.androidfinalproject.hacktok.repository.impl
 import android.util.Log
 import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.repository.PostRepository
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -15,6 +17,7 @@ class PostRepositoryImpl @Inject constructor(
 ) : PostRepository {
     private val TAG = "PostRepository"
     private val postsCollection = firestore.collection("posts")
+    private var lastVisibleSnapshot: DocumentSnapshot? = null
 
     override suspend fun addPost(post: Post): String {
         val documentRef = postsCollection.add(post).await()
@@ -65,4 +68,49 @@ class PostRepositoryImpl @Inject constructor(
             emptyList()
         }
     }
-} 
+
+    override suspend fun getNextPosts(
+        userId: String,
+        friendList: List<String>,
+        limit: Long
+    ): List<Post> {
+        try {
+            // Fetch more than needed to account for filtering
+            val batchSize = limit * 3
+            val query = firestore.collection("posts")
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .let { baseQuery ->
+                    lastVisibleSnapshot?.let {
+                        baseQuery.startAfter(it)
+                    } ?: baseQuery
+                }
+                .limit(batchSize)
+
+            val snapshot = query.get().await()
+            val documents = snapshot.documents
+
+            if (documents.isNotEmpty()) {
+                lastVisibleSnapshot = documents.last()
+            }
+
+            val filteredPosts = documents.mapNotNull { doc ->
+                val post = doc.toObject(Post::class.java)?.copy(id = doc.id)
+                val authorId = post?.userId?.trim()
+
+                when (post?.privacy) {
+                    "PUBLIC" -> post
+                    "FRIENDS" -> if (authorId in friendList || authorId == userId) post else null
+                    else -> null // PRIVATE or unknown
+                }
+            }
+            val finalPosts = filteredPosts.take(limit.toInt())
+            return finalPosts
+        } catch (e: Exception) {
+            Log.e("PostRepository", "Error fetching posts", e)
+            return emptyList()
+        }
+    }
+    override fun resetPagination() {
+        lastVisibleSnapshot = null
+    }
+}

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -28,6 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -56,6 +58,7 @@ fun HomeScreen(
     var reportTargetId by remember { mutableStateOf<String?>(null) }
     var selectPostId by remember { mutableStateOf<String?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
+    val listState = rememberLazyListState()
 
     val bottomSheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = false
@@ -68,6 +71,19 @@ fun HomeScreen(
         if (state.error != null) {
             snackbarHostState.showSnackbar(message = state.error)
         }
+    }
+
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
+            .collect { lastVisibleItemIndex ->
+                val totalItemsCount = listState.layoutInfo.totalItemsCount
+                if (lastVisibleItemIndex == totalItemsCount - 1 &&
+                    !state.isPaginating &&
+                    state.hasMorePosts
+                ) {
+                    onAction(HomeScreenAction.LoadMorePosts)
+                }
+            }
     }
 
     Scaffold(
@@ -105,6 +121,7 @@ fun HomeScreen(
 
                 else -> {
                     LazyColumn(
+                        state = listState,
                         modifier = Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         contentPadding = PaddingValues(bottom = 16.dp)
@@ -125,6 +142,7 @@ fun HomeScreen(
                         }
 
                         items(state.posts) { post ->
+                            val authorName = state.postAuthorNames[post.id]
                             Card(
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RectangleShape,
@@ -132,6 +150,7 @@ fun HomeScreen(
                                 elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
                             ) {
                                 PostContent(
+                                    fullName = authorName,
                                     post = post,
                                     onPostClick = { onAction(HomeScreenAction.OnPostClick(post.id!!)) },
                                     onToggleLike = { onAction(HomeScreenAction.LikePost(post.id!!)) },
@@ -144,6 +163,19 @@ fun HomeScreen(
                                 )
                             }
                             Spacer(modifier = Modifier.height(8.dp))
+                        }
+
+                        if (state.isPaginating) {
+                            item {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator(color = facebookBlue)
+                                }
+                            }
                         }
                     }
 

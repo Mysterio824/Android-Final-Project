@@ -8,6 +8,7 @@ import com.androidfinalproject.hacktok.model.enums.ReportCause
 import com.androidfinalproject.hacktok.model.enums.ReportType
 import com.androidfinalproject.hacktok.repository.PostRepository
 import com.androidfinalproject.hacktok.repository.PostShareRepository
+import com.androidfinalproject.hacktok.repository.UserRepository
 import com.androidfinalproject.hacktok.service.AuthService
 import com.androidfinalproject.hacktok.service.CommentService
 import com.androidfinalproject.hacktok.service.LikeService
@@ -25,6 +26,7 @@ import javax.inject.Inject
 @HiltViewModel
 class PostDetailViewModel @Inject constructor(
     private val postShareRepository: PostShareRepository,
+    private val userRepository: UserRepository,
     private val postRepository: PostRepository,
     private val likeService: LikeService,
     private val authService: AuthService,
@@ -88,10 +90,11 @@ class PostDetailViewModel @Inject constructor(
             _state.update { it.copy(error = null) }
             try {
                 val post = postRepository.getPost(postId)
+                val postUser = post?.userId?.let { userRepository.getUserById(it) }
                 val currentUser = authService.getCurrentUser()
                     ?: throw IllegalStateException("User not found")
 
-                _state.update { it.copy(post = post, currentUser = currentUser) }
+                _state.update { it.copy(post = post, currentUser = currentUser, postUser = postUser) }
                 loadComments()
             } catch (e: Exception) {
                 _state.update { it.copy(error = "Failed to load post: ${e.message}") }

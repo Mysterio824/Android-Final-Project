@@ -14,4 +14,6 @@ interface PostRepository {
     suspend fun deletePost(postId: String)
     suspend fun incrementLikeCount(postId: String)
     suspend fun searchPosts(query: String): List<Post>
+    suspend fun getNextPosts(userId: String, friendList: List<String>, limit: Long = 10): List<Post>
+    fun resetPagination()
 }
