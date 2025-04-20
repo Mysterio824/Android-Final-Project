@@ -5,7 +5,7 @@ import com.androidfinalproject.hacktok.model.Story
 import com.androidfinalproject.hacktok.model.User
 
 data class StoryDetailState(
-    val currentUser: Any = User(),
+    val currentUser: User = User(),
     val story: Story? = null,
     val currentStoryIndex: Int = 0,
     val totalStories: Int = 0,

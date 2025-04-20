@@ -175,12 +175,63 @@ fun StoryDetailScreen(
                 }
             }
 
-            // Story Controls
-            IconButton(onClick = { showReportDialog = true }) {
+            val isMyStory = state.currentUser.id == state.story?.userId
+
+            IconButton(onClick = {
+                showReportDialog = true
+            }) {
                 Icon(
                     imageVector = Icons.Filled.MoreVert,
                     contentDescription = "Options",
                     tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+// Dialog xử lý report / delete
+            if (showReportDialog) {
+                AlertDialog(
+                    onDismissRequest = { showReportDialog = false },
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    title = {
+                        Text(
+                            text = if (isMyStory) "Delete Story" else "Report Story",
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    },
+                    text = {
+                        Text(
+                            text = if (isMyStory)
+                                "Are you sure you want to delete this story?"
+                            else
+                                "Do you want to report this story?",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                if (isMyStory) {
+                                    onAction(StoryDetailAction.DeleteStory)
+                                } else {
+                                    onAction(StoryDetailAction.ReportStory)
+                                }
+                                showReportDialog = false
+                            }
+                        ) {
+                            Text(
+                                text = if (isMyStory) "Delete" else "Report",
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showReportDialog = false }) {
+                            Text(
+                                text = "Cancel",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
                 )
             }
 

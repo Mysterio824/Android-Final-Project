@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.model.Message
 import com.androidfinalproject.hacktok.model.Story
+import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.model.UserSnapshot
+import com.androidfinalproject.hacktok.repository.ChatRepository
 import com.androidfinalproject.hacktok.repository.UserRepository
 import com.androidfinalproject.hacktok.service.StoryService
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,13 +18,14 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Date
-import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
 class StoryDetailViewModel @Inject constructor(
     private val storyService: StoryService,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val chatRepository: ChatRepository
+
 ) : ViewModel() {
     private val _state = MutableStateFlow(StoryDetailState())
     val state = _state.asStateFlow()
@@ -38,8 +41,7 @@ class StoryDetailViewModel @Inject constructor(
             // Initialize current user
             try {
                 val user = userRepository.getCurrentUser()
-                currentUserId = user?.id
-                _state.update { it.copy(currentUser = user ?: UserSnapshot()) }
+                _state.update { it.copy(currentUser = user ?: User()) }
             } catch (e: Exception) {
                 _state.update { it.copy(error = "Failed to load user: ${e.message}") }
             }
@@ -187,24 +189,33 @@ class StoryDetailViewModel @Inject constructor(
         if (content.isBlank()) return
         val currentStory = _state.value.story ?: return
 
-        val newMessage = Message(
-            id = UUID.randomUUID().toString(),
-            senderId = currentUserId ?: "unknown",
-            content = content,
-            createdAt = Date(),
-            isRead = false,
-            media = null,
-            isDeleted = false,
-            replyTo = null
-        )
-
         viewModelScope.launch {
-            // In a real app, send message to server or messaging service
-            // For now, just update local state
-            _state.update { currentState ->
-                currentState.copy(
-                    messages = currentState.messages + newMessage
+            try {
+                val senderId = currentUserId ?: return@launch
+                val receiverId = currentStory.userId ?: return@launch
+
+                // 1. Get or create chat
+                val chatId = chatRepository.getOrCreateChat(senderId, receiverId)
+
+                // 2. Create message
+                val message = Message(
+                    senderId = senderId,
+                    content = content,
+                    createdAt = Date(),
+                    isRead = false,
+                    isDeleted = false
                 )
+
+                // 3. Send
+                chatRepository.sendMessage(chatId, message)
+
+                // 4. Optional: show local message
+                _state.update { currentState ->
+                    currentState.copy(messages = currentState.messages + message)
+                }
+
+            } catch (e: Exception) {
+                _state.update { it.copy(error = "Failed to send message: ${e.message}") }
             }
         }
     }
