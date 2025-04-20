@@ -29,7 +29,8 @@ fun NotificationList(
                 onUserClick = onUserClick,
                 onPostClick = onPostClick,
                 onMarkAsRead = onMarkAsRead,
-                onDelete = onDelete
+                onDelete = onDelete,
+                onCommentClick = {}
             )
             HorizontalDivider(
                 thickness = 1.dp,

@@ -90,6 +90,8 @@ fun WatchLaterScreen(
                                 },
                                 onShare = {},
                                 onOptionsClick = { selectPostId = post.id },
+                                onUnLike = { onAction(WatchLaterAction.OnUnLikeClick(post.id!!)) },
+                                currentId = state.currentUserId ?: ""
                             )
                         }
                     }

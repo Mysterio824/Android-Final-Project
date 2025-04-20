@@ -135,10 +135,12 @@ fun HomeScreen(
                                     post = post,
                                     onPostClick = { onAction(HomeScreenAction.OnPostClick(post.id!!)) },
                                     onToggleLike = { onAction(HomeScreenAction.LikePost(post.id!!)) },
+                                    onUnLike = { onAction(HomeScreenAction.UnLikePost(post.id!!)) },
                                     onUserClick = { onAction(HomeScreenAction.OnUserClick(post.userId)) },
                                     onComment = { onAction(HomeScreenAction.OnPostClick(post.id!!)) },
                                     onShare = { onAction(HomeScreenAction.UpdateSharePost(post)) },
-                                    onOptionsClick = { selectPostId = post.id }
+                                    onOptionsClick = { selectPostId = post.id },
+                                    currentId = state.user?.id ?: ""
                                 )
                             }
                             Spacer(modifier = Modifier.height(8.dp))

@@ -13,10 +13,10 @@ data class UserProfileState (
     val error: String? = null,
     val userIdBeingLoaded: String? = null,
     val numberOfFriends: Int = 0,
-    val isOwner: Boolean = false,
     val userMessage: String? = null,
     val sharePost: Post? = null,
     val showShareDialog: Boolean = false,
     val sharePrivacy: PRIVACY = PRIVACY.PUBLIC,
     val shareCaption: String = "",
+    val currentUserId: String = ""
 )

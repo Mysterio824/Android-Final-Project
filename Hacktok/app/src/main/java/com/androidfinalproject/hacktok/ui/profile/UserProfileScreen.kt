@@ -190,7 +190,7 @@ fun UserProfileScreen (
                     }
 
                     // Action Buttons Row (Only show if not own profile)
-                    if (!state.isOwner) {
+                    if (state.currentUserId != state.user.id) {
                         ProfileActionButtons(
                             state = state,
                             onAction = onAction,
@@ -235,7 +235,9 @@ fun UserProfileScreen (
                              onOptionsClick = { selectPostId = it.id },
                              onToggleLike = { onAction(UserProfileAction.LikePost(it.id!!)) },
                              onComment = { onAction(UserProfileAction.GoToPost(it.id!!)) },
-                             onShare = { onAction(UserProfileAction.UpdateSharePost(it)) }
+                             onShare = { onAction(UserProfileAction.UpdateSharePost(it)) },
+                             onUnLike = { onAction(UserProfileAction.UnlikePost(it.id!!)) },
+                             currentId = state.currentUserId
                          )
                      }
                  }

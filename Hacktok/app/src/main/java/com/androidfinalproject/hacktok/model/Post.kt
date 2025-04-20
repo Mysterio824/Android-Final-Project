@@ -9,17 +9,20 @@ data class Post(
     @PropertyName("userId") val userId: String, // Tham chiếu đến user trong collection "users"
     @PropertyName("createdAt") val createdAt: Date = Date(),
     @PropertyName("active") val isActive: Boolean = true,
-    @PropertyName("likeCount") val likeCount: Int = 0, // Số lượt thích
+    @PropertyName("likedUserIds") val likedUserIds: List<String> = emptyList(),
     @PropertyName("commentCount") val commentCount: Int = 0, // Số lượng bình luận
     @PropertyName("imageLink") val imageLink: String = "",
     @PropertyName("privacy") val privacy: String = "",
     @PropertyName("user") val user: User? = null
 ) {
+    fun getLikeCount(): Int = likedUserIds.size
+
+    fun isLiked(userId: String): Boolean = likedUserIds.contains(userId)
     // Constructor không tham số cho Firestore
-    constructor() : this(null, "", "", Date(), true, 0, 0, "", "", null)
+    constructor() : this(null, "", "", Date(), true, emptyList(), 0, "", "", null)
 
     override fun toString(): String {
         return "Post(id=$id, content='$content', userId='$userId', createdAt=$createdAt, " +
-                "isActive=$isActive, likeCount=$likeCount, commentCount=$commentCount)"
+                "isActive=$isActive, likeCount=${getLikeCount()}, commentCount=$commentCount)"
     }
 }

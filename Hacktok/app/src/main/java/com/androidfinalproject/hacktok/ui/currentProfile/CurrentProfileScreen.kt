@@ -118,13 +118,15 @@ fun CurrentProfileScreen(
                                 post = post,
                                 fullName = state.user.fullName,
                                 onPostClick = { onAction(CurrentProfileAction.OnPostClick(post)) },
-                                onToggleLike = { /* Handle like toggle */ },
+                                onToggleLike = { onAction(CurrentProfileAction.OnLike(post.id!!, true))},
                                 onComment = { onAction(CurrentProfileAction.OnPostClick(post)) },
                                 onShare = {
                                     onAction(CurrentProfileAction.UpdateSharePost(post))
                                 },
                                 onOptionsClick = { selectPostId = post.id },
                                 onUserClick = { onAction(CurrentProfileAction.OnUserClick(post.userId)) },
+                                onUnLike = { onAction(CurrentProfileAction.OnLike(post.id!!, false))},
+                                currentId = state.user.id!!
                             )
                         }
                     }

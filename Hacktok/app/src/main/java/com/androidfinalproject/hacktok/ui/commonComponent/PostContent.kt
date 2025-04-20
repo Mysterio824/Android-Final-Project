@@ -1,10 +1,8 @@
 package com.androidfinalproject.hacktok.ui.commonComponent
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.filled.MoreVert
@@ -16,17 +14,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
-import com.androidfinalproject.hacktok.R
 import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
@@ -40,10 +34,12 @@ fun PostContent(
     post: Post,
     onPostClick: (String) -> Unit = {},
     onToggleLike: () -> Unit,
+    onUnLike: () -> Unit,
     onComment: () -> Unit,
     onShare: () -> Unit,
     onOptionsClick: () -> Unit,
-    onUserClick: () -> Unit
+    onUserClick: () -> Unit,
+    currentId: String
 ) {
     Card(
         modifier = Modifier
@@ -140,7 +136,7 @@ fun PostContent(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = "${post.likeCount}",
+                    text = "${post.getLikeCount()}",
                     color = Color.Gray,
                     fontSize = 14.sp
                 )
@@ -161,17 +157,29 @@ fun PostContent(
                 .padding(vertical = 4.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
+
             TextButton(
-                onClick = onToggleLike,
+                onClick = {
+                    if (post.isLiked(currentId)) {
+                        onUnLike()
+                    } else {
+                        onToggleLike()
+                    }
+                },
                 modifier = Modifier.weight(1f)
             ) {
                 Icon(
-                    imageVector = Icons.Outlined.ThumbUp,
-                    contentDescription = "Like"
+                    imageVector = if (post.isLiked(currentId)) Icons.Filled.ThumbUp else Icons.Outlined.ThumbUp,
+                    contentDescription = "Like",
+                    tint = if (post.isLiked(currentId)) Color(0xFF1565C0) else LocalContentColor.current
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("Like")
+                Text(
+                    text = "Like",
+                    color = if (post.isLiked(currentId)) Color(0xFF1565C0) else LocalContentColor.current
+                )
             }
+
 
             TextButton(
                 onClick = onComment,
@@ -217,7 +225,9 @@ fun PostPreview(){
                 onComment = {},
                 onToggleLike = {},
                 onUserClick = {},
-                onOptionsClick = {}
+                onOptionsClick = {},
+                onUnLike = {},
+                currentId = ""
             )
         }
     }

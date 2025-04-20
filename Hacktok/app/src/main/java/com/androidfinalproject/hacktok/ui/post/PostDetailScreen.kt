@@ -128,7 +128,9 @@ fun PostDetailScreen(
                             onComment = { onAction(PostDetailAction.ToggleCommentInputFocus) },
                             onShare = { showShareOptionsSheet = true },
                             onOptionsClick = { showPostOptionsSheet = true },
-                            onUserClick = { onAction(PostDetailAction.OnUserClick(post.userId)) }
+                            onUserClick = { onAction(PostDetailAction.OnUserClick(post.userId)) },
+                            onUnLike = { onAction(PostDetailAction.UnLikePost) },
+                            currentId = state.currentUser?.id ?: ""
                         )
 
                         CommentsSectionToggle(
