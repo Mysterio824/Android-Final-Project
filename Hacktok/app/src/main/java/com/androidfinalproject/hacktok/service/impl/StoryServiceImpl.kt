@@ -137,6 +137,12 @@ class StoryServiceImpl @Inject constructor(
         }
     }
 
+    override suspend fun getStoriesByUser(userId: String): List<Story> {
+        return storyRepository.getStoriesByUser(userId)
+            .filter { it.expiresAt.after(Date()) }
+    }
+
+
     override suspend fun observeActiveStories(
         forCurrentUserOnly: Boolean,
         filterByPrivacy: Boolean

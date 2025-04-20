@@ -4,14 +4,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 
 @Composable
 fun StoryDetailScreenRoot(
     userId :String?=null,
-    navController: NavController,
-    viewModel: StoryDetailViewModel = viewModel(),
+    viewModel: StoryDetailViewModel = hiltViewModel(),
     storyId: String? = null,
     onClose: () -> Unit,
     onNavigateToUserProfile: (String?) -> Unit = {}

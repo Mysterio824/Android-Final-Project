@@ -21,6 +21,8 @@ import com.androidfinalproject.hacktok.repository.PostShareRepository
 import com.androidfinalproject.hacktok.service.LikeService
 import com.androidfinalproject.hacktok.repository.UserRepository
 import com.androidfinalproject.hacktok.service.RelationshipService
+import com.androidfinalproject.hacktok.service.StoryService
+import kotlinx.coroutines.flow.firstOrNull
 
 @HiltViewModel
 class HomeScreenViewModel @Inject constructor(
@@ -31,13 +33,16 @@ class HomeScreenViewModel @Inject constructor(
     private val postShareRepository: PostShareRepository,
     private val likeService: LikeService,
     private val userRepository: UserRepository,
+    private val storyService: StoryService,
 ) : ViewModel() {
     private val _state = MutableStateFlow(HomeScreenState())
     val state: StateFlow<HomeScreenState> = _state.asStateFlow()
     private lateinit var friendList: List<String>
 
     init {
+        _state.update { HomeScreenState() }
         loadPosts()
+        loadStories()
     }
 
     fun onAction(action: HomeScreenAction) {
@@ -56,6 +61,7 @@ class HomeScreenViewModel @Inject constructor(
                 }
             }
             is HomeScreenAction.LoadMorePosts -> loadMorePosts()
+            is HomeScreenAction.LoadMoreStories -> loadStories()
             is HomeScreenAction.UpdateSharePrivacy -> _state.update { it.copy(sharePrivacy = action.privacy) }
             is HomeScreenAction.UpdateShareCaption -> _state.update { it.copy(shareCaption = action.caption) }
             is HomeScreenAction.UpdateSharePost -> _state.update { it.copy(sharePost = action.post, showShareDialog = true) }
@@ -199,6 +205,49 @@ class HomeScreenViewModel @Inject constructor(
                     )
                 }
                 launch { clearErrorAfterDelay() }
+            }
+        }
+    }
+    private fun loadStories() {
+        viewModelScope.launch {
+            _state.update { it.copy(isStoryLoading = true) }
+
+            try {
+                val currentUser = authService.getCurrentUser()
+                val currentUserId = currentUser?.id
+
+                if (currentUserId == null) {
+                    _state.update { it.copy(isStoryLoading = false) }
+                    return@launch
+                }
+
+                // 1. Lấy story người dùng hiện tại
+                val myStories = storyService.getStoriesByUser(currentUserId)
+
+                // 2. Lấy story từ following
+                val followingStoriesResult = storyService.getStoriesFromFollowing()
+                val followingStories = if (followingStoriesResult.isSuccess) {
+                    followingStoriesResult.getOrNull() ?: emptyList()
+                } else {
+                    emptyList()
+                }
+
+                val allStories = myStories?.plus(followingStories)
+
+                _state.update {
+                    it.copy(
+                        stories = allStories!!,
+                        isStoryLoading = false
+                    )
+                }
+
+            } catch (e: Exception) {
+                Log.e("Story", "Failed to load stories", e)
+                _state.update {
+                    it.copy(
+                        isStoryLoading = false
+                    )
+                }
             }
         }
     }

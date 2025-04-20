@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import com.androidfinalproject.hacktok.router.routes.AuthRoute
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.androidfinalproject.hacktok.ui.newPost.NewPostScreenRoot
+import com.androidfinalproject.hacktok.ui.storydetail.StoryDetailScreenRoot
 
 fun NavGraphBuilder.mainNavigation(navController: NavController) {
     navigation(
@@ -335,5 +336,19 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
                 }
             )
         }
+
+        composable(
+            route = "${MainRoute.StoryDetail.route}/{storyId}",
+            arguments = listOf(navArgument("storyId") { type = NavType.StringType }),
+            enterTransition = { slideFadeInFromRight() },
+            exitTransition = { slideFadeOutToLeft() }
+        ) { backStackEntry ->
+            val storyId = backStackEntry.arguments?.getString("storyId")
+
+            StoryDetailScreenRoot(
+                onClose = { navController.popBackStack() }
+            )
+        }
+
     }
 }

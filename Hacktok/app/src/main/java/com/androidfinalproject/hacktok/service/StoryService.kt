@@ -29,4 +29,5 @@ interface StoryService {
     suspend fun getUnviewedStoriesCount(): Result<Int>
 
     suspend fun getStoriesFromFollowing(): Result<List<Story>>
+    suspend fun getStoriesByUser(userId: String): List<Story>
 }

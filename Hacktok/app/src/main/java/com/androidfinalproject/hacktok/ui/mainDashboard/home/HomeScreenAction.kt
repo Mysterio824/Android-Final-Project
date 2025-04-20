@@ -26,4 +26,5 @@ sealed class HomeScreenAction {
     data class OnSharePost(val post: Post, val caption: String, val privacy: PRIVACY) : HomeScreenAction()
     data object DismissShareDialog : HomeScreenAction()
     data object LoadMorePosts : HomeScreenAction()
+    object LoadMoreStories : HomeScreenAction()
 }
