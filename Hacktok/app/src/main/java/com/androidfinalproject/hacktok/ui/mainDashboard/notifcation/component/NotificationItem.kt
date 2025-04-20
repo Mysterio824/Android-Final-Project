@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.filled.ViewCarousel
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -82,6 +83,8 @@ fun NotificationItem(
                                 // Handle action URL
                             }
                         }
+
+                        NotificationType.NEW_STORY -> TODO()
                     }
                 },
             verticalAlignment = Alignment.CenterVertically
@@ -175,6 +178,7 @@ private fun getNotificationTypeIcon(type: NotificationType): ImageVector {
         NotificationType.COMMENT_REPLY -> Icons.AutoMirrored.Filled.Reply
         NotificationType.COMMENT_LIKE -> Icons.Default.ThumbUp
         NotificationType.ADMIN_NOTIFICATION -> Icons.AutoMirrored.Filled.Announcement
+        NotificationType.NEW_STORY -> Icons.Default.ViewCarousel
     }
 }
 
@@ -187,6 +191,7 @@ private fun getNotificationTypeColor(type: NotificationType): Color {
         NotificationType.POST_COMMENT,
         NotificationType.COMMENT_REPLY -> Color(0xFF0BC5EA) // Light blue for comments
         NotificationType.ADMIN_NOTIFICATION -> Color(0xFFFF8800) // Orange for admin notifications
+        NotificationType.NEW_STORY -> TODO()
     }
 }
 

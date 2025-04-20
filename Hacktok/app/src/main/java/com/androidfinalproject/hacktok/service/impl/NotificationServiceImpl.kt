@@ -83,6 +83,7 @@ class NotificationServiceImpl @Inject constructor(
             NotificationType.COMMENT_REPLY -> "$name replied to your comment"
             NotificationType.COMMENT_LIKE -> "$name liked your comment"
             NotificationType.ADMIN_NOTIFICATION -> "Important system notification" // Content should likely be provided for this type
+            NotificationType.NEW_STORY -> "$name post a story, chekc it out"
         }
     }
 

@@ -182,6 +182,7 @@ object MockData {
             NotificationType.COMMENT_REPLY -> "${sender.username} replied to your comment: \"${mockComments.random()}\""
             NotificationType.COMMENT_LIKE -> "${sender.username} liked your comment"
             NotificationType.ADMIN_NOTIFICATION -> "Important: ${mockAdminMessages.random()}"
+            NotificationType.NEW_STORY -> "${sender.username} post a story, check it out"
         }
 
         // Set a random read status (more recent ones are more likely to be unread)
