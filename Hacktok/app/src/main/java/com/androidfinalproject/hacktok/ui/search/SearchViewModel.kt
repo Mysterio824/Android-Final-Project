@@ -83,7 +83,7 @@ class SearchViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
             try {
-                val query = _state.value.searchQuery
+                val query = _state.value.searchQuery.lowercase()
                 if (query.isBlank()) {
                     _state.update {
                         it.copy(
@@ -97,12 +97,19 @@ class SearchViewModel @Inject constructor(
 
                 when (_state.value.selectedTabIndex) {
                     0 -> {
-                        // Search users
+                        // Search users by all available fields
                         val users = userRepository.searchUsers(query)
+                        val filteredUsers = users.filter { user ->
+                            user.username?.lowercase()?.contains(query) == true ||
+                            user.fullName?.lowercase()?.contains(query) == true ||
+                            user.email?.lowercase()?.contains(query) == true ||
+                            user.bio?.lowercase()?.contains(query) == true ||
+                            user.id?.lowercase()?.contains(query) == true
+                        }
                         _state.update {
                             it.copy(
                                 users = users,
-                                filteredUsers = users,
+                                filteredUsers = filteredUsers,
                                 filteredPosts = emptyList(),
                                 isLoading = false
                             )

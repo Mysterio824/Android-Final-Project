@@ -273,44 +273,16 @@ class UserRepositoryImpl @Inject constructor(
         return try {
             val lowercaseQuery = query.lowercase()
             
-            // Search in username
-            val usernameSnapshot = usersCollection
-                .whereGreaterThanOrEqualTo("username", lowercaseQuery)
-                .whereLessThanOrEqualTo("username", lowercaseQuery + "\uf8ff")
-                .get()
-                .await()
-
-            // Search in email
-            val emailSnapshot = usersCollection
-                .whereGreaterThanOrEqualTo("email", lowercaseQuery)
-                .whereLessThanOrEqualTo("email", lowercaseQuery + "\uf8ff")
-                .get()
-                .await()
-
-            // Search in full name
-            val fullNameSnapshot = usersCollection
-                .whereGreaterThanOrEqualTo("fullName", lowercaseQuery)
-                .whereLessThanOrEqualTo("fullName", lowercaseQuery + "\uf8ff")
-                .get()
-                .await()
-
-            // Use helper function to map results and ensure ID is set
-            val usernameUsers = mapSnapshotToUsers(usernameSnapshot)
-            val emailUsers = mapSnapshotToUsers(emailSnapshot)
-            val fullNameUsers = mapSnapshotToUsers(fullNameSnapshot)
-
-            // Combine results and remove duplicates using the now non-null ID
-            (usernameUsers + emailUsers + fullNameUsers).distinctBy { it.id }
-
-            // The final filtering might be unnecessary now if the query is precise enough,
-            // but keep it for now if needed for broader matching.
-            /* 
-            .filter { user ->
+            // Get all users first
+            val allUsers = getAllUsers()
+            
+            // Filter users in memory
+            allUsers.filter { user ->
                 user.username?.lowercase()?.contains(lowercaseQuery) == true ||
                 user.email.lowercase().contains(lowercaseQuery) ||
-                user.fullName?.lowercase()?.contains(lowercaseQuery) == true
+                user.fullName?.lowercase()?.contains(lowercaseQuery) == true ||
+                user.bio?.lowercase()?.contains(lowercaseQuery) == true
             }
-            */
         } catch (e: Exception) {
             Log.e(TAG, "Error searching users with query: $query", e)
             emptyList()
