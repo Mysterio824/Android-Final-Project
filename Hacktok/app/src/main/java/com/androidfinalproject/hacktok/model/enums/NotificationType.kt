@@ -8,4 +8,5 @@ enum class NotificationType {
     COMMENT_REPLY,
     COMMENT_LIKE,
     ADMIN_NOTIFICATION,
+    NEW_STORY,
 }
