@@ -10,6 +10,7 @@ import com.androidfinalproject.hacktok.repository.PostRepository
 import com.androidfinalproject.hacktok.repository.PostShareRepository
 import com.androidfinalproject.hacktok.service.AuthService
 import com.androidfinalproject.hacktok.service.CommentService
+import com.androidfinalproject.hacktok.service.LikeService
 import com.androidfinalproject.hacktok.service.ReportService
 import com.androidfinalproject.hacktok.ui.currentProfile.CurrentProfileState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,6 +26,7 @@ import javax.inject.Inject
 class PostDetailViewModel @Inject constructor(
     private val postShareRepository: PostShareRepository,
     private val postRepository: PostRepository,
+    private val likeService: LikeService,
     private val authService: AuthService,
     private val reportService: ReportService,
     private val commentService: CommentService
@@ -53,6 +55,7 @@ class PostDetailViewModel @Inject constructor(
             is PostDetailAction.LoadPost -> loadPost(action.postId)
             is PostDetailAction.LoadComments -> loadComments()
             is PostDetailAction.ToggleLike -> toggleLike()
+            is PostDetailAction.UnLikePost -> unlike()
             is PostDetailAction.Share -> sharePost()
             is PostDetailAction.UpdateCommentText -> updateCommentText(action.text)
             is PostDetailAction.SubmitComment -> submitComment()
@@ -158,9 +161,24 @@ class PostDetailViewModel @Inject constructor(
     }
 
     private fun toggleLike() {
-        _state.value.post?.let { post ->
-            val updatedPost = post.copy(likeCount = post.likeCount + 1)
-            _state.update { it.copy(post = updatedPost) }
+        viewModelScope.launch {
+            _state.value.post?.let { post ->
+                val updatedPost = likeService.unlikePost(post.id!!)
+                    ?: post
+                updatedPost.copy(user = post.user)
+                _state.update { it.copy(post = updatedPost) }
+            }
+        }
+    }
+
+    private fun unlike() {
+        viewModelScope.launch {
+            _state.value.post?.let { post ->
+                val updatedPost = likeService.unlikePost(post.id!!)
+                    ?: post
+                updatedPost.copy(user = post.user)
+                _state.update { it.copy(post = updatedPost) }
+            }
         }
     }
 
@@ -215,8 +233,8 @@ class PostDetailViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                if(isLiking) commentService.likeComment(commentId)
-                else commentService.unlikeComment(commentId)
+                if(isLiking) likeService.likeComment(commentId)
+                else likeService.unlikeComment(commentId)
 
                 // The likes will be updated automatically through the observeCommentsForPost Flow
             } catch (e: Exception) {

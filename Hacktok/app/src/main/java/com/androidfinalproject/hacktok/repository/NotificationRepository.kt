@@ -22,5 +22,5 @@ interface NotificationRepository {
     // Xóa thông báo
     suspend fun deleteNotification(notificationId: String)
 
-    fun observeNotifications(userId: String): Flow<Result<List<Notification>>>
+    fun observeNotifications(userId: String): Flow<List<Notification>>
 }

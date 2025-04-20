@@ -47,7 +47,7 @@ fun PostItem(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "Likes: ${post.likeCount}",
+                    text = "Likes: ${post.getLikeCount()}",
                     style = MaterialTheme.typography.bodySmall
                 )
             }

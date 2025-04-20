@@ -19,13 +19,15 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.androidfinalproject.hacktok.model.Story
 import com.androidfinalproject.hacktok.repository.PostShareRepository
+import com.androidfinalproject.hacktok.service.LikeService
 
 @HiltViewModel
 class HomeScreenViewModel @Inject constructor(
     private val authService: AuthService,
     private val postRepository: PostRepository,
     private val reportService: ReportService,
-    private val postShareRepository: PostShareRepository
+    private val postShareRepository: PostShareRepository,
+    private val likeService: LikeService
 ) : ViewModel() {
     private val _state = MutableStateFlow(HomeScreenState())
     val state: StateFlow<HomeScreenState> = _state.asStateFlow()
@@ -54,6 +56,7 @@ class HomeScreenViewModel @Inject constructor(
             is HomeScreenAction.UpdateSharePost -> _state.update { it.copy(sharePost = action.post, showShareDialog = true) }
             is HomeScreenAction.DismissShareDialog -> _state.update { it.copy(showShareDialog = false) }
             is HomeScreenAction.LikePost -> likePost(action.postId)
+            is HomeScreenAction.UnLikePost -> unLikePost(action.postId)
             is HomeScreenAction.SharePost -> sharePost(action.postId)
             is HomeScreenAction.SubmitReport -> submitReport(
                 reportedItemId = action.reportedItemId,
@@ -95,11 +98,34 @@ class HomeScreenViewModel @Inject constructor(
     }
 
     private fun likePost(postId: String) {
-        _state.update { currentState ->
-            val updatedPosts = currentState.posts.map {
-                if (it.id.toString() == postId) it.copy(likeCount = it.likeCount + 1) else it
+        viewModelScope.launch {
+            _state.update { currentState ->
+                val updatedPost = likeService.likePost(postId) ?: return@launch
+
+                val newList = currentState.posts.map { post ->
+                    if (post.id == updatedPost.id) updatedPost.copy(
+                        user = post.user,
+                    ) else post
+                }
+
+                currentState.copy(posts = newList)
             }
-            currentState.copy(posts = updatedPosts)
+        }
+    }
+
+    private fun unLikePost(postId: String) {
+        viewModelScope.launch {
+            _state.update { currentState ->
+                val updatedPost = likeService.unlikePost(postId) ?: return@launch
+
+                val newList = currentState.posts.map { post ->
+                    if (post.id == updatedPost.id) updatedPost.copy(
+                        user = post.user,
+                    ) else post
+                }
+
+                currentState.copy(posts = newList)
+            }
         }
     }
 

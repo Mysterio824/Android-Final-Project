@@ -158,7 +158,7 @@ fun CurrentProfileScreen(
 
                         item {
                             Spacer(modifier = Modifier.height(8.dp))
-                            Divider(
+                            HorizontalDivider(
                                 modifier = Modifier.padding(horizontal = 16.dp),
                                 color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                             )
@@ -180,13 +180,15 @@ fun CurrentProfileScreen(
                                     post = post,
                                     fullName = state.user.fullName,
                                     onPostClick = { onAction(CurrentProfileAction.OnPostClick(post)) },
-                                    onToggleLike = { /* Handle like toggle */ },
+                                    onToggleLike = { onAction(CurrentProfileAction.OnLike(post.id!!, true)) },
+                                    onUnLike = { onAction(CurrentProfileAction.OnLike(post.id!!, false)) },
                                     onComment = { onAction(CurrentProfileAction.OnPostClick(post)) },
                                     onShare = {
                                         onAction(CurrentProfileAction.UpdateSharePost(post))
                                     },
                                     onOptionsClick = { selectPostId = post.id },
                                     onUserClick = { onAction(CurrentProfileAction.OnUserClick(post.userId)) },
+                                    currentId = state.user.id ?: ""
                                 )
                             }
                         }

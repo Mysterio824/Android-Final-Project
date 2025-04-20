@@ -11,6 +11,7 @@ sealed class PostDetailAction {
     data class LoadPost(val postId: String) : PostDetailAction()
     data object LoadComments : PostDetailAction()
     data object ToggleLike : PostDetailAction()
+    data object UnLikePost : PostDetailAction()
     data object Share : PostDetailAction()
     data class SubmitReport(
         val reportedItemId: String,

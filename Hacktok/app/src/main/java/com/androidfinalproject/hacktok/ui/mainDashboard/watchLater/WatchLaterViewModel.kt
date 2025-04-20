@@ -6,6 +6,7 @@ import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.enums.ReportCause
 import com.androidfinalproject.hacktok.model.enums.ReportType
 import com.androidfinalproject.hacktok.service.AuthService
+import com.androidfinalproject.hacktok.service.LikeService
 import com.androidfinalproject.hacktok.service.ReportService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -20,7 +21,8 @@ import javax.inject.Inject
 class WatchLaterViewModel @Inject constructor(
 //    private val postService: PostService
     private val authService: AuthService,
-    private val reportService: ReportService
+    private val reportService: ReportService,
+    private val likeService: LikeService
 ) : ViewModel() {
     private val _state = MutableStateFlow(WatchLaterState())
     val state: StateFlow<WatchLaterState> = _state.asStateFlow()
@@ -32,8 +34,9 @@ class WatchLaterViewModel @Inject constructor(
     fun onAction(action: WatchLaterAction) {
         when (action) {
             is WatchLaterAction.RemovePost -> removePost(action.postId)
-            is WatchLaterAction.OnLikeClick -> {}
+            is WatchLaterAction.OnLikeClick -> likePost(action.postId)
             is WatchLaterAction.SubmitReport -> submitReport(action.reportedItemId, action.reportType, action.reportCause)
+            is WatchLaterAction.OnUnLikeClick -> unlikePost(action.postId)
             else -> {}
         }
     }
@@ -62,6 +65,39 @@ class WatchLaterViewModel @Inject constructor(
             currentState.copy(
                 savedPosts = currentState.savedPosts.filter { it.id != postId }
             )
+        }
+    }
+
+    private fun likePost(postId: String) {
+        viewModelScope.launch {
+            val updatedPost = likeService.likePost(postId) ?: return@launch
+
+            val newList = _state.value.savedPosts.map { post ->
+                if (post.id == updatedPost.id) updatedPost.copy(
+                    user = post.user,
+                ) else post
+            }
+
+            _state.update { currentState ->
+                currentState.copy(savedPosts = newList)
+            }
+        }
+    }
+
+
+    private fun unlikePost(postId: String) {
+        viewModelScope.launch {
+            val updatedPost = likeService.unlikePost(postId) ?: return@launch
+
+            val newList = _state.value.savedPosts.map { post ->
+                if (post.id == updatedPost.id) updatedPost.copy(
+                    user = post.user,
+                ) else post
+            }
+
+            _state.update { currentState ->
+                currentState.copy(savedPosts = newList)
+            }
         }
     }
 

@@ -3,12 +3,15 @@ package com.androidfinalproject.hacktok.ui.currentProfile
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.repository.PostRepository
 import com.androidfinalproject.hacktok.repository.PostShareRepository
 import com.androidfinalproject.hacktok.repository.UserRepository
+import com.androidfinalproject.hacktok.service.LikeService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -17,6 +20,7 @@ class CurrentProfileViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val postRepository: PostRepository,
     private val postShareRepository: PostShareRepository,
+    private val likeService: LikeService
 ) : ViewModel() {
     private val _state = MutableStateFlow<CurrentProfileState>(CurrentProfileState.Loading)
     val state = _state.asStateFlow()
@@ -79,15 +83,6 @@ class CurrentProfileViewModel @Inject constructor(
 
     fun onAction(action: CurrentProfileAction) {
         when (action) {
-            is CurrentProfileAction.OnNavigateBack -> {
-                // Handle navigation back
-            }
-            is CurrentProfileAction.OnEditProfile -> {
-                // Handle edit profile
-            }
-            is CurrentProfileAction.OnCreatePost -> {
-                // Handle create post
-            }
             is CurrentProfileAction.RetryLoading -> {
                 loadCurrentUser()
             }
@@ -148,9 +143,41 @@ class CurrentProfileViewModel @Inject constructor(
                     }
                 }
             }
+
+            is CurrentProfileAction.OnLike -> {
+                viewModelScope.launch {
+                    val updatedPost = if (action.isLike) {
+                        likeService.likePost(action.postId)
+                    } else {
+                        likeService.unlikePost(action.postId)
+                    }
+
+                    if (updatedPost == null) return@launch
+
+                    val posts: List<Post> = when (val state = _state.value) {
+                        is CurrentProfileState.Success -> state.posts
+                        else -> return@launch
+                    }
+
+                    val newList = posts.map { post ->
+                        if (post.id == updatedPost.id) updatedPost else post
+                    }
+
+                    _state.update { current ->
+                        if (current is CurrentProfileState.Success) {
+                            current.copy(posts = newList)
+                        } else current
+                    }
+                }
+            }
             else -> {
 
             } // Handle other actions
         }
     }
+
+    fun List<Post>.replacePost(updatedPost: Post): List<Post> {
+        return map { if (it.id == updatedPost.id) updatedPost else it }
+    }
+
 }

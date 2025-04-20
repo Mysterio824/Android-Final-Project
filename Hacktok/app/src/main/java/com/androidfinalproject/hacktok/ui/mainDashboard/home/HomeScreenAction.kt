@@ -7,6 +7,7 @@ import com.androidfinalproject.hacktok.ui.newPost.PRIVACY
 
 sealed class HomeScreenAction {
     data class LikePost(val postId: String) : HomeScreenAction()
+    data class UnLikePost(val postId: String) : HomeScreenAction()
     data class SharePost(val postId: String) : HomeScreenAction()
     data object OnCreatePost: HomeScreenAction()
     data object OnCreateStory: HomeScreenAction()

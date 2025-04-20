@@ -100,7 +100,7 @@ fun PostItem(
                     contentDescription = "Like"
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(text = "${post.likeCount}")
+                Text(text = "${post.getLikeCount()}")
             }
 
             Button(
