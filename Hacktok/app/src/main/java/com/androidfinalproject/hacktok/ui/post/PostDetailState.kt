@@ -17,4 +17,5 @@ data class PostDetailState(
     val commentIdReply: String = "",
     val userMessage: String? = null,
     val showShareDialog: Boolean = false,
+    val postUser: User? = null
 )

@@ -10,6 +10,7 @@ import com.androidfinalproject.hacktok.model.enums.ReportCause
 import com.androidfinalproject.hacktok.model.enums.ReportType
 import com.androidfinalproject.hacktok.repository.PostShareRepository
 import com.androidfinalproject.hacktok.service.AuthService
+import com.androidfinalproject.hacktok.service.LikeService
 import com.androidfinalproject.hacktok.service.RelationshipService
 import com.androidfinalproject.hacktok.service.ReportService
 import com.google.firebase.firestore.FirebaseFirestore
@@ -34,7 +35,8 @@ class UserProfileViewModel @Inject constructor(
     private val relationshipService: RelationshipService,
     private val authService: AuthService,
     private val reportService: ReportService,
-    private val postShareRepository: PostShareRepository
+    private val postShareRepository: PostShareRepository,
+    private val likeService: LikeService
 ) : ViewModel() {
     private val TAG = "UserProfileViewModel"
     private val _state = MutableStateFlow(UserProfileState())
@@ -92,6 +94,8 @@ class UserProfileViewModel @Inject constructor(
                     }
                 }
             }
+            is UserProfileAction.LikePost -> likePost(action.postId)
+            is UserProfileAction.UnlikePost -> unLikePost(action.postId)
             else -> {}
         }
         
@@ -168,7 +172,7 @@ class UserProfileViewModel @Inject constructor(
                             error = null,
                             userIdBeingLoaded = null,
                             numberOfFriends = relationship.size,
-                            isOwner = userId == authService.getCurrentUserId()
+                            currentUserId = authService.getCurrentUserId()!!
                         )
                     }
                  } else {
@@ -238,6 +242,36 @@ class UserProfileViewModel @Inject constructor(
     
     private fun likePost(postId: String) {
         Log.d(TAG, "LikePost action called for postId: $postId (Not Implemented)")
+        viewModelScope.launch {
+            _state.update { currentState ->
+                val updatedPost = likeService.likePost(postId) ?: return@launch
+
+                val newList = currentState.posts.map { post ->
+                    if (post.id == updatedPost.id) updatedPost.copy(
+                        user = post.user,
+                    ) else post
+                }
+
+                currentState.copy(posts = newList)
+            }
+        }
+    }
+
+    private fun unLikePost(postId: String) {
+        Log.d(TAG, "UnLikePost action called for postId: $postId (Not Implemented)")
+        viewModelScope.launch {
+            _state.update { currentState ->
+                val updatedPost = likeService.unlikePost(postId) ?: return@launch
+
+                val newList = currentState.posts.map { post ->
+                    if (post.id == updatedPost.id) updatedPost.copy(
+                        user = post.user,
+                    ) else post
+                }
+
+                currentState.copy(posts = newList)
+            }
+        }
     }
 
     private fun submitReport(reportedItemId: String, reportType: ReportType, reportCause: ReportCause) : Boolean {

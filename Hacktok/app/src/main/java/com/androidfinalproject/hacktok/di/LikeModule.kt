@@ -1,7 +1,5 @@
 package com.androidfinalproject.hacktok.di
 
-import com.androidfinalproject.hacktok.repository.PostRepository
-import com.androidfinalproject.hacktok.repository.impl.PostRepositoryImpl
 import com.androidfinalproject.hacktok.service.LikeService
 import com.androidfinalproject.hacktok.service.impl.LikeServiceImpl
 import dagger.Binds
@@ -12,8 +10,8 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class PostModule {
+abstract class LikeModule{
     @Binds
     @Singleton
-    abstract fun bindPostRepository(postRepositoryImpl: PostRepositoryImpl): PostRepository
-} 
+    abstract fun bindLikeService(likeServiceImpl: LikeServiceImpl): LikeService
+}

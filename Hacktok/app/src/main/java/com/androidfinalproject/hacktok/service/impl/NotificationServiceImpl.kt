@@ -100,18 +100,15 @@ class NotificationServiceImpl @Inject constructor(
     override suspend fun observeMyNotifications(): Flow<List<Notification>> {
         val currentUserId = authService.getCurrentUserId()
         return if (currentUserId != null) {
+            // Call the repository's observeNotifications method
             notificationRepository.observeNotifications(currentUserId)
-                .map { result ->
-                    result.getOrElse { e ->
-                        Log.e(TAG, "Error observing notifications for user $currentUserId: ${e.message}", e)
-                        emptyList()
-                    }
-                }
-                .catch { e -> 
-                    Log.e(TAG, "Error in notification flow for user $currentUserId: ${e.message}", e)
+                .catch { e ->
+                    // Log error and emit empty list if the flow fails
+                    Log.e(TAG, "Error observing notifications for user $currentUserId: ${e.message}", e)
                     emit(emptyList())
                 }
         } else {
+            // Return an empty flow if user is not logged in
             Log.w(TAG, "User not logged in, cannot observe notifications.")
             emptyFlow()
         }

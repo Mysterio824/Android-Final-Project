@@ -21,4 +21,5 @@ sealed class CurrentProfileAction {
     data object ShowShareDialog : CurrentProfileAction()
     data object DismissShareDialog : CurrentProfileAction()
     data class OnSharePost(val post: Post, val caption: String, val privacy: PRIVACY) : CurrentProfileAction()
+    data class OnLike(val postId: String, val isLike: Boolean) : CurrentProfileAction()
 }

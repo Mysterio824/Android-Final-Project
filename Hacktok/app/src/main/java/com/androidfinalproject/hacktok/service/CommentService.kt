@@ -15,8 +15,6 @@ interface CommentService {
     
     suspend fun addComment(content:String, postId: String): Result<Comment>
     suspend fun replyComment(content:String, userId: String): Result<Comment>
-    suspend fun likeComment(commentId: String): Result<Unit>
-    suspend fun unlikeComment(commentId: String): Result<Unit>
     suspend fun deleteComment(commentId: String): Result<Unit>
     suspend fun updateUserSnapshots(commentIds: List<String>, newSnapshots: Map<String, UserSnapshot>): Result<Unit>
 }

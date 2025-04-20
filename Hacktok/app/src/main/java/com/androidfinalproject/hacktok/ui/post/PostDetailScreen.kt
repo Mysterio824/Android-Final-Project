@@ -122,13 +122,15 @@ fun PostDetailScreen(
                 item {
                     state.post?.let { post ->
                         PostContent(
-                            fullName = state.currentUser?.fullName ?: "",
+                            fullName = state.postUser?.fullName ?: "",
                             post = post,
                             onToggleLike = { onAction(PostDetailAction.ToggleLike) },
                             onComment = { onAction(PostDetailAction.ToggleCommentInputFocus) },
                             onShare = { showShareOptionsSheet = true },
                             onOptionsClick = { showPostOptionsSheet = true },
-                            onUserClick = { onAction(PostDetailAction.OnUserClick(post.userId)) }
+                            onUserClick = { onAction(PostDetailAction.OnUserClick(post.userId)) },
+                            onUnLike = { onAction(PostDetailAction.UnLikePost) },
+                            currentId = state.currentUser?.id ?: ""
                         )
 
                         CommentsSectionToggle(

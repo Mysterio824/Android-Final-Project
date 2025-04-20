@@ -3,7 +3,7 @@ package com.androidfinalproject.hacktok.ui.mainDashboard.home
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.androidfinalproject.hacktok.model.MockData
+import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.repository.PostRepository
 import com.androidfinalproject.hacktok.service.AuthService
 import com.androidfinalproject.hacktok.service.ReportService
@@ -17,18 +17,24 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import com.androidfinalproject.hacktok.model.Story
 import com.androidfinalproject.hacktok.repository.PostShareRepository
+import com.androidfinalproject.hacktok.service.LikeService
+import com.androidfinalproject.hacktok.repository.UserRepository
+import com.androidfinalproject.hacktok.service.RelationshipService
 
 @HiltViewModel
 class HomeScreenViewModel @Inject constructor(
     private val authService: AuthService,
     private val postRepository: PostRepository,
     private val reportService: ReportService,
-    private val postShareRepository: PostShareRepository
+    private val relationshipService: RelationshipService,
+    private val postShareRepository: PostShareRepository,
+    private val likeService: LikeService,
+    private val userRepository: UserRepository,
 ) : ViewModel() {
     private val _state = MutableStateFlow(HomeScreenState())
     val state: StateFlow<HomeScreenState> = _state.asStateFlow()
+    private lateinit var friendList: List<String>
 
     init {
         loadPosts()
@@ -49,11 +55,13 @@ class HomeScreenViewModel @Inject constructor(
                     }
                 }
             }
+            is HomeScreenAction.LoadMorePosts -> loadMorePosts()
             is HomeScreenAction.UpdateSharePrivacy -> _state.update { it.copy(sharePrivacy = action.privacy) }
             is HomeScreenAction.UpdateShareCaption -> _state.update { it.copy(shareCaption = action.caption) }
             is HomeScreenAction.UpdateSharePost -> _state.update { it.copy(sharePost = action.post, showShareDialog = true) }
             is HomeScreenAction.DismissShareDialog -> _state.update { it.copy(showShareDialog = false) }
             is HomeScreenAction.LikePost -> likePost(action.postId)
+            is HomeScreenAction.UnLikePost -> unLikePost(action.postId)
             is HomeScreenAction.SharePost -> sharePost(action.postId)
             is HomeScreenAction.SubmitReport -> submitReport(
                 reportedItemId = action.reportedItemId,
@@ -64,8 +72,25 @@ class HomeScreenViewModel @Inject constructor(
         }
     }
 
+    private suspend fun loadAuthorNames(posts: List<Post>): Map<String, String> {
+        val distinctUserIds = posts.map { it.userId }.distinct()
+        val users = distinctUserIds.mapNotNull { userRepository.getUserById(it) }
+
+        return posts.associate { post ->
+            val name = users.find { it.id == post.userId }?.fullName ?: "Unknown"
+            post.id!! to name
+        }
+    }
+
     private fun loadPosts() {
         viewModelScope.launch {
+            val currentUser = authService.getCurrentUser()
+            val userId = currentUser?.id ?: ""
+            val friendMap = relationshipService.getFriends(userId)
+            friendList = friendMap.keys.toList() // List of friend userIds
+            Log.d("CURRENT_USER", userId)
+            Log.d("FRIEND_LIST", friendList.toString())
+
             _state.update{
                 it.copy(
                     user = authService.getCurrentUser(),
@@ -73,13 +98,20 @@ class HomeScreenViewModel @Inject constructor(
                     error = null
                 )
             }
-            try {
-                val mockPosts = MockData.mockPosts
 
+            try {
+                postRepository.resetPagination()
+
+                val posts = postRepository.getNextPosts(userId = userId, friendList = friendList)
+
+                val postAuthorMap = loadAuthorNames(posts)
                 _state.update {
                     it.copy(
-                        posts = mockPosts,
-                        isLoading = false
+                        posts = posts,
+                        postAuthorNames = postAuthorMap,
+                        isLoading = false,
+                        isPaginating =  false,
+                        hasMorePosts = posts.size == 10
                     )
                 }
             } catch (e: Exception) {
@@ -94,12 +126,53 @@ class HomeScreenViewModel @Inject constructor(
         }
     }
 
-    private fun likePost(postId: String) {
-        _state.update { currentState ->
-            val updatedPosts = currentState.posts.map {
-                if (it.id.toString() == postId) it.copy(likeCount = it.likeCount + 1) else it
+    private fun loadMorePosts() {
+        viewModelScope.launch {
+            _state.update { it.copy(isPaginating = true) }
+            val newPosts = postRepository.getNextPosts(userId = state.value.user?.id ?: "", friendList = friendList)
+            val newAuthorMap = loadAuthorNames(newPosts)
+            _state.update {
+                val allPosts = (it.posts + newPosts).distinctBy { post -> post.id }
+                val allAuthors = it.postAuthorNames + newAuthorMap
+                it.copy(
+                    posts = allPosts,
+                    postAuthorNames = allAuthors,
+                    isPaginating = false,
+                    hasMorePosts = newPosts.size == 10
+                )
             }
-            currentState.copy(posts = updatedPosts)
+        }
+    }
+
+    private fun likePost(postId: String) {
+        viewModelScope.launch {
+            _state.update { currentState ->
+                val updatedPost = likeService.likePost(postId) ?: return@launch
+
+                val newList = currentState.posts.map { post ->
+                    if (post.id == updatedPost.id) updatedPost.copy(
+                        user = post.user,
+                    ) else post
+                }
+
+                currentState.copy(posts = newList)
+            }
+        }
+    }
+
+    private fun unLikePost(postId: String) {
+        viewModelScope.launch {
+            _state.update { currentState ->
+                val updatedPost = likeService.unlikePost(postId) ?: return@launch
+
+                val newList = currentState.posts.map { post ->
+                    if (post.id == updatedPost.id) updatedPost.copy(
+                        user = post.user,
+                    ) else post
+                }
+
+                currentState.copy(posts = newList)
+            }
         }
     }
 

@@ -18,6 +18,5 @@ data class Report(
     @PropertyName("resolvedBy") val resolvedBy: String? = null,
     @PropertyName("resolutionNote") val resolutionNote: String? = null
 ) {
-    // Firestore requires a no-arg constructor
     constructor() : this(null, "", null, "", null, Date(), "pending", null, null)
 }

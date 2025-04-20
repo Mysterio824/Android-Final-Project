@@ -31,4 +31,4 @@ interface UserRepository {
     // New methods required by RelationshipRepository
     suspend fun getUsersByIds(userIds: List<String>): List<User>
     suspend fun getAllUsers(): List<User>
-} 
+}

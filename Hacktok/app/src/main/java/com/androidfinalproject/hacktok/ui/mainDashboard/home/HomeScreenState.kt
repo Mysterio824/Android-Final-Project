@@ -15,5 +15,8 @@ data class HomeScreenState(
     val sharePrivacy: PRIVACY = PRIVACY.PUBLIC,
     val shareCaption: String = "",
     val error: String? = null,
-    val userMessage: String? = null // Added for showing transient messages
+    val userMessage: String? = null, // Added for showing transient messages
+    val isPaginating: Boolean = false,
+    val hasMorePosts: Boolean = true,
+    val postAuthorNames: Map<String, String> = emptyMap() // postId -> authorFullName
 )

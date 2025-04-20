@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.service.AuthService
+import com.androidfinalproject.hacktok.service.FcmService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,7 +15,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
-    private val authService: AuthService
+    private val authService: AuthService,
+    private val fcmService: FcmService
 ) : ViewModel() {
     private val TAG = "DashboardViewModel"
     private val _state = MutableStateFlow(DashboardState())
@@ -37,6 +39,7 @@ class DashboardViewModel @Inject constructor(
                     Log.e(TAG, "AuthService logout failed")
                 } else{
                     Log.d(TAG, "AuthService logout successful, updating state")
+                    fcmService.removeFcmToken()
                     // State update will trigger LaunchedEffect in Root
                     _state.update {
                         it.copy(

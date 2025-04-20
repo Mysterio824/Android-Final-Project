@@ -193,69 +193,6 @@ class CommentServiceImpl @Inject constructor(
         }
     }
 
-    override suspend fun likeComment(commentId: String): Result<Unit> {
-        return try {
-            val comment = commentRepository.getById(commentId).getOrNull()
-                ?: return Result.failure(IllegalArgumentException("Comment not found"))
-
-            val user = userRepository.getCurrentUser()
-                ?: return Result.failure(IllegalArgumentException("User not found"))
-            val userId = user.id
-
-            val updatedLikedUserIds = comment.likedUserIds.toMutableList()
-            // Only add like and send notification if the user hasn't liked yet
-            if (!updatedLikedUserIds.contains(userId)) {
-                updatedLikedUserIds.add(userId!!)
-                
-                val updatedComment = comment.copy(
-                    likedUserIds = updatedLikedUserIds
-                )
-                
-                commentRepository.update(commentId, updatedComment)
-                
-                // Send notification to comment owner (if not the same user)
-                if (comment.userId != userId) {
-                    serviceScope.launch {
-                        fcmService.sendInteractionNotification(
-                            recipientUserId = comment.userId,
-                            senderUserId = userId,
-                            notificationType = NotificationType.COMMENT_LIKE,
-                            itemId = commentId
-                        )
-                    }
-                }
-                
-                Result.success(Unit)
-            } else {
-                Result.success(Unit) // User already liked this comment
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun unlikeComment(commentId: String): Result<Unit> {
-        return try {
-            val comment = commentRepository.getById(commentId).getOrNull()
-                ?: return Result.failure(IllegalArgumentException("Comment not found"))
-
-            val user = userRepository.getCurrentUser()
-                ?: return Result.failure(IllegalArgumentException("User not found"))
-            val userId = user.id
-
-            val updatedLikedUserIds = comment.likedUserIds.toMutableList()
-            updatedLikedUserIds.remove(userId)
-
-            val updatedComment = comment.copy(
-                likedUserIds = updatedLikedUserIds
-            )
-
-            commentRepository.update(commentId, updatedComment)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
     override suspend fun deleteComment(commentId: String): Result<Unit> {
         return try {
             // Verify comment exists
