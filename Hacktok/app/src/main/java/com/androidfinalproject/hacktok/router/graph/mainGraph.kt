@@ -73,10 +73,12 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
                 onCreatePostNavigate = {
                     navController.navigate(MainRoute.NewPost.BASE_ROUTE)
                 },
-                onStoryNavigate = {
+                onStoryNavigate = { storyId ->
+                    navController.navigate("${MainRoute.StoryDetail.route}/$storyId")
 
                 },
                 onCreateStoryNavigate = {
+                    navController.navigate(MainRoute.NewStory.route)
 
                 },
                 onAuthNavigate = {
@@ -319,6 +321,19 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
 //                    }
 //                }
 //            )
+        }
+
+        // New Story Screen
+        composable(
+            route = MainRoute.NewStory.route,
+            enterTransition = { slideFadeInFromRight() },
+            exitTransition = { slideFadeOutToLeft() }
+        ) {
+            NewStoryRoot(
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
         }
     }
 }
