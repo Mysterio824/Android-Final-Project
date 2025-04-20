@@ -229,6 +229,7 @@ fun UserProfileScreen (
                  } else {
                      items(state.posts, key = { it.id ?: "" }) {
                          PostContent(
+                             fullName = state.user.fullName ?: "",
                              post = it,
                              onUserClick = { onAction(UserProfileAction.RefreshProfile) },
                              onPostClick = { postId -> onAction(UserProfileAction.GoToPost(postId)) },
