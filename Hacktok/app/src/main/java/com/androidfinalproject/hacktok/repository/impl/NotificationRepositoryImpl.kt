@@ -17,7 +17,7 @@ class NotificationRepositoryImpl @Inject constructor(
     private val collection = firestore.collection("notifications")
     private val TAG = "NotificationRepository"
 
-    override fun observeNotifications(userId: String): Flow<List<Notification>> = callbackFlow {
+    override fun observeNotifications(userId: String): Flow<Result<List<Notification>>> = callbackFlow {
         Log.d(TAG, "Setting up notification listener for user: $userId")
         val query = collection.whereEqualTo("userId", userId)
             .orderBy("createdAt", Query.Direction.ASCENDING)
@@ -25,12 +25,14 @@ class NotificationRepositoryImpl @Inject constructor(
         val listener = query.addSnapshotListener { snapshot, error ->
             if (error != null) {
                 Log.e(TAG, "Error listening for notification updates for user $userId: ${error.message}", error)
+                trySend(Result.failure(error))
                 close(error)
                 return@addSnapshotListener
             }
 
             if (snapshot == null) {
                  Log.w(TAG, "Received null snapshot for user $userId notification query.")
+                 trySend(Result.success(emptyList()))
                  return@addSnapshotListener
             }
 
@@ -44,17 +46,14 @@ class NotificationRepositoryImpl @Inject constructor(
                     }
                 }
                 Log.d(TAG, "Emitting ${allNotifications.size} notifications for user $userId")
-                trySend(allNotifications)
+                trySend(Result.success(allNotifications))
             } catch (e: Exception) {
                 Log.e(TAG, "Error processing notification snapshot for user $userId: ${e.message}", e)
-                trySend(emptyList())
+                trySend(Result.failure(e))
             }
         }
 
-        awaitClose {
-            Log.d(TAG, "Closing notification listener for user: $userId")
-            listener.remove()
-        }
+        awaitClose { listener.remove() }
     }
 
     // Thêm thông báo mới

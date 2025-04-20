@@ -15,6 +15,7 @@ fun NotificationList(
     notifications: List<Notification>,
     onUserClick: (String) -> Unit,
     onPostClick: (String) -> Unit,
+    onCommentClick: (String) -> Unit,
     onMarkAsRead: (String) -> Unit,
     onDelete: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -28,6 +29,7 @@ fun NotificationList(
                 notification = notification,
                 onUserClick = onUserClick,
                 onPostClick = onPostClick,
+                onCommentClick = onCommentClick,
                 onMarkAsRead = onMarkAsRead,
                 onDelete = onDelete
             )

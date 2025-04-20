@@ -1,5 +1,6 @@
 package com.androidfinalproject.hacktok.ui.chat
 
+import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.androidfinalproject.hacktok.repository.AuthRepository
@@ -13,12 +14,13 @@ class ChatViewModelFactory @AssistedInject constructor(
     private val chatRepository: ChatRepository,
     private val authRepository: AuthRepository,
     private val userRepository: UserRepository,
+    private val application: Application,
     @Assisted private val userId: String
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(ChatViewModel::class.java)) {
-            val viewModel = ChatViewModel(chatRepository, authRepository, userRepository)
+            val viewModel = ChatViewModel(chatRepository, authRepository, userRepository, application)
             viewModel.setUserId(userId)
             return viewModel as T
         }

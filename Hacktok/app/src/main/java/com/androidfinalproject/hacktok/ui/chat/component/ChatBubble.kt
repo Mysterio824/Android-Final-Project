@@ -2,31 +2,24 @@ package com.androidfinalproject.hacktok.ui.chat.component
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.androidfinalproject.hacktok.model.Message
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ChatBubble(
     message: Message,
@@ -35,7 +28,9 @@ fun ChatBubble(
 ) {
     var showTime by remember { mutableStateOf(false) }
     var showMenu by remember { mutableStateOf(false) }
+    var showFullScreenImage by remember { mutableStateOf(false) }
     val clipboardManager = LocalClipboardManager.current
+    val sheetState = rememberModalBottomSheetState()
 
     val bubbleColor = if (isCurrentUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
     val textColor = if (isCurrentUser) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
@@ -60,11 +55,29 @@ fun ChatBubble(
                 .padding(12.dp)
         ) {
             Column {
-                Text(
-                    text = message.content,
-                    color = textColor,
-                    fontSize = 16.sp
-                )
+                message.media?.let { media ->
+                    if (media.type == "image") {
+                        AsyncImage(
+                            model = media.url,
+                            contentDescription = "Message image",
+                            modifier = Modifier
+                                .fillMaxWidth(0.8f)
+                                .height(200.dp)
+                                .padding(bottom = 8.dp)
+                                .clickable { showFullScreenImage = true },
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                }
+
+                if (message.content.isNotEmpty()) {
+                    Text(
+                        text = message.content,
+                        color = textColor,
+                        fontSize = 16.sp
+                    )
+                }
+
                 if (showTime) {
                     Text(
                         text = message.createdAt.toString(),
@@ -94,6 +107,30 @@ fun ChatBubble(
                     showMenu = false
                 }
             )
+        }
+    }
+
+    if (showFullScreenImage) {
+        ModalBottomSheet(
+            onDismissRequest = { showFullScreenImage = false },
+            sheetState = sheetState,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                message.media?.let { media ->
+                    if (media.type == "image") {
+                        AsyncImage(
+                            model = media.url,
+                            contentDescription = "Full screen message image",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Fit
+                        )
+                    }
+                }
+            }
         }
     }
 }
