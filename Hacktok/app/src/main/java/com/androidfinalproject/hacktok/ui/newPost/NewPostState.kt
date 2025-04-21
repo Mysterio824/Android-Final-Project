@@ -15,6 +15,7 @@ data class NewPostState (
     val privacy: PRIVACY = PRIVACY.PUBLIC,
     val isPosting: Boolean = false,
     val username: String = "",
+    val imageLink: String = "",
     val postSubmitted: Boolean = false,
     val isEditing: Boolean = false,
 )

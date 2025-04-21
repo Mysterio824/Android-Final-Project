@@ -1,6 +1,7 @@
 package com.androidfinalproject.hacktok.ui.commonComponent
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,21 +11,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.androidfinalproject.hacktok.R
-import com.androidfinalproject.hacktok.ui.newPost.NewPostAction
+import coil.compose.AsyncImage
 import com.androidfinalproject.hacktok.ui.newPost.PRIVACY
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 
 @Composable
 fun SharePostDialog(
     userName: String,
-    userAvatar: Painter,
+    userAvatar: String,
     onDismiss: () -> Unit,
     onSubmit: (String, PRIVACY) -> Unit
 ) {
@@ -48,12 +48,13 @@ fun SharePostDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Image(
-                        painter = userAvatar,
-                        contentDescription = "Avatar",
+                    AsyncImage(
+                        model = userAvatar,
+                        contentDescription = "User Avatar",
                         modifier = Modifier
                             .size(48.dp)
                             .clip(CircleShape)
+                            .background(Color.Gray)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Column {
@@ -174,7 +175,7 @@ fun SharePostDiaglogPreview() {
     MainAppTheme {
         SharePostDialog(
             userName = "Ronaldo > Pessi",
-            userAvatar = painterResource(id = R.drawable.placeholder_image),
+            userAvatar = "",
             onDismiss = {},
             onSubmit = { _, _ -> }
         )

@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.model.Post
+import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.repository.PostRepository
 import com.androidfinalproject.hacktok.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
@@ -31,12 +32,13 @@ class NewPostViewModel @Inject constructor(
     application: Application,
 ) : AndroidViewModel(application) {
     private val _state = MutableStateFlow(NewPostState())
+    private var currentUser: User? = null
     val state: StateFlow<NewPostState> = _state
 
     init {
         viewModelScope.launch {
-            val user = userRepository.getCurrentUser()
-            _state.value = _state.value.copy(username = user?.fullName ?: "Unknown")
+            currentUser = userRepository.getCurrentUser()
+            _state.value = _state.value.copy(username = currentUser?.fullName ?: "Unknown", imageLink = currentUser?.profileImage ?: "")
         }
     }
 
@@ -121,7 +123,8 @@ class NewPostViewModel @Inject constructor(
                         content = caption,
                         userId = userId,
                         imageLink = imageLink,
-                        privacy = privacy
+                        privacy = privacy,
+                        user = currentUser,
                     )
                     val postId = postRepository.addPost(post)
                     _state.value = _state.value.copy(postSubmitted = true)

@@ -219,7 +219,7 @@ fun PostDetailScreen(
             if (state.showShareDialog) {
                 SharePostDialog(
                     userName = state.currentUser?.fullName ?: "Unknown",
-                    userAvatar = painterResource(id = R.drawable.profile_placeholder), // Replace with actual avatar if you have it
+                    userAvatar = state.currentUser?.profileImage ?: "", // Replace with actual avatar if you have it
                     onDismiss = { onAction(PostDetailAction.DismissShareDialog) },
                     onSubmit = { caption, privacy ->
                         onAction(PostDetailAction.OnSharePost(post = state.post!!, caption = caption, privacy = privacy))

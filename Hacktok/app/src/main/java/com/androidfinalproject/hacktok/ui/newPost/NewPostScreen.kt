@@ -83,8 +83,8 @@ fun NewPostScreen(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.profile_placeholder),
+                AsyncImage(
+                    model = state.imageLink,
                     contentDescription = "Avatar",
                     modifier = Modifier
                         .size(48.dp)

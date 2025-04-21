@@ -76,7 +76,6 @@ class PostRepositoryImpl @Inject constructor(
     ): List<Post> {
         try {
             // Fetch more than needed to account for filtering
-            val batchSize = limit * 3
             val query = firestore.collection("posts")
                 .orderBy("createdAt", Query.Direction.DESCENDING)
                 .let { baseQuery ->
@@ -84,7 +83,7 @@ class PostRepositoryImpl @Inject constructor(
                         baseQuery.startAfter(it)
                     } ?: baseQuery
                 }
-                .limit(batchSize)
+                .limit(limit)
 
             val snapshot = query.get().await()
             val documents = snapshot.documents

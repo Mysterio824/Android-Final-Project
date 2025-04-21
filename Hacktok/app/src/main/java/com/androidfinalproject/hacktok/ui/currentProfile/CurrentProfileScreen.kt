@@ -197,7 +197,7 @@ fun CurrentProfileScreen(
                     if (state.showShareDialog && state.postToShare != null) {
                         SharePostDialog(
                             userName = state.user.fullName ?: "Unknown",
-                            userAvatar = painterResource(id = R.drawable.profile_placeholder),
+                            userAvatar = state.user.profileImage ?: "",
                             onDismiss = { onAction(CurrentProfileAction.DismissShareDialog) },
                             onSubmit = { caption, privacy ->
                                 onAction(CurrentProfileAction.OnSharePost(post = state.postToShare, caption = caption, privacy = privacy))

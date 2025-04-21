@@ -183,7 +183,7 @@ fun HomeScreen(
                     if (state.showShareDialog) {
                         SharePostDialog(
                             userName = state.user?.fullName ?: "Unknown",
-                            userAvatar = painterResource(id = R.drawable.profile_placeholder), // Replace with actual avatar if you have it
+                            userAvatar = state.user?.profileImage ?: "", // Replace with actual avatar if you have it
                             onDismiss = { onAction(HomeScreenAction.DismissShareDialog) },
                             onSubmit = { caption, privacy ->
                                 onAction(HomeScreenAction.OnSharePost(post = state.sharePost!!, caption = caption, privacy = privacy))

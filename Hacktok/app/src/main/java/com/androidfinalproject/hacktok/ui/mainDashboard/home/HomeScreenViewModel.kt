@@ -41,8 +41,11 @@ class HomeScreenViewModel @Inject constructor(
 
     init {
         _state.update { HomeScreenState() }
-        loadPosts()
-        loadStories()
+
+        viewModelScope.launch {
+            reloadPosts()   // resets pagination and loads the first page
+            loadStories()   // loads current user's and following's stories
+        }
     }
 
     fun onAction(action: HomeScreenAction) {
@@ -88,35 +91,41 @@ class HomeScreenViewModel @Inject constructor(
         }
     }
 
+    fun reloadPosts() {
+        postRepository.resetPagination()
+        loadPosts()
+    }
+
     private fun loadPosts() {
         viewModelScope.launch {
             val currentUser = authService.getCurrentUser()
             val userId = currentUser?.id ?: ""
             val friendMap = relationshipService.getFriends(userId)
-            friendList = friendMap.keys.toList() // List of friend userIds
-            Log.d("CURRENT_USER", userId)
-            Log.d("FRIEND_LIST", friendList.toString())
+            friendList = friendMap.keys.toList()
 
-            _state.update{
+            _state.update {
                 it.copy(
-                    user = authService.getCurrentUser(),
+                    user = currentUser,
                     isLoading = true,
                     error = null
                 )
             }
 
             try {
-                postRepository.resetPagination()
-
-                val posts = postRepository.getNextPosts(userId = userId, friendList = friendList)
+                val posts = postRepository.getNextPosts(
+                    userId = userId,
+                    friendList = friendList,
+                    limit = 10L
+                )
 
                 val postAuthorMap = loadAuthorNames(posts)
+
                 _state.update {
                     it.copy(
                         posts = posts,
                         postAuthorNames = postAuthorMap,
                         isLoading = false,
-                        isPaginating =  false,
+                        isPaginating = false,
                         hasMorePosts = posts.size == 10
                     )
                 }
@@ -133,13 +142,23 @@ class HomeScreenViewModel @Inject constructor(
     }
 
     private fun loadMorePosts() {
+        if (state.value.isPaginating || !state.value.hasMorePosts) return
+
         viewModelScope.launch {
             _state.update { it.copy(isPaginating = true) }
-            val newPosts = postRepository.getNextPosts(userId = state.value.user?.id ?: "", friendList = friendList)
+
+            val newPosts = postRepository.getNextPosts(
+                userId = state.value.user?.id ?: "",
+                friendList = friendList,
+                limit = 10L
+            )
+
             val newAuthorMap = loadAuthorNames(newPosts)
+
             _state.update {
                 val allPosts = (it.posts + newPosts).distinctBy { post -> post.id }
                 val allAuthors = it.postAuthorNames + newAuthorMap
+
                 it.copy(
                     posts = allPosts,
                     postAuthorNames = allAuthors,
