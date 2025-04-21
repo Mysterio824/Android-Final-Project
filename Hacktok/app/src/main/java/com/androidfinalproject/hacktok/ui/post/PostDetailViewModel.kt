@@ -4,10 +4,10 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.model.Comment
+import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.model.enums.ReportCause
 import com.androidfinalproject.hacktok.model.enums.ReportType
 import com.androidfinalproject.hacktok.repository.PostRepository
-import com.androidfinalproject.hacktok.repository.PostShareRepository
 import com.androidfinalproject.hacktok.repository.UserRepository
 import com.androidfinalproject.hacktok.service.AuthService
 import com.androidfinalproject.hacktok.service.CommentService
@@ -25,7 +25,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PostDetailViewModel @Inject constructor(
-    private val postShareRepository: PostShareRepository,
     private val userRepository: UserRepository,
     private val postRepository: PostRepository,
     private val likeService: LikeService,
@@ -41,12 +40,16 @@ class PostDetailViewModel @Inject constructor(
         when (action) {
             is PostDetailAction.OnSharePost -> {
                 viewModelScope.launch {
+                    val referencePost = postRepository.getPost(action.post.id ?: return@launch)
+                    val post = Post(
+                        content = action.caption,
+                        userId = state.value.currentUser?.id ?: "",
+                        reference = referencePost,
+                        privacy = action.privacy.name,
+                        user = state.value.currentUser
+                    )
                     try {
-                        postShareRepository.sharePost(
-                            postId = action.post.id ?: return@launch,
-                            caption = action.caption,
-                            privacy = action.privacy.name,
-                        )
+                        postRepository.addPost(post)
                     } catch (e: Exception) {
                         Log.e("ERROR", e.toString())
                     }

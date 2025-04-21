@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import com.androidfinalproject.hacktok.repository.PostShareRepository
 import com.androidfinalproject.hacktok.service.LikeService
 import com.androidfinalproject.hacktok.repository.UserRepository
 import com.androidfinalproject.hacktok.service.RelationshipService
@@ -30,7 +29,6 @@ class HomeScreenViewModel @Inject constructor(
     private val postRepository: PostRepository,
     private val reportService: ReportService,
     private val relationshipService: RelationshipService,
-    private val postShareRepository: PostShareRepository,
     private val likeService: LikeService,
     private val userRepository: UserRepository,
     private val storyService: StoryService,
@@ -52,12 +50,16 @@ class HomeScreenViewModel @Inject constructor(
         when (action) {
             is HomeScreenAction.OnSharePost -> {
                 viewModelScope.launch {
+                    val referencePost = postRepository.getPost(action.post.id ?: return@launch)
+                    val post = Post(
+                        content = action.caption,
+                        userId = state.value.user?.id ?: "",
+                        reference = referencePost,
+                        privacy = action.privacy.name,
+                        user = state.value.user
+                    )
                     try {
-                        postShareRepository.sharePost(
-                            postId = action.post.id ?: return@launch,
-                            caption = action.caption,
-                            privacy = action.privacy.name,
-                        )
+                        postRepository.addPost(post)
                     } catch (e: Exception) {
                         Log.d("ERROR", e.toString())
                     }
