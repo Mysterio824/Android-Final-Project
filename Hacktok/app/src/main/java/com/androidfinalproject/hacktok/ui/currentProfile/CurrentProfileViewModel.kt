@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.repository.PostRepository
-import com.androidfinalproject.hacktok.repository.PostShareRepository
 import com.androidfinalproject.hacktok.repository.UserRepository
 import com.androidfinalproject.hacktok.service.LikeService
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,7 +18,6 @@ import javax.inject.Inject
 class CurrentProfileViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val postRepository: PostRepository,
-    private val postShareRepository: PostShareRepository,
     private val likeService: LikeService
 ) : ViewModel() {
     private val _state = MutableStateFlow<CurrentProfileState>(CurrentProfileState.Loading)
@@ -130,12 +128,16 @@ class CurrentProfileViewModel @Inject constructor(
                 val current = _state.value
                 if (current is CurrentProfileState.Success) {
                     viewModelScope.launch {
+                        val referencePost = postRepository.getPost(action.post.id ?: return@launch)
+                        val post = Post(
+                            content = action.caption,
+                            userId = current.user.id ?: return@launch,
+                            reference = referencePost,
+                            privacy = action.privacy.name,
+                            user = current.user
+                        )
                         try {
-                            postShareRepository.sharePost(
-                                postId = action.post.id ?: return@launch,
-                                caption = action.caption,
-                                privacy = action.privacy.name,
-                            )
+                            postRepository.addPost(post)
                             loadCurrentUser() // Reload after share
                         } catch (e: Exception) {
                             _state.value = CurrentProfileState.Error("Failed to share post: ${e.message}")

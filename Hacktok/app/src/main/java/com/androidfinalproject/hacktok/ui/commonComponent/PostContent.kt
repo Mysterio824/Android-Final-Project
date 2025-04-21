@@ -39,7 +39,7 @@ fun PostContent(
     onShare: () -> Unit,
     onOptionsClick: () -> Unit,
     onUserClick: () -> Unit,
-    currentId: String
+    currentId: String,
 ) {
     Card(
         modifier = Modifier
@@ -51,103 +51,258 @@ fun PostContent(
             containerColor = MaterialTheme.colorScheme.background
         )
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Avatar
-            ProfileImage(
-                imageUrl = post.user?.profileImage,
-                size = 45.dp,
-                onClick = onUserClick
-            )
-
-            Column(
+        if (post.reference == null) {
+            Row(
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 8.dp)
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = fullName ?: "",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                    modifier = Modifier.clickable(onClick = onUserClick)
+                // Avatar
+                ProfileImage(
+                    imageUrl = post.user?.profileImage,
+                    size = 45.dp,
+                    onClick = onUserClick
                 )
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
+
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 8.dp)
                 ) {
                     Text(
-                        text = formatDate(post.createdAt),
-                        color = Color.Gray,
-                        fontSize = 12.sp
+                        text = fullName ?: "",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        modifier = Modifier.clickable(onClick = onUserClick)
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = formatDate(post.createdAt),
+                            color = Color.Gray,
+                            fontSize = 12.sp
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Icon(
+                            imageVector = Icons.Default.Public,
+                            contentDescription = "Privacy: Public",
+                            tint = Color.Gray,
+                            modifier = Modifier.size(12.dp)
+                        )
+                    }
+                }
+
+                IconButton(onClick = onOptionsClick) {
                     Icon(
-                        imageVector = Icons.Default.Public,
-                        contentDescription = "Privacy: Public",
-                        tint = Color.Gray,
-                        modifier = Modifier.size(12.dp)
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = "More options"
                     )
                 }
             }
 
-            IconButton(onClick = onOptionsClick) {
-                Icon(
-                    imageVector = Icons.Default.MoreVert,
-                    contentDescription = "More options"
+            Text(
+                text = post.content,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                fontSize = 16.sp
+            )
+
+            if (post.imageLink.isNotEmpty()) {
+                AsyncImage(
+                    model = post.imageLink,
+                    contentDescription = "Post image",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 200.dp)
+                        .background(Color.White),
+                    contentScale = ContentScale.FillHeight,
                 )
             }
-        }
 
-        Text(
-            text = post.content,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-            fontSize = 16.sp
-        )
-
-        if (post.imageLink.isNotEmpty()) {
-            AsyncImage(
-                model = post.imageLink,
-                contentDescription = "Post image",
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(max = 200.dp)
-                    .background(Color.White),
-                contentScale = ContentScale.FillHeight,
-            )
-        }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.weight(1f)
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Filled.ThumbUp,
-                    contentDescription = "Likes",
-                    tint = Color(0xFF1877F2),
-                    modifier = Modifier.size(16.dp)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.ThumbUp,
+                        contentDescription = "Likes",
+                        tint = Color(0xFF1877F2),
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "${post.getLikeCount()}",
+                        color = Color.Gray,
+                        fontSize = 14.sp
+                    )
+                }
+
                 Text(
-                    text = "${post.getLikeCount()}",
+                    text = "${post.commentCount} comments",
                     color = Color.Gray,
                     fontSize = 14.sp
                 )
             }
+        } else {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Avatar
+                ProfileImage(
+                    imageUrl = post.user?.profileImage,
+                    size = 45.dp,
+                    onClick = onUserClick
+                )
+
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 8.dp)
+                ) {
+                    Text(
+                        text = fullName ?: "",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        modifier = Modifier.clickable(onClick = onUserClick)
+                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = formatDate(post.createdAt),
+                            color = Color.Gray,
+                            fontSize = 12.sp
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Icon(
+                            imageVector = Icons.Default.Public,
+                            contentDescription = "Privacy: Public",
+                            tint = Color.Gray,
+                            modifier = Modifier.size(12.dp)
+                        )
+                    }
+                }
+
+                IconButton(onClick = onOptionsClick) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = "More options"
+                    )
+                }
+            }
 
             Text(
-                text = "${post.commentCount} comments",
-                color = Color.Gray,
-                fontSize = 14.sp
+                text = post.content,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                fontSize = 16.sp
             )
+
+            HorizontalDivider()
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp, horizontal = 20.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Avatar
+                ProfileImage(
+                    imageUrl = post.reference.user?.profileImage,
+                    size = 45.dp,
+                    onClick = onUserClick
+                )
+
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 8.dp)
+                ) {
+                    Text(
+                        text = post.reference?.user?.fullName ?: "Unknown",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        modifier = Modifier.clickable(onClick = onUserClick)
+                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = formatDate(post.reference?.createdAt!!),
+                            color = Color.Gray,
+                            fontSize = 12.sp
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Icon(
+                            imageVector = Icons.Default.Public,
+                            contentDescription = "Privacy: Public",
+                            tint = Color.Gray,
+                            modifier = Modifier.size(12.dp)
+                        )
+                    }
+                }
+            }
+
+            Text(
+                text = post.reference.content,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+                fontSize = 16.sp
+            )
+
+            if (post.reference.imageLink.isNotEmpty()) {
+                AsyncImage(
+                    model = post.reference.imageLink,
+                    contentDescription = "Post image",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp)
+                        .heightIn(max = 200.dp)
+                        .background(Color.White),
+                    contentScale = ContentScale.FillHeight,
+                )
+            } else {
+                HorizontalDivider()
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.ThumbUp,
+                        contentDescription = "Likes",
+                        tint = Color(0xFF1877F2),
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "${post.getLikeCount()}",
+                        color = Color.Gray,
+                        fontSize = 14.sp
+                    )
+                }
+
+                Text(
+                    text = "${post.commentCount} comments",
+                    color = Color.Gray,
+                    fontSize = 14.sp
+                )
+            }
         }
+
 
         HorizontalDivider()
 

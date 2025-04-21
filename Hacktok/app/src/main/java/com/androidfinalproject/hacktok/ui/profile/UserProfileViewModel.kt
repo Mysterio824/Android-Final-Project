@@ -8,7 +8,7 @@ import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.model.RelationInfo
 import com.androidfinalproject.hacktok.model.enums.ReportCause
 import com.androidfinalproject.hacktok.model.enums.ReportType
-import com.androidfinalproject.hacktok.repository.PostShareRepository
+import com.androidfinalproject.hacktok.repository.PostRepository
 import com.androidfinalproject.hacktok.service.AuthService
 import com.androidfinalproject.hacktok.service.LikeService
 import com.androidfinalproject.hacktok.service.RelationshipService
@@ -33,9 +33,9 @@ import kotlinx.coroutines.flow.map
 @HiltViewModel
 class UserProfileViewModel @Inject constructor(
     private val relationshipService: RelationshipService,
+    private val postRepository: PostRepository,
     private val authService: AuthService,
     private val reportService: ReportService,
-    private val postShareRepository: PostShareRepository,
     private val likeService: LikeService
 ) : ViewModel() {
     private val TAG = "UserProfileViewModel"
@@ -83,12 +83,16 @@ class UserProfileViewModel @Inject constructor(
             is UserProfileAction.UpdateSharePost -> _state.update { it.copy(sharePost = action.post, showShareDialog = true) }
             is UserProfileAction.OnSharePost -> {
                 viewModelScope.launch {
+                    val referencePost = postRepository.getPost(action.post.id ?: return@launch)
+                    val post = Post(
+                        content = action.caption,
+                        userId = profileUserId,
+                        reference = referencePost,
+                        privacy = action.privacy.name,
+                        user = state.value.user
+                    )
                     try {
-                        postShareRepository.sharePost(
-                            postId = action.post.id ?: return@launch,
-                            caption = action.caption,
-                            privacy = action.privacy.name,
-                        )
+                        postRepository.addPost(post)
                     } catch (e: Exception) {
                         Log.d("ERROR", e.toString())
                     }
