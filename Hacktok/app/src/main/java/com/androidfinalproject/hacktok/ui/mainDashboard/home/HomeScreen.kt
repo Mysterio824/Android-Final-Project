@@ -1,5 +1,6 @@
 package com.androidfinalproject.hacktok.ui.mainDashboard.home
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -39,13 +40,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.androidfinalproject.hacktok.R
 import com.androidfinalproject.hacktok.model.MockData
+import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.model.enums.ReportType
 import com.androidfinalproject.hacktok.ui.mainDashboard.home.component.*
 import com.androidfinalproject.hacktok.ui.commonComponent.PostContent
 import com.androidfinalproject.hacktok.ui.commonComponent.PostOptionsContent
 import com.androidfinalproject.hacktok.ui.commonComponent.ReportOptionsContent
 import com.androidfinalproject.hacktok.ui.commonComponent.SharePostDialog
-import com.androidfinalproject.hacktok.ui.post.PostDetailAction
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,7 +57,7 @@ fun HomeScreen(
 ) {
     val facebookBlue = Color(0xFF1877F2)
     var reportTargetId by remember { mutableStateOf<String?>(null) }
-    var selectPostId by remember { mutableStateOf<String?>(null) }
+    var selectPost by remember { mutableStateOf<Post?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
     val listState = rememberLazyListState()
 
@@ -158,8 +159,8 @@ fun HomeScreen(
                                     onUserClick = { onAction(HomeScreenAction.OnUserClick(post.userId)) },
                                     onComment = { onAction(HomeScreenAction.OnPostClick(post.id!!)) },
                                     onShare = { onAction(HomeScreenAction.UpdateSharePost(post)) },
-                                    onOptionsClick = { selectPostId = post.id },
-                                    currentId = state.user?.id ?: ""
+                                    onOptionsClick = { selectPost = post },
+                                    currentId = state.user!!.id!!
                                 )
                             }
                             Spacer(modifier = Modifier.height(8.dp))
@@ -209,15 +210,15 @@ fun HomeScreen(
                 }
             }
 
-            if (selectPostId != null) {
+            if (selectPost != null) {
                 ModalBottomSheet(
-                    onDismissRequest = { selectPostId = null },
+                    onDismissRequest = { selectPost = null },
                     sheetState = bottomSheetState
                 ) {
                     PostOptionsContent(
-                        onDismiss = { selectPostId = null },
-                        onReport = { reportTargetId = selectPostId!! },
-                        isPostOwner = state.user?.id == selectPostId
+                        onDismiss = { selectPost = null },
+                        onReport = { reportTargetId = selectPost!!.id },
+                        isPostOwner = state.user!!.id == selectPost!!.user?.id
                     )
                 }
             }

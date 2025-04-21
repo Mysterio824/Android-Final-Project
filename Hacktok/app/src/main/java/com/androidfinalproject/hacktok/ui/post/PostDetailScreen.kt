@@ -1,5 +1,6 @@
 package com.androidfinalproject.hacktok.ui.post
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -63,9 +64,7 @@ fun PostDetailScreen(
     var selectedComment by remember { mutableStateOf<Comment?>(null) }
     var reportTargetId by remember { mutableStateOf<String?>(null) }
     var reportType by remember { mutableStateOf<ReportType?>(null) }
-
     var showComments by remember { mutableStateOf(true) }
-
     val snackbarHostState = remember { SnackbarHostState() }
 
     val bottomSheetState = rememberModalBottomSheetState(
@@ -194,10 +193,10 @@ fun PostDetailScreen(
                     sheetState = bottomSheetState
                 ) {
                     PostOptionsContent(
-                        isPostOwner = state.currentUser?.id == state.post!!.user!!.id!!,
+                        isPostOwner = state.currentUser?.id == state.postUser?.id,
                         onDismiss = { showPostOptionsSheet = false },
                         onReport = {
-                            reportTargetId = state.post.id
+                            reportTargetId = state.post?.id
                             reportType = ReportType.Post
                         }
                     )

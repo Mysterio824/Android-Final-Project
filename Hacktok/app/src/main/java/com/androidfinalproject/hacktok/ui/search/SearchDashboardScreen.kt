@@ -2,34 +2,24 @@ package com.androidfinalproject.hacktok.ui.search
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
-import androidx.compose.material3.TabRowDefaults.SecondaryIndicator
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
-import com.androidfinalproject.hacktok.model.Post
-import com.androidfinalproject.hacktok.model.User
+import com.androidfinalproject.hacktok.ui.search.component.*
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -183,194 +173,7 @@ fun SearchDashboardScreen(
     }
 }
 
-@Composable
-fun SearchHistorySection(
-    searchHistory: List<String>,
-    onHistoryItemClick: (String) -> Unit,
-    onClearHistory: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "Lịch sử tìm kiếm",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            
-            if (searchHistory.isNotEmpty()) {
-                TextButton(onClick = onClearHistory) {
-                    Text(
-                        text = "Xóa tất cả",
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
-        }
-        
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        if (searchHistory.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 32.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Không có lịch sử tìm kiếm",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        } else {
-            LazyColumn {
-                items(searchHistory) { query ->
-                    SearchHistoryItem(
-                        query = query,
-                        onClick = { onHistoryItemClick(query) }
-                    )
-                }
-            }
-        }
-    }
-}
 
-@Composable
-fun SearchHistoryItem(
-    query: String,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = Icons.Default.History,
-            contentDescription = "Search History",
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(20.dp)
-        )
-        
-        Spacer(modifier = Modifier.width(16.dp))
-        
-        Text(
-            text = query,
-            style = MaterialTheme.typography.bodyMedium,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f)
-        )
-    }
-}
-
-@Composable
-private fun UserSearchItem(
-    user: User,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .clickable(onClick = onClick),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        AsyncImage(
-            model = user.profileImage,
-            contentDescription = "Profile Image",
-            modifier = Modifier
-                .size(50.dp)
-                .clip(CircleShape),
-            contentScale = ContentScale.Crop
-        )
-        
-        Spacer(modifier = Modifier.width(12.dp))
-        
-        Column {
-            Text(
-                text = user.username ?: "Unknown User",
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    fontWeight = FontWeight.Bold
-                ),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            
-            Text(
-                text = user.fullName ?: "",
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                ),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-    }
-}
-
-@Composable
-private fun PostSearchItem(
-    post: Post,
-    onClick: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .clickable(onClick = onClick)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(bottom = 8.dp)
-        ) {
-            AsyncImage(
-                model = post.user?.profileImage,
-                contentDescription = "User Profile",
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(CircleShape),
-                contentScale = ContentScale.Crop
-            )
-            
-            Spacer(modifier = Modifier.width(8.dp))
-            
-            Text(
-                text = post.user?.username ?: "Unknown User",
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontWeight = FontWeight.Bold
-                )
-            )
-        }
-        
-        AsyncImage(
-            model = post.imageLink,
-            contentDescription = "Post Image",
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-                .clip(RoundedCornerShape(8.dp)),
-            contentScale = ContentScale.Crop
-        )
-        
-        Text(
-            text = post.content,
-            style = MaterialTheme.typography.bodyMedium,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(top = 8.dp)
-        )
-    }
-}
 
 private fun Modifier.tabIndicatorOffset(
     currentTabPosition: TabPosition

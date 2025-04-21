@@ -58,7 +58,6 @@ class PostDetailViewModel @Inject constructor(
             is PostDetailAction.LoadComments -> loadComments()
             is PostDetailAction.ToggleLike -> toggleLike()
             is PostDetailAction.UnLikePost -> unlike()
-            is PostDetailAction.Share -> sharePost()
             is PostDetailAction.UpdateCommentText -> updateCommentText(action.text)
             is PostDetailAction.SubmitComment -> submitComment()
             is PostDetailAction.ToggleCommentInputFocus -> toggleCommentInputFocus()
@@ -90,7 +89,8 @@ class PostDetailViewModel @Inject constructor(
             _state.update { it.copy(error = null) }
             try {
                 val post = postRepository.getPost(postId)
-                val postUser = post?.userId?.let { userRepository.getUserById(it) }
+                    ?: throw IllegalStateException("Post not found")
+                val postUser = post.userId.let { userRepository.getUserById(it) }
                 val currentUser = authService.getCurrentUser()
                     ?: throw IllegalStateException("User not found")
 
@@ -166,7 +166,7 @@ class PostDetailViewModel @Inject constructor(
     private fun toggleLike() {
         viewModelScope.launch {
             _state.value.post?.let { post ->
-                val updatedPost = likeService.unlikePost(post.id!!)
+                val updatedPost = likeService.likePost(post.id!!)
                     ?: post
                 updatedPost.copy(user = post.user)
                 _state.update { it.copy(post = updatedPost) }
@@ -183,10 +183,6 @@ class PostDetailViewModel @Inject constructor(
                 _state.update { it.copy(post = updatedPost) }
             }
         }
-    }
-
-    private fun sharePost() {
-        // TODO
     }
 
     private fun updateCommentText(text: String) {
