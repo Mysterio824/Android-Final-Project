@@ -1,6 +1,7 @@
-package com.androidfinalproject.hacktok.ui.currentProfile.component
+package com.androidfinalproject.hacktok.ui.chat.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,14 +22,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.androidfinalproject.hacktok.model.User
-import com.androidfinalproject.hacktok.ui.messageDashboard.component.ProfileImage
+import com.androidfinalproject.hacktok.ui.commonComponent.ProfileImage
 
 
 @Composable
 fun ChatTopBar(
     otherUser: User,
     onBackClick: () -> Unit,
-    onInfoClick: () -> Unit
+    onInfoClick: () -> Unit,
+    onUserClick: () -> Unit,
+    isBlock: Boolean
 ) {
     Row(
         modifier = Modifier
@@ -49,20 +52,24 @@ fun ChatTopBar(
                 )
             }
 
-            ProfileImage(
-                imageSize = 40.dp,
-                contentDescription = "Profile Picture",
-                isActive = true
-            )
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Row (
+                modifier = Modifier.clickable { onUserClick() }
+            ) {
+                ProfileImage(
+                    size = 40.dp,
+                    imageUrl = if(isBlock) "" else otherUser.profileImage,
+                )
 
-            Text(
-                text = otherUser.username ?: otherUser.fullName ?: "Unknown",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Text(
+                    text = if(isBlock) "Unknown" else otherUser.username ?: otherUser.fullName ?: "Unknown",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
         }
 
         IconButton(onClick = onInfoClick) {

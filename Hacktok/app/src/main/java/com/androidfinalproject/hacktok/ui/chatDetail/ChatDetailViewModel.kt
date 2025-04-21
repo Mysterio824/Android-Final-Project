@@ -5,26 +5,45 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.model.Group
 import com.androidfinalproject.hacktok.model.User
+import com.androidfinalproject.hacktok.model.enums.RelationshipStatus
+import com.androidfinalproject.hacktok.repository.ChatRepository
+import com.androidfinalproject.hacktok.repository.UserRepository
+import com.androidfinalproject.hacktok.service.RelationshipService
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ChatDetailViewModel(
-    savedStateHandle: SavedStateHandle
+@HiltViewModel
+class ChatDetailViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
+    private val relationshipService: RelationshipService,
+    private val chatRepository: ChatRepository,
+    private val userRepository: UserRepository
 ) : ViewModel() {
+    private var otherUserId: String? = null
     private val _state = MutableStateFlow(ChatDetailState())
     val state: StateFlow<ChatDetailState> = _state.asStateFlow()
 
-    init {
+    private fun loadData(){
+        val userId = otherUserId ?: return
         viewModelScope.launch {
-            // Lấy thông tin từ savedStateHandle để biết đây là chat nhóm hay cá nhân
-            val isGroup = savedStateHandle.get<Boolean>("isGroup") ?: false
-            val chatId = savedStateHandle.get<String>("chatId") ?: ""
 
-            // Tạo user hiện tại
-            val currentUser = User(id = "user1", username = "User One", email = "user1@example.com")
+            // Lấy thông tin từ savedStateHandle để biết đây là chat nhóm hay cá nhân
+            val isGroup = false
+            val currentUser = userRepository.getCurrentUser()
+                ?: return@launch
+
+            val chatId = chatRepository.getOrCreateChat(currentUser.id!!, userId)
+
+            val otherUser = userRepository.getUserById(userId)
+                ?: run{
+                    _state.update { it.copy(error = "User not found", isLoading = false) }
+                    return@launch
+                }
 
             if (isGroup) {
                 // Khởi tạo nhóm (demo)
@@ -55,15 +74,10 @@ class ChatDetailViewModel(
                     )
                 }
             } else {
-                // Khởi tạo chat cá nhân (demo)
-                val otherUser = User(
-                    id = "user2",
-                    username = "User Two",
-                    email = "user2@example.com"
-                )
 
                 _state.update { currentState ->
                     currentState.copy(
+                        chatId = chatId,
                         currentUser = currentUser,
                         otherUser = otherUser,
                         isGroup = false
@@ -71,6 +85,12 @@ class ChatDetailViewModel(
                 }
             }
         }
+
+    }
+
+    fun setUserId(userId: String) {
+        otherUserId = userId
+        loadData()
     }
 
     fun onAction(action: ChatDetailAction) {
@@ -83,9 +103,8 @@ class ChatDetailViewModel(
             is ChatDetailAction.AddMember -> addMember()
             is ChatDetailAction.DeleteChat -> deleteChat()
             is ChatDetailAction.BlockUser -> blockUser()
-            // These are handled in ChatDetailScreenRoot
-            is ChatDetailAction.NavigateBack,
-            is ChatDetailAction.NavigateToUserProfile -> {}
+            is ChatDetailAction.UnBlockUser -> unblockUser()
+            else -> {}
         }
     }
 
@@ -142,10 +161,26 @@ class ChatDetailViewModel(
     }
 
     private fun deleteChat() {
-        // Implement logic to delete the chat/group
+        viewModelScope.launch {
+            chatRepository.deleteChat(state.value.chatId)
+        }
     }
 
     private fun blockUser() {
-        // Implement logic to block a user
+        viewModelScope.launch {
+            val res = relationshipService.blockUser(state.value.otherUser!!.id!!)
+            if (!res) return@launch
+
+            _state.update { it.copy(relation = it.relation.copy(status = RelationshipStatus.BLOCKING)) }
+        }
+    }
+
+    private fun unblockUser() {
+        viewModelScope.launch {
+            val res = relationshipService.unblockUser(state.value.otherUser!!.id!!)
+            if (!res) return@launch
+
+            _state.update { it.copy(relation = it.relation.copy(status = RelationshipStatus.NONE)) }
+        }
     }
 }

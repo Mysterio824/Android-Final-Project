@@ -42,13 +42,13 @@ class RelationshipServiceImpl @Inject constructor(
             .filter { it.value.status == RelationshipStatus.FRIENDS }
     }
 
-    override suspend fun getRelationship(userId: String): RelationInfo? {
-        val currentUserId = authService.getCurrentUserId() ?: return null
+    override suspend fun getRelationship(userId: String): RelationInfo {
+        val currentUserId = authService.getCurrentUserId() ?: return RelationInfo( id = "" )
         if (currentUserId != userId) {
             val relationships = getMyRelationships()
-            return relationships[userId]
+            return relationships[userId] ?: RelationInfo( id = "" )
         } else {
-            return null
+            return RelationInfo( id = "" )
         }
     }
 

@@ -7,6 +7,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Public
+import androidx.compose.material.icons.filled.Report
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -44,12 +47,15 @@ fun PostOptionsContent(
         // Common options for all users
         OptionItem(
             title = "Hide Post",
+            icon = Icons.Default.VisibilityOff,
             description = "See fewer posts like this",
             onClick = onDismiss
         )
+
         if (!isPostOwner) {
             OptionItem(
                 title = "Report Post",
+                icon = Icons.Default.Report,
                 description = "This post concerns me",
                 onClick = withDismiss(onReport)
             )
@@ -57,14 +63,13 @@ fun PostOptionsContent(
 
         OptionItem(
             title = "Save Post",
+            icon = Icons.Default.Save,
             description = "Add to your saved items",
             onClick = onDismiss
         )
 
         // Options only for post owner
         if (isPostOwner) {
-            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-
             OptionItem(
                 title = "Edit Post",
                 icon = Icons.Default.Edit,

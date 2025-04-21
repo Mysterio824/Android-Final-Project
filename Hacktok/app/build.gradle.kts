@@ -106,6 +106,8 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.reactive)
     implementation(libs.mongodb.driver.kotlin.coroutine)
+    implementation("com.google.accompanist:accompanist-swiperefresh:0.33.2-alpha") // latest as of April 2025
+
 
     // Hilt
     implementation("com.google.dagger:hilt-android:2.48")

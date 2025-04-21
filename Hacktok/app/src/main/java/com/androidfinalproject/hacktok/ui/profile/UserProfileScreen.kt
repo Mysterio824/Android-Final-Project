@@ -11,11 +11,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
-import com.androidfinalproject.hacktok.R
 import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.RelationInfo
 import com.androidfinalproject.hacktok.model.enums.RelationshipStatus
@@ -25,7 +23,6 @@ import com.androidfinalproject.hacktok.ui.commonComponent.PostOptionsContent
 import com.androidfinalproject.hacktok.ui.commonComponent.ProfileImage
 import com.androidfinalproject.hacktok.ui.commonComponent.ReportOptionsContent
 import com.androidfinalproject.hacktok.ui.commonComponent.SharePostDialog
-import com.androidfinalproject.hacktok.ui.mainDashboard.home.HomeScreenAction
 import com.androidfinalproject.hacktok.ui.profile.component.*
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 

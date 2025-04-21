@@ -3,51 +3,56 @@ package com.androidfinalproject.hacktok.repository.impl
 import android.util.Log
 import com.androidfinalproject.hacktok.model.Chat
 import com.androidfinalproject.hacktok.model.Message
+import com.androidfinalproject.hacktok.model.enums.NotificationType
+import com.androidfinalproject.hacktok.model.enums.RelationshipStatus
 import com.androidfinalproject.hacktok.repository.ChatRepository
+import com.androidfinalproject.hacktok.service.FcmService
+import com.androidfinalproject.hacktok.service.RelationshipService
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.toObject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class ChatRepositoryImpl @Inject constructor(
-    private val db: FirebaseFirestore
+    private val db: FirebaseFirestore,
+    private val fcmService: FcmService,
+    private val relationshipService: RelationshipService
 ) : ChatRepository {
     private val chatsCollection = db.collection("chats")
     private val TAG = "ChatRepository"
+    private val serviceScope = CoroutineScope(Dispatchers.IO)
+
+    private fun generateChatId(userA: String, userB: String): String {
+        return listOf(userA, userB).sorted().joinToString("_")
+    }
 
     // Create or get existing chat between two users
     override suspend fun getOrCreateChat(currentUserId: String, otherUserId: String): String {
-        // First try to find existing chat
-        val existingChat = chatsCollection
-            .whereArrayContains("participants", currentUserId)
-            .get()
-            .await()
-            .documents
-            .firstOrNull { doc ->
-                val chat = doc.toObject<Chat>()
-                chat?.participants?.containsAll(listOf(currentUserId, otherUserId)) == true
-            }
+        val chatId = generateChatId(currentUserId, otherUserId)
 
-        if (existingChat != null) {
-            return existingChat.id
+        val existingChatSnapshot = chatsCollection.document(chatId).get().await()
+        if (existingChatSnapshot.exists()) {
+            return chatId
         }
 
-        // Create new chat if none exists
         val newChat = Chat(
+            id = chatId,
             participants = listOf(currentUserId, otherUserId),
             lastMessage = "",
-            lastMessageAt = java.util.Date()
         )
 
-        val chatRef = chatsCollection.add(newChat).await()
-        chatsCollection.document(chatRef.id).update("id", chatRef.id).await()
-        return chatRef.id
+        // Try to create document with that ID
+        chatsCollection.document(chatId).set(newChat).await()
+        return chatId
     }
 
     // Get real-time chat messages
@@ -116,20 +121,48 @@ class ChatRepositoryImpl @Inject constructor(
 
     // Send a message
     override suspend fun sendMessage(chatId: String, message: Message): String {
-        val messageRef = chatsCollection.document(chatId)
-            .collection("messages")
-            .add(message)
-            .await()
+        try {
+            // Get information about the chat
+            val chat = chatsCollection.document(chatId).get().await().toObject<Chat>()
+                ?: throw Exception("Chat not found")
+            val recipientUserId = chat.participants.find { it != message.senderId }
+                ?: throw Exception("User not found")
 
-        // Update chat's last message
-        chatsCollection.document(chatId).update(
-            mapOf(
-                "lastMessage" to message.content,
-                "lastMessageAt" to message.createdAt
-            )
-        ).await()
+                // Check relationship status before sending notification
+            val relationshipStatus = relationshipService.getRelationshipStatus(recipientUserId)
 
-        return messageRef.id
+                // Only send notification if user is not blocked
+            if (relationshipStatus == RelationshipStatus.BLOCKED ||
+                    relationshipStatus == RelationshipStatus.BLOCKING) {
+                return ""
+            }
+            val messageRef = chatsCollection.document(chatId)
+                .collection("messages")
+                .add(message)
+                .await()
+
+            Log.d(TAG, "Message sent: ${message.content}")
+
+            // Update chat's last message details
+            chatsCollection.document(chatId).update(
+                mapOf(
+                    "lastMessage" to message.content,
+                    "lastMessageAt" to message.createdAt
+                )
+            ).await()
+            serviceScope.launch {
+                fcmService.sendInteractionNotification(
+                    recipientUserId = recipientUserId,
+                    senderUserId = message.senderId,
+                    notificationType = NotificationType.NEW_MESSAGE,
+                    itemId = chatId,
+                )
+            }
+            return messageRef.id
+        } catch (e: Exception) {
+            Log.e(TAG, "Error sending message", e)
+            throw e
+        }
     }
 
     // Delete a message
@@ -143,6 +176,7 @@ class ChatRepositoryImpl @Inject constructor(
 
     // Delete a chat
     override suspend fun deleteChat(chatId: String) {
+
         // First delete all messages
         val messages = chatsCollection.document(chatId)
             .collection("messages")

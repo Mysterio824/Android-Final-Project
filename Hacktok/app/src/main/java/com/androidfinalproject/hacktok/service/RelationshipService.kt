@@ -18,7 +18,7 @@ interface RelationshipService {
     suspend fun getFriends(userId: String): Map<String, RelationInfo>
 
     // Get relationship
-    suspend fun getRelationship(userId: String): RelationInfo?
+    suspend fun getRelationship(userId: String): RelationInfo
 
     // Get friends for the current user
     suspend fun getMyFriends(): List<User>

@@ -1,22 +1,26 @@
 package com.androidfinalproject.hacktok.ui.chatDetail
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 
 @Composable
 fun ChatDetailScreenRoot(
-    chatId: String,
+    userId: String,
     isGroup: Boolean,
-    viewModel: ChatDetailViewModel = viewModel(
-        factory = ChatDetailViewModelFactory(chatId, isGroup)
-    ),
+    viewModel: ChatDetailViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit,
     onUserProfileNavigate: (String?) -> Unit = {}
 ) {
     val state by viewModel.state.collectAsState()
+
+    LaunchedEffect(userId) {
+        viewModel.setUserId(userId)
+    }
 
     ChatDetailScreen(
         state = state,

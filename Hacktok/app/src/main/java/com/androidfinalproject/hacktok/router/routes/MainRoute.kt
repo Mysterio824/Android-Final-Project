@@ -45,6 +45,11 @@ sealed interface MainRoute : Route {
     }
 
     @Serializable
+    data object ChatOption : MainRoute {
+        override val route = "chat_option"
+    }
+
+    @Serializable
     data object EditProfile : MainRoute {
         override val route = "edit_profile"
     }

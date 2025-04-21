@@ -17,6 +17,7 @@ fun ChatScreenRoot(
     userId: String,
     viewModel: ChatViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit,
+    onChatOptionNavigate: (String) -> Unit,
     onNavigateToManageUser: (String?) -> Unit = {}
 ) {
     LaunchedEffect(userId) {
@@ -31,6 +32,7 @@ fun ChatScreenRoot(
             when (action) {
                 is ChatAction.NavigateBack -> onNavigateBack()
                 is ChatAction.NavigateToManageUser -> onNavigateToManageUser(action.userId)
+                is ChatAction.ChatOptionNavigate -> onChatOptionNavigate(action.chatId)
                 else -> viewModel.onAction(action)
             }
         }

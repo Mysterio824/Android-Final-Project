@@ -1,6 +1,5 @@
 package com.androidfinalproject.hacktok.ui.messageDashboard.component
 
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
@@ -20,6 +19,7 @@ import androidx.compose.ui.unit.sp
 fun SearchBar(
     modifier: Modifier = Modifier,
     searchQuery: MutableState<String>,
+    onQueryChange: (String) -> Unit,
     placeholderText: String = "Search",
     leadingIcon: @Composable (() -> Unit)? = {
         Icon(
@@ -32,7 +32,7 @@ fun SearchBar(
 ) {
     OutlinedTextField(
         value = searchQuery.value,
-        onValueChange = { searchQuery.value = it },
+        onValueChange = { onQueryChange(it) },
         placeholder = { Text(placeholderText, color = Color.DarkGray, fontSize = 18.sp) },
         leadingIcon = leadingIcon,
         modifier = modifier,

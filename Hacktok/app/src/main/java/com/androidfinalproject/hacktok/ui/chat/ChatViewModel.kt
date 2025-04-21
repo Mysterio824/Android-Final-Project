@@ -8,10 +8,12 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.model.Media
 import com.androidfinalproject.hacktok.model.Message
+import com.androidfinalproject.hacktok.model.RelationInfo
 import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.repository.AuthRepository
 import com.androidfinalproject.hacktok.repository.ChatRepository
 import com.androidfinalproject.hacktok.repository.UserRepository
+import com.androidfinalproject.hacktok.service.RelationshipService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,6 +34,7 @@ class ChatViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
     private val authRepository: AuthRepository,
     private val userRepository: UserRepository,
+    private val relationshipService: RelationshipService,
     application: Application
 ) : AndroidViewModel(application) {
     private var otherUserId: String? = null
@@ -61,20 +64,27 @@ class ChatViewModel @Inject constructor(
                 
                 // Load other user's data
                 val otherUser = userRepository.getUserById(userId)
-                if (otherUser == null) {
-                    _state.update { it.copy(error = "User not found", isLoading = false) }
-                    return@launch
-                }
+                        ?: run{
+                            _state.update { it.copy(error = "User not found", isLoading = false) }
+                            return@launch
+                        }
 
                 // Convert FirebaseUser to our User model using the companion object method
                 val currentUser = User.fromFirebaseUser(firebaseUser)
 
+                val relationInfo = relationshipService.getRelationship(otherUser.id!!)
+
                 // Update state with user info
-                _state.update { it.copy(
-                    currentUser = currentUser,
-                    otherUser = otherUser,
-                    isLoading = false
-                ) }
+                _state.update {
+                    it.copy(
+                        chatId = chatId,
+                        currentUser = currentUser,
+                        relation = relationInfo,
+                        otherUser = otherUser,
+                    )
+                }
+
+                _state.update { it.copy(isLoading = false) }
 
                 // Load messages
                 chatRepository.getChatMessagesFlow(chatId).collect { messages ->
@@ -101,7 +111,7 @@ class ChatViewModel @Inject constructor(
             is ChatAction.DeleteChat -> deleteChat()
             is ChatAction.BlockUser -> blockUser()
             is ChatAction.NavigateToManageUser -> {} // Handled by navigation
-            ChatAction.NavigateBack -> {} // Handled by navigation
+            else -> {}
         }
     }
 

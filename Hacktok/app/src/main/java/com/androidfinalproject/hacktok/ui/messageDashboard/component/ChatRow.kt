@@ -26,15 +26,25 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.androidfinalproject.hacktok.model.Chat
+import com.androidfinalproject.hacktok.model.User
+import com.androidfinalproject.hacktok.model.enums.RelationshipStatus
+import com.androidfinalproject.hacktok.ui.commonComponent.ProfileImage
 import com.androidfinalproject.hacktok.ui.messageDashboard.MessageDashboardAction
+import com.mongodb.Block
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Date
 
 @Composable
 fun ChatRow(
-    chat: ChatItem,
-    menuItems: List<Pair<String, () -> Unit>>,
-    onAction: (MessageDashboardAction) -> Unit,
+    user: User,
+    onClick: () -> Unit,
+    chat: Chat,
+    status: RelationshipStatus,
+    onOptionClick: () -> Unit,
 ) {
-    var expanded by remember { mutableStateOf(false) }
     Box {
         Row(
             modifier = Modifier
@@ -42,20 +52,24 @@ fun ChatRow(
                 .padding(vertical = 8.dp)
                 .pointerInput(Unit) {
                     detectTapGestures(
-                        onTap = { onAction(MessageDashboardAction.GoToChat("chat")) },
-                        onLongPress = { expanded = true } // Show dropdown on hold
+                        onTap = { onClick() },
+                        onLongPress = {
+                            if(status != RelationshipStatus.BLOCKED)
+                                onOptionClick()
+                        }
                     )
                 },
             verticalAlignment = Alignment.CenterVertically,
         ) {
-
-            ProfileImage(modifier = Modifier.fillMaxWidth(), contentDescription = "Profile Picture", imageSize = 60.dp, isActive = false)
-
+            ProfileImage(
+                imageUrl = if(status == RelationshipStatus.BLOCKING || status == RelationshipStatus.BLOCKED) "" else user.profileImage,
+                size = 60.dp
+            )
 
             Spacer(modifier = Modifier.width(10.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = chat.name, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Text(text = user.username!!, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(6.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -69,27 +83,39 @@ fun ChatRow(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Text(text = chat.time, fontSize = 14.sp, color = Color.Gray)
+                    FormattedMessageTime(chat.lastMessageAt)
                 }
             }
         }
+    }
+}
 
-        DropdownMenu(
-            modifier = Modifier
-                .width(200.dp)
-                .padding(8.dp),
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            menuItems.forEach { (label, action) ->
-                DropdownMenuItem(
-                    text = { Text(label) },
-                    onClick = {
-                        expanded = false
-                        action()
-                    }
-                )
+@Composable
+private fun FormattedMessageTime(date: Date) {
+    val formatted = remember(date) {
+        val zoneId = ZoneId.systemDefault()
+        val messageDateTime = date.toInstant().atZone(zoneId).toLocalDateTime()
+        val now = LocalDateTime.now(zoneId)
+
+        val formatterToday = DateTimeFormatter.ofPattern("HH:mm")
+        val formatterYesterday = DateTimeFormatter.ofPattern("EEE") // e.g., "Fri"
+
+        when {
+            messageDateTime.toLocalDate() == now.toLocalDate() -> {
+                messageDateTime.format(formatterToday) // Today → show time
+            }
+            messageDateTime.toLocalDate() == now.minusDays(1).toLocalDate() -> {
+                messageDateTime.format(formatterYesterday) // Yesterday → show "Fri"
+            }
+            else -> {
+                messageDateTime.format(DateTimeFormatter.ofPattern("dd MMM")) // fallback: 21 Apr
             }
         }
     }
+
+    Text(
+        text = formatted,
+        fontSize = 14.sp,
+        color = Color.Gray
+    )
 }

@@ -1,6 +1,5 @@
 package com.androidfinalproject.hacktok.ui.post
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,10 +32,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.androidfinalproject.hacktok.R
 import com.androidfinalproject.hacktok.model.Comment
 import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.enums.ReportType

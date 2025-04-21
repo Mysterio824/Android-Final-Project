@@ -7,6 +7,7 @@ sealed class ChatDetailAction {
     data object FindInChat : ChatDetailAction()
     data object DeleteChat : ChatDetailAction()
     data object BlockUser : ChatDetailAction()
+    data object UnBlockUser : ChatDetailAction()
     data object LeaveGroup: ChatDetailAction()
     data class RenameGroup(val newName: String): ChatDetailAction()
     data object NavigateBack : ChatDetailAction()

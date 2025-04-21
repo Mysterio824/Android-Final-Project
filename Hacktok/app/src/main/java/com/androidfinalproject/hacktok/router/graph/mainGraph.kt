@@ -29,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import com.androidfinalproject.hacktok.router.routes.AuthRoute
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.androidfinalproject.hacktok.ui.chatDetail.ChatDetailScreenRoot
 import com.androidfinalproject.hacktok.ui.newPost.NewPostScreenRoot
 import com.androidfinalproject.hacktok.ui.storydetail.StoryDetailScreenRoot
 
@@ -272,6 +273,9 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
                     },
                     onNavigateToManageUser = { userId ->
                         navController.navigate("${MainRoute.UserDetail.route}/$userId")
+                    },
+                    onChatOptionNavigate = {
+                        navController.navigate("${MainRoute.ChatOption.route}/$it")
                     }
                 )
                 "group" -> {
@@ -284,6 +288,25 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
                     }
                 }
             }
+        }
+
+        composable(
+            route = "${MainRoute.ChatOption.route}/{chatId}",
+            enterTransition = { slideFadeInFromLeft() },
+            exitTransition = { slideFadeOutToRight() }
+        ) { backStackEntry ->
+            val chatId = backStackEntry.arguments?.getString("chatId")
+
+            ChatDetailScreenRoot(
+                userId = chatId!!,
+                isGroup = false,
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onUserProfileNavigate = {
+                    navController.navigate("${MainRoute.Profile.route}/$it")
+                }
+            )
         }
 
         // Edit Profile Screen
