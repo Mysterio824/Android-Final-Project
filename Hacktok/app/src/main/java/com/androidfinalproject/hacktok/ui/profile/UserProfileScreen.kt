@@ -123,8 +123,8 @@ fun UserProfileScreen (
 
         if (state.showShareDialog) {
             SharePostDialog(
-                userName = state.user.fullName ?: "Unknown",
-                userAvatar = state.user.profileImage ?: "", // Replace with actual avatar if you have it
+                userName = state.currentUser?.fullName ?: "Unknown",
+                userAvatar = state.currentUser?.profileImage ?: "", // Replace with actual avatar if you have it
                 onDismiss = { onAction(UserProfileAction.DismissShareDialog) },
                 onSubmit = { caption, privacy ->
                     onAction(UserProfileAction.OnSharePost(post = state.sharePost!!, caption = caption, privacy = privacy))
@@ -190,7 +190,7 @@ fun UserProfileScreen (
                     }
 
                     // Action Buttons Row (Only show if not own profile)
-                    if (state.currentUserId != state.user.id) {
+                    if (state.currentUser?.id != state.user.id) {
                         ProfileActionButtons(
                             state = state,
                             onAction = onAction,
@@ -238,7 +238,7 @@ fun UserProfileScreen (
                              onComment = { onAction(UserProfileAction.GoToPost(it.id!!)) },
                              onShare = { onAction(UserProfileAction.UpdateSharePost(it)) },
                              onUnLike = { onAction(UserProfileAction.UnlikePost(it.id!!)) },
-                             currentId = state.currentUserId
+                             currentId = state.currentUser?.id ?: ""
                          )
                      }
                  }

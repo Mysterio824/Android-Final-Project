@@ -86,10 +86,10 @@ class UserProfileViewModel @Inject constructor(
                     val referencePost = postRepository.getPost(action.post.id ?: return@launch)
                     val post = Post(
                         content = action.caption,
-                        userId = profileUserId,
+                        userId = state.value.currentUser?.id ?: return@launch,
                         reference = referencePost,
                         privacy = action.privacy.name,
-                        user = state.value.user
+                        user = state.value.currentUser
                     )
                     try {
                         postRepository.addPost(post)
@@ -176,7 +176,7 @@ class UserProfileViewModel @Inject constructor(
                             error = null,
                             userIdBeingLoaded = null,
                             numberOfFriends = relationship.size,
-                            currentUserId = authService.getCurrentUserId()!!
+                            currentUser = authService.getCurrentUser()
                         )
                     }
                  } else {

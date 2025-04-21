@@ -18,5 +18,5 @@ data class UserProfileState (
     val showShareDialog: Boolean = false,
     val sharePrivacy: PRIVACY = PRIVACY.PUBLIC,
     val shareCaption: String = "",
-    val currentUserId: String = ""
+    val currentUser: User? = null
 )
