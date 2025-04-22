@@ -10,7 +10,7 @@ sealed class MessageDashboardAction {
     data class DeleteChat(val chatId: String): MessageDashboardAction()
     data class BlockChat(val userId: String): MessageDashboardAction()
     data class UnBlockChat(val userId: String): MessageDashboardAction()
-    data class MuteChat(val chatId: String): MessageDashboardAction()
+    data class SetMute(val chatId: String): MessageDashboardAction()
     object OnNavigateBack : MessageDashboardAction()
     object Refresh : MessageDashboardAction()
 }

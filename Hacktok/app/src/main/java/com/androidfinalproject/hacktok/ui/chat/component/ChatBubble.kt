@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,7 +23,8 @@ import com.androidfinalproject.hacktok.model.Message
 fun ChatBubble(
     message: Message,
     isCurrentUser: Boolean,
-    onDeleteMessage: (String?) -> Unit
+    onDeleteMessage: (String?) -> Unit,
+    isHighlighted: Boolean = false
 ) {
     var showTime by remember { mutableStateOf(false) }
     var showMenu by remember { mutableStateOf(false) }
@@ -32,7 +32,13 @@ fun ChatBubble(
     val clipboardManager = LocalClipboardManager.current
     val sheetState = rememberModalBottomSheetState()
 
-    val bubbleColor = if (isCurrentUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
+    // Use a different color for highlighted messages
+    val bubbleColor = when {
+        isHighlighted -> MaterialTheme.colorScheme.tertiaryContainer
+        isCurrentUser -> MaterialTheme.colorScheme.primary
+        else -> MaterialTheme.colorScheme.surfaceVariant
+    }
+
     val textColor = if (isCurrentUser) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
     val timeColor = if (isCurrentUser) MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
 

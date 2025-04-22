@@ -9,8 +9,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -24,14 +25,14 @@ import androidx.compose.ui.unit.sp
 import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.ui.commonComponent.ProfileImage
 
-
 @Composable
 fun ChatTopBar(
     otherUser: User,
     onBackClick: () -> Unit,
     onInfoClick: () -> Unit,
     onUserClick: () -> Unit,
-    isBlock: Boolean
+    isBlock: Boolean,
+    onSearchClick: () -> Unit = {}
 ) {
     Row(
         modifier = Modifier
@@ -46,12 +47,11 @@ fun ChatTopBar(
         ) {
             IconButton(onClick = onBackClick) {
                 Icon(
-                    imageVector = Icons.Default.ArrowBack,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
                     tint = MaterialTheme.colorScheme.onSurface
                 )
             }
-
 
             Row (
                 modifier = Modifier.clickable { onUserClick() }
@@ -72,12 +72,23 @@ fun ChatTopBar(
             }
         }
 
-        IconButton(onClick = onInfoClick) {
-            Icon(
-                imageVector = Icons.Default.MoreVert,
-                contentDescription = "More options",
-                tint = MaterialTheme.colorScheme.onSurface
-            )
+        Row {
+            // Add search button
+            IconButton(onClick = onSearchClick) {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Search messages",
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+            IconButton(onClick = onInfoClick) {
+                Icon(
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = "More options",
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
         }
     }
 }

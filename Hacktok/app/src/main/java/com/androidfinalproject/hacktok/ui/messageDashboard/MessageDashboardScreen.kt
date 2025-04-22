@@ -96,7 +96,7 @@ fun MessageDashboardScreen (
                     onDelete = { onAction(MessageDashboardAction.DeleteChat(selectChatItem!!.chat.id!!)) },
                     onBlock = { onAction(MessageDashboardAction.BlockChat(selectChatItem!!.user.id!!)) },
                     onUnblock = { onAction(MessageDashboardAction.UnBlockChat(selectChatItem!!.user.id!!)) },
-                    onMute = { onAction(MessageDashboardAction.MuteChat(selectChatItem!!.chat.id!!)) },
+                    onMute = { onAction(MessageDashboardAction.SetMute(selectChatItem!!.chat.id!!)) },
                     status = selectChatItem!!.relationInfo.status
                 )
             }

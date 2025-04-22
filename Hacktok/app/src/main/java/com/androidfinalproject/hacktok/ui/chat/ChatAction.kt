@@ -10,9 +10,13 @@ sealed class ChatAction {
     data object ToggleMute : ChatAction()
     data class ChatOptionNavigate(val chatId: String) : ChatAction()
     data object CreateGroup : ChatAction()
-    data object FindInChat : ChatAction()
     data object DeleteChat : ChatAction()
     data object BlockUser : ChatAction()
     data object NavigateBack : ChatAction()
     data class NavigateToManageUser(val userId : String?) : ChatAction()
+
+    data class SetSearchMode(val enabled: Boolean) : ChatAction()
+    data class UpdateSearchQuery(val query: String) : ChatAction()
+    data object SearchNext : ChatAction()
+    data object SearchPrevious : ChatAction()
 }

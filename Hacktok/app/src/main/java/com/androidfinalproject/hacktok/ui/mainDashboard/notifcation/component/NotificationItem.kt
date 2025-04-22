@@ -85,6 +85,7 @@ fun NotificationItem(
                         }
 
                         NotificationType.NEW_STORY -> TODO()
+                        NotificationType.NEW_MESSAGE -> TODO()
                     }
                 },
             verticalAlignment = Alignment.CenterVertically
@@ -179,6 +180,7 @@ private fun getNotificationTypeIcon(type: NotificationType): ImageVector {
         NotificationType.COMMENT_LIKE -> Icons.Default.ThumbUp
         NotificationType.ADMIN_NOTIFICATION -> Icons.AutoMirrored.Filled.Announcement
         NotificationType.NEW_STORY -> Icons.Default.ViewCarousel
+        NotificationType.NEW_MESSAGE -> TODO()
     }
 }
 
@@ -192,6 +194,7 @@ private fun getNotificationTypeColor(type: NotificationType): Color {
         NotificationType.COMMENT_REPLY -> Color(0xFF0BC5EA) // Light blue for comments
         NotificationType.ADMIN_NOTIFICATION -> Color(0xFFFF8800) // Orange for admin notifications
         NotificationType.NEW_STORY -> TODO()
+        NotificationType.NEW_MESSAGE -> TODO()
     }
 }
 

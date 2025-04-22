@@ -107,12 +107,62 @@ class ChatViewModel @Inject constructor(
             is ChatAction.LoadInitialMessages -> loadChat()
             is ChatAction.ToggleMute -> toggleMute()
             is ChatAction.CreateGroup -> createGroup()
-            is ChatAction.FindInChat -> findInChat()
             is ChatAction.DeleteChat -> deleteChat()
             is ChatAction.BlockUser -> blockUser()
-            is ChatAction.NavigateToManageUser -> {} // Handled by navigation
+            is ChatAction.SetSearchMode -> setSearchMode(action.enabled)
+            is ChatAction.UpdateSearchQuery -> updateSearchQuery(action.query)
+            is ChatAction.SearchNext -> navigateSearchResults(true)
+            is ChatAction.SearchPrevious -> navigateSearchResults(false)
             else -> {}
         }
+    }
+
+    private fun setSearchMode(enabled: Boolean) {
+        _state.update {
+            it.copy(
+                isSearchMode = enabled,
+                searchQuery = if (!enabled) "" else it.searchQuery,
+                searchResults = if (!enabled) emptyList() else it.searchResults,
+                currentSearchIndex = if (!enabled) -1 else it.currentSearchIndex
+            )
+        }
+    }
+
+    private fun updateSearchQuery(query: String) {
+        viewModelScope.launch {
+            val results = if (query.isBlank()) {
+                emptyList()
+            } else {
+                _state.value.messages.filter { message ->
+                    message.content.contains(query, ignoreCase = true)
+                }
+            }
+
+            _state.update {
+                it.copy(
+                    searchQuery = query,
+                    searchResults = results,
+                    currentSearchIndex = if (results.isEmpty()) -1 else 0
+                )
+            }
+        }
+    }
+
+    private fun navigateSearchResults(next: Boolean) {
+        val results = _state.value.searchResults
+        val currentIndex = _state.value.currentSearchIndex
+
+        if (results.isEmpty()) return
+
+        val newIndex = when {
+            next && currentIndex < results.size - 1 -> currentIndex + 1
+            !next && currentIndex > 0 -> currentIndex - 1
+            next && currentIndex == results.size - 1 -> 0  // Loop back to beginning
+            !next && currentIndex == 0 -> results.size - 1  // Loop to end
+            else -> currentIndex
+        }
+
+        _state.update { it.copy(currentSearchIndex = newIndex) }
     }
 
     private fun sendMessage(content: String) {

@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.androidfinalproject.hacktok.model.enums.RelationshipStatus
 import com.androidfinalproject.hacktok.service.RelationshipService
 
@@ -80,7 +81,7 @@ class MessageDashboardViewModel @Inject constructor(
             is MessageDashboardAction.Refresh -> {
                 loadChats()
             }
-            is MessageDashboardAction.MuteChat -> muteChat(action.chatId)
+            is MessageDashboardAction.SetMute -> muteChat(action.chatId)
             is MessageDashboardAction.DeleteChat -> deleteChat(action.chatId)
             is MessageDashboardAction.BlockChat -> blockChat(action.userId)
             is MessageDashboardAction.UnBlockChat -> unblockChat(action.userId)
@@ -151,7 +152,63 @@ class MessageDashboardViewModel @Inject constructor(
     }
 
     private fun muteChat(chatId: String) {
-        TODO("Not yet implemented")
+        viewModelScope.launch {
+            try {
+                val currentState = state.value
+                val userId = currentState.currentUserId
+
+                // Find the chat item in the current state
+                val chatItem = currentState.chatList.find { it.chat.id == chatId }
+                if (chatItem == null) {
+                    _state.update { it.copy(error = "Chat not found") }
+                    return@launch
+                }
+
+                // Determine if this user is user1 or user2 in the chat
+                val isUser1 = chatItem.chat.participants[0] == userId
+                // Get current mute state
+                val currentMuteState = if (isUser1) chatItem.chat.isMutedByUser1 else chatItem.chat.isMutedByUser2
+
+                // Toggle mute state
+                val newMuteState = !currentMuteState
+                val success = chatRepository.setMuteState(chatId, userId, newMuteState)
+
+                if (success) {
+                    // Update local state
+                    _state.update { state ->
+                        val updatedChatList = state.chatList.map { item ->
+                            if (item.chat.id == chatId) {
+                                // Create a new chat object with updated mute state
+                                val updatedChat = if (isUser1) {
+                                    item.chat.copy(isMutedByUser1 = newMuteState)
+                                } else {
+                                    item.chat.copy(isMutedByUser2 = newMuteState)
+                                }
+                                item.copy(chat = updatedChat)
+                            } else item
+                        }
+
+                        val updatedFilterChatList = state.filterChatList.map { item ->
+                            if (item.chat.id == chatId) {
+                                // Create a new chat object with updated mute state
+                                val updatedChat = if (isUser1) {
+                                    item.chat.copy(isMutedByUser1 = newMuteState)
+                                } else {
+                                    item.chat.copy(isMutedByUser2 = newMuteState)
+                                }
+                                item.copy(chat = updatedChat)
+                            } else item
+                        }
+
+                        state.copy(chatList = updatedChatList, filterChatList = updatedFilterChatList)
+                    }
+                } else {
+                    _state.update { it.copy(error = "Failed to update mute state") }
+                }
+            } catch (e: Exception) {
+                _state.update { it.copy(error = e.message ?: "An error occurred while muting chat") }
+            }
+        }
     }
 
     private fun onSearch(query: String) {

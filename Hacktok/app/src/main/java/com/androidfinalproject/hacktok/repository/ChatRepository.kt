@@ -13,4 +13,5 @@ interface ChatRepository {
     suspend fun deleteMessage(chatId: String, messageId: String)
     suspend fun deleteChat(chatId: String)
     suspend fun getUserChats(userId: String): List<Chat>
+    suspend fun setMuteState(chatId: String, currentUserId: String, setMute: Boolean): Boolean
 }

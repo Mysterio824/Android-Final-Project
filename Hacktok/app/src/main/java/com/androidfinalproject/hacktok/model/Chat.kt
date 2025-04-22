@@ -12,7 +12,9 @@ data class Chat(
     @PropertyName("unreadCountUser2") val unreadCountUser2: Int = 0,
     @PropertyName("isGroup") val isGroup: Boolean = false,
     @PropertyName("groupName") val groupName: String? = null,
-    @PropertyName("groupAdmins") val groupAdmins: List<String> = emptyList()
+    @PropertyName("groupAdmins") val groupAdmins: List<String> = emptyList(),
+    @PropertyName("isMutedByUser1") val isMutedByUser1: Boolean = false,
+    @PropertyName("isMutedByUser2") val isMutedByUser2: Boolean = false
 ) {
     constructor() : this(null, emptyList(), "", Date(), 0, 0, false, null, emptyList())
 

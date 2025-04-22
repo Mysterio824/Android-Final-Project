@@ -6,11 +6,16 @@ import com.androidfinalproject.hacktok.model.User
 
 data class ChatState(
     val chatId: String = "",
-    val currentUser: User = User(username = "user1", email = "user1@example.com"),
-    val otherUser: User = User(username = "user2", email = "user2@example.com"),
+    val currentUser: User? = null,
+    val otherUser: User? = null,
     val messages: List<Message> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null,
     val isUserMuted: Boolean = false,
-    val relation: RelationInfo = RelationInfo("")
+    val relation: RelationInfo = RelationInfo(""),
+
+    val isSearchMode: Boolean = false,
+    val searchQuery: String = "",
+    val searchResults: List<Message> = emptyList(),
+    val currentSearchIndex: Int = -1
 )

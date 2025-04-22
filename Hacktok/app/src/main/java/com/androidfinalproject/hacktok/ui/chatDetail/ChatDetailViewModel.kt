@@ -9,6 +9,7 @@ import com.androidfinalproject.hacktok.model.enums.RelationshipStatus
 import com.androidfinalproject.hacktok.repository.ChatRepository
 import com.androidfinalproject.hacktok.repository.UserRepository
 import com.androidfinalproject.hacktok.service.RelationshipService
+import com.androidfinalproject.hacktok.ui.messageDashboard.MessageDashboardAction
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -109,10 +110,16 @@ class ChatDetailViewModel @Inject constructor(
     }
 
     private fun toggleMute() {
-        _state.update { currentState ->
-            currentState.copy(
-                isUserMuted = !currentState.isUserMuted
-            )
+        viewModelScope.launch {
+            val value = state.value
+            val res = chatRepository.setMuteState(value.chatId, value.currentUser.id!!, !value.isUserMuted)
+            if(res){
+                _state.update { currentState ->
+                    currentState.copy(
+                        isUserMuted = !currentState.isUserMuted
+                    )
+                }
+            }
         }
     }
 

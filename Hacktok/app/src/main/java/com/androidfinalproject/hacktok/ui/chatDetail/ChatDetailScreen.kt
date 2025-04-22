@@ -145,29 +145,6 @@ fun ChatDetailScreen(
 
                     Spacer(modifier = Modifier.width(24.dp))
                 }
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    FilledTonalIconButton(
-                        onClick = { onAction(ChatDetailAction.FindInChat) },
-                        colors = IconButtonDefaults.filledTonalIconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                            contentColor = MaterialTheme.colorScheme.primary
-                        )
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = "Find in Chat"
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Tìm kiếm",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))

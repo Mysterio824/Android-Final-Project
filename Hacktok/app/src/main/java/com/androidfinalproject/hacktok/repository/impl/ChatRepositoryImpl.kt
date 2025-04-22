@@ -142,21 +142,32 @@ class ChatRepositoryImpl @Inject constructor(
                 .await()
 
             Log.d(TAG, "Message sent: ${message.content}")
+            val userIndex = if (chat.participants[0] == recipientUserId) "unreadCountUser1" else "unreadCountUser2"
+            val currentUnreadCount = if (chat.participants[0] == recipientUserId)
+                chat.unreadCountUser1 else chat.unreadCountUser2
 
             // Update chat's last message details
             chatsCollection.document(chatId).update(
                 mapOf(
                     "lastMessage" to message.content,
-                    "lastMessageAt" to message.createdAt
-                )
+                    "lastMessageAt" to message.createdAt,
+                    userIndex to currentUnreadCount + 1
+                ),
             ).await()
-            serviceScope.launch {
-                fcmService.sendInteractionNotification(
-                    recipientUserId = recipientUserId,
-                    senderUserId = message.senderId,
-                    notificationType = NotificationType.NEW_MESSAGE,
-                    itemId = chatId,
-                )
+
+            val isRecipientUser1 = chat.participants[0] == recipientUserId
+            val isMuted = if (isRecipientUser1) chat.isMutedByUser1 else chat.isMutedByUser2
+
+            // Only send notification if chat is not muted by recipient
+            if (!isMuted) {
+                serviceScope.launch {
+                    fcmService.sendInteractionNotification(
+                        recipientUserId = recipientUserId,
+                        senderUserId = message.senderId,
+                        notificationType = NotificationType.NEW_MESSAGE,
+                        itemId = chatId,
+                    )
+                }
             }
             return messageRef.id
         } catch (e: Exception) {
@@ -210,6 +221,27 @@ class ChatRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             Log.e(TAG, "Error fetching user chats for userId: $userId (NO ORDERING - DIAGNOSTIC)", e)
             emptyList()
+        }
+    }
+
+
+    override suspend fun setMuteState(chatId: String, currentUserId: String, setMute: Boolean): Boolean {
+        try {
+            val chatDoc = chatsCollection.document(chatId).get().await()
+            val chat = chatDoc.toObject<Chat>() ?: throw Exception("Chat not found")
+
+            // Determine which user is setting the mute state
+            val isUser1 = chat.participants[0] == currentUserId
+            val muteField = if (isUser1) "isMutedByUser1" else "isMutedByUser2"
+
+            // Update the mute state
+            chatsCollection.document(chatId).update(muteField, setMute).await()
+
+            Log.d(TAG, "Chat mute state updated: chatId=$chatId, user=$currentUserId, muted=$setMute")
+            return true
+        } catch (e: Exception) {
+            Log.e(TAG, "Error setting mute state for chat: $chatId", e)
+            return false
         }
     }
 }
