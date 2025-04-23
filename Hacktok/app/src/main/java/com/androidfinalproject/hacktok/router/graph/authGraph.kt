@@ -8,9 +8,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavType
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.androidfinalproject.hacktok.router.routes.AdminRoute
 import com.androidfinalproject.hacktok.router.routes.AuthRoute
@@ -18,8 +16,6 @@ import com.androidfinalproject.hacktok.router.routes.MainRoute
 import com.androidfinalproject.hacktok.ui.auth.AuthScreenRoot
 import com.androidfinalproject.hacktok.ui.forgotPassword.ForgotPasswordScreenRoot
 import com.androidfinalproject.hacktok.ui.forgotPassword.ForgotPasswordViewModel
-import com.androidfinalproject.hacktok.ui.resetPassword.ResetPasswordScreenRoot
-import com.androidfinalproject.hacktok.ui.resetPassword.ResetPasswordViewModel
 
 fun NavGraphBuilder.authNavigation(
     navController: NavController,
@@ -112,63 +108,6 @@ fun NavGraphBuilder.authNavigation(
         ) {
             ForgotPasswordScreenRoot(
                 viewModel = ForgotPasswordViewModel(),
-                onResetSuccess = { email, verificationCode ->
-                    navController.navigate("${AuthRoute.PasswordRecovery.route}/$email/$verificationCode")
-                },
-                onGoBack = {
-                    navController.popBackStack()
-                }
-            )
-        }
-
-        composable(
-            route = "${AuthRoute.PasswordRecovery.route}/{email}/{verificationCode}",
-            arguments = listOf(
-                navArgument("email") { type = NavType.StringType },
-                navArgument("verificationCode") { type = NavType.StringType }
-            ),
-            enterTransition = {
-                fadeIn(animationSpec = tween(300)) +
-                        slideIntoContainer(
-                            towards = AnimatedContentTransitionScope.SlideDirection.Left,
-                            animationSpec = tween(300, easing = EaseInOut)
-                        )
-            },
-            exitTransition = {
-                fadeOut(animationSpec = tween(300)) +
-                        slideOutOfContainer(
-                            towards = AnimatedContentTransitionScope.SlideDirection.Left,
-                            animationSpec = tween(300, easing = EaseInOut)
-                        )
-            },
-            popEnterTransition = {
-                fadeIn(animationSpec = tween(300)) +
-                        slideIntoContainer(
-                            towards = AnimatedContentTransitionScope.SlideDirection.Right,
-                            animationSpec = tween(300, easing = EaseInOut)
-                        )
-            },
-            popExitTransition = {
-                fadeOut(animationSpec = tween(300)) +
-                        slideOutOfContainer(
-                            towards = AnimatedContentTransitionScope.SlideDirection.Right,
-                            animationSpec = tween(300, easing = EaseInOut)
-                        )
-            }
-        ) { backStackEntry ->
-            val email = backStackEntry.arguments?.getString("email") ?: ""
-            val verificationCode = backStackEntry.arguments?.getString("verificationCode") ?: ""
-
-            ResetPasswordScreenRoot(
-                viewModel = ResetPasswordViewModel(),
-                email = email,
-                verificationCode = verificationCode,
-                onResetSuccess = {
-                    navController.navigate(AuthRoute.Login.route) {
-                        // Clear the back stack after password reset
-                        popUpTo(AuthRoute.Graph.route) { inclusive = false }
-                    }
-                },
                 onGoBack = {
                     navController.popBackStack()
                 }

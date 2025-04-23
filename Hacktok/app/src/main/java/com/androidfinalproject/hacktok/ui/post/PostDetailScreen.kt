@@ -61,7 +61,6 @@ fun PostDetailScreen(
     var selectedComment by remember { mutableStateOf<Comment?>(null) }
     var reportTargetId by remember { mutableStateOf<String?>(null) }
     var reportType by remember { mutableStateOf<ReportType?>(null) }
-    var showComments by remember { mutableStateOf(true) }
     val snackbarHostState = remember { SnackbarHostState() }
 
     val bottomSheetState = rememberModalBottomSheetState(
@@ -85,8 +84,31 @@ fun PostDetailScreen(
                 listState.animateScrollToItem(index + 1)
             }
         }
-
     }
+
+    LaunchedEffect(commentId, state.comments, state.highlightedCommentId, state.showComments) {
+        if (state.showComments && state.highlightedCommentId != null) {
+            val commentList = state.comments
+            val index = commentList.indexOfFirst { it.id == state.highlightedCommentId && it.parentCommentId == null }
+
+            if (index != -1) {
+                val scrollPosition = index + 2
+                listState.animateScrollToItem(scrollPosition)
+            } else {
+                val replyComment = commentList.find { it.id == state.highlightedCommentId }
+                if (replyComment?.parentCommentId != null) {
+                    val parentIndex = commentList.indexOfFirst {
+                        it.id == replyComment.parentCommentId && it.parentCommentId == null
+                    }
+
+                    if (parentIndex != -1) {
+                        listState.animateScrollToItem(parentIndex + 2)
+                    }
+                }
+            }
+        }
+    }
+
 
     Scaffold(
         topBar = {
@@ -131,20 +153,21 @@ fun PostDetailScreen(
 
                         CommentsSectionToggle(
                             commentCount = post.commentCount,
-                            showComments = showComments,
-                            onToggle = { showComments = !showComments }
+                            showComments = state.showComments,
+                            onToggle = { onAction(PostDetailAction.SetCommentsVisible(!state.showComments)) }
                         )
                     }
                 }
 
 
                 // Comments section
-                if (showComments) {
+                if (state.showComments) {
                     val rootComments = state.comments.filter { it.parentCommentId == null }
                     items(rootComments, key = { it.id!! }) { comment ->
                         CommentItem(
                             comment = comment,
                             isSelected = state.commentIdReply == comment.id,
+                            isHighlighted = state.highlightedCommentId == comment.id,
                             allComments = state.comments,
                             onLikeComment = { onAction(PostDetailAction.LikeComment(it)) },
                             onUnLikeComment = { onAction(PostDetailAction.UnLikeComment(it)) },

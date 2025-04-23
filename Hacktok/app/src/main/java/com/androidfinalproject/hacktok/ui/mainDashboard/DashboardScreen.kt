@@ -12,6 +12,7 @@ import androidx.activity.compose.BackHandler
 import com.androidfinalproject.hacktok.ui.mainDashboard.component.TopNavigationBar
 import com.androidfinalproject.hacktok.ui.mainDashboard.friendSuggestion.FriendSuggestionScreenRoot
 import com.androidfinalproject.hacktok.ui.mainDashboard.notifcation.NotificationScreenRoot
+import com.androidfinalproject.hacktok.ui.mainDashboard.settings.SettingsScreenRoot
 import com.androidfinalproject.hacktok.ui.mainDashboard.watchLater.WatchLaterScreenRoot
 
 
@@ -26,10 +27,10 @@ fun DashboardScreen(
     Scaffold(
         topBar = {
             TopNavigationBar(
+                imageUrl = state.currentUser?.id ?: "" ,
                 currentTab = state.selectedTab,
                 onSearchClick = { onAction(DashboardAction.OnSearchNavigate) },
                 onMessageClick = { onAction(DashboardAction.OnMessageDashboardNavigate) },
-                onLogOut = { onAction(DashboardAction.OnLogout) },
                 onUserClick = { onAction(DashboardAction.OnCurrentProfileNavigate) },
                 onTabSelected = { onAction(DashboardAction.SelectTab(it)) }
             )
@@ -44,7 +45,7 @@ fun DashboardScreen(
                 "Home" -> {
                     HomeScreenRoot(
                         onUserClick = { onAction(DashboardAction.OnUserClick(it)) },
-                        onPostClick = { onAction(DashboardAction.OnPostClick(it)) },
+                        onPostClick = { onAction(DashboardAction.OnPostClick(it, null)) },
                         onStoryClick = { onAction(DashboardAction.OnStoryClick(it)) },
                         onNewPostNavigate = { onAction(DashboardAction.OnCreatePost) },
                         onCreateStoryNavigate = { onAction(DashboardAction.OnCreateStory) }
@@ -60,15 +61,23 @@ fun DashboardScreen(
 
                 "WatchLater" -> {
                     WatchLaterScreenRoot(
-                        onPostClickNavigation = { id -> onAction(DashboardAction.OnPostClick(id)) },
-                        onUserProfileNavigate = { id -> onAction(DashboardAction.OnUserClick(id)) }
+                        onPostClickNavigation = { onAction(DashboardAction.OnPostClick(it, null)) },
+                        onUserProfileNavigate = { onAction(DashboardAction.OnUserClick(it)) }
                     )
                 }
 
                 "Notifications" -> {
                     NotificationScreenRoot(
-                        onPostClick = { onAction(DashboardAction.OnPostClick(it)) },
+                        onPostClick = { postId, commentId -> onAction(DashboardAction.OnPostClick(postId, commentId)) },
                         onUserClick = { onAction(DashboardAction.OnUserClick(it)) },
+                    )
+                }
+
+                "Settings" -> {
+                    SettingsScreenRoot (
+                        onEditProfileNavigate = { onAction(DashboardAction.OnUserEdit) },
+                        onAuthNavigate = { onAction(DashboardAction.OnAuthNavigate) },
+                        onChangePasswordNavigate = { onAction(DashboardAction.OnChangePass) }
                     )
                 }
             }
@@ -88,8 +97,8 @@ fun PreviewDashboardScreen() {
         ) {
             DashboardScreen(
                 state = DashboardState(
-                    selectedTab = "WatchLater"
-                    //Home, Notifications, WatchLater, Friends
+                    selectedTab = "Home"
+                    //Home, Notifications, WatchLater, Friends, Settings
                 ),
                 onAction = {}
             )

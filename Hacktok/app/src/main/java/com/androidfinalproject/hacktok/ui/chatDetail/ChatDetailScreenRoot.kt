@@ -27,7 +27,7 @@ fun ChatDetailScreenRoot(
         onAction = { action ->
             when (action) {
                 is ChatDetailAction.NavigateBack -> onNavigateBack()
-                is ChatDetailAction.NavigateToUserProfile -> onUserProfileNavigate(action.userId)
+                is ChatDetailAction.NavigateToUserProfile -> onUserProfileNavigate(userId)
                 else -> viewModel.onAction(action)
             }
         }

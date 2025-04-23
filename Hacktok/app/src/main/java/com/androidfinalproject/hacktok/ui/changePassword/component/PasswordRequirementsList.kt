@@ -1,11 +1,11 @@
-package com.androidfinalproject.hacktok.ui.resetPassword.component
+package com.androidfinalproject.hacktok.ui.changePassword.component
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.androidfinalproject.hacktok.ui.resetPassword.PasswordRequirement
+import com.androidfinalproject.hacktok.ui.changePassword.PasswordRequirement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding

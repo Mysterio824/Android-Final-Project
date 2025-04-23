@@ -20,7 +20,7 @@ class NotificationRepositoryImpl @Inject constructor(
     override fun observeNotifications(userId: String): Flow<List<Notification>> = callbackFlow {
         Log.d(TAG, "Setting up notification listener for user: $userId")
         val query = collection.whereEqualTo("userId", userId)
-            .orderBy("createdAt", Query.Direction.ASCENDING)
+            .orderBy("createdAt", Query.Direction.DESCENDING)
 
         val listener = query.addSnapshotListener { snapshot, error ->
             if (error != null) {

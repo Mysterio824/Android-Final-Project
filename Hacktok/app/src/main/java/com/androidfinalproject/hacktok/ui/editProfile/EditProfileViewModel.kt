@@ -6,7 +6,6 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.androidfinalproject.hacktok.model.enums.UserRole
 import com.androidfinalproject.hacktok.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -45,7 +44,6 @@ class EditProfileViewModel @Inject constructor(
                             fullName = user.fullName ?: "Unknown",
                             email = user.email,
                             bio = user.bio ?: "",
-                            role = user.role,
                             avatarUrl = user.profileImage ?: "",
                             errorState = emptyMap(),
                             isLoading = false,
@@ -82,7 +80,6 @@ class EditProfileViewModel @Inject constructor(
                     "fullName" -> _state.update { it.copy(fullName = action.value) }
                     "email" -> _state.update { it.copy(email = action.value) }
                     "bio" -> _state.update { it.copy(bio = action.value) }
-                    "role" -> _state.update { it.copy(role = UserRole.valueOf(action.value)) }
                 }
             }
             is EditProfileAction.UpdateAvatar -> {
@@ -125,7 +122,6 @@ class EditProfileViewModel @Inject constructor(
                         fullName = _state.value.fullName,
                         email = _state.value.email,
                         bio = _state.value.bio,
-                        role = _state.value.role,
                         profileImage = avatarUrl
                     )
                     
@@ -220,9 +216,7 @@ class EditProfileViewModel @Inject constructor(
     private fun validateFields(): Boolean {
         val errors = mutableMapOf<String, Boolean>()
         errors["username"] = _state.value.username.isBlank()
-        errors["fullName"] = _state.value.fullName.isBlank()
         errors["email"] = _state.value.email.isBlank()
-        errors["bio"] = _state.value.bio.isBlank()
 
         _state.update { it.copy(errorState = errors) }
         return !errors.containsValue(true)

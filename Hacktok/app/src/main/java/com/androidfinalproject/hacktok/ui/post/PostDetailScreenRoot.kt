@@ -21,6 +21,18 @@ fun PostDetailScreenRoot(
         viewModel.onAction(PostDetailAction.LoadPost(postId))
     }
 
+    LaunchedEffect(commentId, state.comments.isNotEmpty()) {
+        if (commentId != null && state.comments.isNotEmpty()) {
+            // Check if the comment exists in the loaded comments
+            val commentExists = state.comments.any { it.id == commentId }
+            if (commentExists) {
+                // Set the selected comment for highlighting
+                viewModel.onAction(PostDetailAction.SelectCommentToHighlight(commentId))
+                viewModel.onAction(PostDetailAction.SetCommentsVisible(true))
+            }
+        }
+    }
+
     PostDetailScreen(
         state = state,
         onAction = { action ->

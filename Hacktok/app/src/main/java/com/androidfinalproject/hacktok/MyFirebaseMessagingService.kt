@@ -4,7 +4,6 @@ import android.util.Log
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.androidfinalproject.hacktok.service.FcmService
-import com.androidfinalproject.hacktok.service.NotificationService
 import com.androidfinalproject.hacktok.utils.TokenManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -18,12 +17,9 @@ open class AndroidEntryPointFirebaseMessagingService : FirebaseMessagingService(
 
     // Inject the FcmServiceImpl (as FcmService)
     @Inject lateinit var fcmService: FcmService
-    // Inject NotificationService if you want to store history upon receiving
-    @Inject lateinit var notificationService: NotificationService
 
     private val serviceJob = SupervisorJob()
-    // Use Main dispatcher if immediately calling UI-related things,
-    // but IO is often better for background processing like storing tokens/history
+
     private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
 
     private val TAG = "MyFirebaseMsgService"
@@ -88,24 +84,6 @@ open class AndroidEntryPointFirebaseMessagingService : FirebaseMessagingService(
         val notificationDocId = data["notificationDocId"] // Get history ID if sent from backend
 
         Log.d(TAG, "Handling data message: Title='$title', Body='$body', Data=$data")
-
-        // Optional: Store/Update notification history using NotificationService
-        // This might be redundant if sender already created it, but useful
-        // if you want to mark it as "delivered" or store FCM specific info.
-        // serviceScope.launch {
-        //     val type = NotificationType.valueOf(data["type"] ?: NotificationType.UNKNOWN.name)
-        //     notificationService.createOrUpdateNotificationFromFcm(
-        //         docId = notificationDocId, // Pass ID if available
-        //         recipientUserId = // Need recipient ID - might need to add to FCM data payload
-        //         senderId = data["senderId"],
-        //         type = type,
-        //         relatedItemId = data["itemId"],
-        //         content = body
-        //         // Add delivery timestamp etc.
-        //     )
-        // }
-
-        // Display the notification using FcmServiceImpl's method
         fcmService.showNotification(title, body, data)
     }
 

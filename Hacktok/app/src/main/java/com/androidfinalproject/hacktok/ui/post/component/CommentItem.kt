@@ -35,6 +35,7 @@ import java.util.Locale
 fun CommentItem(
     comment: Comment,
     isSelected: Boolean = false,
+    isHighlighted: Boolean = false, // New parameter
     allComments: List<Comment>,
     onLikeComment: (String?) -> Unit,
     onUnLikeComment: (String?) -> Unit,
@@ -43,6 +44,8 @@ fun CommentItem(
     onReplyClick: (String) -> Unit,
     currentUserId: String
 ) {
+    // Use either isSelected or isHighlighted to determine background color
+    val shouldHighlight = isSelected || isHighlighted
     val replies = allComments.filter { it.parentCommentId == comment.id }
     val user = comment.userSnapshot
 
@@ -56,7 +59,7 @@ fun CommentItem(
         )
             .clip(RoundedCornerShape(12.dp))
             .background(
-                if (isSelected) Color(0xFFE0E0E0) else Color.Transparent
+                if (shouldHighlight) Color(0xFFE0E0E0) else Color.Transparent
             )
     ) {
         Row(

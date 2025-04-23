@@ -1,23 +1,18 @@
-package com.androidfinalproject.hacktok.ui.resetPassword
+package com.androidfinalproject.hacktok.ui.changePassword
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
-fun ResetPasswordScreenRoot(
-    viewModel: ResetPasswordViewModel,
-    email: String,
-    verificationCode: String,
+fun ChangePasswordScreenRoot(
+    viewModel: ChangePasswordViewModel = hiltViewModel(),
     onResetSuccess: () -> Unit,
     onGoBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
-
-    LaunchedEffect(Unit) {
-        viewModel.setEmailAndCode(email, verificationCode)
-    }
 
     LaunchedEffect(viewModel.isResetSuccessful()) {
         if (viewModel.isResetSuccessful()) {
@@ -25,11 +20,11 @@ fun ResetPasswordScreenRoot(
         }
     }
 
-    ResetPasswordScreen(
+    ChangePasswordScreen(
         state = state,
         onAction = { action ->
             when (action) {
-                is ResetPasswordAction.NavigateBack -> onGoBack()
+                is ChangePasswordAction.NavigateBack -> onGoBack()
                 else -> viewModel.onAction(action)
             }
         }

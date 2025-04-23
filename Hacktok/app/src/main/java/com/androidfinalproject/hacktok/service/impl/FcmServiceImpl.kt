@@ -15,8 +15,8 @@ import com.androidfinalproject.hacktok.model.enums.NotificationType
 import com.androidfinalproject.hacktok.repository.UserRepository
 import com.androidfinalproject.hacktok.repository.PostRepository
 import com.androidfinalproject.hacktok.repository.CommentRepository
+import com.androidfinalproject.hacktok.service.ApiService
 import com.androidfinalproject.hacktok.service.FcmService
-import com.androidfinalproject.hacktok.service.NotificationService
 import com.androidfinalproject.hacktok.utils.TokenManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -31,11 +31,6 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.RequestBody.Companion.toRequestBody
-import org.json.JSONObject
 
 @Singleton
 class FcmServiceImpl @Inject constructor(
@@ -45,22 +40,18 @@ class FcmServiceImpl @Inject constructor(
     private val userRepository: UserRepository,
     private val postRepository: PostRepository,
     private val commentRepository: CommentRepository,
-    private val notificationService: NotificationService, // Used for storing history
+    private val apiService: ApiService
 ) : FcmService {
 
     private val TAG = "FcmServiceImpl"
     private val CHANNEL_ID = "default_channel"
     private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    private val SERVER_URL = "http://10.0.2.2:3000/send-notification"
-    private val client = OkHttpClient()
 
     init {
         createNotificationChannel()
-        // Initial token storage can be triggered here or after login elsewhere
         initialize()
     }
 
-    // Renamed for clarity, potentially trigger after login too
     override fun initialize() {
         serviceScope.launch {
             val userId = auth.currentUser?.uid
@@ -73,8 +64,6 @@ class FcmServiceImpl @Inject constructor(
         }
     }
 
-    // Simplified getToken: Prioritizes cache, fetches as fallback (using coroutine)
-    // Consider if fetch is truly needed here or should only rely on Application/Service updates
     override suspend fun getToken(): String? = withContext(Dispatchers.IO) {
         val cachedToken = TokenManager.getTokenFromPreferences(context)
         if (cachedToken != null) {
@@ -94,7 +83,6 @@ class FcmServiceImpl @Inject constructor(
         }
     }
 
-    // Refactored storeToken using Coroutines
     override suspend fun storeToken() = withContext(Dispatchers.IO) {
         val currentUserId = auth.currentUser?.uid
         if (currentUserId == null) {
@@ -133,8 +121,6 @@ class FcmServiceImpl @Inject constructor(
         }
     }
 
-    // *** REMOVED startListeningForNotifications() ***
-    // Receiving happens in MyFirebaseMessagingService#onMessageReceived
     override fun showNotification(title: String, body: String, data: Map<String, String>) {
         Log.d(TAG, "Preparing to show notification. Title: $title, Body: $body, Data: $data")
         val intent = Intent(context, MainActivity::class.java).apply {
@@ -143,12 +129,9 @@ class FcmServiceImpl @Inject constructor(
             data["type"]?.let { putExtra("notificationType", it) }
             data["itemId"]?.let { putExtra("notificationItemId", it) }
             data["senderId"]?.let { putExtra("notificationSenderId", it) }
-            data["notificationId"]?.let { putExtra("notificationDocId", it) } // Pass Firestore doc ID if available
-            // Add other relevant data fields needed for navigation
+            data["notificationId"]?.let { putExtra("notificationDocId", it) }
         }
 
-        // Use a more specific request code if needed, 0 is often fine
-        // Use FLAG_IMMUTABLE as required for newer Android versions
         val pendingIntent = PendingIntent.getActivity(
             context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
@@ -167,8 +150,6 @@ class FcmServiceImpl @Inject constructor(
 
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        // Generate a notification ID. Using hash of content can group similar notifications
-        // Or use the Firestore document ID if passed in data
         val notificationId = data["notificationId"]?.hashCode() ?: System.currentTimeMillis().toInt()
         Log.d(TAG, "Showing notification with ID: $notificationId")
         notificationManager.notify(notificationId, notificationBuilder.build())
@@ -183,30 +164,6 @@ class FcmServiceImpl @Inject constructor(
         Log.d(TAG, "Initiating FCM send request for user $recipientUserId. Title: $title")
 
         try {
-            // 1. Store notification history in Firestore
-            val typeString = data["type"]
-            val notificationType = try {
-                NotificationType.valueOf(typeString ?: throw IllegalArgumentException("Missing type"))
-            } catch (e: IllegalArgumentException) {
-                Log.e(TAG, "Invalid or missing notification type: $typeString", e)
-                return@withContext false
-            }
-
-            val notificationDocId = notificationService.createNotification(
-                recipientUserId = recipientUserId,
-                type = notificationType,
-                senderId = auth.currentUser?.uid ?: "system",
-                relatedItemId = data["itemId"],
-                content = body
-            )
-            
-            if (notificationDocId == null) {
-                Log.e(TAG, "Failed to create notification history record in Firestore")
-            } else {
-                Log.d(TAG, "Notification history record created: $notificationDocId")
-            }
-
-            // 2. Get recipient's FCM token from Firestore
             val userDocRef = firestore.collection("users").document(recipientUserId)
             val document = userDocRef.get().await()
             val recipientToken = document.getString("fcmToken")
@@ -218,34 +175,8 @@ class FcmServiceImpl @Inject constructor(
             
             Log.d(TAG, "Retrieved recipient's FCM token: ${recipientToken.take(10)}...")
 
-            // 3. Prepare JSON payload for the server
-            val jsonPayload = JSONObject().apply {
-                put("token", recipientToken)
-                put("title", title)
-                put("body", body)
-                
-                // Add data fields
-                val dataJson = JSONObject()
-                data.forEach { (key, value) -> 
-                    dataJson.put(key, value) 
-                }
-                // Add notification ID if available
-                notificationDocId?.let { dataJson.put("notificationDocId", it) }
-                
-                put("data", dataJson)
-            }
+            val response = apiService.sendNotificationRequest(recipientToken, title, body, data)
 
-            // 4. Send HTTP request to local server
-            Log.d(TAG, "Sending notification request to local server")
-            val mediaType = "application/json; charset=utf-8".toMediaType()
-            val requestBody = jsonPayload.toString().toRequestBody(mediaType)
-            
-            val request = Request.Builder()
-                .url(SERVER_URL)
-                .post(requestBody)
-                .build()
-
-            val response = client.newCall(request).execute()
             val isSuccessful = response.isSuccessful
             
             if (isSuccessful) {
@@ -316,7 +247,6 @@ class FcmServiceImpl @Inject constructor(
         }
     }
 
-    // generateNotificationContent remains mostly the same
     private suspend fun generateNotificationContent(
         sender: User,
         notificationType: NotificationType,
@@ -346,6 +276,9 @@ class FcmServiceImpl @Inject constructor(
                     val comment = commentRepository.getById(itemId).getOrNull()
                     val shortContent = comment?.content?.take(30)?.let { if (it.length >= 30) "$it..." else it } ?: "your comment"
                     Pair("New Reply", "$senderName replied to your comment: $shortContent")
+                }
+                NotificationType.NEW_MESSAGE -> {
+                    Pair("New Message", "$senderName send you a new message ")
                 }
                 else -> Pair("HackTok", "$senderName interacted with you")
             }

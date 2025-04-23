@@ -4,10 +4,8 @@ import android.util.Log
 import com.androidfinalproject.hacktok.model.Chat
 import com.androidfinalproject.hacktok.model.Message
 import com.androidfinalproject.hacktok.model.enums.NotificationType
-import com.androidfinalproject.hacktok.model.enums.RelationshipStatus
 import com.androidfinalproject.hacktok.repository.ChatRepository
 import com.androidfinalproject.hacktok.service.FcmService
-import com.androidfinalproject.hacktok.service.RelationshipService
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.toObject
@@ -25,7 +23,6 @@ import javax.inject.Singleton
 class ChatRepositoryImpl @Inject constructor(
     private val db: FirebaseFirestore,
     private val fcmService: FcmService,
-    private val relationshipService: RelationshipService
 ) : ChatRepository {
     private val chatsCollection = db.collection("chats")
     private val TAG = "ChatRepository"
@@ -128,14 +125,6 @@ class ChatRepositoryImpl @Inject constructor(
             val recipientUserId = chat.participants.find { it != message.senderId }
                 ?: throw Exception("User not found")
 
-                // Check relationship status before sending notification
-            val relationshipStatus = relationshipService.getRelationshipStatus(recipientUserId)
-
-                // Only send notification if user is not blocked
-            if (relationshipStatus == RelationshipStatus.BLOCKED ||
-                    relationshipStatus == RelationshipStatus.BLOCKING) {
-                return ""
-            }
             val messageRef = chatsCollection.document(chatId)
                 .collection("messages")
                 .add(message)

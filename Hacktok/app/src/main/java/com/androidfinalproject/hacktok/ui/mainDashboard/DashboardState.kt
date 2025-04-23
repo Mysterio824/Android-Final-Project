@@ -1,6 +1,8 @@
 package com.androidfinalproject.hacktok.ui.mainDashboard
 
+import com.androidfinalproject.hacktok.model.User
+
 data class DashboardState (
-    val isLogout: Boolean = false,
     val selectedTab: String = "Home",
+    val currentUser: User? = null
 )

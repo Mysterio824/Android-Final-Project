@@ -2,6 +2,7 @@ package com.androidfinalproject.hacktok.ui.mainDashboard.notifcation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.androidfinalproject.hacktok.service.CommentService
 import com.androidfinalproject.hacktok.service.NotificationService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +15,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class NotificationViewModel @Inject constructor(
-    private val notificationService: NotificationService
+    private val notificationService: NotificationService,
+    private val commentService: CommentService
 ) : ViewModel() {
     private val _state = MutableStateFlow(NotificationState())
     val state: StateFlow<NotificationState> = _state.asStateFlow()
@@ -35,8 +37,23 @@ class NotificationViewModel @Inject constructor(
     fun onAction(action: NotificationAction) {
         when (action) {
             is NotificationAction.OnMarkAsRead -> markNotificationAsRead(action.notificationId)
+            is NotificationAction.OnCommentClick -> onCommentClick(action.commentId)
             is NotificationAction.OnDeleteNotification -> deleteNotification(action.notificationId)
             else -> {}
+        }
+    }
+
+    private fun onCommentClick(commentId: String) {
+        viewModelScope.launch {
+            val comment = commentService.getComment(commentId)
+                ?: return@launch
+            _state.update {
+                it.copy(
+                    commentId = commentId,
+                    postId = comment.postId,
+                    navigateComment = true
+                )
+            }
         }
     }
 

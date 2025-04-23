@@ -7,8 +7,6 @@ interface UserRepository {
     suspend fun getUser(userId: String): User?
     suspend fun updateUser(userId: String, updates: Map<String, Any>)
     suspend fun deleteUser(userId: String)
-    suspend fun addFriend(userId: String, friendId: String)
-    suspend fun removeFriend(userId: String, friendId: String)
     suspend fun getCurrentUser(): User?
     suspend fun getUserById(userId: String): User?
     suspend fun updateUserProfile(user: User): Boolean
@@ -16,10 +14,6 @@ interface UserRepository {
     suspend fun updateUserProfileImage(imageUrl: String): Boolean
     suspend fun followUser(userId: String): Boolean
     suspend fun unfollowUser(userId: String): Boolean
-    suspend fun isFollowingUser(userId: String): Boolean
-    suspend fun getFollowersCount(): Int
-    suspend fun getFollowingCount(): Int
-    suspend fun getVideosCount(): Int
     suspend fun searchUsers(query: String): List<User>
     suspend fun updateUserFcmToken(userId: String, token: String?)
 

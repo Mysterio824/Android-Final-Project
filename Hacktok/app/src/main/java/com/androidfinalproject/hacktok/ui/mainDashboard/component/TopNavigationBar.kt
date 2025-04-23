@@ -1,19 +1,17 @@
 package com.androidfinalproject.hacktok.ui.mainDashboard.component
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Message
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.VideoLibrary
 import androidx.compose.material.icons.outlined.Group
 import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -29,15 +27,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.androidfinalproject.hacktok.ui.commonComponent.ProfileImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopNavigationBar(
+    imageUrl: String = "",
     currentTab: String,
     onSearchClick: () -> Unit,
     onMessageClick: () -> Unit,
     onUserClick: () -> Unit,
-    onLogOut: () -> Unit,
     onTabSelected: (String) -> Unit
 ) {
     val facebookBlue = Color(0xFF1877F2)
@@ -45,7 +44,8 @@ fun TopNavigationBar(
         "Home" to Icons.Default.Home,
         "Friends" to Icons.Outlined.Group,
         "WatchLater" to Icons.Default.VideoLibrary,
-        "Notifications" to Icons.Outlined.Notifications
+        "Notifications" to Icons.Outlined.Notifications,
+        "Settings" to Icons.Outlined.Settings
     )
 
     Column {
@@ -77,9 +77,10 @@ fun TopNavigationBar(
                     Icon(Icons.AutoMirrored.Outlined.Message, contentDescription = "Messenger", tint = Color.Black)
                 }
 
-                UserDropdownMenu(
-                    onProfileClick = onUserClick,
-                    onLogoutClick = onLogOut
+                ProfileImage(
+                    imageUrl = imageUrl,
+                    size = 32.dp,
+                    onClick = onUserClick
                 )
 
             },

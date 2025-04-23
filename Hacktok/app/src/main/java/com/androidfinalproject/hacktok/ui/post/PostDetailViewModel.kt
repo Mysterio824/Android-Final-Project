@@ -55,6 +55,12 @@ class PostDetailViewModel @Inject constructor(
                     }
                 }
             }
+            is PostDetailAction.SelectCommentToHighlight -> {
+                _state.update { it.copy(highlightedCommentId = action.commentId) }
+            }
+            is PostDetailAction.SetCommentsVisible -> {
+                _state.update { it.copy(showComments = action.visible) }
+            }
             is PostDetailAction.DismissShareDialog -> _state.update { it.copy(showShareDialog = false) }
             is PostDetailAction.ShowShareDialog -> _state.update { it.copy(showShareDialog = true) }
             is PostDetailAction.LoadPost -> loadPost(action.postId)
@@ -195,7 +201,10 @@ class PostDetailViewModel @Inject constructor(
     }
 
     private fun selectComment(commentId: String) {
-        _state.update { it.copy(commentIdReply = commentId) }
+        _state.update { it.copy(
+            commentIdReply = commentId,
+            isCommenting = true
+        ) }
     }
 
     private fun submitComment() {

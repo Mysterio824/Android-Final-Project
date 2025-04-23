@@ -8,7 +8,7 @@ import com.androidfinalproject.hacktok.repository.CommentRepository
 import com.androidfinalproject.hacktok.repository.PostRepository
 import com.androidfinalproject.hacktok.repository.UserRepository
 import com.androidfinalproject.hacktok.service.CommentService
-import com.androidfinalproject.hacktok.service.FcmService
+import com.androidfinalproject.hacktok.service.NotificationService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -24,7 +24,7 @@ class CommentServiceImpl @Inject constructor(
     private val commentRepository: CommentRepository,
     private val userRepository: UserRepository,
     private val postRepository: PostRepository,
-    private val fcmService: FcmService,
+    private val notificationService: NotificationService
 ) : CommentService {
 
     private val TAG = "CommentServiceImpl"
@@ -81,6 +81,10 @@ class CommentServiceImpl @Inject constructor(
         }
     }
 
+    override suspend fun getComment(commentId: String): Comment? {
+        return commentRepository.getById(commentId).getOrNull()
+    }
+
     override suspend fun addComment(content: String, postId: String): Result<Comment> {
         return try {
 
@@ -110,16 +114,13 @@ class CommentServiceImpl @Inject constructor(
             val post = postRepository.getPost(postId)
             if (post != null) {
                 postRepository.updatePost(postId, mapOf("commentCount" to post.commentCount + 1))
-                
-                // Send notification to post owner (if not the same user)
-                serviceScope.launch {
-                    fcmService.sendInteractionNotification(
-                        recipientUserId = post.userId,
-                        senderUserId = user.id,
-                        notificationType = NotificationType.POST_COMMENT,
-                        itemId = postId
-                    )
-                }
+
+                notificationService.createNotification(
+                    recipientUserId = post.userId,
+                    type = NotificationType.POST_COMMENT,
+                    senderId = user.id,
+                    relatedItemId = postId
+                )
             }
 
             return Result.success(resComment)
@@ -170,18 +171,18 @@ class CommentServiceImpl @Inject constructor(
             // Send notification to parent comment owner (if not the same user)
             if (parentComment.userId != user.id) {
                 serviceScope.launch {
-                    fcmService.sendInteractionNotification(
+                    notificationService.createNotification(
                         recipientUserId = parentComment.userId,
-                        senderUserId = user.id,
-                        notificationType = NotificationType.COMMENT_REPLY,
-                        itemId = parentId
+                        type = NotificationType.COMMENT_REPLY,
+                        senderId = user.id,
+                        relatedItemId = parentId
                     )
                     post!!.id?.let {
-                        fcmService.sendInteractionNotification(
+                        notificationService.createNotification(
                             recipientUserId = post.userId,
-                            senderUserId = user.id,
-                            notificationType = NotificationType.POST_COMMENT,
-                            itemId = it
+                            type = NotificationType.POST_COMMENT,
+                            senderId = user.id,
+                            relatedItemId = it
                         )
                     }
                 }

@@ -23,12 +23,15 @@ sealed class PostDetailAction {
     data object ToggleCommentInputFocus : PostDetailAction()
     data class UpdateCommentText(val text: String) : PostDetailAction()
     data object SubmitComment : PostDetailAction()
+
     //comment action
     data class SetCommentFocus(val focused: Boolean) : PostDetailAction()
     data class LikeComment(val commentId: String?) : PostDetailAction()
     data class UnLikeComment(val commentId: String?) : PostDetailAction()
     data class SelectCommentToReply(val commentId: String) : PostDetailAction()
     data class DeleteComment(val commentId: String) : PostDetailAction()
+    data class SelectCommentToHighlight(val commentId: String) : PostDetailAction()
+    data class SetCommentsVisible(val visible: Boolean) : PostDetailAction()
     data object ShowShareDialog : PostDetailAction()
     data object DismissShareDialog : PostDetailAction()
     data class OnSharePost(val post: Post, val caption: String, val privacy: PRIVACY) : PostDetailAction()

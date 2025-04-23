@@ -6,22 +6,16 @@ import com.androidfinalproject.hacktok.model.enums.NotificationType
 import com.androidfinalproject.hacktok.repository.CommentRepository
 import com.androidfinalproject.hacktok.repository.PostRepository
 import com.androidfinalproject.hacktok.repository.UserRepository
-import com.androidfinalproject.hacktok.service.FcmService
 import com.androidfinalproject.hacktok.service.LikeService
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import com.androidfinalproject.hacktok.service.NotificationService
 import javax.inject.Inject
 
 class LikeServiceImpl @Inject constructor(
     private val commentRepository: CommentRepository,
     private val userRepository: UserRepository,
     private val postRepository: PostRepository,
-    private val fcmService: FcmService,
+    private val notificationService: NotificationService
 ) : LikeService{
-    private val serviceScope = CoroutineScope(Dispatchers.IO)
-
-
     override suspend fun likePost(postId: String): Post? {
         try {
             val post = postRepository.getPost(postId)
@@ -40,17 +34,12 @@ class LikeServiceImpl @Inject constructor(
 
                 postRepository.updatePost(postId, updates)
 
-                // Send notification to Post owner (if not the same user)
-                if (post.userId != userId) {
-                    serviceScope.launch {
-                        fcmService.sendInteractionNotification(
-                            recipientUserId = post.userId,
-                            senderUserId = userId,
-                            notificationType = NotificationType.POST_LIKE,
-                            itemId = postId
-                        )
-                    }
-                }
+                notificationService.createNotification(
+                    recipientUserId = post.userId,
+                    type = NotificationType.POST_LIKE,
+                    senderId = userId,
+                    relatedItemId = post.id,
+                )
 
                 return post.copy(
                     likedUserIds = updatedLikedUserIds
@@ -107,17 +96,12 @@ class LikeServiceImpl @Inject constructor(
 
                 commentRepository.update(commentId, updatedComment)
 
-                // Send notification to comment owner (if not the same user)
-                if (comment.userId != userId) {
-                    serviceScope.launch {
-                        fcmService.sendInteractionNotification(
-                            recipientUserId = comment.userId,
-                            senderUserId = userId,
-                            notificationType = NotificationType.COMMENT_LIKE,
-                            itemId = commentId
-                        )
-                    }
-                }
+                notificationService.createNotification(
+                    recipientUserId = comment.userId,
+                    type = NotificationType.COMMENT_LIKE,
+                    senderId = userId,
+                    relatedItemId = comment.id,
+                )
 
                 Result.success(Unit)
             } else {

@@ -20,4 +20,6 @@ interface AuthService {
     
     // Logout the current user
     suspend fun logout(): Boolean
+
+    suspend fun changePassword(oldPass: String, newPassword: String): String
 } 

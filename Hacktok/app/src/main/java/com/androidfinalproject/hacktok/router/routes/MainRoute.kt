@@ -10,6 +10,11 @@ sealed interface MainRoute : Route {
     }
 
     @Serializable
+    data object Dashboard : MainRoute {
+        override val route = "dashboard"
+    }
+
+    @Serializable
     data object PostDetail : MainRoute {
         override val route = "post_detail"
     }
@@ -17,6 +22,11 @@ sealed interface MainRoute : Route {
     @Serializable
     data object UserDetail : MainRoute {
         override val route = "user_detail"
+    }
+
+    @Serializable
+    data object ChangePass : MainRoute {
+        override val route = "change_pass"
     }
 
     @Serializable

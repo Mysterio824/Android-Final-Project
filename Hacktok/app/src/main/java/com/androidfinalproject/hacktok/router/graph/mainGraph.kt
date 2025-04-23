@@ -29,18 +29,19 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import com.androidfinalproject.hacktok.router.routes.AuthRoute
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.androidfinalproject.hacktok.ui.changePassword.ChangePasswordScreenRoot
 import com.androidfinalproject.hacktok.ui.chatDetail.ChatDetailScreenRoot
 import com.androidfinalproject.hacktok.ui.newPost.NewPostScreenRoot
 import com.androidfinalproject.hacktok.ui.storydetail.StoryDetailScreenRoot
 
 fun NavGraphBuilder.mainNavigation(navController: NavController) {
     navigation(
-        startDestination = "dashboard",
+        startDestination = MainRoute.Dashboard.route,
         route = MainRoute.Graph.route
     ) {
         // Dashboard Screen
         composable(
-            route = "dashboard",
+            route = MainRoute.Dashboard.route,
             enterTransition = { slideFadeInFromLeft() },
             exitTransition = { slideFadeOutToRight() }
         ) {
@@ -48,8 +49,13 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
                 onUserProfileNavigate = { userId ->
                     navController.navigate("${MainRoute.UserDetail.route}/$userId")
                 },
-                onPostDetailNavigate = { postId ->
-                    navController.navigate("${MainRoute.PostDetail.route}/$postId")
+                onPostDetailNavigate = { postId, commentId ->
+                    val route = if (commentId != null) {
+                        "${MainRoute.PostDetail.route}/$postId?commentId=$commentId"
+                    } else {
+                        "${MainRoute.PostDetail.route}/$postId"
+                    }
+                    navController.navigate(route)
                 },
                 onUserChatNavigate = { userId ->
                     navController.navigate("${MainRoute.ChatRoom.route}/user/$userId")
@@ -77,7 +83,6 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
                 },
                 onStoryNavigate = { storyId ->
                     navController.navigate("${MainRoute.StoryDetail.route}/$storyId")
-
                 },
                 onCreateStoryNavigate = {
                     navController.navigate(MainRoute.NewStory.route)
@@ -88,7 +93,13 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
                 },
                 onNavigateBack = {
                     navController.popBackStack()
-                }
+                },
+                onChangePassNavigate = {
+                    navController.navigate(MainRoute.ChangePass.route)
+                },
+                onUserEditNavigate = {
+                    navController.navigate(MainRoute.EditProfile.route)
+                },
             )
         }
 
@@ -176,17 +187,20 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
 
         // Post Detail Screen
         composable(
-            route = "${MainRoute.PostDetail.route}/{postId}",
+            route = "${MainRoute.PostDetail.route}/{postId}?commentId={commentId}",
             arguments = listOf(
-                navArgument("postId") { type = NavType.StringType; nullable = true }
+                navArgument("postId") { type = NavType.StringType; nullable = true },
+                navArgument("commentId") { type = NavType.StringType; nullable = true; defaultValue = null }
             ),
             enterTransition = { slideFadeInFromLeft() },
             exitTransition = { slideFadeOutToRight() }
         ) { backStackEntry ->
             val postId = backStackEntry.arguments?.getString("postId")
+            val commentId = backStackEntry.arguments?.getString("commentId")
 
             PostDetailScreenRoot(
                 postId = postId!!,
+                commentId = commentId,
                 onNavigateBack = {
                     navController.popBackStack()
                 },
@@ -317,6 +331,22 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
         ) {
             EditProfileScreenRoot(
                 onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // Change password
+        composable(
+            route = MainRoute.ChangePass.route,
+            enterTransition = { slideFadeInFromRight() },
+            exitTransition = { slideFadeOutToLeft() }
+        ) {
+            ChangePasswordScreenRoot(
+                onResetSuccess = {
+                    navController.navigate(MainRoute.Dashboard.route)
+                },
+                onGoBack = {
                     navController.popBackStack()
                 }
             )

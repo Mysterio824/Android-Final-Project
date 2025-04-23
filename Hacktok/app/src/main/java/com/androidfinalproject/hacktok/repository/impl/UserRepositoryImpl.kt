@@ -2,6 +2,7 @@ package com.androidfinalproject.hacktok.repository.impl
 
 import android.util.Log
 import com.androidfinalproject.hacktok.model.User
+import com.androidfinalproject.hacktok.model.enums.UserRole
 import com.androidfinalproject.hacktok.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
@@ -42,16 +43,6 @@ class UserRepositoryImpl @Inject constructor(
 
     override suspend fun deleteUser(userId: String) {
         usersCollection.document(userId).delete().await()
-    }
-
-    override suspend fun addFriend(userId: String, friendId: String) {
-        usersCollection.document(userId)
-            .update("friends", FieldValue.arrayUnion(friendId)).await()
-    }
-
-    override suspend fun removeFriend(userId: String, friendId: String) {
-        usersCollection.document(userId)
-            .update("friends", FieldValue.arrayRemove(friendId)).await()
     }
 
     override suspend fun getCurrentUser(): User? {
@@ -199,66 +190,6 @@ class UserRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun isFollowingUser(userId: String): Boolean {
-        return try {
-            val currentUser = firebaseAuth.currentUser
-            if (currentUser != null) {
-                val userDoc = usersCollection.document(currentUser.uid).get().await()
-                val user = userDoc.toObject(User::class.java)
-                user?.following?.contains(userId) ?: false
-            } else {
-                false
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error checking if following user: $userId", e)
-            false
-        }
-    }
-
-    override suspend fun getFollowersCount(): Int {
-        return try {
-            val currentUser = firebaseAuth.currentUser
-            if (currentUser != null) {
-                val userDoc = usersCollection.document(currentUser.uid).get().await()
-                val user = userDoc.toObject(User::class.java)
-                user?.followerCount ?: 0
-            } else {
-                0
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error getting followers count", e)
-            0
-        }
-    }
-
-    override suspend fun getFollowingCount(): Int {
-        return try {
-            val currentUser = firebaseAuth.currentUser
-            if (currentUser != null) {
-                val userDoc = usersCollection.document(currentUser.uid).get().await()
-                val user = userDoc.toObject(User::class.java)
-                user?.followingCount ?: 0
-            } else {
-                0
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error getting following count", e)
-            0
-        }
-    }
-
-    override suspend fun getVideosCount(): Int {
-        return try {
-            val currentUser = getCurrentUser() ?: return 0
-            val postsRef = FirebaseDatabase.getInstance().getReference("posts")
-            val snapshot = postsRef.orderByChild("userId").equalTo(currentUser.id).get().await()
-            snapshot.children.count()
-        } catch (e: Exception) {
-            Log.e(TAG, "Error getting videos count", e)
-            0
-        }
-    }
-
     // Helper function to map QuerySnapshot to List<User> with ID
     private fun mapSnapshotToUsers(snapshot: QuerySnapshot): List<User> {
         return snapshot.documents.mapNotNull { document ->
@@ -277,16 +208,22 @@ class UserRepositoryImpl @Inject constructor(
     override suspend fun searchUsers(query: String): List<User> {
         return try {
             val lowercaseQuery = query.lowercase()
-            
+            val currentUser = getCurrentUser()
+                ?: return emptyList()
             // Get all users first
             val allUsers = getAllUsers()
             
             // Filter users in memory
             allUsers.filter { user ->
-                user.username?.lowercase()?.contains(lowercaseQuery) == true ||
-                user.email.lowercase().contains(lowercaseQuery) ||
-                user.fullName?.lowercase()?.contains(lowercaseQuery) == true ||
-                user.bio?.lowercase()?.contains(lowercaseQuery) == true
+                (
+                    user.username?.lowercase()?.contains(lowercaseQuery) == true ||
+                    user.email.lowercase().contains(lowercaseQuery) ||
+                    user.fullName?.lowercase()?.contains(lowercaseQuery) == true ||
+                    user.bio?.lowercase()?.contains(lowercaseQuery) == true
+                ) &&
+                user.id != currentUser.id &&
+                user.role != UserRole.ADMIN &&
+                user.role != UserRole.MODERATOR
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error searching users with query: $query", e)
@@ -351,15 +288,15 @@ class UserRepositoryImpl @Inject constructor(
         try {
             // Remove if already exists to avoid duplicates
             searchHistory.remove(query)
-            
+
             // Add to the front of the list
             searchHistory.addFirst(query)
-            
+
             // Keep only the most recent queries
             while (searchHistory.size > searchHistoryLimit) {
                 searchHistory.removeLast()
             }
-            
+
             // Store in Firestore for persistence across app restarts
             val currentUser = firebaseAuth.currentUser
             if (currentUser != null) {
@@ -381,7 +318,7 @@ class UserRepositoryImpl @Inject constructor(
             Log.e(TAG, "Error in addSearchQuery", e)
         }
     }
-    
+
     override suspend fun getSearchHistory(): List<String> {
         try {
             val currentUser = firebaseAuth.currentUser
@@ -390,15 +327,15 @@ class UserRepositoryImpl @Inject constructor(
                     val userDoc = usersCollection.document(currentUser.uid).get().await()
                     if (userDoc.exists()) {
                         val user = userDoc.toObject(User::class.java)
-                        
+
                         @Suppress("UNCHECKED_CAST")
                         val storedHistory = user?.searchHistory
-                        
+
                         if (storedHistory != null && storedHistory.isNotEmpty()) {
                             // Update local cache
                             searchHistory.clear()
                             searchHistory.addAll(storedHistory)
-                            
+
                             Log.d(TAG, "Retrieved search history: ${storedHistory.joinToString()}")
                         } else {
                             Log.d(TAG, "No search history found in user document")
@@ -415,13 +352,13 @@ class UserRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             Log.e(TAG, "Error in getSearchHistory", e)
         }
-        
+
         return searchHistory.toList()
     }
-    
+
     override suspend fun clearSearchHistory() {
         searchHistory.clear()
-        
+
         val currentUser = firebaseAuth.currentUser
         if (currentUser != null) {
             try {

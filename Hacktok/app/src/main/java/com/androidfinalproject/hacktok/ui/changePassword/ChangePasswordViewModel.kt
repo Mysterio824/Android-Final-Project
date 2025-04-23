@@ -1,32 +1,47 @@
-package com.androidfinalproject.hacktok.ui.resetPassword
+package com.androidfinalproject.hacktok.ui.changePassword
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.androidfinalproject.hacktok.service.AuthService
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ResetPasswordViewModel : ViewModel() {
-    private val _state = MutableStateFlow(ResetPasswordState())
-    val state: StateFlow<ResetPasswordState> = _state.asStateFlow()
+@HiltViewModel
+class ChangePasswordViewModel @Inject constructor(
+    private val authService: AuthService
+) : ViewModel() {
+    private val _state = MutableStateFlow(ChangePasswordState())
+    val state: StateFlow<ChangePasswordState> = _state.asStateFlow()
 
     private var resetSuccess = false
 
-    fun onAction(action: ResetPasswordAction) {
+    fun onAction(action: ChangePasswordAction) {
         when (action) {
-            is ResetPasswordAction.UpdateNewPassword -> updateNewPassword(action.password)
-            is ResetPasswordAction.UpdateConfirmPassword -> updateConfirmPassword(action.password)
-            is ResetPasswordAction.ToggleNewPasswordVisibility -> toggleNewPasswordVisibility()
-            is ResetPasswordAction.ToggleConfirmPasswordVisibility -> toggleConfirmPasswordVisibility()
-            is ResetPasswordAction.ResetPassword -> resetPassword()
-            is ResetPasswordAction.NavigateBack -> {}
+            is ChangePasswordAction.UpdateNewPassword -> updateNewPassword(action.password)
+            is ChangePasswordAction.UpdateConfirmPassword -> updateConfirmPassword(action.password)
+            is ChangePasswordAction.UpdateOldPassword -> updateOldPassword(action.password)
+            is ChangePasswordAction.ToggleOldPasswordVisibility -> toggleOldPasswordVisibility()
+            is ChangePasswordAction.ToggleNewPasswordVisibility -> toggleNewPasswordVisibility()
+            is ChangePasswordAction.ToggleConfirmPasswordVisibility -> toggleConfirmPasswordVisibility()
+            is ChangePasswordAction.ResetPassword -> resetPassword()
+            else -> {}
         }
     }
 
-    fun setEmailAndCode(email: String, code: String) {
-        _state.update { it.copy(email = email, verificationCode = code) }
+    private fun updateOldPassword(password: String) {
+        _state.update {
+            val passwordRequirements = validatePasswordRequirements(password)
+            it.copy(
+                oldPassword = password,
+                passwordRequirements = passwordRequirements,
+                oldPasswordError = if (password.isBlank()) "Password cannot be empty" else null
+            )
+        }
     }
 
     private fun updateNewPassword(password: String) {
@@ -54,6 +69,10 @@ class ResetPasswordViewModel : ViewModel() {
         }
     }
 
+    private fun toggleOldPasswordVisibility() {
+        _state.update { it.copy(oldPasswordVisible = !it.oldPasswordVisible) }
+    }
+
     private fun toggleNewPasswordVisibility() {
         _state.update { it.copy(newPasswordVisible = !it.newPasswordVisible) }
     }
@@ -77,9 +96,10 @@ class ResetPasswordViewModel : ViewModel() {
         if (!currentState.isFormValid) {
             _state.update {
                 it.copy(
+                    oldPasswordError = if (it.oldPassword.isBlank()) "Old password can't be empty" else null,
                     newPasswordError = if (it.newPassword.isBlank()) "Password cannot be empty" else null,
                     confirmPasswordError = when {
-                        it.confirmPassword.isBlank() -> "Confirm password cannot be empty"
+                        it.confirmPassword.isBlank() -> "Confirm password can't be empty"
                         it.newPassword != it.confirmPassword -> "Passwords do not match"
                         else -> null
                     }
@@ -92,11 +112,19 @@ class ResetPasswordViewModel : ViewModel() {
             _state.update { it.copy(isLoading = true, errorMessage = null) }
 
             try {
-                // In a real app, you would make an API call here
-                kotlinx.coroutines.delay(1500)
+                val res = authService.changePassword(currentState.oldPassword, currentState.newPassword)
 
-                resetSuccess = true
-                _state.update { it.copy(isLoading = false) }
+                if(res == "Password changed successfully"){
+                    resetSuccess = true
+                    _state.update { it.copy(isLoading = false) }
+                } else {
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = res
+                        )
+                    }
+                }
             } catch (e: Exception) {
                 _state.update {
                     it.copy(

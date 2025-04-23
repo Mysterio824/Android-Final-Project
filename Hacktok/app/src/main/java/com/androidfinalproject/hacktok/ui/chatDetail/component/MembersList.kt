@@ -115,7 +115,7 @@ fun MemberItem(
 
         // Three dots menu button
         IconButton(onClick = {
-            onMemberAction?.invoke(ChatDetailAction.NavigateToUserProfile(user.id))
+//            onMemberAction?.invoke(ChatDetailAction.NavigateToUserProfile())
         }) {
             Icon(
                 imageVector = Icons.Default.MoreVert,

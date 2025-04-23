@@ -11,5 +11,5 @@ sealed class ChatDetailAction {
     data object LeaveGroup: ChatDetailAction()
     data class RenameGroup(val newName: String): ChatDetailAction()
     data object NavigateBack : ChatDetailAction()
-    data class NavigateToUserProfile(val userId : String?) : ChatDetailAction()
+    data object NavigateToUserProfile : ChatDetailAction()
 }

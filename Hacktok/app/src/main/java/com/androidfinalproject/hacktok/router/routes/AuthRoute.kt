@@ -18,9 +18,4 @@ sealed interface AuthRoute : Route {
     data object ForgotPassword : AuthRoute {
         override val route = "password_recovery"
     }
-
-    @Serializable
-    data object PasswordRecovery : AuthRoute {
-        override val route = "password_recovery"
-    }
 }

@@ -4,7 +4,6 @@ import com.androidfinalproject.hacktok.model.Comment
 import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.model.User
 
-
 data class PostDetailState(
     val post: Post? = null,
     val currentUser: User? = null,
@@ -14,7 +13,9 @@ data class PostDetailState(
     val isShare: Boolean = false,
     val isCommenting: Boolean = false,
     val error: String? = null,
-    val commentIdReply: String = "",
+    val commentIdReply: String = "", // For replying to comments
+    val highlightedCommentId: String? = null,
+    val showComments: Boolean = true,
     val userMessage: String? = null,
     val showShareDialog: Boolean = false,
     val postUser: User? = null

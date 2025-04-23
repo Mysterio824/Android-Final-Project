@@ -7,13 +7,17 @@ import com.androidfinalproject.hacktok.model.enums.NotificationType
 import com.androidfinalproject.hacktok.repository.NotificationRepository
 import com.androidfinalproject.hacktok.repository.UserRepository // To get sender details
 import com.androidfinalproject.hacktok.service.AuthService
+import com.androidfinalproject.hacktok.service.FcmService
 import com.androidfinalproject.hacktok.service.NotificationService
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -22,8 +26,10 @@ import javax.inject.Singleton
 class NotificationServiceImpl @Inject constructor(
     private val notificationRepository: NotificationRepository,
     private val userRepository: UserRepository,
-    private val authService: AuthService
+    private val authService: AuthService,
+    private val fcmService: FcmService
 ) : NotificationService {
+    private val serviceScope = CoroutineScope(Dispatchers.IO)
 
     private val TAG = "NotificationService"
 
@@ -32,7 +38,6 @@ class NotificationServiceImpl @Inject constructor(
         type: NotificationType,
         senderId: String?,
         relatedItemId: String?,
-        content: String?,
         actionUrl: String?,
         priority: String
     ): String? {
@@ -45,7 +50,7 @@ class NotificationServiceImpl @Inject constructor(
             }
 
             // Generate default content if not provided
-            val finalContent = content ?: generateDefaultContent(type, sender?.username)
+            val finalContent = generateDefaultContent(type, sender?.username)
             
             if (finalContent == null) {
                  Log.e(TAG, "Could not generate content for notification type $type")
@@ -60,11 +65,20 @@ class NotificationServiceImpl @Inject constructor(
                 senderImage = sender?.profileImage,
                 relatedId = relatedItemId,
                 content = finalContent,
-                createdAt = Date(), // Set creation timestamp
+                createdAt = Date(),
                 isRead = false,
                 actionUrl = actionUrl,
                 priority = priority
             )
+
+            serviceScope.launch {
+                fcmService.sendInteractionNotification(
+                    recipientUserId = recipientUserId,
+                    senderUserId = senderId!!,
+                    notificationType = type,
+                    itemId = relatedItemId!!
+                )
+            }
             
             notificationRepository.addNotification(notification)
         } catch (e: Exception) {
@@ -82,8 +96,8 @@ class NotificationServiceImpl @Inject constructor(
             NotificationType.POST_COMMENT -> "$name commented on your post"
             NotificationType.COMMENT_REPLY -> "$name replied to your comment"
             NotificationType.COMMENT_LIKE -> "$name liked your comment"
-            NotificationType.ADMIN_NOTIFICATION -> "Important system notification" // Content should likely be provided for this type
-            NotificationType.NEW_STORY -> "$name post a story, chekc it out"
+            NotificationType.ADMIN_NOTIFICATION -> "Important system notification"
+            NotificationType.NEW_STORY -> "$name post a story, check it out"
             else -> ""
 
         }

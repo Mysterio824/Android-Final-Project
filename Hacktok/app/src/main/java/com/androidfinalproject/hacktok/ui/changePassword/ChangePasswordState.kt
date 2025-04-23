@@ -1,13 +1,14 @@
-package com.androidfinalproject.hacktok.ui.resetPassword
+package com.androidfinalproject.hacktok.ui.changePassword
 
-data class ResetPasswordState(
-    val email: String = "",
-    val verificationCode: String = "",
+data class ChangePasswordState(
+    val oldPassword: String = "",
     val newPassword: String = "",
     val confirmPassword: String = "",
+    val oldPasswordVisible: Boolean = false,
     val newPasswordVisible: Boolean = false,
     val confirmPasswordVisible: Boolean = false,
     val newPasswordError: String? = null,
+    val oldPasswordError: String? = null,
     val confirmPasswordError: String? = null,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,

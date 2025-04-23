@@ -22,7 +22,10 @@ fun EditProfileScreenRoot(
     EditProfileScreen(
         state = state,
         onAction = { action ->
-            viewModel.onAction(action)
+            when(action){
+                is EditProfileAction.Cancel -> onNavigateBack()
+                else -> viewModel.onAction(action)
+            }
         }
     )
 }

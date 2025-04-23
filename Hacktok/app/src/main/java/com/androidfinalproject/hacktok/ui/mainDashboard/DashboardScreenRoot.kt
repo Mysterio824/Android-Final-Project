@@ -1,17 +1,15 @@
 package com.androidfinalproject.hacktok.ui.mainDashboard
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlin.system.exitProcess
 
 @Composable
 fun DashboardScreenRoot(
     viewModel: DashboardViewModel = hiltViewModel(),
     onUserProfileNavigate: (String?) -> Unit = {},
-    onPostDetailNavigate: (String?) -> Unit = {},
+    onPostDetailNavigate: (String?, String?) -> Unit,
     onStoryNavigate: (String?) -> Unit = {},
     onUserChatNavigate: (String?) -> Unit,
     onGroupChatNavigate: (String?) -> Unit,
@@ -23,21 +21,18 @@ fun DashboardScreenRoot(
     onCreateStoryNavigate: () -> Unit,
     onAuthNavigate: () -> Unit,
     onPostEditNavigate: (String) -> Unit,
+    onUserEditNavigate: () -> Unit,
+    onChangePassNavigate: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-
-    LaunchedEffect(state.isLogout) {
-        if (state.isLogout)
-            onAuthNavigate()
-    }
 
     DashboardScreen(
         state = state,
         onAction = { action ->
             when (action) {
                 is DashboardAction.OnUserClick -> onUserProfileNavigate(action.userId)
-                is DashboardAction.OnPostClick -> onPostDetailNavigate(action.postId)
+                is DashboardAction.OnPostClick -> onPostDetailNavigate(action.postId, action.commentId)
                 is DashboardAction.GotoUserChat -> onUserChatNavigate(action.userId)
                 is DashboardAction.GotoGroupChat -> onGroupChatNavigate(action.groupId)
                 is DashboardAction.OnFriendListNavigate -> onFriendListNavigate(action.userId)
@@ -48,6 +43,9 @@ fun DashboardScreenRoot(
                 is DashboardAction.OnPostEditNavigate -> onPostEditNavigate(action.postId)
                 is DashboardAction.OnCurrentProfileNavigate -> onCurrentProfileNavigate()
                 is DashboardAction.OnMessageDashboardNavigate -> onMessageDashBoardNavigate()
+                is DashboardAction.OnUserEdit -> onUserEditNavigate()
+                is DashboardAction.OnChangePass -> onChangePassNavigate()
+                is DashboardAction.OnAuthNavigate -> onAuthNavigate()
                 is DashboardAction.OnNavigateBack -> onNavigateBack()
                 else -> viewModel.onAction(action)
             }

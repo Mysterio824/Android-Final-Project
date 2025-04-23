@@ -77,7 +77,7 @@ fun ChatDetailScreen(
                     ProfileImage(
                         imageUrl = if(isBlock) "" else user.profileImage,
                         size = 100.dp,
-                        onClick = { onAction(ChatDetailAction.NavigateToUserProfile(user.id)) }
+                        onClick = { onAction(ChatDetailAction.NavigateToUserProfile) }
                     )
                 }
             }

@@ -1,6 +1,5 @@
 package com.androidfinalproject.hacktok.ui.chatDetail
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.model.Group
@@ -9,7 +8,6 @@ import com.androidfinalproject.hacktok.model.enums.RelationshipStatus
 import com.androidfinalproject.hacktok.repository.ChatRepository
 import com.androidfinalproject.hacktok.repository.UserRepository
 import com.androidfinalproject.hacktok.service.RelationshipService
-import com.androidfinalproject.hacktok.ui.messageDashboard.MessageDashboardAction
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,7 +18,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ChatDetailViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
     private val relationshipService: RelationshipService,
     private val chatRepository: ChatRepository,
     private val userRepository: UserRepository
