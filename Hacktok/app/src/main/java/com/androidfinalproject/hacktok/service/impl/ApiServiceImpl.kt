@@ -73,7 +73,39 @@ class ApiServiceImpl @Inject constructor() : ApiService {
         return client.newCall(request).execute()
     }
 
-    override suspend fun sendEmailVerifyRequest(email: String): Response {
-        TODO("Not yet implemented")
+    override suspend fun sendSignUpRequest(
+        email: String,
+        password: String
+    ): Response = withContext(Dispatchers.IO) {
+        val jsonPayload = JSONObject().apply {
+            put("email", email)
+            put("password", password)
+        }
+        Log.d(TAG, "Sending change password request to local server")
+        val mediaType = "application/json; charset=utf-8".toMediaType()
+        val requestBody = jsonPayload.toString().toRequestBody(mediaType)
+
+        val request = Request.Builder()
+            .url("$SERVER_URL/signup")
+            .post(requestBody)
+            .build()
+
+        client.newCall(request).execute()
+    }
+
+    override suspend fun sendResetPassword(email: String): Response = withContext(Dispatchers.IO) {
+        val jsonPayload = JSONObject().apply {
+            put("email", email)
+        }
+        Log.d(TAG, "Sending change password request to local server")
+        val mediaType = "application/json; charset=utf-8".toMediaType()
+        val requestBody = jsonPayload.toString().toRequestBody(mediaType)
+
+        val request = Request.Builder()
+            .url("$SERVER_URL/reset-password")
+            .post(requestBody)
+            .build()
+
+        client.newCall(request).execute()
     }
 }

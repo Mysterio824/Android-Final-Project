@@ -83,6 +83,26 @@ class UserRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getUserByEmail(email: String): User? {
+        return try {
+            val querySnapshot = usersCollection
+                .whereEqualTo("email", email)
+                .limit(1)
+                .get()
+                .await()
+
+            if (!querySnapshot.isEmpty) {
+                querySnapshot.documents.first().toObject(User::class.java)
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting user by email: $email", e)
+            null
+        }
+    }
+
+
     override suspend fun updateUserProfile(user: User): Boolean {
         return try {
             val currentUser = firebaseAuth.currentUser

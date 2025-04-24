@@ -100,7 +100,7 @@ private fun filterPendingRequests(users: List<User>, relations: Map<String, Rela
 private fun filterSuggestedFriends(users: List<User>, relations: Map<String, RelationInfo>): List<User> {
     return users.filter { user ->
         val relation = relations[user.id]
-        relation?.status == RelationshipStatus.NONE || relation?.status == RelationshipStatus.PENDING_OUTGOING
+        relation == null || relation.status == RelationshipStatus.NONE || relation.status == RelationshipStatus.PENDING_OUTGOING
     }
 }
 

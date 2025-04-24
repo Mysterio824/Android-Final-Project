@@ -9,6 +9,7 @@ interface UserRepository {
     suspend fun deleteUser(userId: String)
     suspend fun getCurrentUser(): User?
     suspend fun getUserById(userId: String): User?
+    suspend fun getUserByEmail(userId: String): User?
     suspend fun updateUserProfile(user: User): Boolean
     suspend fun updateUserBio(bio: String): Boolean
     suspend fun updateUserProfileImage(imageUrl: String): Boolean

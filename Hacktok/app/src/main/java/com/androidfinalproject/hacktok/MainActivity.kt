@@ -30,9 +30,7 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
-import android.os.Build
-import androidx.core.content.ContextCompat
-import android.Manifest
+import com.androidfinalproject.hacktok.service.AuthService
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -45,7 +43,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var authViewModel: AuthViewModel
 
     @Inject
-    lateinit var fcmService: FcmService
+    lateinit var authService: AuthService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,6 +63,7 @@ class MainActivity : ComponentActivity() {
             MainAppTheme {
                 val navController = rememberNavController()
                 authViewModel = hiltViewModel()
+
 
                 // Re-use the existing Google Sign-In Client in Compose
                 val googleSignInClient = remember { googleSignInClient }
@@ -92,27 +91,19 @@ class MainActivity : ComponentActivity() {
                                 // Fallback to compatibility workaround
                                 startGoogleSignInWithCompatibilityWorkaround()
                             }
-                        }
+                        },
+                        authViewModel = authViewModel
                     )
                     adminNavigation(navController)
                     mainNavigation(navController)
                     testNavigation(navController)
                 }
             }
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-                ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
-                != PackageManager.PERMISSION_GRANTED
-            ) {
-                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-            }
         }
 
     }
     
-    /**
-     * Fallback method for devices with Google Play Services issues
-     */
+
     private fun startGoogleSignInWithCompatibilityWorkaround() {
         try {
             val signInIntent = googleSignInClient.signInIntent
@@ -123,9 +114,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    /**
-     * Handle Google Sign-In result from startActivityForResult
-     */
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == RC_SIGN_IN) {
@@ -133,9 +122,7 @@ class MainActivity : ComponentActivity() {
         }
     }
     
-    /**
-     * Handle sign-in result from either launcher or compatibility workaround
-     */
+
     private fun handleSignInResult(resultCode: Int, data: Intent?) {
         Log.d(TAG, "Sign-in result received. Result code: $resultCode")
         try {
@@ -160,16 +147,6 @@ class MainActivity : ComponentActivity() {
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error handling Google Sign-In result", e)
-        }
-    }
-
-    private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            Log.d("MainActivity", "Notification permission granted")
-        } else {
-            Log.d("MainActivity", "Notification permission denied")
         }
     }
 }

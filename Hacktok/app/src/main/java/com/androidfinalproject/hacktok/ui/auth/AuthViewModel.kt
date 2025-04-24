@@ -4,7 +4,7 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.androidfinalproject.hacktok.repository.AuthRepository
+import com.androidfinalproject.hacktok.service.AuthService
 import com.androidfinalproject.hacktok.service.FcmService
 import com.androidfinalproject.hacktok.utils.FcmDiagnosticTool
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,25 +17,12 @@ import kotlinx.coroutines.launch
 import java.util.regex.Pattern
 import javax.inject.Inject
 
-// Define the sealed class for core authentication state
-sealed class AuthState {
-    object Initial : AuthState()
-    object Loading : AuthState() // Loading for the core auth process (e.g., Google sign-in)
-    data class Success(val isAdmin: Boolean) : AuthState()
-    object SignedOut : AuthState()
-    data class Error(val message: String) : AuthState()
-}
-
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val authRepository: AuthRepository,
+    private val authService: AuthService,
     private val fcmService: FcmService,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
-    // StateFlow for core authentication status
-    private val _authState = MutableStateFlow<AuthState>(AuthState.Initial)
-    val authState: StateFlow<AuthState> = _authState.asStateFlow()
-
     // StateFlow for UI elements state
     private val _uiState = MutableStateFlow(AuthUiState())
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
@@ -68,7 +55,7 @@ class AuthViewModel @Inject constructor(
 
             // Actions that trigger core auth logic
             is AuthAction.GoogleSignIn -> signInWithGoogle(action.idToken)
-            
+
             // Actions related to navigation or higher-level state (handle where appropriate)
             is AuthAction.ForgotPassword -> { /* Trigger navigation? */ }
             is AuthAction.OnLoginSuccess -> { /* Handled by observing _authState */ }
@@ -91,9 +78,31 @@ class AuthViewModel @Inject constructor(
     private fun toggleAuthMode() {
         _uiState.update { it.copy(isLoginMode = !it.isLoginMode, email = "", password = "", confirmPassword = "", emailError = null, passwordError = null, confirmPasswordError = null) }
     }
-    
+
     private fun updateLanguage(languageId: String) {
         _uiState.update { it.copy(language = languageId) }
+    }
+
+    fun resetAfterLogin() {
+        viewModelScope.launch {
+            _uiState.update {
+                AuthUiState(
+                    language = it.language,
+                    isLoginSuccess = false,
+                    isAdmin = false,
+                    email = "",
+                    password = "",
+                    confirmPassword = "",
+                    isLoginMode = true,
+                    emailError = null,
+                    passwordError = null,
+                    confirmPasswordError = null,
+                    mainError = null,
+                    isLoading = false,
+                    isFullInitial = true
+                )
+            }
+        }
     }
 
     private fun submitForm() {
@@ -114,123 +123,107 @@ class AuthViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true) }
             viewModelScope.launch {
                 try {
-                    val user = if (currentState.isLoginMode) {
-                        authRepository.signInWithEmail(currentState.email, currentState.password)
-                    } else {
-                        authRepository.createUserWithEmail(currentState.email, currentState.password)
-                    }
+                    if(currentState.isLoginMode){
+                        val user = authService.signInWithEmail(currentState.email, currentState.password)
+                        if (user != null) {
+                            val isAdmin = authService.isUserAdmin(user.uid)
+                            _uiState.update { it.copy(
+                                isLoginSuccess = true,
+                                isAdmin = isAdmin,
+                                isLoading = false
+                            )}
 
-                    if (user != null) {
-                        val isAdmin = authRepository.isUserAdmin(user.uid)
-                        _uiState.update { it.copy(
-                            isLoginSuccess = true,
-                            isAdmin = isAdmin,
-                            isLoading = false
-                        )}
-                        _authState.value = AuthState.Success(isAdmin = isAdmin)
-                        
-                        // Initialize FCM after login success
-                        initializeFcm()
+                            // Initialize FCM after login success
+                            initializeFcm()
+                        } else {
+                            _uiState.update { it.copy(isLoading = false, mainError = "Wrong Email or Password") }
+                        }
+                        return@launch
+                    }
+                    val res = authService.signUp(currentState.email, currentState.password)
+                    if(res == "Password changed successfully"){
+                        return@launch
                     } else {
-                        _uiState.update { it.copy(isLoading = false) }
-                        _authState.value = AuthState.Error(
-                            if (currentState.isLoginMode) "Sign in failed" else "Account creation failed"
-                        )
+                        _uiState.update { it.copy(isLoading = false, mainError = res) }
                     }
                 } catch (e: Exception) {
-                    _uiState.update { it.copy(isLoading = false) }
-                    _authState.value = AuthState.Error(e.message ?: "Authentication failed")
+                    _uiState.update { it.copy(isLoading = false, mainError = e.message ?: "Authentication failed") }
                 }
             }
         }
     }
-    
+
     // --- Methods modifying Core Auth State (_authState) ---
     private fun signInWithGoogle(idToken: String) {
         Log.d("AuthViewModel", "signInWithGoogle called with token: ${idToken.take(10)}...")
         viewModelScope.launch {
             try {
-                _authState.value = AuthState.Loading 
-                _uiState.update { it.copy(isLoading = true) } 
-                
-                val user = authRepository.signInWithGoogle(idToken)
+                _uiState.update { it.copy(isLoading = true) }
+
+                val user = authService.signInWithGoogle(idToken)
                 if (user != null) {
                     Log.d("AuthViewModel", "Firebase Sign-In successful. User: ${user.uid}, Email: ${user.email}")
-                    val isAdmin = authRepository.isUserAdmin(user.uid)
+                    val isAdmin = authService.isUserAdmin(user.uid)
                     Log.d("AuthViewModel", "User admin status: $isAdmin")
-                    
+
                     // First update UI state, then auth state
                     _uiState.update { it.copy(
                         isLoginSuccess = true,
                         isAdmin = isAdmin,
                         isLoading = false
                     )}
-                    
-                    // Important: Set auth state after UI state is updated
-                    _authState.value = AuthState.Success(isAdmin = isAdmin)
-                    Log.d("AuthViewModel", "Set AuthState to Success(isAdmin=$isAdmin)")
-                    
-                    // Initialize FCM after login success
                     initializeFcm()
+
+                    Log.d("AuthViewModel", "Set AuthState to Success(isAdmin=$isAdmin)")
                 } else {
                     Log.e("AuthViewModel", "Firebase Sign-In failed: User is null after repository call")
-                    _authState.value = AuthState.Error("Google Sign-In failed: User is null")
                     _uiState.update { it.copy(isLoading = false) }
                 }
             } catch (e: Exception) {
                 Log.e("AuthViewModel", "signInWithGoogle error", e)
-                _authState.value = AuthState.Error(e.message ?: "Unknown Google Sign-In error")
                 _uiState.update { it.copy(isLoading = false) }
             }
         }
     }
 
     private fun checkAuthState() {
-        val currentUser = authRepository.getCurrentUser()
-        if (currentUser != null) {
-             viewModelScope.launch {
-                // Consider showing loading state while checking admin status
-                // _authState.value = AuthState.Loading 
+        val currentUserId = authService.getCurrentUserIdSync()
+        if (currentUserId != null) {
+            viewModelScope.launch {
                 try {
-                    initializeFcm()
-                    val isAdmin = authRepository.isUserAdmin(currentUser.uid)
-                    _authState.value = AuthState.Success(isAdmin = isAdmin)
-
-                    // Initialize FCM for already logged-in user
+                    val isAdmin = authService.isUserAdmin(currentUserId)
+                    _uiState.update { it.copy(isLoading = false, isLoginSuccess = true, isAdmin = isAdmin) }
                 } catch (e: Exception) {
-                     _authState.value = AuthState.Error("Failed to check user status: ${e.message}")
+                    _uiState.update { it.copy(mainError = "Failed to check user status: ${e.message}") }
                 }
-             }
+            }
         } else {
-            _authState.value = AuthState.SignedOut
+            _uiState.update { it.copy(isLoading = false, isLoginSuccess = false, isFullInitial = true) }
         }
     }
-    
-    /**
-     * Initialize FCM token and start listening for notifications
-     */
+
     private fun initializeFcm() {
         Log.d("AuthViewModel", "Initializing FCM after successful login")
-        
+
         // First initialize the FCM service normally
         fcmService.initialize()
-        
+
         // Then run FCM diagnostic to ensure token is properly stored
         viewModelScope.launch {
             try {
                 // Wait a bit to allow normal initialization to finish
                 kotlinx.coroutines.delay(2000)
-                
+
                 // Run the diagnostic tool to verify and fix token issues
                 FcmDiagnosticTool.runDiagnostic(context)
-                
+
                 Log.d("AuthViewModel", "FCM diagnostic scheduled")
             } catch (e: Exception) {
                 Log.e("AuthViewModel", "Error scheduling FCM diagnostic", e)
             }
         }
     }
-    
+
     // --- Validation Methods --- (Keep as they are)
     private fun validateEmail(email: String): String? {
         return when {

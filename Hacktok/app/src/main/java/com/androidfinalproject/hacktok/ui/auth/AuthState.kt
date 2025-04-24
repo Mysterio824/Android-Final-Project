@@ -11,5 +11,7 @@ data class AuthUiState(
     val isLoading: Boolean = false,
     val language: String = "English (US)",
     val isLoginSuccess: Boolean = false,
-    val isAdmin: Boolean = false
+    val isAdmin: Boolean = false,
+    val isFullInitial: Boolean = false,
+    val mainError: String? = null,
 )

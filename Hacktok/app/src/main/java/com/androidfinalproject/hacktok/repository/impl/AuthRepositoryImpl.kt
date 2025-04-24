@@ -31,17 +31,6 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
     
-    override suspend fun isUserAdmin(userId: String): Boolean {
-        Log.d("AuthRepository", "Checking admin status for user: $userId")
-        return try {
-            val document = firestore.collection("users").document(userId).get().await()
-            document.getBoolean("isAdmin") ?: false
-        } catch (e: Exception) {
-            Log.e("AuthRepository", "Error checking admin status for $userId", e)
-            false
-        }
-    }
-    
     override suspend fun signOut() {
         Log.d("AuthRepository", "Signing out user")
         try {
@@ -73,21 +62,6 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun createUserWithEmail(email: String, password: String): FirebaseUser? {
-        Log.d("AuthRepository", "Attempting to create user with email: ${email.take(10)}...")
-        return try {
-            val authResult = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
-            authResult.user?.let {
-                Log.d("AuthRepository", "User created successfully. User: ${it.uid}")
-                checkAndCreateUserData(it)
-            }
-            authResult.user
-        } catch (e: Exception) {
-            Log.e("AuthRepository", "Failed to create user with email", e)
-            null
-        }
-    }
-    
     private suspend fun checkAndCreateUserData(user: FirebaseUser) {
         Log.d("AuthRepository", "Checking/Creating user data for: ${user.uid}")
         val userRef = firestore.collection("users").document(user.uid)
@@ -117,7 +91,6 @@ class AuthRepositoryImpl @Inject constructor(
                     "profileImage" to null,
                     "role" to "USER",
                     "username" to (user.displayName?.replace(" ", "") ?: "user${System.currentTimeMillis()}"),
-                    "videosCount" to 0
                 )
                 userRef.set(userData).await()
                 Log.d("AuthRepository", "Created new user data for: ${user.uid}")

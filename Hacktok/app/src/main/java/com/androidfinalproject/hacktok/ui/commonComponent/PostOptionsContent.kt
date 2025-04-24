@@ -48,7 +48,6 @@ fun PostOptionsContent(
         OptionItem(
             title = "Hide Post",
             icon = Icons.Default.VisibilityOff,
-            description = "See fewer posts like this",
             onClick = onDismiss
         )
 
@@ -56,7 +55,6 @@ fun PostOptionsContent(
             OptionItem(
                 title = "Report Post",
                 icon = Icons.Default.Report,
-                description = "This post concerns me",
                 onClick = withDismiss(onReport)
             )
         }
@@ -64,7 +62,6 @@ fun PostOptionsContent(
         OptionItem(
             title = "Save Post",
             icon = Icons.Default.Save,
-            description = "Add to your saved items",
             onClick = onDismiss
         )
 
