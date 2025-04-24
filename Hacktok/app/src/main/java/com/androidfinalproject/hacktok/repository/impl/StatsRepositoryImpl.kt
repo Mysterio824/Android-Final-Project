@@ -48,8 +48,21 @@ class StatisticsRepositoryImpl @Inject constructor(
                         createdAtField = "createdAt"
                     )
 
-                    // Calculate new users in period
-                    val newUsersInPeriod = userStatPoints.sumOf { it.count }
+                    // Calculate new users in period based on timeframe
+                    val newUsersInPeriod = when (timeframe) {
+                        Timeframe.DAY -> {
+                            val oneDayAgo = getDateBefore(endDate, Calendar.DAY_OF_MONTH, 1)
+                            countUsersInRange(snapshot.documents, oneDayAgo, endDate)
+                        }
+                        Timeframe.MONTH -> {
+                            val oneMonthAgo = getDateBefore(endDate, Calendar.MONTH, 1)
+                            countUsersInRange(snapshot.documents, oneMonthAgo, endDate)
+                        }
+                        Timeframe.YEAR -> {
+                            val oneYearAgo = getDateBefore(endDate, Calendar.YEAR, 1)
+                            countUsersInRange(snapshot.documents, oneYearAgo, endDate)
+                        }
+                    }
 
                     // Calculate percentage change
                     val userPercentChange = if (totalUsers > 0) {
@@ -82,6 +95,17 @@ class StatisticsRepositoryImpl @Inject constructor(
         }
     }
 
+    // Helper function to count users in a date range
+    private fun countUsersInRange(
+        users: List<com.google.firebase.firestore.DocumentSnapshot>,
+        startDate: Date,
+        endDate: Date
+    ): Int {
+        return users.count { doc ->
+            val createdAt = doc.getTimestamp("createdAt")?.toDate()
+            createdAt != null && createdAt >= startDate && createdAt <= endDate
+        }
+    }
 
     override fun observePostStatistics(
         timeframe: Timeframe,
@@ -349,8 +373,17 @@ class StatisticsRepositoryImpl @Inject constructor(
         // Khởi tạo các khoảng thời gian dựa trên timeframe
         val calendar = Calendar.getInstance()
         calendar.time = startDate
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+
         val endCalendar = Calendar.getInstance()
         endCalendar.time = endDate
+        endCalendar.set(Calendar.HOUR_OF_DAY, 23)
+        endCalendar.set(Calendar.MINUTE, 59)
+        endCalendar.set(Calendar.SECOND, 59)
+        endCalendar.set(Calendar.MILLISECOND, 999)
 
         while (calendar.time <= endCalendar.time) {
             val currentDate = calendar.time
@@ -359,26 +392,64 @@ class StatisticsRepositoryImpl @Inject constructor(
 
             when (timeframe) {
                 Timeframe.DAY -> calendar.add(Calendar.DAY_OF_MONTH, 1)
-                Timeframe.MONTH -> calendar.add(Calendar.MONTH, 1)
-                Timeframe.YEAR -> calendar.add(Calendar.YEAR, 1)
+                Timeframe.MONTH -> {
+                    calendar.add(Calendar.MONTH, 1)
+                    calendar.set(Calendar.DAY_OF_MONTH, 1)
+                }
+                Timeframe.YEAR -> {
+                    calendar.add(Calendar.YEAR, 1)
+                    calendar.set(Calendar.MONTH, 0)
+                    calendar.set(Calendar.DAY_OF_MONTH, 1)
+                }
             }
         }
 
         // Nhóm các mục theo ngày tạo
         for (document in documents) {
             val createdAt = document.getTimestamp(createdAtField)?.toDate()
-            if (createdAt != null && createdAt >= startDate && createdAt <= endDate) {
-                val label = dateFormat.format(createdAt)
-                statPointsMap[label]?.add(createdAt)
+            if (createdAt != null) {
+                val docCalendar = Calendar.getInstance()
+                docCalendar.time = createdAt
+                
+                // Normalize the document date to match the timeframe
+                when (timeframe) {
+                    Timeframe.DAY -> {
+                        docCalendar.set(Calendar.HOUR_OF_DAY, 0)
+                        docCalendar.set(Calendar.MINUTE, 0)
+                        docCalendar.set(Calendar.SECOND, 0)
+                        docCalendar.set(Calendar.MILLISECOND, 0)
+                    }
+                    Timeframe.MONTH -> {
+                        docCalendar.set(Calendar.DAY_OF_MONTH, 1)
+                        docCalendar.set(Calendar.HOUR_OF_DAY, 0)
+                        docCalendar.set(Calendar.MINUTE, 0)
+                        docCalendar.set(Calendar.SECOND, 0)
+                        docCalendar.set(Calendar.MILLISECOND, 0)
+                    }
+                    Timeframe.YEAR -> {
+                        docCalendar.set(Calendar.MONTH, 0)
+                        docCalendar.set(Calendar.DAY_OF_MONTH, 1)
+                        docCalendar.set(Calendar.HOUR_OF_DAY, 0)
+                        docCalendar.set(Calendar.MINUTE, 0)
+                        docCalendar.set(Calendar.SECOND, 0)
+                        docCalendar.set(Calendar.MILLISECOND, 0)
+                    }
+                }
+                
+                val normalizedDate = docCalendar.time
+                if (normalizedDate >= startDate && normalizedDate <= endDate) {
+                    val label = dateFormat.format(normalizedDate)
+                    statPointsMap[label]?.add(normalizedDate)
+                }
             }
         }
 
-        // Chuyển đổi sang danh sách StatPoint
+        // Convert to StatPoint list
         return statPointsMap.map { (label, dates) ->
             StatPoint(
                 label = label,
                 count = dates.size,
-                date = if (dates.isNotEmpty()) dates.first() else startDate
+                date = dates.firstOrNull() ?: startDate
             )
         }.sortedBy { it.date }
     }

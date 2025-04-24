@@ -65,10 +65,25 @@ class PostStatisticsViewModel : ViewModel() {
     }
 
     private fun updateDateRange(startDate: Long, endDate: Long) {
+        val calendar = Calendar.getInstance()
+        calendar.timeInMillis = startDate
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        val normalizedStartDate = calendar.time
+
+        calendar.timeInMillis = endDate
+        calendar.set(Calendar.HOUR_OF_DAY, 23)
+        calendar.set(Calendar.MINUTE, 59)
+        calendar.set(Calendar.SECOND, 59)
+        calendar.set(Calendar.MILLISECOND, 999)
+        val normalizedEndDate = calendar.time
+
         _state.update {
             it.copy(
-                startDate = Date(startDate),
-                endDate = Date(endDate)
+                startDate = normalizedStartDate,
+                endDate = normalizedEndDate
             )
         }
         loadPostStatistics()

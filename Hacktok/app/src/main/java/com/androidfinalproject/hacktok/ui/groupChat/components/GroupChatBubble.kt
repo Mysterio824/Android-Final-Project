@@ -26,6 +26,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.androidfinalproject.hacktok.model.Message
+import java.text.SimpleDateFormat
+import java.util.*
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -98,7 +100,7 @@ fun GroupChatBubble(
                 if (showTime) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = message.createdAt.toString(),
+                        text = formatTimestamp(message.createdAt),
                         color = timeColor,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Light
@@ -129,5 +131,21 @@ fun GroupChatBubble(
                 )
             }
         }
+    }
+}
+
+private fun formatTimestamp(date: Date): String {
+    val now = Date()
+    val diffInMillis = now.time - date.time
+    val diffInMinutes = diffInMillis / (1000 * 60)
+    val diffInHours = diffInMinutes / 60
+    val diffInDays = diffInHours / 24
+
+    return when {
+        diffInMinutes < 1 -> "Just now"
+        diffInMinutes < 60 -> "$diffInMinutes min ago"
+        diffInHours < 24 -> "$diffInHours h ago"
+        diffInDays < 7 -> "$diffInDays d ago"
+        else -> SimpleDateFormat("MMM d, yyyy", Locale.getDefault()).format(date)
     }
 }
