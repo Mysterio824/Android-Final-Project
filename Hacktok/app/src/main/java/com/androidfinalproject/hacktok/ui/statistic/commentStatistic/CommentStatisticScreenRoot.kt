@@ -2,6 +2,7 @@ package com.androidfinalproject.hacktok.ui.statistic.commentStatistic
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.androidfinalproject.hacktok.ui.statistic.postStatistic.PostStatisticsAction
 import com.androidfinalproject.hacktok.ui.statistic.postStatistic.PostStatisticsScreen
@@ -9,7 +10,7 @@ import com.androidfinalproject.hacktok.ui.statistic.postStatistic.PostStatistics
 
 @Composable
 fun CommentStatisticsScreenRoot (
-    viewModel: CommentStatisticsViewModel,
+    viewModel: CommentStatisticsViewModel= hiltViewModel(),
     onNavigateBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()

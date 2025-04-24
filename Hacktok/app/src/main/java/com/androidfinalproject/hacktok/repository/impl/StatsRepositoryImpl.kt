@@ -146,11 +146,39 @@ class StatisticsRepositoryImpl @Inject constructor(
                         createdAtField = "createdAt"
                     )
 
-                    // Tính số lượng bài viết mới trong khoảng thời gian
-                    val newPostsInPeriod = postStatPoints.sumOf { it.count }
-                    val newBannedPostsInPeriod = bannedPostStatPoints.sumOf { it.count }
+                    // Calculate new posts in period based on timeframe
+                    val newPostsInPeriod = when (timeframe) {
+                        Timeframe.DAY -> {
+                            val oneDayAgo = getDateBefore(endDate, Calendar.DAY_OF_MONTH, 1)
+                            countPostsInRange(normalPosts, oneDayAgo, endDate)
+                        }
+                        Timeframe.MONTH -> {
+                            val oneMonthAgo = getDateBefore(endDate, Calendar.MONTH, 1)
+                            countPostsInRange(normalPosts, oneMonthAgo, endDate)
+                        }
+                        Timeframe.YEAR -> {
+                            val oneYearAgo = getDateBefore(endDate, Calendar.YEAR, 1)
+                            countPostsInRange(normalPosts, oneYearAgo, endDate)
+                        }
+                    }
 
-                    // Tính phần trăm thay đổi
+                    // Calculate new banned posts in period based on timeframe
+                    val newBannedPostsInPeriod = when (timeframe) {
+                        Timeframe.DAY -> {
+                            val oneDayAgo = getDateBefore(endDate, Calendar.DAY_OF_MONTH, 1)
+                            countPostsInRange(bannedPosts, oneDayAgo, endDate)
+                        }
+                        Timeframe.MONTH -> {
+                            val oneMonthAgo = getDateBefore(endDate, Calendar.MONTH, 1)
+                            countPostsInRange(bannedPosts, oneMonthAgo, endDate)
+                        }
+                        Timeframe.YEAR -> {
+                            val oneYearAgo = getDateBefore(endDate, Calendar.YEAR, 1)
+                            countPostsInRange(bannedPosts, oneYearAgo, endDate)
+                        }
+                    }
+
+                    // Calculate percentage changes
                     val postPercentChange = if (totalPosts - totalBannedPosts > 0) {
                         (newPostsInPeriod.toFloat() / (totalPosts - totalBannedPosts)) * 100
                     } else {
@@ -188,6 +216,18 @@ class StatisticsRepositoryImpl @Inject constructor(
             Log.e(TAG, "Exception in observePostStatistics", e)
             trySend(Result.failure(e))
             close(e)
+        }
+    }
+
+    // Helper function to count posts in a date range
+    private fun countPostsInRange(
+        posts: List<com.google.firebase.firestore.DocumentSnapshot>,
+        startDate: Date,
+        endDate: Date
+    ): Int {
+        return posts.count { doc ->
+            val createdAt = doc.getTimestamp("createdAt")?.toDate()
+            createdAt != null && createdAt >= startDate && createdAt <= endDate
         }
     }
 

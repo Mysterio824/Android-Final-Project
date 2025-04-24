@@ -68,13 +68,11 @@ fun StatisticsScreen(
 
                 1 ->
                     PostStatisticsScreenRoot(
-                    viewModel = PostStatisticsViewModel(),
                     onNavigateBack = { onAction(StatisticsAction.NavigateBack) }
                 )
 
                 2 ->
                     CommentStatisticsScreenRoot(
-                    viewModel = CommentStatisticsViewModel(),
                     onNavigateBack = { onAction(StatisticsAction.NavigateBack) }
                 )
             }
