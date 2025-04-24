@@ -4,7 +4,7 @@ import com.androidfinalproject.hacktok.model.Report
 import com.androidfinalproject.hacktok.model.enums.ReportType
 
 sealed class ReportManagementAction {
-    data class BanUser(val userId: String, val isPermanent: Boolean, val durationDays: Int?) : ReportManagementAction()
+    data class BanUser(val userId: String, val isPermanent: Boolean, val durationDays: Int?, val reason: String) : ReportManagementAction()
     data class ResolveReport(val reportId: String, val resolutionNote: String) : ReportManagementAction()
     data class OpenBanUserDialog(val report: Report) : ReportManagementAction()
     object CloseBanUserDialog : ReportManagementAction()

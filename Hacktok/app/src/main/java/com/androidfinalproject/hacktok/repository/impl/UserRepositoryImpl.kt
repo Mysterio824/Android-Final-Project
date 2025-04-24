@@ -12,6 +12,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.QuerySnapshot
+import java.util.Calendar
+import java.util.Date
 import java.util.LinkedList
 
 @Singleton
@@ -368,6 +370,38 @@ class UserRepositoryImpl @Inject constructor(
             } catch (e: Exception) {
                 Log.e(TAG, "Error clearing search history", e)
             }
+        }
+    }
+
+    override suspend fun banUser(userId: String, reason: String, duration: Long) {
+        try {
+            val user = getUserById(userId)
+            if (user == null) {
+                Log.e(TAG, "Cannot ban user: User $userId not found")
+                return
+            }
+
+            val startDate = Date()
+            val endDate = if (duration == Long.MAX_VALUE) {
+                null // Permanent ban
+            } else {
+                Calendar.getInstance().apply {
+                    time = startDate
+                    add(Calendar.DAY_OF_YEAR, duration.toInt())
+                }.time
+            }
+
+            val banInfo = mapOf(
+                "isBanned" to true,
+                "reason" to reason,
+                "startDate" to startDate,
+                "endDate" to endDate
+            )
+
+            updateUser(userId, mapOf("banInfo" to banInfo))
+            Log.d(TAG, "User $userId banned successfully")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error banning user $userId", e)
         }
     }
 }

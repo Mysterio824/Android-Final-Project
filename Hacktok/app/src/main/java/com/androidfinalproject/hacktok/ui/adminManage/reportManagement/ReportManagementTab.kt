@@ -10,6 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.androidfinalproject.hacktok.ui.adminManage.reportManagement.component.*
 
@@ -104,10 +105,10 @@ fun ReportManagementTab(
     // Ban User Dialog
     if (state.isBanUserDialogOpen && state.selectedReport != null) {
         BanUserDialog(
-            userId = state.selectedReport!!.targetId,
+            userId = state.selectedReport.targetId,
             onDismiss = { onAction(ReportManagementAction.CloseBanUserDialog) },
-            onBanUser = { userId, isPermanent, durationDays ->
-                onAction(ReportManagementAction.BanUser(userId, isPermanent, durationDays))
+            onBanUser = { userId, isPermanent, durationDays, reason ->
+                onAction(ReportManagementAction.BanUser(userId, isPermanent, durationDays, reason))
             }
         )
     }
@@ -122,4 +123,13 @@ fun ReportManagementTab(
             }
         )
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ReportManagementTabPreview() {
+    ReportManagementTab(
+        state = ReportManagementState(),
+        onAction = {}
+    )
 }

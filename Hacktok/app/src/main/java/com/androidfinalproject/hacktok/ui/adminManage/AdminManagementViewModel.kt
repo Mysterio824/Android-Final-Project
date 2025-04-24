@@ -1,5 +1,6 @@
 package com.androidfinalproject.hacktok.ui.adminManage
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,6 +15,7 @@ class AdminManagementViewModel : ViewModel() {
         when (action) {
             is AdminManagementAction.SelectTab -> {
                 _state.update { currentState ->
+                    Log.d("TAB", action.tabIndex)
                     currentState.copy(selectedTab = action.tabIndex)
                 }
             }

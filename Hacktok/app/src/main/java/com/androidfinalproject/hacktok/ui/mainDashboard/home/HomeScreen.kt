@@ -157,7 +157,7 @@ fun HomeScreen(
                                     onComment = { onAction(HomeScreenAction.OnPostClick(post.id!!)) },
                                     onShare = { onAction(HomeScreenAction.UpdateSharePost(post)) },
                                     onOptionsClick = { selectPost = post },
-                                    currentId = state.user!!.id!!
+                                    currentId = state.user?.id ?: ""
                                 )
                             }
                             Spacer(modifier = Modifier.height(8.dp))
