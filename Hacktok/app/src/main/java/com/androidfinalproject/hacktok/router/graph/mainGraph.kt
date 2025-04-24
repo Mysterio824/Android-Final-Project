@@ -33,6 +33,7 @@ import com.androidfinalproject.hacktok.ui.changePassword.ChangePasswordScreenRoo
 import com.androidfinalproject.hacktok.ui.chatDetail.ChatDetailScreenRoot
 import com.androidfinalproject.hacktok.ui.newPost.NewPostScreenRoot
 import com.androidfinalproject.hacktok.ui.storydetail.StoryDetailScreenRoot
+import com.androidfinalproject.hacktok.ui.secretCrush.SecretCrushScreenRoot
 
 fun NavGraphBuilder.mainNavigation(navController: NavController) {
     navigation(
@@ -387,6 +388,19 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
                 onNavigateBack = {
                     navController.popBackStack()
                 }
+            )
+        }
+
+        // Secret Crush Screen
+        composable(
+            route = MainRoute.SecretCrush.route,
+            enterTransition = { slideFadeInFromRight() },
+            exitTransition = { slideFadeOutToLeft() }
+        ) {
+            SecretCrushScreenRoot(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
             )
         }
 

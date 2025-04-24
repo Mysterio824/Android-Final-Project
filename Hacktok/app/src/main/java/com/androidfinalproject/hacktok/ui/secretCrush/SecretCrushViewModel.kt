@@ -1,4 +1,4 @@
-package com.androidfinalproject.hacktok.ui.secretcrush
+package com.androidfinalproject.hacktok.ui.secretCrush
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel

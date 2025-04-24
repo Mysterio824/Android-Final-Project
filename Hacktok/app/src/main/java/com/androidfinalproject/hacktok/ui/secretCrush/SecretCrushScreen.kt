@@ -8,15 +8,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,6 +23,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -33,6 +32,9 @@ import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.User
+import com.androidfinalproject.hacktok.ui.secretCrush.SecretCrushAction
+import com.androidfinalproject.hacktok.ui.secretCrush.SecretCrushState
+import com.androidfinalproject.hacktok.ui.secretCrush.SelectedCrush
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,9 +46,20 @@ fun SecretCrushScreen(
     var showMessageDialog by remember { mutableStateOf<User?>(null) }
     var messageText by remember { mutableStateOf("") }
     var showRemoveConfirmation by remember { mutableStateOf<String?>(null) }
+    var showUsersList by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
 
     LaunchedEffect(Unit) {
         onAction(SecretCrushAction.LoadCrushData)
+    }
+
+    val filteredUsers = if (searchQuery.text.isEmpty()) {
+        state.availableUsers
+    } else {
+        state.availableUsers.filter {
+            it.username?.contains(searchQuery.text, ignoreCase = true) ?: false ||
+                    it.fullName?.contains(searchQuery.text, ignoreCase = true) ?: false
+        }
     }
 
     Scaffold(
@@ -187,7 +200,7 @@ fun SecretCrushScreen(
                                         shape = RoundedCornerShape(8.dp)
                                     )
                                     .background(MaterialTheme.colorScheme.surface)
-                                    .clickable { onAction(SecretCrushAction.NavigateToSelectCrush) },
+                                    .clickable { showUsersList = true },
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
@@ -236,16 +249,96 @@ fun SecretCrushScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-                Button(
-                    onClick = { onAction(SecretCrushAction.NavigateToSelectCrush) },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = state.selectedCrushes.size < 5
+                // User selection section - shown when "Add" is clicked
+                AnimatedVisibility(
+                    visible = showUsersList,
+                    enter = fadeIn(animationSpec = tween(300)),
+                    exit = fadeOut(animationSpec = tween(300))
                 ) {
-                    Icon(Icons.Default.Favorite, contentDescription = "Select crush")
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Choose Your Secret Crush")
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                    ) {
+                        // Search bar with close button
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            OutlinedTextField(
+                                value = searchQuery,
+                                onValueChange = { searchQuery = it },
+                                modifier = Modifier
+                                    .weight(1f),
+                                placeholder = { Text("Search users") },
+                                leadingIcon = {
+                                    Icon(Icons.Default.Search, contentDescription = "Search")
+                                },
+                                singleLine = true
+                            )
+
+                            IconButton(onClick = { showUsersList = false }) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Close user selection"
+                                )
+                            }
+                        }
+
+                        // Users list
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(filteredUsers) { user ->
+                                // Skip users that are already selected
+                                if (state.selectedCrushes.none { it.user.id == user.id }) {
+                                    UserListItem(
+                                        user = user,
+                                        onUserClick = {
+                                            showMessageDialog = user
+                                        }
+                                    )
+                                }
+                            }
+
+                            if (filteredUsers.isEmpty() ||
+                                filteredUsers.all { user -> state.selectedCrushes.any { it.user.id == user.id } }) {
+                                item {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(32.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "No available users found",
+                                            style = MaterialTheme.typography.bodyLarge
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Show button only when user list is not visible
+                if (!showUsersList) {
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    Button(
+                        onClick = { showUsersList = true },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = state.selectedCrushes.size < 5
+                    ) {
+                        Icon(Icons.Default.Favorite, contentDescription = "Select crush")
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Choose Your Secret Crush")
+                    }
                 }
             }
         }
@@ -332,6 +425,51 @@ fun SecretCrushScreen(
     }
 }
 
+@Composable
+fun UserListItem(
+    user: User,
+    onUserClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onUserClick)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // User avatar
+            AsyncImage(
+                model = user.profileImage,
+                contentDescription = "User avatar",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(50.dp)
+                    .clip(CircleShape)
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            // User info
+            Column {
+                Text(
+                    text = user.fullName ?: "User",
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                Text(
+                    text = "@${user.username ?: ""}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun SecretCrushScreenPreview() {
@@ -346,9 +484,10 @@ fun SecretCrushScreenPreview() {
                     ),
                     SelectedCrush(
                         user = MockData.mockUsers[2],
-                        message = null.toString()
+                        message = null
                     )
                 ),
+                availableUsers = MockData.mockUsers,
                 peopleWhoLikeYou = 3,
                 isLoading = false
             ),
@@ -365,6 +504,7 @@ fun SecretCrushScreenEmptyPreview() {
             state = SecretCrushState(
                 currentUser = MockData.mockUsers[0],
                 selectedCrushes = emptyList(),
+                availableUsers = MockData.mockUsers,
                 peopleWhoLikeYou = 0,
                 isLoading = false
             ),
@@ -391,19 +531,18 @@ fun SecretCrushScreenLoadingPreview() {
 fun SecretCrushScreenFullPreview() {
     // Create a list of 5 selected crushes using the mock users
     val selectedCrushes = MockData.mockUsers.take(5).mapIndexed { index, user ->
-        (if (index % 2 == 0) "Hey there! I like you!" else null)?.let {
-            SelectedCrush(
-                user = user,
-                message = it
-            )
-        }
+        SelectedCrush(
+            user = user,
+            message = if (index % 2 == 0) "Hey there! I like you!" else null
+        )
     }
 
     MainAppTheme {
         SecretCrushScreen(
             state = SecretCrushState(
                 currentUser = MockData.mockUsers[0],
-                selectedCrushes = selectedCrushes as List<SelectedCrush>,
+                selectedCrushes = selectedCrushes,
+                availableUsers = MockData.mockUsers,
                 peopleWhoLikeYou = 7,
                 isLoading = false
             ),
