@@ -1,11 +1,9 @@
 package com.androidfinalproject.hacktok.ui.secretCrush
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.User
-import com.androidfinalproject.hacktok.repository.AuthRepository
-import com.androidfinalproject.hacktok.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,14 +12,14 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class SecretCrushViewModel @Inject constructor(
-    private val authRepository: AuthRepository,
-    private val userRepository: UserRepository,
-    application: Application
-) : AndroidViewModel(application) {
+class SecretCrushViewModel @Inject constructor() : ViewModel() {
 
     private val _state = MutableStateFlow(SecretCrushState())
     val state = _state.asStateFlow()
+
+    init {
+        loadCrushData()
+    }
 
     fun onAction(action: SecretCrushAction) {
         when (action) {
@@ -38,24 +36,16 @@ class SecretCrushViewModel @Inject constructor(
             _state.update { it.copy(isLoading = true) }
 
             try {
-                val firebaseUser = authRepository.getCurrentUser()
-                if (firebaseUser == null) {
-                    _state.update { it.copy(error = "Not authenticated", isLoading = false) }
-                    return@launch
-                }
-
-                // Convert FirebaseUser to our User model
-                val currentUser = User.fromFirebaseUser(firebaseUser)
-
-                // TODO: Load actual crush data and like count from backend
-                // Placeholder for now - this will be implemented in backend later
+                // Using mock data for now
+                val currentUser = MockData.mockUsers[0]
+                val availableUsers = MockData.mockUsers.drop(1) // All users except current user
 
                 _state.update {
                     it.copy(
                         currentUser = currentUser,
+                        availableUsers = availableUsers,
                         isLoading = false,
-                        // Placeholder data - will be replaced with actual API calls
-                        peopleWhoLikeYou = 0,
+                        peopleWhoLikeYou = 3, // Mock number
                         selectedCrushes = emptyList()
                     )
                 }
@@ -91,8 +81,6 @@ class SecretCrushViewModel @Inject constructor(
                 selectedCrushes = it.selectedCrushes + SelectedCrush(user)
             )
         }
-
-        // TODO: Update the selection in the backend
     }
 
     private fun unselectUser(userId: String) {
@@ -101,12 +89,20 @@ class SecretCrushViewModel @Inject constructor(
                 selectedCrushes = it.selectedCrushes.filter { crush -> crush.user.id != userId }
             )
         }
-
-        // TODO: Update the unselection in the backend
     }
 
     private fun sendCrushMessage(userId: String, message: String) {
-        // TODO: Send message to backend
-        // This is just a placeholder as backend will be implemented later
+        // Just update the state for now
+        _state.update { state ->
+            state.copy(
+                selectedCrushes = state.selectedCrushes.map { crush ->
+                    if (crush.user.id == userId) {
+                        crush.copy(message = message)
+                    } else {
+                        crush
+                    }
+                }
+            )
+        }
     }
 }

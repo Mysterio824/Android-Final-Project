@@ -95,6 +95,6 @@ sealed interface MainRoute : Route {
 
     @Serializable
     data object SelectCrush : MainRoute {
-        override val route = "select_crush"
+        override val route = "select_crusch"
     }
 }

@@ -29,15 +29,17 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import com.androidfinalproject.hacktok.router.routes.AuthRoute
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.androidfinalproject.hacktok.ui.changePassword.ChangePasswordScreenRoot
 import com.androidfinalproject.hacktok.ui.chatDetail.ChatDetailScreenRoot
 import com.androidfinalproject.hacktok.ui.newPost.NewPostScreenRoot
 import com.androidfinalproject.hacktok.ui.storydetail.StoryDetailScreenRoot
 import com.androidfinalproject.hacktok.ui.secretCrush.SecretCrushScreenRoot
+import com.androidfinalproject.hacktok.ui.secretCrush.SecretCrushViewModel
 
 fun NavGraphBuilder.mainNavigation(navController: NavController) {
     navigation(
-        startDestination = MainRoute.Dashboard.route,
+        startDestination = MainRoute.SecretCrush.route,
         route = MainRoute.Graph.route
     ) {
         // Dashboard Screen
@@ -400,7 +402,7 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
             SecretCrushScreenRoot(
                 onNavigateBack = {
                     navController.popBackStack()
-                },
+                }
             )
         }
 

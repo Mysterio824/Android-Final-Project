@@ -1,4 +1,4 @@
-package com.androidfinalproject.hacktok.ui.secretcrush
+package com.androidfinalproject.hacktok.ui.secretCrush
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
