@@ -25,12 +25,13 @@ data class User(
     @PropertyName("followerCount") val followerCount: Int = 0,
     @PropertyName("followingCount") val followingCount: Int = 0,
     @PropertyName("searchHistory") val searchHistory: List<String> = emptyList(),
+    @PropertyName("banInfo") val banInfo: BanInfo? = null,
     val videosCount: Int = 0
 ) {
     // Constructor không tham số cho Firestore
     constructor() : this(
         null, null, "", null, Date(), true, UserRole.USER, null, null,
-        PrivacySettings(), null, "en", emptyList(), emptyList(), emptyList(), emptyList(), 0, 0, emptyList(), 0
+        PrivacySettings(), null, "en", emptyList(), emptyList(), emptyList(), emptyList(), 0, 0, emptyList()
     )
 
     companion object {
@@ -55,8 +56,13 @@ data class User(
                 followerCount = 0,
                 followingCount = 0,
                 searchHistory = emptyList(),
-                videosCount = 0
+                videosCount = 0,
             )
         }
+    }
+
+    fun isCurrentlyBanned(): Boolean {
+        val now = Date()
+        return banInfo?.isBanned == true && (banInfo.endDate == null || now.before(banInfo.endDate))
     }
 }

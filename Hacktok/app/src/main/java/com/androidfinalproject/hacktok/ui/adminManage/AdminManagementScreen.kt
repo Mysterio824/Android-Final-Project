@@ -3,6 +3,7 @@ package com.androidfinalproject.hacktok.ui.adminManage
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -13,33 +14,51 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.androidfinalproject.hacktok.ui.adminManage.postManagement.PostManagementViewModel
+import com.androidfinalproject.hacktok.ui.adminManage.reportManagement.ReportManagementTab
+import com.androidfinalproject.hacktok.ui.adminManage.reportManagement.ReportManagementViewModel
 import com.androidfinalproject.hacktok.ui.adminManage.userManagement.UserManagementScreen
 import com.androidfinalproject.hacktok.ui.adminManage.userManagement.UserManagementViewModel
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
+import kotlinx.coroutines.selects.select
 
 @Composable
 fun AdminManagementScreen(
+    modifier: Modifier = Modifier,
     navController: NavController,
-    modifier: Modifier = Modifier
+    onAction: (AdminManagementAction) -> Unit = {},
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
     val userManagementViewModel: UserManagementViewModel = hiltViewModel()
+    val postManagementViewModel: PostManagementViewModel = hiltViewModel()
+    val reportManagementViewModel: ReportManagementViewModel = hiltViewModel()
+
+    val reportState by reportManagementViewModel.state.collectAsState()
 
     Column(modifier = modifier.fillMaxSize()) {
         TabRow(selectedTabIndex = selectedTab) {
             Tab(
                 selected = selectedTab == 0,
-                onClick = { selectedTab = 0 },
+                onClick = {
+                    selectedTab = 0
+                    onAction(AdminManagementAction.SelectTab("Users"))
+                },
                 text = { Text("User Management") }
             )
             Tab(
                 selected = selectedTab == 1,
-                onClick = { selectedTab = 1 },
+                onClick = {
+                    selectedTab = 1
+                    onAction(AdminManagementAction.SelectTab("Content"))
+                },
                 text = { Text("Content Management") }
             )
             Tab(
                 selected = selectedTab == 2,
-                onClick = { selectedTab = 2 },
+                onClick = {
+                    selectedTab = 2
+                    onAction(AdminManagementAction.SelectTab("Reports"))
+                },
                 text = { Text("Reports") }
             )
         }
@@ -52,8 +71,13 @@ fun AdminManagementScreen(
                     navController.navigate("userDetail/$userId")
                 }
             )
-            1 -> ContentManagementScreen()
-            2 -> ReportsScreen()
+            1 -> ContentManagementScreen(
+
+            )
+            2 -> ReportManagementTab(
+                state = reportState,
+                onAction = { action -> reportManagementViewModel.onAction(action) }
+            )
         }
     }
 }

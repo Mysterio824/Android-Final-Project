@@ -1,5 +1,5 @@
 package com.androidfinalproject.hacktok.ui.adminManage
 
 data class AdminManagementState(
-    val selectedTab: String = "Posts",
+    val selectedTab: String = "Users",
 )

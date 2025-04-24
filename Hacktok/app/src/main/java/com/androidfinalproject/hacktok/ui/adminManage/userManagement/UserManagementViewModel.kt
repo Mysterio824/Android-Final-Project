@@ -41,6 +41,7 @@ class UserManagementViewModel @Inject constructor(
             try {
                 // Implement loading all users from repository
                 // For now, using a placeholder
+                allUsers = userRepository.getAllUsers()
                 _userManagementState.value = UserManagementUiState.Success(allUsers)
             } catch (e: Exception) {
                 _userManagementState.value = UserManagementUiState.Error(e.message ?: "Unknown error occurred")

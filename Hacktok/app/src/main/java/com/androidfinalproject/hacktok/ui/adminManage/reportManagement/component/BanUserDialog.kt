@@ -24,10 +24,11 @@ import androidx.compose.ui.unit.dp
 fun BanUserDialog(
     userId: String,
     onDismiss: () -> Unit,
-    onBanUser: (String, Boolean, Int?) -> Unit
+    onBanUser: (userId: String, isPermanent: Boolean, durationDays: Int?, reason: String) -> Unit
 ) {
     var isPermanent by remember { mutableStateOf(false) }
     var banDuration by remember { mutableStateOf("7") }
+    var banReason by remember { mutableStateOf("") }
     var showError by remember { mutableStateOf(false) }
 
     AlertDialog(
@@ -38,9 +39,7 @@ fun BanUserDialog(
                 Text("User ID: $userId")
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(
                         checked = isPermanent,
                         onCheckedChange = { isPermanent = it }
@@ -66,18 +65,32 @@ fun BanUserDialog(
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
+
+                Spacer(modifier = Modifier.height(12.dp))
+                OutlinedTextField(
+                    value = banReason,
+                    onValueChange = { banReason = it },
+                    label = { Text("Reason for Ban") },
+                    modifier = Modifier.fillMaxWidth(),
+                    maxLines = 3
+                )
             }
         },
         confirmButton = {
             TextButton(
                 onClick = {
+                    if (banReason.isBlank()) {
+                        showError = true
+                        return@TextButton
+                    }
+
                     if (isPermanent) {
-                        onBanUser(userId, true, null)
+                        onBanUser(userId, true, null, banReason.trim())
                     } else {
                         try {
                             val days = banDuration.toInt()
                             if (days > 0) {
-                                onBanUser(userId, false, days)
+                                onBanUser(userId, false, days, banReason.trim())
                             } else {
                                 showError = true
                             }
