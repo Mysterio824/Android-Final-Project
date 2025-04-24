@@ -1,5 +1,6 @@
 package com.androidfinalproject.hacktok.ui.statistic.postStatistic
 
+import com.androidfinalproject.hacktok.model.Timeframe
 import java.util.Date
 
 data class PostStatisticsState(

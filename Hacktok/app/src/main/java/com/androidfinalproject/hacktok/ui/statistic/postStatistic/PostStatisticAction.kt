@@ -1,5 +1,7 @@
 package com.androidfinalproject.hacktok.ui.statistic.postStatistic
 
+import com.androidfinalproject.hacktok.model.Timeframe
+
 sealed class PostStatisticsAction {
     object LoadPostStatistics : PostStatisticsAction()
     data class SelectTimeframe(val timeframe: Timeframe) : PostStatisticsAction()
@@ -7,10 +9,6 @@ sealed class PostStatisticsAction {
     object RefreshData : PostStatisticsAction()
     data class ToggleDataType(val dataType: PostDataType) : PostStatisticsAction()
     object NavigateBack : PostStatisticsAction()
-}
-
-enum class Timeframe {
-    DAY, MONTH, YEAR
 }
 
 enum class PostDataType {

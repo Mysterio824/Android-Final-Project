@@ -1,32 +1,34 @@
 package com.androidfinalproject.hacktok.repository
 
 import com.androidfinalproject.hacktok.model.Stats
-import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.tasks.await
+import com.androidfinalproject.hacktok.model.Timeframe
+import kotlinx.coroutines.flow.Flow
+import java.util.Date
 
-class StatsRepository {
-    private val db = FirebaseFirestore.getInstance()
-    private val collection = db.collection("stats")
+interface StatisticsRepository {
+    fun observeUserStatistics(
+        timeframe: Timeframe,
+        startDate: Date,
+        endDate: Date
+    ): Flow<Result<Stats>>
 
-    // Thêm hoặc cập nhật thống kê
-    suspend fun upsertStats(stats: Stats) {
-        if (stats.id == null) {
-            val documentRef = collection.add(stats).await()
-            collection.document(documentRef.id).update("id", documentRef.id).await()
-        } else {
-            collection.document(stats.id).set(stats).await()
-        }
-    }
+    fun observePostStatistics(
+        timeframe: Timeframe,
+        startDate: Date,
+        endDate: Date,
+        includeBanned: Boolean = true
+    ): Flow<Result<Stats>>
 
-    // Lấy thống kê theo ID
-    suspend fun getStats(statsId: String): Stats? {
-        val snapshot = collection.document(statsId).get().await()
-        return snapshot.toObject(Stats::class.java)
-    }
+    fun observeCommentStatistics(
+        timeframe: Timeframe,
+        startDate: Date,
+        endDate: Date,
+        includeBanned: Boolean = true
+    ): Flow<Result<Stats>>
 
-    // Lấy thống kê theo ngày
-    suspend fun getStatsByDate(date: String): Stats? {
-        val snapshot = collection.document(date).get().await()
-        return snapshot.toObject(Stats::class.java)
-    }
+    fun observeAllStatistics(
+        timeframe: Timeframe,
+        startDate: Date,
+        endDate: Date
+    ): Flow<Result<Stats>>
 }

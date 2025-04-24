@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.androidfinalproject.hacktok.ui.statistic.commentStatistic.CommentStatisticsScreenRoot
 import com.androidfinalproject.hacktok.ui.statistic.commentStatistic.CommentStatisticsViewModel
 import com.androidfinalproject.hacktok.ui.statistic.postStatistic.PostStatisticsScreenRoot
@@ -62,7 +63,6 @@ fun StatisticsScreen(
             when (state.selectedTab) {
                 0 ->
                     UserStatisticsScreenRoot(
-                        viewModel = UserStatisticsViewModel(),
                         onNavigateBack = { onAction(StatisticsAction.NavigateBack) }
                     )
 

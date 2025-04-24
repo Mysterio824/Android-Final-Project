@@ -6,7 +6,6 @@ import com.androidfinalproject.hacktok.model.enums.UserRole
 import com.androidfinalproject.hacktok.ui.statistic.postStatistic.PostDataType
 import com.androidfinalproject.hacktok.ui.statistic.postStatistic.PostStatPoint
 import com.androidfinalproject.hacktok.ui.statistic.postStatistic.PostStatisticsState
-import com.androidfinalproject.hacktok.ui.statistic.userStatistic.Timeframe
 import com.androidfinalproject.hacktok.ui.statistic.userStatistic.UserStatPoint
 import com.androidfinalproject.hacktok.ui.statistic.userStatistic.UserStatisticsState
 import java.text.SimpleDateFormat
@@ -317,7 +316,7 @@ object MockData {
         }
 
         return PostStatisticsState(
-            timeframe = com.androidfinalproject.hacktok.ui.statistic.postStatistic.Timeframe.MONTH,
+            timeframe = Timeframe.MONTH,
             dataType = PostDataType.BOTH,
             postStats = postStats,
             bannedPostStats = bannedPostStats,
