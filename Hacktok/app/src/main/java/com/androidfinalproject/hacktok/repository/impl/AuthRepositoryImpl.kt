@@ -35,7 +35,8 @@ class AuthRepositoryImpl @Inject constructor(
         Log.d("AuthRepository", "Checking admin status for user: $userId")
         return try {
             val document = firestore.collection("users").document(userId).get().await()
-            document.getBoolean("isAdmin") ?: false
+            val role = document.getString("role")
+            role == "ADMIN"
         } catch (e: Exception) {
             Log.e("AuthRepository", "Error checking admin status for $userId", e)
             false
