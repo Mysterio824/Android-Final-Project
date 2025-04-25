@@ -18,6 +18,7 @@ import android.content.res.Configuration
 import android.os.Build
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.*
 
@@ -32,6 +33,14 @@ class SettingsViewModel @Inject constructor(
     private val _state = MutableStateFlow(SettingsState())
     val state : StateFlow<SettingsState> = _state.asStateFlow()
 
+    init {
+        viewModelScope.launch {
+            _state.update{
+                it.copy(currentUser = authService.getCurrentUser())
+            }
+        }
+    }
+
     fun onAction(action: SettingsScreenAction){
         when(action){
             is SettingsScreenAction.OnChangeLanguage -> changeLanguage(action.language)
@@ -44,12 +53,12 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try{
                 Log.d(TAG, "Logout action started")
+                fcmService.removeFcmToken()
                 val status = authService.logout()
                 if(!status) {
                     Log.e(TAG, "AuthService logout failed")
                 } else{
                     Log.d(TAG, "AuthService logout successful, updating state")
-                    fcmService.removeFcmToken()
                     // State update will trigger LaunchedEffect in Root
                     _state.update {
                         it.copy(

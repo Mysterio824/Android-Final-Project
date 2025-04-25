@@ -12,6 +12,7 @@ fun SettingsScreenRoot(
     onNavigationBack: () -> Unit = {},
     onEditProfileNavigate: () -> Unit,
     onChangePasswordNavigate: () -> Unit,
+    onCurrentProfileNavigate: () -> Unit,
     onAuthNavigate: () -> Unit
 ){
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -28,6 +29,7 @@ fun SettingsScreenRoot(
                 is SettingsScreenAction.OnNavigateBack -> onNavigationBack()
                 is SettingsScreenAction.OnNavigateEdit -> onEditProfileNavigate()
                 is SettingsScreenAction.OnChangePassword -> onChangePasswordNavigate()
+                is SettingsScreenAction.OnCurrentProfileNavigate -> onCurrentProfileNavigate()
                 else -> viewModel.onAction(action)
             }
         }

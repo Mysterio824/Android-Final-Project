@@ -18,5 +18,6 @@ data class UserProfileState (
     val showShareDialog: Boolean = false,
     val sharePrivacy: PRIVACY = PRIVACY.PUBLIC,
     val shareCaption: String = "",
-    val currentUser: User? = null
+    val currentUser: User? = null,
+    val listLikeUser: List<User> = emptyList()
 )

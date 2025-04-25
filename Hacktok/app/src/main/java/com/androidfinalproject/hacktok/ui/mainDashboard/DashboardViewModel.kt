@@ -26,7 +26,7 @@ class DashboardViewModel @Inject constructor(
         viewModelScope.launch {
             val currentUser = authService.getCurrentUser()
             _state.update{
-                it.copy(currentUser = currentUser, isLogout = (currentUser == null))
+                it.copy(currentUser = currentUser, isLogout = (currentUser == null), isLoading = false)
             }
         }
     }

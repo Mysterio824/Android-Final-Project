@@ -7,4 +7,5 @@ interface AuthRepository {
     suspend fun signInWithEmail(email: String, password: String): FirebaseUser?
     suspend fun signOut()
     fun getCurrentUser(): FirebaseUser?
+    suspend fun isUserAdmin(userId: String): Boolean
 } 

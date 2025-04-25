@@ -14,6 +14,7 @@ sealed class CurrentProfileState {
         val showShareDialog: Boolean = false,
         val postToShare: Post? = null,
         val sharePrivacy: PRIVACY = PRIVACY.PUBLIC,
-        val shareCaption: String = ""
+        val shareCaption: String = "",
+        val listLikeUser: List<User> = emptyList()
     ) : CurrentProfileState()
 }

@@ -2,6 +2,8 @@ package com.androidfinalproject.hacktok.service.impl
 
 import android.util.Log
 import com.androidfinalproject.hacktok.model.Post
+import com.androidfinalproject.hacktok.model.User
+import com.androidfinalproject.hacktok.model.UserSnapshot
 import com.androidfinalproject.hacktok.model.enums.NotificationType
 import com.androidfinalproject.hacktok.repository.CommentRepository
 import com.androidfinalproject.hacktok.repository.PostRepository
@@ -134,4 +136,17 @@ class LikeServiceImpl @Inject constructor(
         }
     }
 
+    override suspend fun getCommentLike(commentId: String): List<User> {
+        val comment = commentRepository.getById(commentId).getOrNull()
+            ?: return emptyList()
+        val userList = userRepository.getUsersByIds(comment.likedUserIds)
+        return userList
+    }
+
+    override suspend fun getPostLike(postId: String): List<User> {
+        val post = postRepository.getPost(postId)
+            ?: return emptyList()
+        val userList = userRepository.getUsersByIds(post.likedUserIds)
+        return userList
+    }
 }

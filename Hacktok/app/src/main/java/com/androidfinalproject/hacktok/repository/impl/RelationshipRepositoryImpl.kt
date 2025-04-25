@@ -176,4 +176,45 @@ class RelationshipRepositoryImpl @Inject constructor(
             listener2.remove()
         }
     }
+
+    override suspend fun getFriendsOfUser(userId: String): List<String> {
+        try {
+            // Query relationships where user is involved and status is FRIENDS
+            val query1 = relationshipsCollection
+                .whereEqualTo("user1Id", userId)
+                .whereEqualTo("status", RelationshipStatus.FRIENDS.toString())
+                .get()
+                .await()
+            Log.d(TAG, "Get data for user1 $userId: ${query1.count()}")
+
+            val query2 = relationshipsCollection
+                .whereEqualTo("user2Id", userId)
+                .whereEqualTo("status", RelationshipStatus.FRIENDS.toString())
+                .get()
+                .await()
+            Log.d(TAG, "Get data for user2 $userId: ${query2.count()}")
+
+            val friendIds = mutableListOf<String>()
+            
+            // Process where user is user1
+            for (doc in query1.documents) {
+                val data = doc.data ?: continue
+                val user2Id = data["user2Id"] as? String ?: continue
+                friendIds.add(user2Id)
+            }
+            
+            // Process where user is user2
+            for (doc in query2.documents) {
+                val data = doc.data ?: continue
+                val user1Id = data["user1Id"] as? String ?: continue
+                friendIds.add(user1Id)
+            }
+            Log.d(TAG, "Get data $userId: ${friendIds.distinct().count()}")
+
+            return friendIds.distinct()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting friends for user $userId: ${e.message}")
+            return emptyList()
+        }
+    }
 } 

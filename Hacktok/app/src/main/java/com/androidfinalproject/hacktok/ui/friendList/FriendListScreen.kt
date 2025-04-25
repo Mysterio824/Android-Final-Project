@@ -116,7 +116,8 @@ fun FriendListScreen(
                             },
                             onUserClick = {
                                 onAction(FriendListAction.UserClicked(user.id!!))
-                            }
+                            },
+                            currentId = state.currentUserId
                         )
                     }
                 }

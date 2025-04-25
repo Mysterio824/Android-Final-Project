@@ -15,6 +15,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.androidfinalproject.hacktok.ui.commonComponent.ProfileImage
 
 @Composable
 fun SettingsScreen(
@@ -34,6 +35,16 @@ fun SettingsScreen(
         ) {
             // Account Section
             SectionHeader("Account")
+
+            // Profile Option
+            SettingsItem(
+                icon = Icons.Default.Person,
+                title = "Main Profile",
+                imageUrl = state.currentUser?.profileImage,
+                onClick = { onAction(SettingsScreenAction.OnCurrentProfileNavigate) }
+            )
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
             // Edit Profile Option
             SettingsItem(
@@ -139,8 +150,9 @@ private fun SectionHeader(title: String) {
 
 @Composable
 private fun SettingsItem(
-    icon: ImageVector,
+    icon: ImageVector? = null,
     title: String,
+    imageUrl: String? = null,
     subtitle: String? = null,
     onClick: () -> Unit
 ) {
@@ -161,12 +173,20 @@ private fun SettingsItem(
                     .clip(CircleShape),
                 color = MaterialTheme.colorScheme.primaryContainer
             ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = Modifier.padding(8.dp)
-                )
+                if(imageUrl != null) {
+                    ProfileImage(
+                        imageUrl = imageUrl,
+                        size = 40.dp,
+                        onClick = onClick
+                    )
+                } else {
+                    Icon(
+                        imageVector = icon!!,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                }
             }
 
             Column(

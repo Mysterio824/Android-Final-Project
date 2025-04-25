@@ -64,6 +64,10 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 authViewModel = hiltViewModel()
 
+                // Process notifications when the app first starts
+                if (intent?.hasExtra("deepLink") == true) {
+                    handleNotificationNavigation(navController, intent)
+                }
 
                 // Re-use the existing Google Sign-In Client in Compose
                 val googleSignInClient = remember { googleSignInClient }
@@ -100,9 +104,22 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-
     }
-    
+
+    private fun handleNotificationNavigation(navController: androidx.navigation.NavController, intent: Intent) {
+        val deepLink = intent.getStringExtra("deepLink")
+        if (deepLink != null) {
+            Log.d(TAG, "Navigating to deep link from notification: $deepLink")
+            // First navigate to MainRoute.Graph to ensure we're in the main navigation
+            navController.navigate(com.androidfinalproject.hacktok.router.routes.MainRoute.Graph.route) {
+                // Clear backstack to avoid nested navigation issues
+                popUpTo(0) { inclusive = true }
+            }
+            
+            // Then navigate to the specific deep link
+            navController.navigate(deepLink)
+        }
+    }
 
     private fun startGoogleSignInWithCompatibilityWorkaround() {
         try {
@@ -114,7 +131,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == RC_SIGN_IN) {
@@ -122,7 +138,6 @@ class MainActivity : ComponentActivity() {
         }
     }
     
-
     private fun handleSignInResult(resultCode: Int, data: Intent?) {
         Log.d(TAG, "Sign-in result received. Result code: $resultCode")
         try {

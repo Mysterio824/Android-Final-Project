@@ -31,7 +31,8 @@ fun FriendListItem(
     onSendFriendRequest: (send: Boolean) -> Unit,
     onAcceptRequest: (accept: Boolean) -> Unit,
     onOptionsClick: () -> Unit,
-    onUserClick: () -> Unit
+    onUserClick: () -> Unit,
+    currentId: String,
 ) {
     Row(
         modifier = Modifier
@@ -78,63 +79,66 @@ fun FriendListItem(
             )
         }
 
-        // Action Buttons
-        Row {
-            when (relation.status) {
-                RelationshipStatus.NONE -> {
-                    Button(
-                        onClick = { onSendFriendRequest(true) },
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Add Friend",
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Add Friend")
-                    }
-                }
-
-                RelationshipStatus.FRIENDS -> {
-                    IconButton(onClick = onOptionsClick) {
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = "More options"
-                        )
-                    }
-                }
-
-                RelationshipStatus.PENDING_INCOMING -> {
-                    Row {
+        if(user.id != currentId){
+            // Action Buttons
+            Row {
+                when (relation.status) {
+                    RelationshipStatus.NONE -> {
                         Button(
-                            onClick = { onAcceptRequest(true) },
+                            onClick = { onSendFriendRequest(true) },
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Add Friend",
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Add Friend")
+                        }
+                    }
+
+                    RelationshipStatus.FRIENDS -> {
+                        IconButton(onClick = onOptionsClick) {
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = "More options"
+                            )
+                        }
+                    }
+
+                    RelationshipStatus.PENDING_INCOMING -> {
+                        Row {
+                            Button(
+                                onClick = { onAcceptRequest(true) },
+                                contentPadding = PaddingValues(12.dp, 6.dp),
+                                shape = RoundedCornerShape(16.dp)
+                            ) { Text("Accept") }
+                            Spacer(Modifier.width(8.dp))
+                            Button(
+                                onClick = { onAcceptRequest(false) },
+                                contentPadding = PaddingValues(12.dp, 6.dp),
+                                shape = RoundedCornerShape(16.dp)
+                            ) { Text("Decline") }
+                        }
+                    }
+
+                    RelationshipStatus.PENDING_OUTGOING -> {
+                        Button(
+                            onClick = { onSendFriendRequest(false) },
                             contentPadding = PaddingValues(12.dp, 6.dp),
                             shape = RoundedCornerShape(16.dp)
-                        ) { Text("Accept") }
-                        Spacer(Modifier.width(8.dp))
-                        Button(
-                            onClick = { onAcceptRequest(false) },
-                            contentPadding = PaddingValues(12.dp, 6.dp),
-                            shape = RoundedCornerShape(16.dp)
-                        ) { Text("Decline") }
+                        ) {
+                            Text("Cancel")
+                        }
                     }
-                }
 
-                RelationshipStatus.PENDING_OUTGOING -> {
-                    Button(
-                        onClick = { onSendFriendRequest(false) },
-                        contentPadding = PaddingValues(12.dp, 6.dp),
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        Text("Cancel")
-                    }
+                    else -> {}
                 }
-
-                else -> {}
             }
         }
+
     }
 
     HorizontalDivider(

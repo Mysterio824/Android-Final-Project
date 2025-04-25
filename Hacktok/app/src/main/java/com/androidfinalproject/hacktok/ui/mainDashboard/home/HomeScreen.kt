@@ -39,12 +39,16 @@ import androidx.compose.ui.unit.dp
 import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.model.enums.ReportType
+import com.androidfinalproject.hacktok.ui.commonComponent.LikeListContent
 import com.androidfinalproject.hacktok.ui.mainDashboard.home.component.*
 import com.androidfinalproject.hacktok.ui.commonComponent.PostContent
 import com.androidfinalproject.hacktok.ui.commonComponent.PostOptionsContent
 import com.androidfinalproject.hacktok.ui.commonComponent.ReportOptionsContent
 import com.androidfinalproject.hacktok.ui.commonComponent.SharePostDialog
+import com.androidfinalproject.hacktok.ui.profile.UserProfileAction
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,6 +59,7 @@ fun HomeScreen(
     val facebookBlue = Color(0xFF1877F2)
     var reportTargetId by remember { mutableStateOf<String?>(null) }
     var selectPost by remember { mutableStateOf<Post?>(null) }
+    var selectedLikeShowId by remember { mutableStateOf<String?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
     val listState = rememberLazyListState()
 
@@ -84,139 +89,170 @@ fun HomeScreen(
             }
     }
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        modifier = Modifier.fillMaxSize()
-    ) { paddingValues ->
+    val isRefreshing = state.isLoading
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .background(Color(0xFFF0F2F5))
-        ) {
-            when {
-                state.isLoading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center),
-                        color = facebookBlue
-                    )
-                }
+    SwipeRefresh(
+        state = rememberSwipeRefreshState(isRefreshing),
+        onRefresh = {
+            onAction(HomeScreenAction.Refresh)
+        }
+    ) {
+        Scaffold(
+            snackbarHost = { SnackbarHost(snackbarHostState) },
+            modifier = Modifier.fillMaxSize()
+        ) { paddingValues ->
 
-                state.error != null -> {
-                    Text(
-                        text = state.error,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .background(Color(0xFFF0F2F5))
+            ) {
+                when {
+                    state.isLoading -> {
+                        CircularProgressIndicator(
+                            modifier = Modifier.align(Alignment.Center),
+                            color = facebookBlue
+                        )
+                    }
 
-                state.posts.isEmpty() -> {
-                    Text(
-                        text = "No posts available",
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
+                    state.error != null -> {
+                        Text(
+                            text = state.error,
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
 
-                else -> {
-                    LazyColumn(
-                        state = listState,
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                        contentPadding = PaddingValues(bottom = 16.dp)
-                    ) {
-                        item {
-                            WhatsNewBar(
-                                profilePicUrl = state.user?.profileImage ?: "",
-                                onNewPostCLick = { onAction(HomeScreenAction.OnCreatePost) }
-                            )
-                        }
+                    state.posts.isEmpty() -> {
+                        Text(
+                            text = "No posts available",
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
 
-                        item {
-                            StoriesSection(
-                                stories = state.stories,
-                                onCreateStory = { onAction(HomeScreenAction.OnCreateStory) },
-                                onStoryClick = { onAction(HomeScreenAction.OnStoryClick(it)) }
-                            )
-                        }
-
-                        items(state.posts) { post ->
-                            val authorName = state.postAuthorNames[post.id]
-                            Card(
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RectangleShape,
-                                colors = CardDefaults.cardColors(containerColor = Color.White),
-                                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-                            ) {
-                                PostContent(
-                                    fullName = authorName,
-                                    post = post,
-                                    onPostClick = { onAction(HomeScreenAction.OnPostClick(post.id!!)) },
-                                    onToggleLike = { onAction(HomeScreenAction.LikePost(post.id!!)) },
-                                    onUnLike = { onAction(HomeScreenAction.UnLikePost(post.id!!)) },
-                                    onUserClick = { onAction(HomeScreenAction.OnUserClick(post.userId)) },
-                                    onComment = { onAction(HomeScreenAction.OnPostClick(post.id!!)) },
-                                    onShare = { onAction(HomeScreenAction.UpdateSharePost(post)) },
-                                    onOptionsClick = { selectPost = post },
-                                    currentId = state.user?.id ?: ""
+                    else -> {
+                        LazyColumn(
+                            state = listState,
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            contentPadding = PaddingValues(bottom = 16.dp)
+                        ) {
+                            item {
+                                WhatsNewBar(
+                                    profilePicUrl = state.user?.profileImage ?: "",
+                                    onNewPostCLick = { onAction(HomeScreenAction.OnCreatePost) }
                                 )
                             }
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
 
-                        if (state.isPaginating) {
                             item {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp),
-                                    contentAlignment = Alignment.Center
+                                StoriesSection(
+                                    stories = state.stories,
+                                    onCreateStory = { onAction(HomeScreenAction.OnCreateStory) },
+                                    onStoryClick = { onAction(HomeScreenAction.OnStoryClick(it)) }
+                                )
+                            }
+
+                            items(state.posts) { post ->
+                                val authorName = state.postAuthorNames[post.id]
+                                Card(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RectangleShape,
+                                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
                                 ) {
-                                    CircularProgressIndicator(color = facebookBlue)
+                                    PostContent(
+                                        fullName = authorName,
+                                        post = post,
+                                        onPostClick = { onAction(HomeScreenAction.OnPostClick(post.id!!)) },
+                                        onToggleLike = { onAction(HomeScreenAction.LikePost(post.id!!)) },
+                                        onUnLike = { onAction(HomeScreenAction.UnLikePost(post.id!!)) },
+                                        onUserClick = { onAction(HomeScreenAction.OnUserClick(post.userId)) },
+                                        onComment = { onAction(HomeScreenAction.OnPostClick(post.id!!)) },
+                                        onShare = { onAction(HomeScreenAction.UpdateSharePost(post)) },
+                                        onOptionsClick = { selectPost = post },
+                                        currentId = state.user?.id ?: "",
+                                        onLikesClick = { selectedLikeShowId = post.id }
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
+
+                            if (state.isPaginating) {
+                                item {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator(color = facebookBlue)
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    if (state.showShareDialog) {
-                        SharePostDialog(
-                            userName = state.user?.fullName ?: "Unknown",
-                            userAvatar = state.user?.profileImage ?: "", // Replace with actual avatar if you have it
-                            onDismiss = { onAction(HomeScreenAction.DismissShareDialog) },
-                            onSubmit = { caption, privacy ->
-                                onAction(HomeScreenAction.OnSharePost(post = state.sharePost!!, caption = caption, privacy = privacy))
-                                onAction(HomeScreenAction.DismissShareDialog)
-                            }
+                        if (state.showShareDialog) {
+                            SharePostDialog(
+                                userName = state.user?.fullName ?: "Unknown",
+                                userAvatar = state.user?.profileImage
+                                    ?: "", // Replace with actual avatar if you have it
+                                onDismiss = { onAction(HomeScreenAction.DismissShareDialog) },
+                                onSubmit = { caption, privacy ->
+                                    onAction(
+                                        HomeScreenAction.OnSharePost(
+                                            post = state.sharePost!!,
+                                            caption = caption,
+                                            privacy = privacy
+                                        )
+                                    )
+                                    onAction(HomeScreenAction.DismissShareDialog)
+                                }
+                            )
+                        }
+                    }
+                }
+
+                if (reportTargetId != null) {
+                    ModalBottomSheet(
+                        onDismissRequest = { reportTargetId = null },
+                        sheetState = bottomSheetState
+                    ) {
+                        ReportOptionsContent(
+                            onDismiss = { reportTargetId = null },
+                            targetId = reportTargetId!!,
+                            onReportCauseSelected = { id, cause, type ->
+                                onAction(HomeScreenAction.SubmitReport(id, type, cause))
+                            },
+                            type = ReportType.Post,
                         )
                     }
                 }
-            }
 
-            if (reportTargetId != null) {
-                ModalBottomSheet(
-                    onDismissRequest = { reportTargetId = null },
-                    sheetState = bottomSheetState
-                ) {
-                    ReportOptionsContent(
-                        onDismiss = { reportTargetId = null },
-                        targetId = reportTargetId!!,
-                        onReportCauseSelected = { id, cause, type ->
-                            onAction(HomeScreenAction.SubmitReport(id, type, cause))
-                        },
-                        type = ReportType.Post,
-                    )
+                if (selectPost != null) {
+                    ModalBottomSheet(
+                        onDismissRequest = { selectPost = null },
+                        sheetState = bottomSheetState
+                    ) {
+                        PostOptionsContent(
+                            onDismiss = { selectPost = null },
+                            onReport = { reportTargetId = selectPost!!.id },
+                            isPostOwner = state.user!!.id == selectPost!!.user?.id
+                        )
+                    }
                 }
-            }
 
-            if (selectPost != null) {
-                ModalBottomSheet(
-                    onDismissRequest = { selectPost = null },
-                    sheetState = bottomSheetState
-                ) {
-                    PostOptionsContent(
-                        onDismiss = { selectPost = null },
-                        onReport = { reportTargetId = selectPost!!.id },
-                        isPostOwner = state.user!!.id == selectPost!!.user?.id
-                    )
+                if(selectedLikeShowId != null) {
+                    onAction(HomeScreenAction.OnLikesShowClick(selectedLikeShowId!!))
+                    ModalBottomSheet(
+                        onDismissRequest = { selectedLikeShowId = null },
+                        sheetState = bottomSheetState
+                    ) {
+                        LikeListContent(
+                            users = state.listLikeUser,
+                            onUserClick = { onAction(HomeScreenAction.OnUserClick(it)) },
+                            onDismiss = { selectedLikeShowId = null }
+                        )
+                    }
                 }
             }
         }
