@@ -31,6 +31,7 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
+import java.util.*
 
 @Singleton
 class FcmServiceImpl @Inject constructor(
@@ -227,19 +228,45 @@ class FcmServiceImpl @Inject constructor(
                 "senderId" to senderUserId,
             )
 
-            // Call the refactored sendNotification which triggers the backend
-            val backendCallInitiated = sendNotification(
-                recipientUserId = recipientUserId,
-                title = title,
-                body = body,
-                data = fcmData
+            // Store notification in Firestore first
+            val notification = com.androidfinalproject.hacktok.model.Notification(
+                userId = recipientUserId,
+                type = notificationType,
+                senderId = senderUserId,
+                senderName = sender.username,
+                senderImage = sender.profileImage,
+                relatedId = itemId,
+                content = body,
+                createdAt = Date(),
+                isRead = false,
+                priority = "normal"
             )
 
-            if (!backendCallInitiated) {
-                Log.e(TAG, "Backend call initiation failed for interaction notification.")
+            try {
+                firestore.collection("notifications").add(notification).await()
+                Log.d(TAG, "Notification stored in Firestore successfully")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error storing notification in Firestore", e)
+                return@withContext false
             }
 
-            return@withContext backendCallInitiated
+            // Try to send FCM notification, but don't fail if it doesn't work
+            try {
+                val backendCallInitiated = sendNotification(
+                    recipientUserId = recipientUserId,
+                    title = title,
+                    body = body,
+                    data = fcmData
+                )
+
+                if (!backendCallInitiated) {
+                    Log.w(TAG, "FCM notification failed, but notification was stored in Firestore")
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "FCM notification failed, but notification was stored in Firestore", e)
+            }
+
+            return@withContext true
 
         } catch (e: Exception) {
             Log.e(TAG, "Error processing or sending interaction notification", e)
@@ -279,6 +306,9 @@ class FcmServiceImpl @Inject constructor(
                 }
                 NotificationType.NEW_MESSAGE -> {
                     Pair("New Message", "$senderName send you a new message ")
+                }
+                NotificationType.SECRET_CRUSH -> {
+                    Pair("Secret Crush", "$senderName has a secret crush on you! 💕")
                 }
                 else -> Pair("HackTok", "$senderName interacted with you")
             }

@@ -2,7 +2,9 @@ package com.androidfinalproject.hacktok.repository.impl
 
 import android.util.Log
 import com.androidfinalproject.hacktok.model.SecretCrush
+import com.androidfinalproject.hacktok.model.enums.NotificationType
 import com.androidfinalproject.hacktok.repository.SecretCrushRepository
+import com.androidfinalproject.hacktok.service.FcmService
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -12,16 +14,21 @@ import kotlinx.coroutines.flow.callbackFlow
 import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Singleton
 class SecretCrushRepositoryImpl @Inject constructor(
     private val firestore: FirebaseFirestore,
-    private val auth: FirebaseAuth
+    private val auth: FirebaseAuth,
+    private val fcmService: FcmService
 ) : SecretCrushRepository {
 
     private val TAG = "SecretCrushRepository"
     private val crushesCollection = firestore.collection("secret_crushes")
     private val usersCollection = firestore.collection("users")
+    private val serviceScope = CoroutineScope(Dispatchers.IO)
 
     override fun observeMySecretCrushes(): Flow<Result<List<SecretCrush>>> = callbackFlow {
         val currentUserId = auth.currentUser?.uid ?: run {
@@ -153,6 +160,17 @@ class SecretCrushRepositoryImpl @Inject constructor(
                                                         "isMatch", true
                                                     )
                                                 }
+
+                                                // Send notification to the receiver
+                                                serviceScope.launch {
+                                                    fcmService.sendInteractionNotification(
+                                                        recipientUserId = crushId,
+                                                        senderUserId = currentUserId,
+                                                        notificationType = NotificationType.SECRET_CRUSH,
+                                                        itemId = it.id
+                                                    )
+                                                }
+
                                                 trySend(Result.success(Unit))
                                             }
                                             .addOnFailureListener { e ->
