@@ -5,8 +5,6 @@ data class ForgotPasswordState(
     val emailError: String? = null,
     val isCodeSent: Boolean = false,
     val isEmailEditable: Boolean = true,
-    val verificationCode: String = "",
-    val verificationCodeError: String? = null,
     val isLoading: Boolean = false,
-    val isCodeVerified: Boolean = false
+    val error: String? = null
 )

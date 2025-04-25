@@ -5,5 +5,6 @@ sealed class SettingsScreenAction{
     object OnLogout: SettingsScreenAction()
     object OnChangePassword: SettingsScreenAction()
     object OnNavigateBack: SettingsScreenAction()
+    object OnCurrentProfileNavigate : SettingsScreenAction()
     data class OnChangeLanguage(val language: String): SettingsScreenAction()
 }

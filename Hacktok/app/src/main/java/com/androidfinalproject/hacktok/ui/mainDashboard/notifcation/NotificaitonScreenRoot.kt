@@ -18,6 +18,7 @@ fun NotificationScreenRoot(
     LaunchedEffect(state.navigateComment) {
         if(state.navigateComment){
             onPostClick(state.postId, state.commentId)
+            viewModel.reset()
         }
     }
 

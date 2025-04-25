@@ -75,7 +75,7 @@ fun NotificationItem(
                         NotificationType.FRIEND_REQUEST -> notification.senderId?.let { onUserClick(it) }
                         NotificationType.FRIEND_ACCEPT -> notification.senderId?.let { onUserClick(it) }
                         NotificationType.POST_LIKE -> notification.relatedId?.let { onPostClick(it) }
-                        NotificationType.POST_COMMENT -> notification.relatedId?.let { onPostClick(it) }
+                        NotificationType.POST_COMMENT -> notification.relatedId?.let { onCommentClick(it) }
                         NotificationType.COMMENT_REPLY -> notification.relatedId?.let { onCommentClick(it) }
                         NotificationType.COMMENT_LIKE -> notification.relatedId?.let { onCommentClick(it) }
                         NotificationType.ADMIN_NOTIFICATION -> {
@@ -86,19 +86,18 @@ fun NotificationItem(
                         NotificationType.NEW_STORY -> notification.senderId?.let { onUserClick(it) }
                         NotificationType.NEW_MESSAGE -> notification.senderId?.let { onUserClick(it) }
                         NotificationType.SECRET_CRUSH -> notification.senderId?.let { onUserClick(it) }
+                        else -> TODO()
                     }
                 },
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Profile Image with notification type indicator
             Box(contentAlignment = Alignment.BottomEnd) {
-                notification.senderImage?.let { imageUrl ->
-                    ProfileImage(
-                        imageUrl = imageUrl,
-                        onClick = { notification.senderId?.let { onUserClick(it) } },
-                        size = 50.dp
-                    )
-                }
+                ProfileImage(
+                    imageUrl =  notification.senderImage?: "",
+                    onClick = { notification.senderId?.let { onUserClick(it) } },
+                    size = 50.dp
+                )
 
                 // Icon badge based on notification type
                 Surface(
@@ -182,6 +181,7 @@ private fun getNotificationTypeIcon(type: NotificationType): ImageVector {
         NotificationType.NEW_STORY -> Icons.Default.ViewCarousel
         NotificationType.NEW_MESSAGE -> Icons.Default.ChatBubble
         NotificationType.SECRET_CRUSH -> Icons.Default.Favorite
+        else -> TODO()
     }
 }
 
@@ -197,6 +197,7 @@ private fun getNotificationTypeColor(type: NotificationType): Color {
         NotificationType.NEW_STORY -> Color(0xFF8A2BE2) // Blue violet for stories
         NotificationType.NEW_MESSAGE -> Color(0xFF0BC5EA) // Light blue for messages
         NotificationType.SECRET_CRUSH -> Color(0xFFE41E3F) // Red for secret crush
+        else -> TODO()
     }
 }
 

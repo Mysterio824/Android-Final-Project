@@ -14,12 +14,13 @@ import com.androidfinalproject.hacktok.router.routes.AdminRoute
 import com.androidfinalproject.hacktok.router.routes.AuthRoute
 import com.androidfinalproject.hacktok.router.routes.MainRoute
 import com.androidfinalproject.hacktok.ui.auth.AuthScreenRoot
+import com.androidfinalproject.hacktok.ui.auth.AuthViewModel
 import com.androidfinalproject.hacktok.ui.forgotPassword.ForgotPasswordScreenRoot
-import com.androidfinalproject.hacktok.ui.forgotPassword.ForgotPasswordViewModel
 
 fun NavGraphBuilder.authNavigation(
     navController: NavController,
-    onGoogleSignInClicked: () -> Unit
+    onGoogleSignInClicked: () -> Unit,
+    authViewModel: AuthViewModel
 ) {
     navigation(
         startDestination = AuthRoute.Login.route,
@@ -57,6 +58,7 @@ fun NavGraphBuilder.authNavigation(
             }
         ) {
             AuthScreenRoot(
+                viewModel = authViewModel,
                 onLoginSuccess = { isAdmin ->
                     if (isAdmin) {
                         navController.navigate(AdminRoute.Graph.route) {
@@ -107,7 +109,6 @@ fun NavGraphBuilder.authNavigation(
             }
         ) {
             ForgotPasswordScreenRoot(
-                viewModel = ForgotPasswordViewModel(),
                 onGoBack = {
                     navController.popBackStack()
                 }

@@ -10,4 +10,5 @@ data class UserSnapshot(
     @PropertyName("snapshotAt") val snapshotAt: Date = Date()
 ) {
     constructor() : this("", null, Date())
+    constructor(user: User) : this(user.username!!, user.profileImage, Date())
 }

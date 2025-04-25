@@ -89,7 +89,6 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
                 },
                 onCreateStoryNavigate = {
                     navController.navigate(MainRoute.NewStory.route)
-
                 },
                 onAuthNavigate = {
                     navController.navigate(AuthRoute.Graph.route)
@@ -236,8 +235,11 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
                 onGoToPost = { postId ->
                     navController.navigate("${MainRoute.PostDetail.route}/$postId")
                 },
-                onGoToFriendList = { chatId ->
-                    navController.navigate("${MainRoute.FriendList.route}/$chatId")
+                onGoToFriendList = { 
+                    navController.navigate("${MainRoute.FriendList.route}/$userId")
+                },
+                onUserNavigate = {
+                    navController.navigate("${MainRoute.UserDetail.route}/$it")
                 },
                 onNavigateBack = {
                     navController.popBackStack()

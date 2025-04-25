@@ -5,13 +5,16 @@ import com.androidfinalproject.hacktok.model.RelationInfo
 import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.model.enums.NotificationType
 import com.androidfinalproject.hacktok.model.enums.RelationshipStatus
+import com.androidfinalproject.hacktok.model.enums.UserRole
 import com.androidfinalproject.hacktok.repository.RelationshipRepository
 import com.androidfinalproject.hacktok.repository.UserRepository
 import com.androidfinalproject.hacktok.service.AuthService
 import com.androidfinalproject.hacktok.service.NotificationService
 import com.androidfinalproject.hacktok.service.RelationshipService
 import com.google.firebase.Timestamp
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.map
 import java.time.Instant
@@ -83,7 +86,6 @@ class RelationshipServiceImpl @Inject constructor(
     override suspend fun getUserFromRelationship(relations: Map<String, RelationInfo>): List<User> {
         // Filter relationships to get only friends
         val friendIds = relations
-            .filter { it.value.status == RelationshipStatus.FRIENDS }
             .keys
             .toList()
 
@@ -91,32 +93,91 @@ class RelationshipServiceImpl @Inject constructor(
         return userRepository.getUsersByIds(friendIds)
     }
 
-
     override suspend fun getFriendSuggestions(limit: Int): List<User> {
         val currentUserId = authService.getCurrentUserId() ?: return emptyList()
-        
+
         try {
-            // Get existing relationships
             val relationships = getRelationshipsForUser(currentUserId)
             val existingUserIds = relationships.keys
-            
-            // Get hidden suggestions
+
             val hiddenSuggestions = relationshipRepository.getHiddenSuggestions(currentUserId)
-            
-            // Get all users and filter out existing relationships and hidden suggestions
-            val allUsers = userRepository.getAllUsers()
-            
-            return allUsers
-                .filter { user -> 
-                    user.id != currentUserId && 
-                    user.id != null && 
-                    !existingUserIds.contains(user.id) && 
-                    !hiddenSuggestions.contains(user.id) 
+
+            val directRelations = convertToRelationInfoMap(currentUserId, relationshipRepository.getRelationshipDocs(currentUserId))
+            val friendsOfFriends = fetchFriendsOfFriends(directRelations)
+
+            val fofUserIds = friendsOfFriends.keys.toList()
+            val fofUsers = userRepository.getUsersByIds(fofUserIds)
+                .filter { user ->
+                    user.id != null &&
+                            user.id != currentUserId &&
+                            user.role != UserRole.ADMIN &&
+                            user.role != UserRole.MODERATOR
+                            !hiddenSuggestions.contains(user.id)
                 }
-                .take(limit)
+
+            if (fofUsers.size >= limit) {
+                return fofUsers.take(limit)
+            }
+
+            val allUsers = userRepository.getAllUsers()
+            val additionalUsers = allUsers
+                .filter { user ->
+                    user.id != null &&
+                            user.id != currentUserId &&
+                            !existingUserIds.contains(user.id) &&
+                            !hiddenSuggestions.contains(user.id) &&
+                            !fofUserIds.contains(user.id) &&
+                            user.role != UserRole.ADMIN && user.role != UserRole.MODERATOR
+                }
+
+            return (fofUsers + additionalUsers).take(limit)
         } catch (e: Exception) {
             Log.e(TAG, "Error getting friend suggestions: ${e.message}")
             return emptyList()
+        }
+    }
+
+    private suspend fun fetchFriendsOfFriends(directRelations: Map<String, RelationInfo>): Map<String, RelationInfo> {
+        val currentUserId = authService.getCurrentUserId() ?: return emptyMap()
+        val result = mutableMapOf<String, RelationInfo>()
+
+        try {
+            // Get direct friends only
+            val myFriendIds = directRelations
+                .filter { it.value.status == RelationshipStatus.FRIENDS }
+                .keys
+                .toList()
+
+            // For each friend, get their friends
+            myFriendIds.forEach { friendId ->
+                // Get relationships for this friend
+                val friendRelationships = getRelationshipsForUser(friendId)
+
+                // Get only friends of this friend
+                val secondDegreeConnections = friendRelationships
+                    .filter { it.value.status == RelationshipStatus.FRIENDS }
+                    .keys
+                    .toList()
+
+                // Add second-degree connections (friend of friend)
+                secondDegreeConnections.forEach { fofId ->
+                    // Skip if it's the current user or already in direct relationships
+                    if (fofId != currentUserId && !directRelations.containsKey(fofId)) {
+                        // Create a RelationInfo for friend-of-friend
+                        result[fofId] = RelationInfo(
+                            id = fofId,
+                            status = RelationshipStatus.NONE,
+                            lastActionByMe = false,
+                            updatedAt = null
+                        )
+                    }
+                }
+            }
+
+            return result
+        } catch (e: Exception) {
+            Log.e(TAG, "Error fetching friends of friends: ${e.message}")
+            return emptyMap()
         }
     }
 
@@ -249,6 +310,59 @@ class RelationshipServiceImpl @Inject constructor(
             return false
         }
         // No notification needed
+    }
+
+    override suspend fun getRelationshipsWithFriendsOfUser(userId: String): Map<String, RelationInfo> {
+        val currentUserId = authService.getCurrentUserId() ?: return emptyMap()
+        
+        // Get all friend IDs of the target user
+        val friendIds = relationshipRepository.getFriendsOfUser(userId)
+
+        Log.d("Friend", friendIds.count().toString())
+        
+        // If there are no friends, return empty map
+        if (friendIds.isEmpty()) {
+            return emptyMap()
+        }
+        
+        // Get all relationships of the current user
+        val myRelationships = getRelationshipsForUser(currentUserId)
+        
+        // Create a result map that includes ALL friend IDs
+        val result = mutableMapOf<String, RelationInfo>()
+        
+        // For each friend ID, either use existing relationship or create empty one
+        friendIds.forEach { friendId ->
+            val relation = myRelationships[friendId] ?: RelationInfo(id = friendId)
+            result[friendId] = relation
+        }
+        
+        return result
+    }
+    
+    override fun observeMyFriendRequests(): Flow<List<User>> = callbackFlow {
+        val currentUserId = authService.getCurrentUserIdSync() ?: run {
+            close()
+            return@callbackFlow
+        }
+        
+        val listener = relationshipRepository.observeRelationships(currentUserId)
+            .collect { relationshipDocs ->
+                // Convert to RelationInfo map
+                val relationInfoMap = convertToRelationInfoMap(currentUserId, relationshipDocs)
+                
+                // Filter for pending incoming requests only
+                val requestIds = relationInfoMap
+                    .filter { it.value.status == RelationshipStatus.PENDING_INCOMING }
+                    .keys
+                    .toList()
+                
+                // Fetch user details for these IDs
+                val users = userRepository.getUsersByIds(requestIds)
+                trySend(users)
+            }
+        
+        awaitClose {}
     }
 
     override fun observeMyRelationships(): Flow<Map<String, RelationInfo>> {

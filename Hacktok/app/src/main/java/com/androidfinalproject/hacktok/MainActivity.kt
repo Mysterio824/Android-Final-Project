@@ -30,9 +30,7 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
-import android.os.Build
-import androidx.core.content.ContextCompat
-import android.Manifest
+import com.androidfinalproject.hacktok.service.AuthService
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -45,7 +43,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var authViewModel: AuthViewModel
 
     @Inject
-    lateinit var fcmService: FcmService
+    lateinit var authService: AuthService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,6 +63,11 @@ class MainActivity : ComponentActivity() {
             MainAppTheme {
                 val navController = rememberNavController()
                 authViewModel = hiltViewModel()
+
+                // Process notifications when the app first starts
+                if (intent?.hasExtra("deepLink") == true) {
+                    handleNotificationNavigation(navController, intent)
+                }
 
                 // Re-use the existing Google Sign-In Client in Compose
                 val googleSignInClient = remember { googleSignInClient }
@@ -92,27 +95,32 @@ class MainActivity : ComponentActivity() {
                                 // Fallback to compatibility workaround
                                 startGoogleSignInWithCompatibilityWorkaround()
                             }
-                        }
+                        },
+                        authViewModel = authViewModel
                     )
                     adminNavigation(navController)
                     mainNavigation(navController)
                     testNavigation(navController)
                 }
             }
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-                ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
-                != PackageManager.PERMISSION_GRANTED
-            ) {
-                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-            }
         }
-
     }
-    
-    /**
-     * Fallback method for devices with Google Play Services issues
-     */
+
+    private fun handleNotificationNavigation(navController: androidx.navigation.NavController, intent: Intent) {
+        val deepLink = intent.getStringExtra("deepLink")
+        if (deepLink != null) {
+            Log.d(TAG, "Navigating to deep link from notification: $deepLink")
+            // First navigate to MainRoute.Graph to ensure we're in the main navigation
+            navController.navigate(com.androidfinalproject.hacktok.router.routes.MainRoute.Graph.route) {
+                // Clear backstack to avoid nested navigation issues
+                popUpTo(0) { inclusive = true }
+            }
+            
+            // Then navigate to the specific deep link
+            navController.navigate(deepLink)
+        }
+    }
+
     private fun startGoogleSignInWithCompatibilityWorkaround() {
         try {
             val signInIntent = googleSignInClient.signInIntent
@@ -123,9 +131,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    /**
-     * Handle Google Sign-In result from startActivityForResult
-     */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == RC_SIGN_IN) {
@@ -133,9 +138,6 @@ class MainActivity : ComponentActivity() {
         }
     }
     
-    /**
-     * Handle sign-in result from either launcher or compatibility workaround
-     */
     private fun handleSignInResult(resultCode: Int, data: Intent?) {
         Log.d(TAG, "Sign-in result received. Result code: $resultCode")
         try {
@@ -160,16 +162,6 @@ class MainActivity : ComponentActivity() {
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error handling Google Sign-In result", e)
-        }
-    }
-
-    private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            Log.d("MainActivity", "Notification permission granted")
-        } else {
-            Log.d("MainActivity", "Notification permission denied")
         }
     }
 }

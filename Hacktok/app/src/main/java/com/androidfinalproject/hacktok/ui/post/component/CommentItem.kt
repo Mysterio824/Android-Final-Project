@@ -12,6 +12,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,6 +28,7 @@ import com.androidfinalproject.hacktok.model.Comment
 import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.ui.commonComponent.ProfileImage
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
+import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -42,6 +45,7 @@ fun CommentItem(
     onCommentLongPress: (String?) -> Unit,
     onUserClick: (String) -> Unit,
     onReplyClick: (String) -> Unit,
+    onLikesClick: (String) -> Unit,
     currentUserId: String
 ) {
     // Use either isSelected or isHighlighted to determine background color
@@ -52,11 +56,12 @@ fun CommentItem(
     var showReplies by remember { mutableStateOf(false) }
 
     Column(
-        modifier = Modifier.padding(
-            start = if (comment.parentCommentId == null) 16.dp else 10.dp,
-            end = 16.dp,
-            top = 8.dp
-        )
+        modifier = Modifier
+            .padding(
+                start = if (comment.parentCommentId == null) 16.dp else 10.dp,
+                end = 16.dp,
+                top = 8.dp
+            )
             .clip(RoundedCornerShape(12.dp))
             .background(
                 if (shouldHighlight) Color(0xFFE0E0E0) else Color.Transparent
@@ -93,7 +98,7 @@ fun CommentItem(
                 ) {
                     Column {
                         Text(
-                            text = "User ${user.username}",
+                            text = user.username,
                             fontWeight = FontWeight.Bold,
                             fontSize = 14.sp,
                             modifier = Modifier
@@ -111,6 +116,16 @@ fun CommentItem(
                     modifier = Modifier.padding(start = 0.dp, top = 0.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    Spacer(modifier = Modifier.width(10.dp))
+
+                    Text(
+                        text = formatDateShort(comment.createdAt),
+                        fontSize = 12.sp,
+                        color = Color.Gray
+                    )
+
+//                    Spacer(modifier = Modifier.width(20.dp))
+
                      if(comment.isLiked(currentUserId)){
                          TextButton(
                              onClick = { onUnLikeComment(comment.id) },
@@ -128,7 +143,7 @@ fun CommentItem(
                         TextButton(
                             onClick = { onLikeComment(comment.id) },
                             modifier = Modifier.height(20.dp),
-                            contentPadding = PaddingValues(horizontal = 4.dp)
+                            contentPadding = PaddingValues(horizontal = 2.dp)
                         ) {
                             Text(
                                 text = "Like",
@@ -139,18 +154,10 @@ fun CommentItem(
                         }
                      }
 
-                    if (comment.getLikeCount() > 0) {
-                        Text(
-                            text = "${comment.getLikeCount()}",
-                            fontSize = 12.sp,
-                            color = Color.Gray
-                        )
-                    }
-
                     Spacer(modifier = Modifier.width(8.dp))
 
                     TextButton(
-                        onClick = { onReplyClick(comment.id!!) },
+                        onClick = { onReplyClick(comment.parentCommentId ?: comment.id!!) },
                         modifier = Modifier.height(24.dp),
                         contentPadding = PaddingValues(horizontal = 4.dp)
 
@@ -163,13 +170,30 @@ fun CommentItem(
                         )
                     }
 
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.weight(1f))
 
-                    Text(
-                        text = formatDateShort(comment.createdAt),
-                        fontSize = 12.sp,
-                        color = Color.Gray
-                    )
+                    if (comment.getLikeCount() > 0) {
+                        TextButton(
+                            onClick = { onLikesClick(comment.id!!) },
+                            modifier = Modifier.height(20.dp),
+                            contentPadding = PaddingValues(horizontal = 4.dp)
+                        ) {
+                            Text(
+                                text = "${comment.getLikeCount()}",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Blue
+                            )
+                            Icon(
+                                imageVector = Icons.Filled.ThumbUp,
+                                contentDescription = "Like Icon",
+                                modifier = Modifier
+                                    .padding(start = 4.dp)
+                                    .size(16.dp),
+                                tint = Color.Blue
+                            )
+                        }
+                    }
                 }
 
                 // Show "View replies" / "Hide replies" toggle for parent comments with replies
@@ -212,7 +236,8 @@ fun CommentItem(
                                     onUserClick = onUserClick,
                                     onUnLikeComment = onUnLikeComment,
                                     onReplyClick = onReplyClick,
-                                    currentUserId = currentUserId
+                                    currentUserId = currentUserId,
+                                    onLikesClick = onLikesClick
                                 )
                             }
                         }
@@ -241,14 +266,15 @@ fun formatDateShort(date: Date): String {
 private fun PreviewComponent() {
     MainAppTheme {
         CommentItem(
-            comment = MockData.mockComments.first(),
+            comment = MockData.mockComments.first().copy(likedUserIds = listOf("1")),
             onUserClick = {},
             onLikeComment = {},
             onCommentLongPress = {},
             onUnLikeComment = {},
             onReplyClick = {},
             allComments = emptyList(),
-            currentUserId = ""
+            currentUserId = "",
+            onLikesClick = {}
         )
     }
 }

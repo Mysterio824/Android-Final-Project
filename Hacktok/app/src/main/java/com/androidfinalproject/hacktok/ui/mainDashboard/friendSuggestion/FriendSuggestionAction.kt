@@ -7,4 +7,5 @@ sealed class FriendSuggestionAction {
     data class OnUserClick(val userId: String): FriendSuggestionAction()
     data class OnRemove(val userId: String): FriendSuggestionAction()
     data object OnFriendListNavigate : FriendSuggestionAction()
+    data object Refresh : FriendSuggestionAction()
 }

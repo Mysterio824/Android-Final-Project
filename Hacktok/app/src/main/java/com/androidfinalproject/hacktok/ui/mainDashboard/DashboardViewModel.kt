@@ -1,10 +1,11 @@
 package com.androidfinalproject.hacktok.ui.mainDashboard
 
-import android.util.Log
+import android.content.Context
+import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.androidfinalproject.hacktok.service.AuthService
+import com.androidfinalproject.hacktok.utils.NotificationPermissionHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,8 +24,9 @@ class DashboardViewModel @Inject constructor(
 
     init{
         viewModelScope.launch {
+            val currentUser = authService.getCurrentUser()
             _state.update{
-                it.copy(currentUser = authService.getCurrentUser())
+                it.copy(currentUser = currentUser, isLogout = (currentUser == null), isLoading = false)
             }
         }
     }
@@ -32,6 +34,7 @@ class DashboardViewModel @Inject constructor(
     fun onAction(action: DashboardAction) {
         when (action) {
             is DashboardAction.SelectTab -> changeTab(action.index)
+            is DashboardAction.CheckNotificationPermission -> checkNotificationPermission(action.context, action.permissionLauncher)
             else -> {}
         }
     }
@@ -41,4 +44,11 @@ class DashboardViewModel @Inject constructor(
             currentState.copy(selectedTab = tabIndex)
         }
     }
-}
+
+    private fun checkNotificationPermission(context: Context, permissionLauncher: ActivityResultLauncher<String>) {
+        // Use the singleton to handle permission checking
+        NotificationPermissionHandler.checkAndRequestNotificationPermission(
+            context = context,
+            permissionLauncher = permissionLauncher
+        )
+    }}

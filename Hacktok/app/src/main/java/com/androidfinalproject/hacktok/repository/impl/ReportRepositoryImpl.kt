@@ -78,4 +78,17 @@ class ReportRepositoryImpl @Inject constructor(
                 emit(emptyList())
             }
     }
+
+    override suspend fun getReportsForUser(userId: String): List<Report> {
+        val query = collection
+            .whereEqualTo("targetId", userId)
+            .whereEqualTo("status", "pending")
+
+        return try {
+            val snapshot = query.get().await()
+            snapshot.toObjects(Report::class.java)
+        } catch (e: Exception) {
+            throw Exception("Failed to get pending reports for user $userId: ${e.message}", e)
+        }
+    }
 } 

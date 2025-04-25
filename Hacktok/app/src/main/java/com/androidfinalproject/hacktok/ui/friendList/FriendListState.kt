@@ -7,10 +7,12 @@ import org.bson.types.ObjectId
 // UI State
 data class FriendListState(
     val users: List<User> = emptyList(),
-    val currentUserId: String = "",
+    val userId: String = "",
     val filteredUsers: List<User> = emptyList(),
     val searchQuery: String = "",
     val isLoading: Boolean = false,
     val error: String? = null,
-    val relations: Map<String, RelationInfo> = emptyMap()
+    val currentUserId: String = "",
+    val relations: Map<String, RelationInfo> = emptyMap(),
+    val friendRequests: List<User> = emptyList()
 )

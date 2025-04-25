@@ -34,12 +34,15 @@ class FriendSuggestionViewModel @Inject constructor(
         }
     }
 
+
+
     fun onAction(action: FriendSuggestionAction) {
         when (action) {
             is FriendSuggestionAction.HandleRequest -> handleRequest(action.userId, action.isAccepted)
             is FriendSuggestionAction.OnRemove -> removeFriendSuggestion(action.userId)
             is FriendSuggestionAction.SendRequest -> sendFriendRequest(action.userId)
             is FriendSuggestionAction.UnSendRequest -> unSendRequest(action.userId)
+            is FriendSuggestionAction.Refresh -> loadScreen()
             else -> {}
         }
     }
@@ -56,7 +59,7 @@ class FriendSuggestionViewModel @Inject constructor(
                 val friendRequests = relationshipService.getMyFriendRequests()
                 val friendSuggestions = relationshipService.getFriendSuggestions(10)
                 val relation = relationshipService.getMyRelationships()
-                
+
                 // Update state - remove explicit setting of relations
                 _state.update { currentState ->
                     currentState.copy(

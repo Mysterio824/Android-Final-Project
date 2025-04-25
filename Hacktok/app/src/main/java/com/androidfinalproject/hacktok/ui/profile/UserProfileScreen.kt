@@ -18,11 +18,14 @@ import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.RelationInfo
 import com.androidfinalproject.hacktok.model.enums.RelationshipStatus
 import com.androidfinalproject.hacktok.model.enums.ReportType
+import com.androidfinalproject.hacktok.ui.commonComponent.LikeListContent
 import com.androidfinalproject.hacktok.ui.commonComponent.PostContent
 import com.androidfinalproject.hacktok.ui.commonComponent.PostOptionsContent
 import com.androidfinalproject.hacktok.ui.commonComponent.ProfileImage
 import com.androidfinalproject.hacktok.ui.commonComponent.ReportOptionsContent
 import com.androidfinalproject.hacktok.ui.commonComponent.SharePostDialog
+import com.androidfinalproject.hacktok.ui.currentProfile.CurrentProfileScreen
+import com.androidfinalproject.hacktok.ui.post.PostDetailAction
 import com.androidfinalproject.hacktok.ui.profile.component.*
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 
@@ -36,6 +39,7 @@ fun UserProfileScreen (
     var showResponseOptionsSheet by remember { mutableStateOf(false) }
     var reportTargetId by remember { mutableStateOf<String?>(null) }
     var selectPostId by remember { mutableStateOf<String?>(null) }
+    var selectedLikeShowId by remember { mutableStateOf<String?>(null) }
     var reportType by remember { mutableStateOf<ReportType?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -235,7 +239,8 @@ fun UserProfileScreen (
                              onComment = { onAction(UserProfileAction.GoToPost(it.id!!)) },
                              onShare = { onAction(UserProfileAction.UpdateSharePost(it)) },
                              onUnLike = { onAction(UserProfileAction.UnlikePost(it.id!!)) },
-                             currentId = state.currentUser?.id ?: ""
+                             currentId = state.currentUser?.id ?: "",
+                             onLikesClick = { postId -> selectedLikeShowId = postId }
                          )
                      }
                  }
@@ -323,6 +328,20 @@ fun UserProfileScreen (
                     onDismiss = { selectPostId = null },
                     onReport = { reportTargetId = selectPostId!! },
                     isPostOwner = false
+                )
+            }
+        }
+
+        if(selectedLikeShowId != null) {
+            onAction(UserProfileAction.OnLikesShowClick(selectedLikeShowId!!))
+            ModalBottomSheet(
+                onDismissRequest = { selectedLikeShowId = null },
+                sheetState = bottomSheetState
+            ) {
+                LikeListContent(
+                    users = state.listLikeUser,
+                    onUserClick = { onAction(UserProfileAction.OnUserClick(it)) },
+                    onDismiss = { selectedLikeShowId = null }
                 )
             }
         }

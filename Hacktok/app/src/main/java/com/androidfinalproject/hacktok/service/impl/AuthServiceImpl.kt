@@ -2,10 +2,13 @@ package com.androidfinalproject.hacktok.service.impl
 
 import android.util.Log
 import com.androidfinalproject.hacktok.model.User
+import com.androidfinalproject.hacktok.model.enums.UserRole
+import com.androidfinalproject.hacktok.repository.AuthRepository
 import com.androidfinalproject.hacktok.repository.UserRepository
 import com.androidfinalproject.hacktok.service.ApiService
 import com.androidfinalproject.hacktok.service.AuthService
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import org.json.JSONObject
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -14,6 +17,7 @@ import javax.inject.Singleton
 class AuthServiceImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     private val userRepository: UserRepository,
+    private val authRepository: AuthRepository,
     private val apiService: ApiService
 ) : AuthService {
 
@@ -101,5 +105,95 @@ class AuthServiceImpl @Inject constructor(
             Log.e(TAG, "Error changing password: ${e.message}")
             return "Error: ${e.message}"
         }
+    }
+
+    override suspend fun resetPassword(email: String): String {
+        val user = userRepository.getUserByEmail(email)
+            ?: return "Email has not been registered!"
+
+        return try {
+            // Send the request and handle the response
+            val response = apiService.sendResetPassword(email)
+
+            // Check if the response is successful
+            if (response.isSuccessful) {
+                val responseBody = response.body?.string()
+                if (responseBody != null) {
+                    try {
+                        val jsonObject = JSONObject(responseBody)
+                        return jsonObject.optString("message", "Send request successfully")
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error parsing JSON response: ${e.message}")
+                        return "Send request successfully"
+                    }
+                }
+                return "Send request successfully"
+            } else {
+                val responseBody = response.body?.string()
+                if (responseBody != null) {
+                    try {
+                        val jsonObject = JSONObject(responseBody)
+                        return "Failed to send request: ${jsonObject.optString("error", "Unknown error")}"
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error parsing JSON error response: ${e.message}")
+                        return "Failed to send request: ${response.code}"
+                    }
+                }
+                return "Failed to send request: ${response.code}"
+            }
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Error sending request: ${e.message}")
+            return "Error: ${e.message}"
+        }
+    }
+
+    override suspend fun signUp(email: String, password: String): String {
+        return try {
+            val response = apiService.sendSignUpRequest(email, password)
+            if (response.isSuccessful) {
+                val responseBody = response.body?.string()
+                if (responseBody != null) {
+                    try {
+                        val jsonObject = JSONObject(responseBody)
+                        return jsonObject.optString("message", "Password changed successfully")
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error parsing JSON response: ${e.message}")
+                        return "Password changed successfully"
+                    }
+                }
+                return "Sign up successfully!"
+            } else {
+                val responseBody = response.body?.string()
+                if (responseBody != null) {
+                    try {
+                        val jsonObject = JSONObject(responseBody)
+                        return "Failed to signup: ${jsonObject.optString("error", "Unknown error")}"
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error parsing JSON error response: ${e.message}")
+                        return "Failed to signup: ${response.code}"
+                    }
+                }
+                return "Failed to signup: ${response.code}"
+            }
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Error creating new account: ${e.message}")
+            return "Error: ${e.message}"
+        }
+    }
+
+    override suspend fun signInWithGoogle(idToken: String): FirebaseUser? {
+        return authRepository.signInWithGoogle(idToken)
+    }
+
+    override suspend fun signInWithEmail(email: String, password: String): FirebaseUser? {
+        return authRepository.signInWithEmail(email, password)
+    }
+
+    override suspend fun isUserAdmin(userId: String): Boolean {
+        val user = userRepository.getCurrentUser()
+            ?: return false
+        return user.role == UserRole.ADMIN
     }
 }

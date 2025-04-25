@@ -87,6 +87,17 @@ fun AuthScreen(
                 )
             }
 
+            if (state.mainError != null) {
+                Text(
+                    text = state.mainError,
+                    color = MaterialTheme.colorScheme.error,
+                    fontSize = 14.sp,
+                    modifier = Modifier
+                        .padding(bottom = 8.dp)
+                        .fillMaxWidth()
+                )
+            }
+
             Spacer(modifier = Modifier.weight(1f))
 
             Row(

@@ -15,6 +15,7 @@ import com.androidfinalproject.hacktok.model.enums.NotificationType
 import com.androidfinalproject.hacktok.repository.UserRepository
 import com.androidfinalproject.hacktok.repository.PostRepository
 import com.androidfinalproject.hacktok.repository.CommentRepository
+import com.androidfinalproject.hacktok.router.routes.MainRoute
 import com.androidfinalproject.hacktok.service.ApiService
 import com.androidfinalproject.hacktok.service.FcmService
 import com.androidfinalproject.hacktok.utils.TokenManager
@@ -126,11 +127,39 @@ class FcmServiceImpl @Inject constructor(
         Log.d(TAG, "Preparing to show notification. Title: $title, Body: $body, Data: $data")
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            // Add specific data likely needed by MainActivity to navigate
-            data["type"]?.let { putExtra("notificationType", it) }
-            data["itemId"]?.let { putExtra("notificationItemId", it) }
-            data["senderId"]?.let { putExtra("notificationSenderId", it) }
-            data["notificationId"]?.let { putExtra("notificationDocId", it) }
+            
+            // Add all notification data as extras to support precise navigation
+            putExtra("notificationReceived", true)
+            data.forEach { (key, value) ->
+                putExtra(key, value)
+            }
+            
+            // Handle specific navigation based on notification type
+            when (data["type"]) {
+                NotificationType.POST_LIKE.name, NotificationType.POST_COMMENT.name -> {
+                    // Use deep linking format for post detail
+                    putExtra("deepLink", "${MainRoute.PostDetail.route}/${data["itemId"]}")
+                }
+                NotificationType.COMMENT_LIKE.name, NotificationType.COMMENT_REPLY.name -> {
+                    // Deep link with post ID and comment ID (scrollToComment)
+                    val postId = data["postId"]
+                    val commentId = data["itemId"]
+                    if (postId != null && commentId != null) {
+                        putExtra("deepLink", "${MainRoute.PostDetail.route}/$postId?commentId=$commentId")
+                    }
+                }
+                NotificationType.NEW_MESSAGE.name -> {
+                    // Use deep linking format for chat room with user
+                    val senderId = data["senderId"]
+                    if (senderId != null) {
+                        putExtra("deepLink", "${MainRoute.ChatRoom.route}/user/$senderId")
+                    }
+                }
+                else -> {
+                    // Default to dashboard if no specific navigation
+                    putExtra("deepLink", MainRoute.Dashboard.route)
+                }
+            }
         }
 
         val pendingIntent = PendingIntent.getActivity(
@@ -140,14 +169,14 @@ class FcmServiceImpl @Inject constructor(
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
         val notificationBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_stat_ic_notification) // Ensure this drawable exists
+            .setSmallIcon(R.drawable.ic_stat_ic_notification)
             .setContentTitle(title)
             .setContentText(body)
-            .setAutoCancel(true) // Dismiss notification when tapped
+            .setAutoCancel(true)
             .setSound(defaultSoundUri)
             .setContentIntent(pendingIntent)
-            .setPriority(NotificationCompat.PRIORITY_HIGH) // Use HIGH for important notifications
-            .setStyle(NotificationCompat.BigTextStyle().bigText(body)) // Show longer text
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(body))
 
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
@@ -221,12 +250,23 @@ class FcmServiceImpl @Inject constructor(
             val (title, body) = generateNotificationContent(sender, notificationType, itemId)
 
             // Prepare data payload for FCM (and backend)
-            // Include enough info for the recipient app to handle the notification tap
-            val fcmData = mapOf(
+            val fcmData = mutableMapOf(
                 "type" to notificationType.name,
                 "itemId" to itemId,
                 "senderId" to senderUserId,
             )
+            
+            // Add post ID for comment notifications to enable proper navigation
+            if (notificationType == NotificationType.COMMENT_LIKE || notificationType == NotificationType.COMMENT_REPLY) {
+                try {
+                    val comment = commentRepository.getById(itemId).getOrNull()
+                    comment?.postId?.let { postId ->
+                        fcmData["postId"] = postId
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error fetching post ID for comment notification", e)
+                }
+            }
 
             // Store notification in Firestore first
             val notification = com.androidfinalproject.hacktok.model.Notification(
@@ -240,6 +280,12 @@ class FcmServiceImpl @Inject constructor(
                 createdAt = Date(),
                 isRead = false,
                 priority = "normal"
+            // Call the refactored sendNotification which triggers the backend
+            val backendCallInitiated = sendNotification(
+                recipientUserId = recipientUserId,
+                title = "Hacktok",
+                body = body,
+                data = fcmData
             )
 
             try {
