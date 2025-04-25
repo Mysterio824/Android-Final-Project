@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.model.enums.UserRole
+import com.androidfinalproject.hacktok.repository.ReportRepository
 import com.androidfinalproject.hacktok.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,13 +15,17 @@ import javax.inject.Inject
 
 sealed class UserManagementUiState {
     object Loading : UserManagementUiState()
-    data class Success(val users: List<User>) : UserManagementUiState()
+    data class Success(
+        val users: List<User>,
+        val reportCounts: Map<String, Int> = emptyMap()
+    ) : UserManagementUiState()
     data class Error(val message: String) : UserManagementUiState()
 }
 
 @HiltViewModel
 class UserManagementViewModel @Inject constructor(
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val reportRepository: ReportRepository,
 ) : ViewModel() {
 
     private val _userManagementState = MutableStateFlow<UserManagementUiState>(UserManagementUiState.Loading)
@@ -30,6 +35,7 @@ class UserManagementViewModel @Inject constructor(
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
     private var allUsers = listOf<User>()
+    private var reportCounts = mutableMapOf<String, Int>()
 
     init {
         loadUsers()
@@ -42,7 +48,21 @@ class UserManagementViewModel @Inject constructor(
                 // Implement loading all users from repository
                 // For now, using a placeholder
                 allUsers = userRepository.getAllUsers()
-                _userManagementState.value = UserManagementUiState.Success(allUsers)
+
+                reportCounts.clear() // Reset before updating
+
+                allUsers.forEach { user ->
+                    val userId = user.id
+                    if (userId != null) {
+                        val reports = reportRepository.getReportsForUser(userId)
+                        reportCounts[userId] = reports.size
+                    }
+                }
+
+                _userManagementState.value = UserManagementUiState.Success(
+                    users = allUsers,
+                    reportCounts = reportCounts.toMap()
+                )
             } catch (e: Exception) {
                 _userManagementState.value = UserManagementUiState.Error(e.message ?: "Unknown error occurred")
             }
