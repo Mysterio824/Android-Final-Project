@@ -29,7 +29,8 @@ fun BanUserDialog(
     var isPermanent by remember { mutableStateOf(false) }
     var banDuration by remember { mutableStateOf("7") }
     var banReason by remember { mutableStateOf("") }
-    var showError by remember { mutableStateOf(false) }
+
+    var showDurationError by remember { mutableStateOf(false) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -42,7 +43,10 @@ fun BanUserDialog(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(
                         checked = isPermanent,
-                        onCheckedChange = { isPermanent = it }
+                        onCheckedChange = {
+                            isPermanent = it
+                            showDurationError = false // reset error on switch
+                        }
                     )
                     Text("Permanent Ban")
                 }
@@ -53,13 +57,13 @@ fun BanUserDialog(
                         value = banDuration,
                         onValueChange = {
                             banDuration = it
-                            showError = false
+                            showDurationError = false
                         },
                         label = { Text("Ban Duration (days)") },
-                        isError = showError,
+                        isError = showDurationError,
                         supportingText = {
-                            if (showError) {
-                                Text("Please enter a valid number")
+                            if (showDurationError) {
+                                Text("Please enter a valid number > 0")
                             }
                         },
                         modifier = Modifier.fillMaxWidth()
@@ -70,7 +74,7 @@ fun BanUserDialog(
                 OutlinedTextField(
                     value = banReason,
                     onValueChange = { banReason = it },
-                    label = { Text("Reason for Ban") },
+                    label = { Text("Reason for Ban (optional)") },
                     modifier = Modifier.fillMaxWidth(),
                     maxLines = 3
                 )
@@ -79,24 +83,12 @@ fun BanUserDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    if (banReason.isBlank()) {
-                        showError = true
-                        return@TextButton
-                    }
+                    val durationValid = isPermanent || (banDuration.toIntOrNull()?.let { it > 0 } ?: false)
+                    showDurationError = !isPermanent && !durationValid
 
-                    if (isPermanent) {
-                        onBanUser(userId, true, null, banReason.trim())
-                    } else {
-                        try {
-                            val days = banDuration.toInt()
-                            if (days > 0) {
-                                onBanUser(userId, false, days, banReason.trim())
-                            } else {
-                                showError = true
-                            }
-                        } catch (e: NumberFormatException) {
-                            showError = true
-                        }
+                    if (durationValid) {
+                        val duration = if (isPermanent) null else banDuration.toInt()
+                        onBanUser(userId, isPermanent, duration, banReason.trim())
                     }
                 }
             ) {

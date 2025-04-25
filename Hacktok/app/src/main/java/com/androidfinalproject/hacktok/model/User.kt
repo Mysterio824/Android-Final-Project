@@ -63,6 +63,7 @@ data class User(
 
     fun isCurrentlyBanned(): Boolean {
         val now = Date()
+        println("isBanned: ${banInfo?.isBanned}, endDate: ${banInfo?.endDate}, now: $now")
         return banInfo?.isBanned == true && (banInfo.endDate == null || now.before(banInfo.endDate))
     }
 }

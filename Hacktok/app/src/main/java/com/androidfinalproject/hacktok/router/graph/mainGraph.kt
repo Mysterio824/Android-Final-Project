@@ -86,7 +86,6 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
                 },
                 onCreateStoryNavigate = {
                     navController.navigate(MainRoute.NewStory.route)
-
                 },
                 onAuthNavigate = {
                     navController.navigate(AuthRoute.Graph.route)

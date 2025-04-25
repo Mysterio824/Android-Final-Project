@@ -27,8 +27,9 @@ fun AdminManagementScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
     onAction: (AdminManagementAction) -> Unit = {},
+    startTabIndex: Int = 0
 ) {
-    var selectedTab by remember { mutableIntStateOf(0) }
+    var selectedTab by remember { mutableIntStateOf(startTabIndex) }
     val userManagementViewModel: UserManagementViewModel = hiltViewModel()
     val postManagementViewModel: PostManagementViewModel = hiltViewModel()
     val reportManagementViewModel: ReportManagementViewModel = hiltViewModel()

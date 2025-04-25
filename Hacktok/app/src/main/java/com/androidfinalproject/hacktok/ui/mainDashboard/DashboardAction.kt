@@ -1,5 +1,8 @@
 package com.androidfinalproject.hacktok.ui.mainDashboard;
 
+import android.content.Context
+import androidx.activity.result.ActivityResultLauncher
+
 sealed class DashboardAction {
     data class SelectTab(val index: String) : DashboardAction()
     data class OnPostClick(val postId: String, val commentId: String?) : DashboardAction()
@@ -18,4 +21,8 @@ sealed class DashboardAction {
     object OnUserEdit : DashboardAction()
     object OnChangePass : DashboardAction()
     object OnAuthNavigate : DashboardAction()
+    data class CheckNotificationPermission(
+        val context: Context,
+        val permissionLauncher: ActivityResultLauncher<String>
+    ) : DashboardAction()
 }

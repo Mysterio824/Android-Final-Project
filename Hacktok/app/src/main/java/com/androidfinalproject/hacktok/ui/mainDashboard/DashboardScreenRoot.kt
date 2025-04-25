@@ -1,7 +1,12 @@
 package com.androidfinalproject.hacktok.ui.mainDashboard
 
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
@@ -26,6 +31,30 @@ fun DashboardScreenRoot(
     onNavigateBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+
+    val requestPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            Log.d("DashboardScreenRoot", "Notification permission granted")
+        } else {
+            Log.d("DashboardScreenRoot", "Notification permission denied")
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.onAction(
+            DashboardAction.CheckNotificationPermission(
+                context = context,
+                permissionLauncher = requestPermissionLauncher
+            )
+        )
+    }
+    LaunchedEffect(state.isLogout) {
+        if(state.isLogout)
+            onAuthNavigate()
+    }
 
     DashboardScreen(
         state = state,

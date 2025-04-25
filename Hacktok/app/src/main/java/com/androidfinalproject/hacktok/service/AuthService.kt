@@ -1,6 +1,7 @@
 package com.androidfinalproject.hacktok.service
 
 import com.androidfinalproject.hacktok.model.User
+import com.google.firebase.auth.FirebaseUser
 
 /**
  * Service to handle authentication and user operations
@@ -22,4 +23,9 @@ interface AuthService {
     suspend fun logout(): Boolean
 
     suspend fun changePassword(oldPass: String, newPassword: String): String
+    suspend fun signUp(email: String, password: String): String
+    suspend fun resetPassword(email: String): String
+    suspend fun signInWithGoogle(idToken: String): FirebaseUser?
+    suspend fun signInWithEmail(email: String, password: String): FirebaseUser?
+    suspend fun isUserAdmin(userId: String): Boolean
 } 

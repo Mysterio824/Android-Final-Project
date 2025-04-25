@@ -45,7 +45,6 @@ fun ResponseOptionsContent(
 
         OptionItem(
             title = "Delete Request",
-            description = "This comment concerns me",
             onClick = withDismiss(unaccepted)
         )
     }

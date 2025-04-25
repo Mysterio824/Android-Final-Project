@@ -56,7 +56,7 @@ class FriendSuggestionViewModel @Inject constructor(
                 val friendRequests = relationshipService.getMyFriendRequests()
                 val friendSuggestions = relationshipService.getFriendSuggestions(10)
                 val relation = relationshipService.getMyRelationships()
-                
+
                 // Update state - remove explicit setting of relations
                 _state.update { currentState ->
                     currentState.copy(

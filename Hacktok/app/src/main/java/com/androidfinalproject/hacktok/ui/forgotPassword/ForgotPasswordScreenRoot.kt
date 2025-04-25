@@ -2,12 +2,12 @@ package com.androidfinalproject.hacktok.ui.forgotPassword
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun ForgotPasswordScreenRoot(
-    viewModel: ForgotPasswordViewModel = viewModel(),
+    viewModel: ForgotPasswordViewModel = hiltViewModel(),
     onGoBack: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
