@@ -251,74 +251,80 @@ fun SecretCrushScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // User selection section - shown when "Add" is clicked
-                AnimatedVisibility(
-                    visible = showUsersList,
-                    enter = fadeIn(animationSpec = tween(300)),
-                    exit = fadeOut(animationSpec = tween(300))
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
-                    ) {
-                        // Search bar with close button
-                        Row(
+                // Users List Dialog
+                if (showUsersList) {
+                    Dialog(onDismissRequest = { showUsersList = false }) {
+                        Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(bottom = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            OutlinedTextField(
-                                value = searchQuery,
-                                onValueChange = { searchQuery = it },
-                                modifier = Modifier
-                                    .weight(1f),
-                                placeholder = { Text("Search users") },
-                                leadingIcon = {
-                                    Icon(Icons.Default.Search, contentDescription = "Search")
-                                },
-                                singleLine = true
+                                .fillMaxHeight(0.8f),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surface
                             )
-
-                            IconButton(onClick = { showUsersList = false }) {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = "Close user selection"
-                                )
-                            }
-                        }
-
-                        // Users list
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            items(filteredUsers) { user ->
-                                // Skip users that are already selected
-                                if (state.selectedCrushes.none { it.user.id == user.id }) {
-                                    UserListItem(
-                                        user = user,
-                                        onUserClick = {
-                                            showMessageDialog = user
-                                        }
-                                    )
-                                }
-                            }
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(16.dp)
+                            ) {
+                                // Search bar
+                                OutlinedTextField(
+                                    value = searchQuery,
+                                    onValueChange = { searchQuery = it },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    placeholder = { Text("Search users...") },
+                                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
+                                    singleLine = true
+                                )
 
-                            if (filteredUsers.isEmpty() ||
-                                filteredUsers.all { user -> state.selectedCrushes.any { it.user.id == user.id } }) {
-                                item {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(32.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = "No available users found",
-                                            style = MaterialTheme.typography.bodyLarge
-                                        )
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                // Users list
+                                LazyColumn(
+                                    modifier = Modifier.fillMaxSize(),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    items(filteredUsers) { user ->
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clickable {
+                                                    onAction(SecretCrushAction.SelectUser(user))
+                                                    showUsersList = false
+                                                }
+                                                .padding(8.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            // User avatar
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(50.dp)
+                                                    .clip(CircleShape)
+                                                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                                            ) {
+                                                AsyncImage(
+                                                    model = user.profileImage ?: "",
+                                                    contentDescription = "User avatar",
+                                                    contentScale = ContentScale.Crop,
+                                                    modifier = Modifier.fillMaxSize()
+                                                )
+                                            }
+
+                                            Spacer(modifier = Modifier.width(16.dp))
+
+                                            // User info
+                                            Column {
+                                                Text(
+                                                    text = user.username ?: "User",
+                                                    style = MaterialTheme.typography.titleMedium
+                                                )
+                                                Text(
+                                                    text = user.fullName ?: "",
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
+                                        }
                                     }
                                 }
                             }

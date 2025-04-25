@@ -6,7 +6,7 @@ data class SecretCrushState(
     val currentUser: User? = null,
     val selectedCrushes: List<SelectedCrush> = emptyList(),
     val receivedCrushes: List<SelectedCrush> = emptyList(),
-    val availableUsers: List<User> = emptyList(),  // Added list of available users
+    val availableUsers: List<User> = emptyList(),
     val peopleWhoLikeYou: Int = 0,
     val isLoading: Boolean = false,
     val error: String? = null

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.model.SecretCrush
 import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.repository.SecretCrushRepository
+import com.androidfinalproject.hacktok.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,13 +18,15 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SecretCrushViewModel @Inject constructor(
-    private val secretCrushRepository: SecretCrushRepository
+    private val secretCrushRepository: SecretCrushRepository,
+    private val userRepository: UserRepository
 ) : ViewModel() {
     private val _state = MutableStateFlow(SecretCrushState())
     val state: StateFlow<SecretCrushState> = _state.asStateFlow()
 
     init {
         loadCrushes()
+        loadAllUsers()
     }
 
     fun onAction(action: SecretCrushAction) {
@@ -32,8 +35,24 @@ class SecretCrushViewModel @Inject constructor(
             is SecretCrushAction.RevealCrush -> revealCrush(action.crushId)
             is SecretCrushAction.UnselectUser -> deleteCrush(action.userId)
             SecretCrushAction.LoadCrushData -> loadCrushes()
+            SecretCrushAction.LoadAllUsers -> loadAllUsers()
             SecretCrushAction.NavigateBack -> {} // Handled by the screen root
             is SecretCrushAction.SendMessage -> TODO()
+        }
+    }
+
+    private fun loadAllUsers() {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, error = null) }
+
+            try {
+                val users = userRepository.getAllUsers()
+                _state.update { it.copy(availableUsers = users) }
+            } catch (e: Exception) {
+                _state.update { it.copy(error = e.message) }
+            }
+
+            _state.update { it.copy(isLoading = false) }
         }
     }
 

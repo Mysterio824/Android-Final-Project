@@ -4,6 +4,7 @@ import com.androidfinalproject.hacktok.model.User
 
 sealed class SecretCrushAction {
     object LoadCrushData : SecretCrushAction()
+    object LoadAllUsers : SecretCrushAction()
     object NavigateBack : SecretCrushAction()
     data class RevealCrush(val crushId: String) : SecretCrushAction()
 
