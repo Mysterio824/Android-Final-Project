@@ -137,8 +137,6 @@ class SecretCrushRepositoryImpl @Inject constructor(
                                     .whereEqualTo("receiverId", currentUserId)
                                     .get()
                                     .addOnSuccessListener { reciprocalDocs ->
-                                        val isMatch = !reciprocalDocs.isEmpty
-
                                         // Create the new crush
                                         val secretCrush = SecretCrush(
                                             senderId = currentUserId,
@@ -147,20 +145,12 @@ class SecretCrushRepositoryImpl @Inject constructor(
                                             receiverId = crushId,
                                             receiverName = receiverName,
                                             receiverImageUrl = receiverImageUrl,
-                                            isMatch = isMatch,
                                             createdAt = Date()
                                         )
 
                                         // Add to Firestore
                                         crushesCollection.add(secretCrush)
                                             .addOnSuccessListener {
-                                                // If it's a match, update the other person's crush
-                                                if (isMatch) {
-                                                    reciprocalDocs.documents.firstOrNull()?.reference?.update(
-                                                        "isMatch", true
-                                                    )
-                                                }
-
                                                 // Send notification to the receiver
                                                 serviceScope.launch {
                                                     fcmService.sendInteractionNotification(
@@ -217,17 +207,11 @@ class SecretCrushRepositoryImpl @Inject constructor(
                     return@addOnSuccessListener
                 }
 
-                // Verify the current user is the sender
-                if (crush.senderId != currentUserId) {
-                    trySend(Result.failure(IllegalStateException("You can only reveal your own crushes")))
-                    return@addOnSuccessListener
-                }
-
                 // Update the crush to be revealed
                 crushesCollection.document(crushId)
                     .update(
                         mapOf(
-                            "isRevealed" to true,
+                            "revealed" to true,
                             "revealedAt" to Date()
                         )
                     )
@@ -267,12 +251,6 @@ class SecretCrushRepositoryImpl @Inject constructor(
                     return@addOnSuccessListener
                 }
 
-                // Verify the current user is the sender
-                if (crush.senderId != currentUserId) {
-                    Log.e(TAG, "User $currentUserId attempted to delete crush owned by ${crush.senderId}")
-                    trySend(Result.failure(IllegalStateException("You can only delete your own crushes")))
-                    return@addOnSuccessListener
-                }
 
                 Log.d(TAG, "Attempting to delete crush document: $crushId")
                 // Delete the crush
@@ -280,23 +258,6 @@ class SecretCrushRepositoryImpl @Inject constructor(
                     .delete()
                     .addOnSuccessListener {
                         Log.d(TAG, "Successfully deleted crush document: $crushId")
-                        // If it was a match, update the other person's crush to no longer be a match
-                        if (crush.isMatch) {
-                            Log.d(TAG, "Updating match status for reciprocal crush")
-                            crushesCollection
-                                .whereEqualTo("senderId", crush.receiverId)
-                                .whereEqualTo("receiverId", crush.senderId)
-                                .get()
-                                .addOnSuccessListener { documents ->
-                                    documents.documents.firstOrNull()?.reference?.update(
-                                        "isMatch", false
-                                    )
-                                    Log.d(TAG, "Updated match status for reciprocal crush")
-                                }
-                                .addOnFailureListener { e ->
-                                    Log.e(TAG, "Failed to update match status for reciprocal crush", e)
-                                }
-                        }
                         trySend(Result.success(Unit))
                     }
                     .addOnFailureListener { e ->

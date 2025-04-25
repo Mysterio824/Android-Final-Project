@@ -77,7 +77,8 @@ class SecretCrushViewModel @Inject constructor(
                                     ),
                                     message = null,
                                     timestamp = crush.createdAt.time,
-                                    crushId = crush.id
+                                    crushId = crush.id,
+                                    isRevealed = crush.revealed
                                 )
                             }
                             _state.update { it.copy(selectedCrushes = selectedCrushes) }
@@ -101,10 +102,18 @@ class SecretCrushViewModel @Inject constructor(
                                     ),
                                     message = null,
                                     timestamp = crush.createdAt.time,
-                                    crushId = crush.id
+                                    crushId = crush.id,
+                                    isRevealed = crush.revealed
                                 )
                             }
-                            _state.update { it.copy(receivedCrushes = receivedCrushes) }
+                            // Update peopleWhoLikeYou count
+                            val peopleWhoLikeYouCount = crushes.size
+                            _state.update { 
+                                it.copy(
+                                    receivedCrushes = receivedCrushes,
+                                    peopleWhoLikeYou = peopleWhoLikeYouCount
+                                ) 
+                            }
                         }.onFailure { error ->
                             _state.update { it.copy(error = error.message) }
                         }
@@ -142,17 +151,22 @@ class SecretCrushViewModel @Inject constructor(
     private fun revealCrush(crushId: String) {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
+            Log.d("SecretCrushViewModel", "Attempting to reveal crush with ID: $crushId")
 
             try {
                 secretCrushRepository.revealSecretCrush(crushId).collect { result ->
                     result.onSuccess {
+                        Log.d("SecretCrushViewModel", "Successfully revealed crush with ID: $crushId")
+
                         loadCrushes()
                     }.onFailure { error ->
-                        _state.update { it.copy(error = error.message) }
+                        Log.e("SecretCrushViewModel", "Failed to reveal crush with ID: $crushId", error)
+                        _state.update { it.copy(error = error.message,isLoading = false) }
                     }
                 }
             } catch (e: Exception) {
-                _state.update { it.copy(error = e.message) }
+                Log.e("SecretCrushViewModel", "Exception while revealing crush with ID: $crushId", e)
+                _state.update { it.copy(error = e.message,isLoading = false) }
             }
 
             _state.update { it.copy(isLoading = false) }

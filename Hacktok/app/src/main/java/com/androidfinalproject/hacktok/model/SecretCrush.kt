@@ -11,8 +11,7 @@ data class SecretCrush(
     @PropertyName("receiverId") val receiverId: String = "",
     @PropertyName("receiverName") val receiverName: String = "",
     @PropertyName("receiverImageUrl") val receiverImageUrl: String = "",
-    @PropertyName("isRevealed") val isRevealed: Boolean = false,
-    @PropertyName("isMatch") val isMatch: Boolean = false,
+    @PropertyName("revealed") val revealed: Boolean = false,
     @PropertyName("createdAt") val createdAt: Date = Date(),
     @PropertyName("revealedAt") val revealedAt: Date? = null
 ) {
@@ -25,8 +24,7 @@ data class SecretCrush(
         receiverId = "",
         receiverName = "",
         receiverImageUrl = "",
-        isRevealed = false,
-        isMatch = false,
+        revealed = false,
         createdAt = Date(),
         revealedAt = null
     )

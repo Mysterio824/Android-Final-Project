@@ -1,5 +1,6 @@
 package com.androidfinalproject.hacktok.ui.secretCrush
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -48,9 +49,21 @@ fun SecretCrushScreen(
     var showRemoveConfirmation by remember { mutableStateOf<String?>(null) }
     var showUsersList by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
+    var userToReveal by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
         onAction(SecretCrushAction.LoadCrushData)
+    }
+
+    // Handle revealing new crush when state updates
+    LaunchedEffect(state.selectedCrushes, userToReveal) {
+        if (userToReveal != null) {
+            val newCrush = state.selectedCrushes.find { it.user.id == userToReveal }
+            newCrush?.crushId?.let { newCrushId ->
+                onAction(SecretCrushAction.RevealCrush(newCrushId))
+                userToReveal = null
+            }
+        }
     }
 
     val filteredUsers = if (searchQuery.text.isEmpty()) {
@@ -226,6 +239,17 @@ fun SecretCrushScreen(
                                         .size(80.dp)
                                         .clip(RoundedCornerShape(8.dp))
                                         .clickable { showRemoveConfirmation = crush.user.id }
+                                        .then(
+                                            if (crush.isRevealed) {
+                                                Modifier.border(
+                                                    width = 2.dp,
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                    shape = RoundedCornerShape(8.dp)
+                                                )
+                                            } else {
+                                                Modifier
+                                            }
+                                        )
                                 ) {
                                     // User avatar
                                     AsyncImage(
@@ -234,6 +258,18 @@ fun SecretCrushScreen(
                                         contentScale = ContentScale.Crop,
                                         modifier = Modifier.fillMaxSize()
                                     )
+                                    
+                                    // Revealed indicator
+                                    if (crush.isRevealed) {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .background(
+                                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                                                    shape = RoundedCornerShape(8.dp)
+                                                )
+                                        )
+                                    }
                                 }
 
                                 Spacer(modifier = Modifier.height(4.dp))
@@ -242,7 +278,12 @@ fun SecretCrushScreen(
                                     text = crush.user.username ?: "User",
                                     style = MaterialTheme.typography.bodySmall,
                                     maxLines = 1,
-                                    textAlign = TextAlign.Center
+                                    textAlign = TextAlign.Center,
+                                    color = if (crush.isRevealed) {
+                                        MaterialTheme.colorScheme.primary
+                                    } else {
+                                        MaterialTheme.colorScheme.onSurface
+                                    }
                                 )
                             }
                         }
@@ -289,7 +330,23 @@ fun SecretCrushScreen(
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .clickable {
-                                                    onAction(SecretCrushAction.SelectUser(user))
+                                                    // Check if the selected user is a received crush
+                                                    val receivedCrush = state.receivedCrushes.find { it.user.id == user.id }
+                                                    if (receivedCrush != null) {
+                                                        // First reveal the received crush
+                                                        receivedCrush.crushId?.let { crushId ->
+                                                            onAction(SecretCrushAction.RevealCrush(crushId))
+                                                        }
+                                                        
+                                                        // Then create new document
+                                                        onAction(SecretCrushAction.SelectUser(user))
+                                                        
+                                                        // Set the user ID to reveal once the state updates
+                                                        userToReveal = user.id
+                                                    } else {
+                                                        // Otherwise, just add them as a crush
+                                                        onAction(SecretCrushAction.SelectUser(user))
+                                                    }
                                                     showUsersList = false
                                                 }
                                                 .padding(8.dp),

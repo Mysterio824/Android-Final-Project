@@ -16,5 +16,6 @@ data class SelectedCrush(
     val user: User,
     val message: String? = null,
     val timestamp: Long = System.currentTimeMillis(),
-    val crushId: String? = null
+    val crushId: String? = null,
+    val isRevealed: Boolean = false
 )
