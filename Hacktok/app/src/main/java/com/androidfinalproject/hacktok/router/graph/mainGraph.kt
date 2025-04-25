@@ -39,7 +39,7 @@ import com.androidfinalproject.hacktok.ui.secretCrush.SecretCrushViewModel
 
 fun NavGraphBuilder.mainNavigation(navController: NavController) {
     navigation(
-        startDestination = MainRoute.SecretCrush.route,
+        startDestination = MainRoute.Dashboard.route,
         route = MainRoute.Graph.route
     ) {
         // Dashboard Screen

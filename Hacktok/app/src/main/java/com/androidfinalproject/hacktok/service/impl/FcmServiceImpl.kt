@@ -279,7 +279,7 @@ class FcmServiceImpl @Inject constructor(
                 content = body,
                 createdAt = Date(),
                 isRead = false,
-                priority = "normal"
+                priority = "normal")
             // Call the refactored sendNotification which triggers the backend
             val backendCallInitiated = sendNotification(
                 recipientUserId = recipientUserId,
