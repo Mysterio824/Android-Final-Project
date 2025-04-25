@@ -243,7 +243,7 @@ fun SecretCrushScreen(
                                             if (crush.isRevealed) {
                                                 Modifier.border(
                                                     width = 2.dp,
-                                                    color = MaterialTheme.colorScheme.primary,
+                                                    color = MaterialTheme.colorScheme.tertiary,
                                                     shape = RoundedCornerShape(8.dp)
                                                 )
                                             } else {
@@ -265,7 +265,7 @@ fun SecretCrushScreen(
                                             modifier = Modifier
                                                 .fillMaxSize()
                                                 .background(
-                                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                                                    color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.3f),
                                                     shape = RoundedCornerShape(8.dp)
                                                 )
                                         )
@@ -280,7 +280,7 @@ fun SecretCrushScreen(
                                     maxLines = 1,
                                     textAlign = TextAlign.Center,
                                     color = if (crush.isRevealed) {
-                                        MaterialTheme.colorScheme.primary
+                                        MaterialTheme.colorScheme.tertiary
                                     } else {
                                         MaterialTheme.colorScheme.onSurface
                                     }
