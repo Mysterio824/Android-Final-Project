@@ -9,5 +9,6 @@ enum class NotificationType {
     COMMENT_LIKE,
     ADMIN_NOTIFICATION,
     NEW_STORY,
-    NEW_MESSAGE
+    NEW_MESSAGE,
+    SECRET_CRUSH
 }

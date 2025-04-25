@@ -83,7 +83,9 @@ fun NotificationItem(
                                 // Handle action URL
                             }
                         }
-
+                        NotificationType.NEW_STORY -> notification.senderId?.let { onUserClick(it) }
+                        NotificationType.NEW_MESSAGE -> notification.senderId?.let { onUserClick(it) }
+                        NotificationType.SECRET_CRUSH -> notification.senderId?.let { onUserClick(it) }
                         else -> TODO()
                     }
                 },
@@ -177,6 +179,8 @@ private fun getNotificationTypeIcon(type: NotificationType): ImageVector {
         NotificationType.COMMENT_LIKE -> Icons.Default.ThumbUp
         NotificationType.ADMIN_NOTIFICATION -> Icons.AutoMirrored.Filled.Announcement
         NotificationType.NEW_STORY -> Icons.Default.ViewCarousel
+        NotificationType.NEW_MESSAGE -> Icons.Default.ChatBubble
+        NotificationType.SECRET_CRUSH -> Icons.Default.Favorite
         else -> TODO()
     }
 }
@@ -190,6 +194,9 @@ private fun getNotificationTypeColor(type: NotificationType): Color {
         NotificationType.POST_COMMENT,
         NotificationType.COMMENT_REPLY -> Color(0xFF0BC5EA) // Light blue for comments
         NotificationType.ADMIN_NOTIFICATION -> Color(0xFFFF8800) // Orange for admin notifications
+        NotificationType.NEW_STORY -> Color(0xFF8A2BE2) // Blue violet for stories
+        NotificationType.NEW_MESSAGE -> Color(0xFF0BC5EA) // Light blue for messages
+        NotificationType.SECRET_CRUSH -> Color(0xFFE41E3F) // Red for secret crush
         else -> TODO()
     }
 }
