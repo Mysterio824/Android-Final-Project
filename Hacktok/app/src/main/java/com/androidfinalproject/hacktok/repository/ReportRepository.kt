@@ -49,4 +49,6 @@ interface ReportRepository {
      * @return A Flow emitting lists of pending Report objects.
      */
     fun getPendingReportsFlow(): Flow<List<Report>>
+
+    suspend fun getReportsForUser(userId: String): List<Report>
 }
