@@ -1,5 +1,6 @@
 package com.androidfinalproject.hacktok.ui.secretCrush
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.model.SecretCrush
@@ -75,7 +76,8 @@ class SecretCrushViewModel @Inject constructor(
                                         profileImage = crush.receiverImageUrl
                                     ),
                                     message = null,
-                                    timestamp = crush.createdAt.time
+                                    timestamp = crush.createdAt.time,
+                                    crushId = crush.id
                                 )
                             }
                             _state.update { it.copy(selectedCrushes = selectedCrushes) }
@@ -98,7 +100,8 @@ class SecretCrushViewModel @Inject constructor(
                                         profileImage = crush.senderImageUrl
                                     ),
                                     message = null,
-                                    timestamp = crush.createdAt.time
+                                    timestamp = crush.createdAt.time,
+                                    crushId = crush.id
                                 )
                             }
                             _state.update { it.copy(receivedCrushes = receivedCrushes) }
@@ -159,17 +162,21 @@ class SecretCrushViewModel @Inject constructor(
     private fun deleteCrush(crushId: String) {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
+            Log.d("SecretCrushViewModel", "Attempting to delete crush with ID: $crushId")
 
             try {
                 secretCrushRepository.deleteSecretCrush(crushId).collect { result ->
                     result.onSuccess {
+                        Log.d("SecretCrushViewModel", "Successfully deleted crush with ID: $crushId")
                         loadCrushes()
                     }.onFailure { error ->
-                        _state.update { it.copy(error = error.message) }
+                        Log.e("SecretCrushViewModel", "Failed to delete crush with ID: $crushId", error)
+                        _state.update { it.copy(error = error.message, isLoading = false) }
                     }
                 }
             } catch (e: Exception) {
-                _state.update { it.copy(error = e.message) }
+                Log.e("SecretCrushViewModel", "Exception while deleting crush with ID: $crushId", e)
+                _state.update { it.copy(error = e.message, isLoading = false) }
             }
 
             _state.update { it.copy(isLoading = false) }

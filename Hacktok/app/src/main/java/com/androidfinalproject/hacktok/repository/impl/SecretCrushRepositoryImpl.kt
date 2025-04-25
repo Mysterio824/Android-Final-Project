@@ -249,32 +249,40 @@ class SecretCrushRepositoryImpl @Inject constructor(
 
     override fun deleteSecretCrush(crushId: String): Flow<Result<Unit>> = callbackFlow {
         val currentUserId = auth.currentUser?.uid ?: run {
+            Log.e(TAG, "User not authenticated while trying to delete crush: $crushId")
             trySend(Result.failure(IllegalStateException("User not authenticated")))
             close()
             return@callbackFlow
         }
+
+        Log.d(TAG, "Starting delete operation for crush: $crushId by user: $currentUserId")
 
         crushesCollection.document(crushId).get()
             .addOnSuccessListener { document ->
                 val crush = document.toObject(SecretCrush::class.java)
 
                 if (crush == null) {
+                    Log.e(TAG, "Crush document not found with ID: $crushId")
                     trySend(Result.failure(IllegalStateException("Crush not found")))
                     return@addOnSuccessListener
                 }
 
                 // Verify the current user is the sender
                 if (crush.senderId != currentUserId) {
+                    Log.e(TAG, "User $currentUserId attempted to delete crush owned by ${crush.senderId}")
                     trySend(Result.failure(IllegalStateException("You can only delete your own crushes")))
                     return@addOnSuccessListener
                 }
 
+                Log.d(TAG, "Attempting to delete crush document: $crushId")
                 // Delete the crush
                 crushesCollection.document(crushId)
                     .delete()
                     .addOnSuccessListener {
+                        Log.d(TAG, "Successfully deleted crush document: $crushId")
                         // If it was a match, update the other person's crush to no longer be a match
                         if (crush.isMatch) {
+                            Log.d(TAG, "Updating match status for reciprocal crush")
                             crushesCollection
                                 .whereEqualTo("senderId", crush.receiverId)
                                 .whereEqualTo("receiverId", crush.senderId)
@@ -283,17 +291,21 @@ class SecretCrushRepositoryImpl @Inject constructor(
                                     documents.documents.firstOrNull()?.reference?.update(
                                         "isMatch", false
                                     )
+                                    Log.d(TAG, "Updated match status for reciprocal crush")
+                                }
+                                .addOnFailureListener { e ->
+                                    Log.e(TAG, "Failed to update match status for reciprocal crush", e)
                                 }
                         }
                         trySend(Result.success(Unit))
                     }
                     .addOnFailureListener { e ->
-                        Log.e(TAG, "Error deleting crush", e)
+                        Log.e(TAG, "Failed to delete crush document: $crushId", e)
                         trySend(Result.failure(e))
                     }
             }
             .addOnFailureListener { e ->
-                Log.e(TAG, "Error getting crush document", e)
+                Log.e(TAG, "Failed to get crush document: $crushId", e)
                 trySend(Result.failure(e))
             }
 

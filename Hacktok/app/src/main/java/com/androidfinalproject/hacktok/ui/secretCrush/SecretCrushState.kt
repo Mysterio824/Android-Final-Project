@@ -15,5 +15,6 @@ data class SecretCrushState(
 data class SelectedCrush(
     val user: User,
     val message: String? = null,
-    val timestamp: Long = System.currentTimeMillis()
+    val timestamp: Long = System.currentTimeMillis(),
+    val crushId: String? = null
 )

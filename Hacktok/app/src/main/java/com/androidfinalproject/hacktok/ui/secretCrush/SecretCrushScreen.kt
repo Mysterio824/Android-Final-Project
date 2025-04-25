@@ -414,7 +414,9 @@ fun SecretCrushScreen(
                 confirmButton = {
                     Button(
                         onClick = {
-                            onAction(SecretCrushAction.UnselectUser(showRemoveConfirmation!!))
+                            crushToRemove.crushId?.let { crushId ->
+                                onAction(SecretCrushAction.UnselectUser(crushId))
+                            }
                             showRemoveConfirmation = null
                         }
                     ) {
