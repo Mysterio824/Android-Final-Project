@@ -31,4 +31,10 @@ interface SecretCrushRepository {
      * @param crushId The ID of the secret crush to delete
      */
     fun deleteSecretCrush(crushId: String): Flow<Result<Unit>>
+
+    /**
+     * Unreveals a secret crush
+     * @param crushId The ID of the secret crush to unreveal
+     */
+    fun unrevealSecretCrush(crushId: String): Flow<Result<Unit>>
 }

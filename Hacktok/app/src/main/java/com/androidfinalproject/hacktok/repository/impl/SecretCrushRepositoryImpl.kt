@@ -251,22 +251,97 @@ class SecretCrushRepositoryImpl @Inject constructor(
                     return@addOnSuccessListener
                 }
 
+                // If the crush is revealed, we need to unreveal it first
+                if (crush.revealed) {
+                    // Find the reciprocal crush (if it exists)
+                    crushesCollection
+                        .whereEqualTo("senderId", crush.receiverId)
+                        .whereEqualTo("receiverId", crush.senderId)
+                        .get()
+                        .addOnSuccessListener { reciprocalDocs ->
+                            if (!reciprocalDocs.isEmpty) {
+                                // Unreveal the reciprocal crush
+                                val reciprocalCrush = reciprocalDocs.documents[0]
+                                reciprocalCrush.reference.update(
+                                    mapOf(
+                                        "revealed" to false,
+                                        "revealedAt" to null
+                                    )
+                                )
+                            }
 
-                Log.d(TAG, "Attempting to delete crush document: $crushId")
-                // Delete the crush
+                            // Delete the original crush
+                            crushesCollection.document(crushId)
+                                .delete()
+                                .addOnSuccessListener {
+                                    Log.d(TAG, "Successfully deleted crush document: $crushId")
+                                    trySend(Result.success(Unit))
+                                }
+                                .addOnFailureListener { e ->
+                                    Log.e(TAG, "Failed to delete crush document: $crushId", e)
+                                    trySend(Result.failure(e))
+                                }
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e(TAG, "Failed to find reciprocal crush", e)
+                            trySend(Result.failure(e))
+                        }
+                } else {
+                    // If not revealed, just delete it
+                    crushesCollection.document(crushId)
+                        .delete()
+                        .addOnSuccessListener {
+                            Log.d(TAG, "Successfully deleted crush document: $crushId")
+                            trySend(Result.success(Unit))
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e(TAG, "Failed to delete crush document: $crushId", e)
+                            trySend(Result.failure(e))
+                        }
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e(TAG, "Failed to get crush document: $crushId", e)
+                trySend(Result.failure(e))
+            }
+
+        awaitClose { }
+    }
+
+    override fun unrevealSecretCrush(crushId: String): Flow<Result<Unit>> = callbackFlow {
+        val currentUserId = auth.currentUser?.uid ?: run {
+            trySend(Result.failure(IllegalStateException("User not authenticated")))
+            close()
+            return@callbackFlow
+        }
+
+        crushesCollection.document(crushId).get()
+            .addOnSuccessListener { document ->
+                val crush = document.toObject(SecretCrush::class.java)
+
+                if (crush == null) {
+                    trySend(Result.failure(IllegalStateException("Crush not found")))
+                    return@addOnSuccessListener
+                }
+
+                // Update the crush to be unrevealed
                 crushesCollection.document(crushId)
-                    .delete()
+                    .update(
+                        mapOf(
+                            "revealed" to false,
+                            "revealedAt" to null
+                        )
+                    )
                     .addOnSuccessListener {
-                        Log.d(TAG, "Successfully deleted crush document: $crushId")
                         trySend(Result.success(Unit))
                     }
                     .addOnFailureListener { e ->
-                        Log.e(TAG, "Failed to delete crush document: $crushId", e)
+                        Log.e(TAG, "Error unrevealing crush", e)
                         trySend(Result.failure(e))
                     }
             }
             .addOnFailureListener { e ->
-                Log.e(TAG, "Failed to get crush document: $crushId", e)
+                Log.e(TAG, "Error getting crush document", e)
                 trySend(Result.failure(e))
             }
 
