@@ -34,12 +34,15 @@ class FriendSuggestionViewModel @Inject constructor(
         }
     }
 
+
+
     fun onAction(action: FriendSuggestionAction) {
         when (action) {
             is FriendSuggestionAction.HandleRequest -> handleRequest(action.userId, action.isAccepted)
             is FriendSuggestionAction.OnRemove -> removeFriendSuggestion(action.userId)
             is FriendSuggestionAction.SendRequest -> sendFriendRequest(action.userId)
             is FriendSuggestionAction.UnSendRequest -> unSendRequest(action.userId)
+            is FriendSuggestionAction.Refresh -> loadScreen()
             else -> {}
         }
     }

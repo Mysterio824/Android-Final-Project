@@ -75,7 +75,7 @@ fun NotificationItem(
                         NotificationType.FRIEND_REQUEST -> notification.senderId?.let { onUserClick(it) }
                         NotificationType.FRIEND_ACCEPT -> notification.senderId?.let { onUserClick(it) }
                         NotificationType.POST_LIKE -> notification.relatedId?.let { onPostClick(it) }
-                        NotificationType.POST_COMMENT -> notification.relatedId?.let { onPostClick(it) }
+                        NotificationType.POST_COMMENT -> notification.relatedId?.let { onCommentClick(it) }
                         NotificationType.COMMENT_REPLY -> notification.relatedId?.let { onCommentClick(it) }
                         NotificationType.COMMENT_LIKE -> notification.relatedId?.let { onCommentClick(it) }
                         NotificationType.ADMIN_NOTIFICATION -> {
@@ -84,21 +84,18 @@ fun NotificationItem(
                             }
                         }
 
-                        NotificationType.NEW_STORY -> TODO()
-                        NotificationType.NEW_MESSAGE -> TODO()
+                        else -> TODO()
                     }
                 },
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Profile Image with notification type indicator
             Box(contentAlignment = Alignment.BottomEnd) {
-                notification.senderImage?.let { imageUrl ->
-                    ProfileImage(
-                        imageUrl = imageUrl,
-                        onClick = { notification.senderId?.let { onUserClick(it) } },
-                        size = 50.dp
-                    )
-                }
+                ProfileImage(
+                    imageUrl =  notification.senderImage?: "",
+                    onClick = { notification.senderId?.let { onUserClick(it) } },
+                    size = 50.dp
+                )
 
                 // Icon badge based on notification type
                 Surface(
@@ -180,7 +177,7 @@ private fun getNotificationTypeIcon(type: NotificationType): ImageVector {
         NotificationType.COMMENT_LIKE -> Icons.Default.ThumbUp
         NotificationType.ADMIN_NOTIFICATION -> Icons.AutoMirrored.Filled.Announcement
         NotificationType.NEW_STORY -> Icons.Default.ViewCarousel
-        NotificationType.NEW_MESSAGE -> TODO()
+        else -> TODO()
     }
 }
 
@@ -193,8 +190,7 @@ private fun getNotificationTypeColor(type: NotificationType): Color {
         NotificationType.POST_COMMENT,
         NotificationType.COMMENT_REPLY -> Color(0xFF0BC5EA) // Light blue for comments
         NotificationType.ADMIN_NOTIFICATION -> Color(0xFFFF8800) // Orange for admin notifications
-        NotificationType.NEW_STORY -> TODO()
-        NotificationType.NEW_MESSAGE -> TODO()
+        else -> TODO()
     }
 }
 

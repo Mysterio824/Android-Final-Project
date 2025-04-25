@@ -49,6 +49,22 @@ class CurrentProfileViewModel @Inject constructor(
         }
     }
 
+    private fun loadLikesUser(targetId: String) {
+        viewModelScope.launch {
+            try {
+                val current = _state.value
+                val likeUsers = likeService.getPostLike(targetId)
+                if (current is CurrentProfileState.Success) {
+                    _state.value = current.copy(
+                        listLikeUser = likeUsers
+                    )
+                }
+            } catch(e: Exception){
+                Log.d("CurrentProfileViewModel", e.message.toString())
+            }
+        }
+    }
+
     private fun editPost(postId: String?, newContent: String) {
         viewModelScope.launch {
             try {
@@ -172,6 +188,11 @@ class CurrentProfileViewModel @Inject constructor(
                     }
                 }
             }
+
+            is CurrentProfileAction.OnLikesShowClick -> loadLikesUser(action.targetId)
+
+            is CurrentProfileAction.Refresh  -> loadCurrentUser()
+
             else -> {
 
             } // Handle other actions

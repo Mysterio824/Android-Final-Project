@@ -72,6 +72,11 @@ class HomeScreenViewModel @Inject constructor(
             is HomeScreenAction.UpdateSharePost -> _state.update { it.copy(sharePost = action.post, showShareDialog = true) }
             is HomeScreenAction.DismissShareDialog -> _state.update { it.copy(showShareDialog = false) }
             is HomeScreenAction.LikePost -> likePost(action.postId)
+            is HomeScreenAction.Refresh -> {
+                reloadPosts()
+                loadStories()
+            }
+            is HomeScreenAction.OnLikesShowClick -> loadLikesUser(action.targetId)
             is HomeScreenAction.UnLikePost -> unLikePost(action.postId)
             is HomeScreenAction.SharePost -> sharePost(action.postId)
             is HomeScreenAction.SubmitReport -> submitReport(
@@ -96,6 +101,19 @@ class HomeScreenViewModel @Inject constructor(
     fun reloadPosts() {
         postRepository.resetPagination()
         loadPosts()
+    }
+
+    private fun loadLikesUser(targetId: String) {
+        viewModelScope.launch {
+            try {
+                val likeUsers = likeService.getPostLike(targetId)
+                _state.update{
+                    it.copy(listLikeUser = likeUsers)
+                }
+            } catch(e: Exception){
+                Log.d("PostDetailViewModel", e.message.toString())
+            }
+        }
     }
 
     private fun loadPosts() {

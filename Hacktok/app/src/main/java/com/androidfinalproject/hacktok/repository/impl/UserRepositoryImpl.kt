@@ -3,6 +3,7 @@ package com.androidfinalproject.hacktok.repository.impl
 import android.util.Log
 import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.model.enums.UserRole
+import com.androidfinalproject.hacktok.repository.CommentRepository
 import com.androidfinalproject.hacktok.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
@@ -10,7 +11,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
-import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.QuerySnapshot
 import java.util.Calendar
 import java.util.Date
@@ -19,7 +19,8 @@ import java.util.LinkedList
 @Singleton
 class UserRepositoryImpl @Inject constructor(
     private val firestore: FirebaseFirestore,
-    private val firebaseAuth: FirebaseAuth
+    private val firebaseAuth: FirebaseAuth,
+    private val commentRepository: CommentRepository
 ) : UserRepository {
     private val TAG = "UserRepository"
     private val usersCollection = firestore.collection("users")
@@ -108,6 +109,7 @@ class UserRepositoryImpl @Inject constructor(
             val currentUser = firebaseAuth.currentUser
             if (currentUser != null) {
                 usersCollection.document(currentUser.uid).set(user).await()
+                commentRepository.updateSnapshot(currentUser.uid, user)
                 true
             } else {
                 false
@@ -220,6 +222,11 @@ class UserRepositoryImpl @Inject constructor(
                 val user = document.toObject(User::class.java)
                 // Explicitly set the ID from the document ID
                 user?.copy(id = document.id)
+                if(user?.role != UserRole.ADMIN && user?.role != UserRole.MODERATOR){
+                    user
+                } else {
+                    null
+                }
             } catch (e: Exception) {
                 Log.e(TAG, "Error parsing user document ${document.id}", e)
                 null
@@ -258,9 +265,7 @@ class UserRepositoryImpl @Inject constructor(
             if (userIds.isEmpty()) {
                 return emptyList()
             }
-            
-            // Firestore has a limit of 10 items for 'in' queries
-            // Split the list into chunks of 10 and query each chunk
+
             val users = mutableListOf<User>()
             
             userIds.chunked(10).forEach { chunk ->

@@ -44,13 +44,6 @@ fun PostOptionsContent(
             modifier = Modifier.padding(16.dp)
         )
 
-        // Common options for all users
-        OptionItem(
-            title = "Hide Post",
-            icon = Icons.Default.VisibilityOff,
-            onClick = onDismiss
-        )
-
         if (!isPostOwner) {
             OptionItem(
                 title = "Report Post",

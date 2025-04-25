@@ -24,6 +24,7 @@ fun OptionItem(
     title: String,
     description: String? = null,
     icon: ImageVector? = null,
+    imageUrl: String? = null,
     onClick: () -> Unit
 ) {
     Row(
@@ -33,7 +34,14 @@ fun OptionItem(
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (icon != null) {
+        if (imageUrl != null) {
+            ProfileImage(
+                imageUrl = imageUrl,
+                size = 24.dp,
+                onClick = onClick
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+        } else if(icon != null) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,

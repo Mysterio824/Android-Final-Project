@@ -54,19 +54,18 @@ fun CommentOptionsContent(
             onClick = withDismiss(copyTextAction)
         )
 
-        OptionItem(
-            title = "Report Comment",
-            icon = Icons.Default.Report,
-            onClick = withDismiss(reportComment)
-        )
-
         if(isCommentOwner){
              OptionItem(
                  title = "Delete Comment",
                  icon = Icons.Default.Delete,
                  onClick = withDismiss(deleteComment)
              )
+        } else {
+            OptionItem(
+                title = "Report Comment",
+                icon = Icons.Default.Report,
+                onClick = withDismiss(reportComment)
+            )
         }
-
     }
 }

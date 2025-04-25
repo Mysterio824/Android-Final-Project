@@ -12,6 +12,8 @@ sealed class CurrentProfileAction {
     object OnNavigateBack : CurrentProfileAction()
     object OnEditProfile : CurrentProfileAction()
     object OnCreatePost : CurrentProfileAction()
+    object Refresh: CurrentProfileAction()
+    data class OnLikesShowClick(val targetId: String): CurrentProfileAction()
     object RetryLoading : CurrentProfileAction()
     data class OnDeletePost(val postId: String) : CurrentProfileAction()
     data class OnUserClick(val userId: String) : CurrentProfileAction()

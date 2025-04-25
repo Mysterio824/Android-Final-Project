@@ -24,20 +24,38 @@ class FriendListViewModel @Inject constructor(
     val state: StateFlow<FriendListState> = _state.asStateFlow()
 
     init {
-        // Observe relationship changes
-        viewModelScope.launch {
-            relationshipService.observeMyRelationships().collect { relations ->
-                _state.update {
-                    it.copy(relations = relations)
-                }
-                loadUsersForRelationships(relations)
-            }
-        }
+        // No auto-loading in init since we need userId first
     }
     
     // This is still needed for backward compatibility with screens that manually initialize
     fun initialize(userId: String) {
-        _state.update { it.copy(currentUserId = userId) }
+        _state.update { it.copy(userId = userId, currentUserId = authService.getCurrentUserIdSync()!!) }
+        loadFriendsData()
+    }
+
+    private fun loadFriendsData() {
+        viewModelScope.launch {
+            try {
+                _state.update { it.copy(isLoading = true) }
+                
+                // Get relationships between current user and the friends of target user
+                val relation = relationshipService.getRelationshipsWithFriendsOfUser(_state.value.userId)
+                _state.update { it.copy(relations = relation) }
+                
+                // Load user data for these relationships
+                loadUsersForRelationships(relation)
+                
+                // Also get friend requests
+                val friendRequests = relationshipService.getMyFriendRequests()
+                _state.update { it.copy(friendRequests = friendRequests) }
+            } catch (e: Exception) {
+                Log.e("FriendListViewModel", "Error loading friends data: ${e.message}", e)
+                _state.update { it.copy(
+                    isLoading = false,
+                    error = "Failed to load relationship data: ${e.message}"
+                )}
+            }
+        }
     }
 
     fun onAction(action: FriendListAction) {
@@ -55,15 +73,11 @@ class FriendListViewModel @Inject constructor(
     private suspend fun loadUsersForRelationships(relations: Map<String, RelationInfo>) {
         try {
             _state.update { it.copy( isLoading = true ) }
-            var filterRelation: Map<String, RelationInfo> = relations
+            Log.d("FriendListViewModel", "relations: " + relations.count().toString())
 
-            if(_state.value.currentUserId == authService.getCurrentUserId()) {
-                filterRelation = relations
-                    .filter { it.value.status == RelationshipStatus.FRIENDS }
-            }
+            val users = relationshipService.getUserFromRelationship(relations)
+            Log.d("FriendListViewModel", "users: " + users.count().toString())
 
-            val users = relationshipService.getUserFromRelationship(filterRelation)
-            
             _state.update {
                 it.copy(
                     users = users,
@@ -107,6 +121,9 @@ class FriendListViewModel @Inject constructor(
                 
                 if (!success) {
                     _state.update { it.copy(error = "Failed to ${if (isSend) "send" else "cancel"} friend request") }
+                } else {
+                    // Reload data after successful action
+                    loadFriendsData()
                 }
             } catch (e: Exception) {
                 _state.update { it.copy(error = "Error: ${e.message}") }
@@ -127,6 +144,9 @@ class FriendListViewModel @Inject constructor(
                     _state.update {
                         it.copy(error = "Failed to ${if (isAccepted) "accept" else "decline"} friend request")
                     }
+                } else {
+                    // Reload data after successful action
+                    loadFriendsData()
                 }
             } catch (e: Exception) {
                 _state.update { it.copy(error = "Error: ${e.message}") }
@@ -140,6 +160,9 @@ class FriendListViewModel @Inject constructor(
                 val success = relationshipService.blockUser(userId)
                 if (!success) {
                     _state.update { it.copy(error = "Failed to block user") }
+                } else {
+                    // Reload data after successful action
+                    loadFriendsData()
                 }
             } catch (e: Exception) {
                 _state.update { it.copy(error = "Error: ${e.message}") }
@@ -153,6 +176,9 @@ class FriendListViewModel @Inject constructor(
                 val success = relationshipService.unblockUser(userId)
                 if (!success) {
                     _state.update { it.copy(error = "Failed to unblock user") }
+                } else {
+                    // Reload data after successful action
+                    loadFriendsData()
                 }
             } catch (e: Exception) {
                 _state.update { it.copy(error = "Error: ${e.message}") }
@@ -167,6 +193,9 @@ class FriendListViewModel @Inject constructor(
                 val success = relationshipService.cancelFriendRequest(userId)
                 if (!success) {
                     _state.update { it.copy(error = "Failed to unfriend user") }
+                } else {
+                    // Reload data after successful action
+                    loadFriendsData()
                 }
             } catch (e: Exception) {
                 _state.update { it.copy(error = "Error unfriending user: ${e.message}") }

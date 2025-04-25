@@ -40,6 +40,7 @@ fun PostContent(
     onOptionsClick: () -> Unit,
     onUserClick: () -> Unit,
     currentId: String,
+    onLikesClick: (String) -> Unit = {}
 ) {
     Card(
         modifier = Modifier
@@ -127,7 +128,7 @@ fun PostContent(
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f).clickable { onLikesClick(post.id!!) }
                 ) {
                     Icon(
                         imageVector = Icons.Filled.ThumbUp,

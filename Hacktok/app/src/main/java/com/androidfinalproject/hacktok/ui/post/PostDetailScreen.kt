@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import com.androidfinalproject.hacktok.model.Comment
 import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.enums.ReportType
+import com.androidfinalproject.hacktok.ui.commonComponent.LikeListContent
 import com.androidfinalproject.hacktok.ui.commonComponent.PostContent
 import com.androidfinalproject.hacktok.ui.commonComponent.PostOptionsContent
 import com.androidfinalproject.hacktok.ui.commonComponent.ReportOptionsContent
@@ -61,6 +62,8 @@ fun PostDetailScreen(
     var selectedComment by remember { mutableStateOf<Comment?>(null) }
     var reportTargetId by remember { mutableStateOf<String?>(null) }
     var reportType by remember { mutableStateOf<ReportType?>(null) }
+    var selectedLikeShowId by remember { mutableStateOf<String?>(null) }
+    var selectedType by remember { mutableStateOf<String?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
 
     val bottomSheetState = rememberModalBottomSheetState(
@@ -74,15 +77,12 @@ fun PostDetailScreen(
         if (state.error != null) {
             snackbarHostState.showSnackbar(message = state.error)
         }
+    }
+
+    LaunchedEffect(state.trigger) {
         if (state.isCommenting) {
             commentFocusRequester.requestFocus()
             keyboardController?.show()
-        }
-        commentId?.let { id ->
-            val index = state.comments.indexOfFirst { it.id == id && it.parentCommentId == null }
-            if (index != -1) {
-                listState.animateScrollToItem(index + 1)
-            }
         }
     }
 
@@ -93,7 +93,7 @@ fun PostDetailScreen(
 
             if (index != -1) {
                 val scrollPosition = index + 2
-                listState.animateScrollToItem(scrollPosition)
+                listState.animateScrollToItem(scrollPosition-2)
             } else {
                 val replyComment = commentList.find { it.id == state.highlightedCommentId }
                 if (replyComment?.parentCommentId != null) {
@@ -102,7 +102,7 @@ fun PostDetailScreen(
                     }
 
                     if (parentIndex != -1) {
-                        listState.animateScrollToItem(parentIndex + 2)
+                        listState.animateScrollToItem(parentIndex-2)
                     }
                 }
             }
@@ -148,7 +148,11 @@ fun PostDetailScreen(
                             onOptionsClick = { showPostOptionsSheet = true },
                             onUserClick = { onAction(PostDetailAction.OnUserClick(post.userId)) },
                             onUnLike = { onAction(PostDetailAction.UnLikePost) },
-                            currentId = state.currentUser?.id ?: ""
+                            currentId = state.currentUser?.id ?: "",
+                            onLikesClick = {
+                                selectedType = "post"
+                                selectedLikeShowId = it
+                            }
                         )
 
                         CommentsSectionToggle(
@@ -158,7 +162,6 @@ fun PostDetailScreen(
                         )
                     }
                 }
-
 
                 // Comments section
                 if (state.showComments) {
@@ -174,7 +177,11 @@ fun PostDetailScreen(
                             onCommentLongPress = { selectedComment = comment },
                             onUserClick = { onAction(PostDetailAction.OnUserClick(it)) },
                             onReplyClick = { onAction(PostDetailAction.SelectCommentToReply(it)) },
-                            currentUserId = state.currentUser!!.id!!
+                            currentUserId = state.currentUser!!.id!!,
+                            onLikesClick = {
+                                selectedType = "comment"
+                                selectedLikeShowId = it
+                            }
                         )
                     }
                 }
@@ -286,6 +293,26 @@ fun PostDetailScreen(
                             onAction(PostDetailAction.SubmitReport(id, type, cause))
                         },
                         type = reportType!!,
+                    )
+                }
+            }
+
+            if(selectedType != null && selectedLikeShowId != null) {
+                onAction(PostDetailAction.OnLikesShowClick(selectedLikeShowId!!, selectedType == "post"))
+                ModalBottomSheet(
+                    onDismissRequest = {
+                        selectedLikeShowId = null
+                        selectedType != null
+                    },
+                    sheetState = bottomSheetState
+                ) {
+                    LikeListContent(
+                        users = state.listLikeUser,
+                        onUserClick = { onAction(PostDetailAction.OnUserClick(it)) },
+                        onDismiss = {
+                            selectedLikeShowId = null
+                            selectedType != null
+                        }
                     )
                 }
             }

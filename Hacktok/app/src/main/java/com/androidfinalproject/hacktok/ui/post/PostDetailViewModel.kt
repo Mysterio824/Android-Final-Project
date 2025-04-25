@@ -76,7 +76,25 @@ class PostDetailViewModel @Inject constructor(
             is PostDetailAction.SelectCommentToReply -> selectComment(action.commentId)
             is PostDetailAction.DeleteComment -> deleteComment(action.commentId)
             is PostDetailAction.SubmitReport -> submitReport(action.reportedItemId, action.reportType, action.reportCause)
+            is PostDetailAction.OnLikesShowClick -> loadLikesUser(action.targetId, action.isPost)
             else -> {}
+        }
+    }
+
+    private fun loadLikesUser(targetId: String, isPost: Boolean) {
+        viewModelScope.launch {
+            try {
+                val likeUsers = if(isPost){
+                    likeService.getPostLike(targetId)
+                }  else {
+                    likeService.getCommentLike(targetId)
+                }
+                _state.update{
+                    it.copy(listLikeUser = likeUsers)
+                }
+            } catch(e: Exception){
+                Log.d("PostDetailViewModel", e.message.toString())
+            }
         }
     }
 
@@ -84,13 +102,15 @@ class PostDetailViewModel @Inject constructor(
         _state.update { currentState ->
             currentState.copy(
                 isCommenting = !currentState.isCommenting,
-                commentIdReply = ""
+                commentIdReply = "",
+                highlightedCommentId = "",
+                trigger = !state.value.trigger
             )
         }
     }
 
     private fun setCommentFocus(focused: Boolean) {
-        _state.update { it.copy(isCommenting = focused) }
+        _state.update { it.copy(isCommenting = focused, trigger = !state.value.trigger) }
     }
 
     private fun loadPost(postId: String) {
@@ -203,7 +223,9 @@ class PostDetailViewModel @Inject constructor(
     private fun selectComment(commentId: String) {
         _state.update { it.copy(
             commentIdReply = commentId,
-            isCommenting = true
+            isCommenting = true,
+            highlightedCommentId = commentId,
+            trigger = !state.value.trigger
         ) }
     }
 

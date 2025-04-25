@@ -55,6 +55,12 @@ interface RelationshipService {
     // Remove a user from suggestions for the current user
     suspend fun removeFromSuggestions(suggestionId: String): Boolean
 
+    // Get relationships between current user and friends of a specific user
+    suspend fun getRelationshipsWithFriendsOfUser(userId: String): Map<String, RelationInfo>
+
+    // Observe my friend requests (incoming requests)
+    fun observeMyFriendRequests(): Flow<List<User>>
+
     // Stream of relationship changes for the current user
     fun observeMyRelationships(): Flow<Map<String, RelationInfo>>
-} 
+}

@@ -12,7 +12,7 @@ sealed class UserProfileAction {
     data object Unfriend : UserProfileAction()
     data object BlockUser : UserProfileAction()
     data object UnblockUser : UserProfileAction()
-    
+
     // Actions responding to the profile user's request
     data object AcceptFriendRequest : UserProfileAction()
     data object DeclineFriendRequest : UserProfileAction()
@@ -20,14 +20,16 @@ sealed class UserProfileAction {
     // Navigation/UI Actions
     data object ChatWithFriend : UserProfileAction()
     data class GoToPost(val postId : String) : UserProfileAction()
+    data class OnUserClick (val userId: String) : UserProfileAction()
     data object NavigateFriendList : UserProfileAction()
     data object NavigateBack : UserProfileAction()
-    
+
     // Data Actions
     data class LikePost(val postId: String) : UserProfileAction()
     data class UnlikePost(val postId: String) : UserProfileAction()
     data object RefreshProfile : UserProfileAction()
     data object MessageUser : UserProfileAction()
+    data class OnLikesShowClick(val targetId: String): UserProfileAction()
     data class SubmitReport(
         val reportedItemId: String,
         val reportType: ReportType,

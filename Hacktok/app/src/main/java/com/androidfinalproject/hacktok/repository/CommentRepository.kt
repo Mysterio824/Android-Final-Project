@@ -1,11 +1,11 @@
 package com.androidfinalproject.hacktok.repository
 
 import com.androidfinalproject.hacktok.model.Comment
+import com.androidfinalproject.hacktok.model.User
 import kotlinx.coroutines.flow.Flow
 
 interface CommentRepository {
     fun getAll(postId: String): Flow<List<Comment>>
-    
     /**
      * Observes comments for a specific post with real-time updates
      * 
@@ -20,7 +20,8 @@ interface CommentRepository {
         parentCommentId: String? = null,
         sortAscending: Boolean = false
     ): Flow<Result<List<Comment>>>
-    
+
+    suspend fun updateSnapshot(userId: String, user: User): Boolean
     suspend fun add(comment: Comment): Result<Comment>
     suspend fun getById(commentId: String): Result<Comment>
     suspend fun update(commentId: String, comment: Comment): Result<Unit>

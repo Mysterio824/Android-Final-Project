@@ -42,4 +42,9 @@ interface RelationshipRepository {
      * Observe changes to relationships for a user
      */
     fun observeRelationships(userId: String): Flow<List<Map<String, Any>>>
+
+    /**
+     * Get list of friend IDs for a specific user
+     */
+    suspend fun getFriendsOfUser(userId: String): List<String>
 } 

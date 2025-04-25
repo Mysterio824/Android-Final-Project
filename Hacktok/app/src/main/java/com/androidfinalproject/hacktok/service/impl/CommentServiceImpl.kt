@@ -119,7 +119,7 @@ class CommentServiceImpl @Inject constructor(
                     recipientUserId = post.userId,
                     type = NotificationType.POST_COMMENT,
                     senderId = user.id,
-                    relatedItemId = postId
+                    relatedItemId = resComment.id
                 )
             }
 

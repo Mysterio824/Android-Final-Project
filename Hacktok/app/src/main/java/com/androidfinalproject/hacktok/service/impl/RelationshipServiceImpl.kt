@@ -12,7 +12,9 @@ import com.androidfinalproject.hacktok.service.AuthService
 import com.androidfinalproject.hacktok.service.NotificationService
 import com.androidfinalproject.hacktok.service.RelationshipService
 import com.google.firebase.Timestamp
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.map
 import java.time.Instant
@@ -84,7 +86,6 @@ class RelationshipServiceImpl @Inject constructor(
     override suspend fun getUserFromRelationship(relations: Map<String, RelationInfo>): List<User> {
         // Filter relationships to get only friends
         val friendIds = relations
-            .filter { it.value.status == RelationshipStatus.FRIENDS }
             .keys
             .toList()
 
@@ -109,6 +110,8 @@ class RelationshipServiceImpl @Inject constructor(
                 .filter { user ->
                     user.id != null &&
                             user.id != currentUserId &&
+                            user.role != UserRole.ADMIN &&
+                            user.role != UserRole.MODERATOR
                             !hiddenSuggestions.contains(user.id)
                 }
 
@@ -307,6 +310,59 @@ class RelationshipServiceImpl @Inject constructor(
             return false
         }
         // No notification needed
+    }
+
+    override suspend fun getRelationshipsWithFriendsOfUser(userId: String): Map<String, RelationInfo> {
+        val currentUserId = authService.getCurrentUserId() ?: return emptyMap()
+        
+        // Get all friend IDs of the target user
+        val friendIds = relationshipRepository.getFriendsOfUser(userId)
+
+        Log.d("Friend", friendIds.count().toString())
+        
+        // If there are no friends, return empty map
+        if (friendIds.isEmpty()) {
+            return emptyMap()
+        }
+        
+        // Get all relationships of the current user
+        val myRelationships = getRelationshipsForUser(currentUserId)
+        
+        // Create a result map that includes ALL friend IDs
+        val result = mutableMapOf<String, RelationInfo>()
+        
+        // For each friend ID, either use existing relationship or create empty one
+        friendIds.forEach { friendId ->
+            val relation = myRelationships[friendId] ?: RelationInfo(id = friendId)
+            result[friendId] = relation
+        }
+        
+        return result
+    }
+    
+    override fun observeMyFriendRequests(): Flow<List<User>> = callbackFlow {
+        val currentUserId = authService.getCurrentUserIdSync() ?: run {
+            close()
+            return@callbackFlow
+        }
+        
+        val listener = relationshipRepository.observeRelationships(currentUserId)
+            .collect { relationshipDocs ->
+                // Convert to RelationInfo map
+                val relationInfoMap = convertToRelationInfoMap(currentUserId, relationshipDocs)
+                
+                // Filter for pending incoming requests only
+                val requestIds = relationInfoMap
+                    .filter { it.value.status == RelationshipStatus.PENDING_INCOMING }
+                    .keys
+                    .toList()
+                
+                // Fetch user details for these IDs
+                val users = userRepository.getUsersByIds(requestIds)
+                trySend(users)
+            }
+        
+        awaitClose {}
     }
 
     override fun observeMyRelationships(): Flow<Map<String, RelationInfo>> {

@@ -2,6 +2,8 @@ package com.androidfinalproject.hacktok.repository.impl
 
 import android.util.Log
 import com.androidfinalproject.hacktok.model.Comment
+import com.androidfinalproject.hacktok.model.User
+import com.androidfinalproject.hacktok.model.UserSnapshot
 import com.androidfinalproject.hacktok.repository.CommentRepository
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -105,6 +107,31 @@ class CommentRepositoryImpl @Inject constructor(
             Log.e(TAG, "Error setting up comment observer", e)
             trySend(Result.failure(e))
             close(e)
+        }
+    }
+
+    override suspend fun updateSnapshot(userId: String, user: User): Boolean {
+        return try {
+            val snapshot = commentsCollection
+                .whereEqualTo("userId", userId)
+                .get()
+                .await()
+
+            val updatedSnapshot = UserSnapshot(user)
+
+            val batch = FirebaseFirestore.getInstance().batch()
+
+            snapshot.documents.forEach { doc ->
+                val ref = doc.reference
+                batch.update(ref, "userSnapshot", updatedSnapshot)
+            }
+
+            batch.commit().await()
+
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
         }
     }
 
