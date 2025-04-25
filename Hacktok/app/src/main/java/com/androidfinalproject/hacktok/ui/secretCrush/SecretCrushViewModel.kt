@@ -2,107 +2,158 @@ package com.androidfinalproject.hacktok.ui.secretCrush
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.androidfinalproject.hacktok.model.MockData
+import com.androidfinalproject.hacktok.model.SecretCrush
 import com.androidfinalproject.hacktok.model.User
+import com.androidfinalproject.hacktok.repository.SecretCrushRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.async
 import javax.inject.Inject
 
-@HiltViewModel
-class SecretCrushViewModel @Inject constructor() : ViewModel() {
 
+@HiltViewModel
+class SecretCrushViewModel @Inject constructor(
+    private val secretCrushRepository: SecretCrushRepository
+) : ViewModel() {
     private val _state = MutableStateFlow(SecretCrushState())
-    val state = _state.asStateFlow()
+    val state: StateFlow<SecretCrushState> = _state.asStateFlow()
 
     init {
-        loadCrushData()
+        loadCrushes()
     }
 
     fun onAction(action: SecretCrushAction) {
         when (action) {
-            is SecretCrushAction.LoadCrushData -> loadCrushData()
-            is SecretCrushAction.SelectUser -> selectUser(action.user)
-            is SecretCrushAction.UnselectUser -> unselectUser(action.userId)
-            is SecretCrushAction.SendMessage -> sendCrushMessage(action.userId, action.message)
-            else -> {} // Navigation actions are handled in SecretCrushScreenRoot
+            is SecretCrushAction.SelectUser -> action.user.id?.let { sendCrush(it) }
+            is SecretCrushAction.RevealCrush -> revealCrush(action.crushId)
+            is SecretCrushAction.UnselectUser -> deleteCrush(action.userId)
+            SecretCrushAction.LoadCrushData -> loadCrushes()
+            SecretCrushAction.NavigateBack -> {} // Handled by the screen root
+            is SecretCrushAction.SendMessage -> TODO()
         }
     }
 
-    private fun loadCrushData() {
+    private fun loadCrushes() {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
+            _state.update { it.copy(isLoading = true, error = null) }
 
             try {
-                // Using mock data for now
-                val currentUser = MockData.mockUsers[0]
-                val availableUsers = MockData.mockUsers.drop(1) // All users except current user
-
-                _state.update {
-                    it.copy(
-                        currentUser = currentUser,
-                        availableUsers = availableUsers,
-                        isLoading = false,
-                        peopleWhoLikeYou = 3, // Mock number
-                        selectedCrushes = emptyList()
-                    )
+                // Launch separate coroutines for each flow
+                launch {
+                    secretCrushRepository.observeMySecretCrushes().collect { result ->
+                        result.onSuccess { crushes ->
+                            val selectedCrushes = crushes.map { crush ->
+                                SelectedCrush(
+                                    user = User(
+                                        id = crush.receiverId,
+                                        email = "",
+                                        username = crush.receiverName,
+                                        fullName = crush.receiverName,
+                                        profileImage = crush.receiverImageUrl
+                                    ),
+                                    message = null,
+                                    timestamp = crush.createdAt.time
+                                )
+                            }
+                            _state.update { it.copy(selectedCrushes = selectedCrushes) }
+                        }.onFailure { error ->
+                            _state.update { it.copy(error = error.message) }
+                        }
+                    }
                 }
 
+                launch {
+                    secretCrushRepository.observeReceivedSecretCrushes().collect { result ->
+                        result.onSuccess { crushes ->
+                            val receivedCrushes = crushes.map { crush ->
+                                SelectedCrush(
+                                    user = User(
+                                        id = crush.senderId,
+                                        email = "",
+                                        username = crush.senderName,
+                                        fullName = crush.senderName,
+                                        profileImage = crush.senderImageUrl
+                                    ),
+                                    message = null,
+                                    timestamp = crush.createdAt.time
+                                )
+                            }
+                            _state.update { it.copy(receivedCrushes = receivedCrushes) }
+                        }.onFailure { error ->
+                            _state.update { it.copy(error = error.message) }
+                        }
+                    }
+                }
+
+                // Set loading to false after initial data is received
+                _state.update { it.copy(isLoading = false) }
             } catch (e: Exception) {
-                _state.update {
-                    it.copy(
-                        error = e.message ?: "An error occurred",
-                        isLoading = false
-                    )
-                }
+                _state.update { it.copy(error = e.message, isLoading = false) }
             }
         }
     }
 
-    private fun selectUser(user: User) {
-        val currentCrushes = _state.value.selectedCrushes
+    private fun sendCrush(crushId: String) {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, error = null) }
 
-        // Check if we already have 5 crushes
-        if (currentCrushes.size >= 5) {
-            _state.update { it.copy(error = "You can only select up to 5 secret crushes") }
-            return
-        }
-
-        // Check if user is already selected
-        if (currentCrushes.any { it.user.id == user.id }) {
-            return
-        }
-
-        // Add the new crush to the list
-        _state.update {
-            it.copy(
-                selectedCrushes = it.selectedCrushes + SelectedCrush(user)
-            )
-        }
-    }
-
-    private fun unselectUser(userId: String) {
-        _state.update {
-            it.copy(
-                selectedCrushes = it.selectedCrushes.filter { crush -> crush.user.id != userId }
-            )
-        }
-    }
-
-    private fun sendCrushMessage(userId: String, message: String) {
-        // Just update the state for now
-        _state.update { state ->
-            state.copy(
-                selectedCrushes = state.selectedCrushes.map { crush ->
-                    if (crush.user.id == userId) {
-                        crush.copy(message = message)
-                    } else {
-                        crush
+            try {
+                secretCrushRepository.sendSecretCrush(crushId).collect { result ->
+                    result.onSuccess {
+                        loadCrushes()
+                    }.onFailure { error ->
+                        _state.update { it.copy(error = error.message) }
                     }
                 }
-            )
+            } catch (e: Exception) {
+                _state.update { it.copy(error = e.message) }
+            }
+
+            _state.update { it.copy(isLoading = false) }
+        }
+    }
+
+    private fun revealCrush(crushId: String) {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, error = null) }
+
+            try {
+                secretCrushRepository.revealSecretCrush(crushId).collect { result ->
+                    result.onSuccess {
+                        loadCrushes()
+                    }.onFailure { error ->
+                        _state.update { it.copy(error = error.message) }
+                    }
+                }
+            } catch (e: Exception) {
+                _state.update { it.copy(error = e.message) }
+            }
+
+            _state.update { it.copy(isLoading = false) }
+        }
+    }
+
+    private fun deleteCrush(crushId: String) {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, error = null) }
+
+            try {
+                secretCrushRepository.deleteSecretCrush(crushId).collect { result ->
+                    result.onSuccess {
+                        loadCrushes()
+                    }.onFailure { error ->
+                        _state.update { it.copy(error = error.message) }
+                    }
+                }
+            } catch (e: Exception) {
+                _state.update { it.copy(error = e.message) }
+            }
+
+            _state.update { it.copy(isLoading = false) }
         }
     }
 }

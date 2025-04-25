@@ -5,6 +5,7 @@ import com.androidfinalproject.hacktok.model.User
 data class SecretCrushState(
     val currentUser: User? = null,
     val selectedCrushes: List<SelectedCrush> = emptyList(),
+    val receivedCrushes: List<SelectedCrush> = emptyList(),
     val availableUsers: List<User> = emptyList(),  // Added list of available users
     val peopleWhoLikeYou: Int = 0,
     val isLoading: Boolean = false,
