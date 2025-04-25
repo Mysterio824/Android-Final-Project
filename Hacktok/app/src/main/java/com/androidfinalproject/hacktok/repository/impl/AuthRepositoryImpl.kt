@@ -31,6 +31,18 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
     
+    override suspend fun isUserAdmin(userId: String): Boolean {
+        Log.d("AuthRepository", "Checking admin status for user: $userId")
+        return try {
+            val document = firestore.collection("users").document(userId).get().await()
+            val role = document.getString("role")
+            role == "ADMIN"
+        } catch (e: Exception) {
+            Log.e("AuthRepository", "Error checking admin status for $userId", e)
+            false
+        }
+    }
+    
     override suspend fun signOut() {
         Log.d("AuthRepository", "Signing out user")
         try {

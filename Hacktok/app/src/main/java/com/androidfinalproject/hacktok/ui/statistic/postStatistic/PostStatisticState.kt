@@ -1,5 +1,6 @@
 package com.androidfinalproject.hacktok.ui.statistic.postStatistic
 
+import com.androidfinalproject.hacktok.model.Timeframe
 import java.util.Date
 
 data class PostStatisticsState(
@@ -17,7 +18,35 @@ data class PostStatisticsState(
     val newBannedPostsInPeriod: Int = 0,
     val postPercentChange: Float = 0f,
     val bannedPostPercentChange: Float = 0f
-)
+) {
+    val displayStats: List<PostStatPoint>
+        get() = when (dataType) {
+            PostDataType.ALL_POSTS -> postStats
+            PostDataType.BANNED_POSTS -> bannedPostStats
+            PostDataType.BOTH -> postStats + bannedPostStats
+        }
+
+    val displayNewCount: Int
+        get() = when (dataType) {
+            PostDataType.ALL_POSTS -> newPostsInPeriod
+            PostDataType.BANNED_POSTS -> newBannedPostsInPeriod
+            PostDataType.BOTH -> newPostsInPeriod + newBannedPostsInPeriod
+        }
+
+    val displayPercentChange: Float
+        get() = when (dataType) {
+            PostDataType.ALL_POSTS -> postPercentChange
+            PostDataType.BANNED_POSTS -> bannedPostPercentChange
+            PostDataType.BOTH -> (postPercentChange + bannedPostPercentChange) / 2
+        }
+
+    val timeframeLabel: String
+        get() = when (timeframe) {
+            Timeframe.DAY -> "Daily"
+            Timeframe.MONTH -> "Monthly"
+            Timeframe.YEAR -> "Yearly"
+        }
+}
 
 data class PostStatPoint(
     val label: String,
