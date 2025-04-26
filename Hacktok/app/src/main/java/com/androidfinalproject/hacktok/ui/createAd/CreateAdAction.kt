@@ -16,4 +16,6 @@ sealed class CreateAdAction {
     data class RemoveLocation(val location: String) : CreateAdAction()
     object SubmitAd : CreateAdAction()
     object NavigateBack : CreateAdAction()
+    object LoadUserAds : CreateAdAction()
+    data class DeleteAd(val adId: String) : CreateAdAction()
 }

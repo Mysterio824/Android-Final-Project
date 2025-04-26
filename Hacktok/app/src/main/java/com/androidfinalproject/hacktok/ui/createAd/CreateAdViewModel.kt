@@ -31,6 +31,7 @@ class CreateAdViewModel @Inject constructor(
     init {
         loadCurrentUser()
         updateEndDate(_state.value.durationDays)
+        loadUserAds()
     }
 
     private fun loadCurrentUser() {
@@ -48,6 +49,34 @@ class CreateAdViewModel @Inject constructor(
         val currentTime = System.currentTimeMillis()
         val endDate = Date(currentTime + (days * 24 * 60 * 60 * 1000))
         _state.update { it.copy(endDate = endDate) }
+    }
+
+    private fun loadUserAds() {
+        viewModelScope.launch {
+            try {
+                _state.update { it.copy(isLoadingAds = true) }
+                val currentUser = _state.value.currentUser
+                if (currentUser != null) {
+                    val ads = adRepository.getUserAds(currentUser.id ?: "")
+                    _state.update { it.copy(userAds = ads, isLoadingAds = false) }
+                }
+            } catch (e: Exception) {
+                _state.update { it.copy(error = "Failed to load ads: ${e.message}", isLoadingAds = false) }
+            }
+        }
+    }
+
+    private fun deleteAd(adId: String) {
+        viewModelScope.launch {
+            try {
+                _state.update { it.copy(isDeletingAd = true) }
+                adRepository.deleteAd(adId)
+                loadUserAds() // Reload ads after deletion
+                _state.update { it.copy(isDeletingAd = false) }
+            } catch (e: Exception) {
+                _state.update { it.copy(error = "Failed to delete ad: ${e.message}", isDeletingAd = false) }
+            }
+        }
     }
 
     fun onAction(action: CreateAdAction) {
@@ -121,6 +150,7 @@ class CreateAdViewModel @Inject constructor(
 
                         val ad = Ad(
                             advertiserId = currentUser.id ?: "",
+                            userId = currentUser.id ?: "",
                             content = currentState.adContent,
                             mediaUrl = currentState.mediaUrl,
                             targetAudience = currentState.targetAudience
@@ -144,6 +174,12 @@ class CreateAdViewModel @Inject constructor(
             }
 
             is CreateAdAction.UpdateTargetAudience -> TODO()
+            is CreateAdAction.LoadUserAds -> {
+                loadUserAds()
+            }
+            is CreateAdAction.DeleteAd -> {
+                deleteAd(action.adId)
+            }
         }
     }
 }

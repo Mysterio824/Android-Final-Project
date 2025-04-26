@@ -25,6 +25,12 @@ class AdRepository @Inject constructor() {
         return snapshot.toObject(Ad::class.java)
     }
 
+    // Lấy quảng cáo theo userId
+    suspend fun getUserAds(userId: String): List<Ad> {
+        val snapshot = collection.whereEqualTo("userId", userId).get().await()
+        return snapshot.toObjects(Ad::class.java)
+    }
+
     // Tăng lượt hiển thị
     suspend fun incrementImpressions(adId: String) {
         collection.document(adId).update("impressions", FieldValue.increment(1)).await()

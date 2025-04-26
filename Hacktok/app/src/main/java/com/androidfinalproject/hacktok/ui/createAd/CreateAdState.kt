@@ -1,5 +1,6 @@
 package com.androidfinalproject.hacktok.ui.createAd
 
+import com.androidfinalproject.hacktok.model.Ad
 import com.androidfinalproject.hacktok.model.TargetAudience
 import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.model.enums.AdType
@@ -15,5 +16,8 @@ data class CreateAdState(
     val isSubmitting: Boolean = false,
     val endDate: Date = Date(System.currentTimeMillis() + (7 * 24 * 60 * 60 * 1000)), // Default 7 days
     val error: String? = null,
-    val isSuccess: Boolean = false
+    val isSuccess: Boolean = false,
+    val userAds: List<Ad> = emptyList(),
+    val isLoadingAds: Boolean = false,
+    val isDeletingAd: Boolean = false
 )

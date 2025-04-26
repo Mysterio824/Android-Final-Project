@@ -6,6 +6,7 @@ import java.util.Date
 data class Ad(
     @PropertyName("id") val id: String? = null,
     @PropertyName("advertiserId") val advertiserId: String,
+    @PropertyName("userId") val userId: String,
     @PropertyName("content") val content: String,
     @PropertyName("mediaUrl") val mediaUrl: String,
     @PropertyName("targetAudience") val targetAudience: TargetAudience,
@@ -13,10 +14,10 @@ data class Ad(
     @PropertyName("clicks") val clicks: Int = 0,
     @PropertyName("createdAt") val createdAt: Date = Date()
 ) {
-    constructor() : this(null, "", "", "", TargetAudience(), 0, 0, Date())
+    constructor() : this(null, "", "", "", "", TargetAudience(), 0, 0, Date())
 
     override fun toString(): String {
-        return "Ad(id=$id, advertiserId='$advertiserId', content='$content', " +
+        return "Ad(id=$id, advertiserId='$advertiserId', userId='$userId', content='$content', " +
                 "impressions=$impressions, createdAt=$createdAt)"
     }
 }
