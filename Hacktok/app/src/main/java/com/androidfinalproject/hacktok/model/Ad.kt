@@ -12,12 +12,13 @@ data class Ad(
     @PropertyName("targetAudience") val targetAudience: TargetAudience,
     @PropertyName("impressions") val impressions: Int = 0,
     @PropertyName("clicks") val clicks: Int = 0,
-    @PropertyName("createdAt") val createdAt: Date = Date()
+    @PropertyName("createdAt") val createdAt: Date = Date(),
+    @PropertyName("endDate") val endDate: Date = Date()
 ) {
-    constructor() : this(null, "", "", "", "", TargetAudience(), 0, 0, Date())
+    constructor() : this(null, "", "", "", "", TargetAudience(), 0, 0, Date(), Date())
 
     override fun toString(): String {
         return "Ad(id=$id, advertiserId='$advertiserId', userId='$userId', content='$content', " +
-                "impressions=$impressions, createdAt=$createdAt)"
+                "impressions=$impressions, createdAt=$createdAt, endDate=$endDate)"
     }
 }

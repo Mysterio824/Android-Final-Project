@@ -1,25 +1,16 @@
 package com.androidfinalproject.hacktok.ui.createAd
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.androidfinalproject.hacktok.ui.createAd.CreateAdViewModel
 
 @Composable
 fun CreateAdScreenRoot(
     viewModel: CreateAdViewModel = hiltViewModel(),
-    onNavigateBack: () -> Unit,
-    onAdCreated: () -> Unit
+    onNavigateBack: () -> Unit
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
-
-    LaunchedEffect(state.isSuccess) {
-        if (state.isSuccess) {
-            onAdCreated()
-        }
-    }
+    val state by viewModel.state.collectAsState()
 
     CreateAdScreen(
         state = state,

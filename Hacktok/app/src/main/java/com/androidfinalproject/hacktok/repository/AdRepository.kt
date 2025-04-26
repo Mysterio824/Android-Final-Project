@@ -6,11 +6,23 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
+import java.util.*
 
 @Singleton
 class AdRepository @Inject constructor() {
     private val db = FirebaseFirestore.getInstance()
     private val collection = db.collection("ads")
+
+    // Create a new ad with duration
+    suspend fun createAd(ad: Ad, durationDays: Int): String {
+        val adWithDuration = ad.copy(
+            createdAt = Date(),
+            endDate = Date(System.currentTimeMillis() + (durationDays * 24 * 60 * 60 * 1000L))
+        )
+        val documentRef = collection.add(adWithDuration).await()
+        collection.document(documentRef.id).update("id", documentRef.id).await()
+        return documentRef.id
+    }
 
     // Thêm quảng cáo mới
     suspend fun addAd(ad: Ad): String {

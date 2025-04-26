@@ -54,14 +54,48 @@ class CreateAdViewModel @Inject constructor(
     private fun loadUserAds() {
         viewModelScope.launch {
             try {
-                _state.update { it.copy(isLoadingAds = true) }
+                _state.update { it.copy(isLoadingAds = true, error = null) }
                 val currentUser = _state.value.currentUser
-                if (currentUser != null) {
-                    val ads = adRepository.getUserAds(currentUser.id ?: "")
-                    _state.update { it.copy(userAds = ads, isLoadingAds = false) }
+                if (currentUser == null) {
+                    _state.update { 
+                        it.copy(
+                            isLoadingAds = false,
+                            error = "User not found. Please try again.",
+                            userAds = emptyList()
+                        )
+                    }
+                    return@launch
+                }
+                
+                val userId = currentUser.id
+                if (userId.isNullOrEmpty()) {
+                    _state.update { 
+                        it.copy(
+                            isLoadingAds = false,
+                            error = "Invalid user ID. Please try again.",
+                            userAds = emptyList()
+                        )
+                    }
+                    return@launch
+                }
+
+                val ads = adRepository.getUserAds(userId)
+                _state.update { 
+                    it.copy(
+                        userAds = ads,
+                        isLoadingAds = false,
+                        error = null
+                    )
                 }
             } catch (e: Exception) {
-                _state.update { it.copy(error = "Failed to load ads: ${e.message}", isLoadingAds = false) }
+                Log.e(tag, "Error loading user ads", e)
+                _state.update { 
+                    it.copy(
+                        error = "Failed to load ads: ${e.message}",
+                        isLoadingAds = false,
+                        userAds = emptyList()
+                    )
+                }
             }
         }
     }
@@ -139,25 +173,51 @@ class CreateAdViewModel @Inject constructor(
                         val currentUser = currentState.currentUser
 
                         if (currentUser == null) {
-                            _state.update { it.copy(error = "User not authenticated") }
+                            _state.update { it.copy(
+                                isSubmitting = false,
+                                error = "User not authenticated. Please try again."
+                            )}
                             return@launch
                         }
 
                         if (currentState.adContent.isBlank()) {
-                            _state.update { it.copy(error = "Ad content cannot be empty") }
+                            _state.update { it.copy(
+                                isSubmitting = false,
+                                error = "Ad content cannot be empty"
+                            )}
+                            return@launch
+                        }
+
+                        val userId = currentUser.id
+                        if (userId.isNullOrEmpty()) {
+                            _state.update { it.copy(
+                                isSubmitting = false,
+                                error = "Invalid user ID. Please try again."
+                            )}
                             return@launch
                         }
 
                         val ad = Ad(
-                            advertiserId = currentUser.id ?: "",
-                            userId = currentUser.id ?: "",
+                            advertiserId = userId,
+                            userId = userId,
                             content = currentState.adContent,
                             mediaUrl = currentState.mediaUrl,
                             targetAudience = currentState.targetAudience
                         )
 
-//                        adRepository.createAd(ad, currentState.durationDays)
-                        _state.update { it.copy(isSubmitting = false, isSuccess = true) }
+                        // Create the ad in the repository
+                        val adId = adRepository.createAd(ad, currentState.durationDays)
+                        
+                        // Reload the user's ads to show the new one
+                        loadUserAds()
+                        
+                        _state.update { it.copy(
+                            isSubmitting = false,
+                            isSuccess = true,
+                            adContent = "", // Clear the form
+                            mediaUrl = "", // Clear the media
+                            error = null
+                        )}
                     } catch (e: Exception) {
                         Log.e(tag, "Error submitting ad", e)
                         _state.update {
