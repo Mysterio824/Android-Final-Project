@@ -1,6 +1,7 @@
 package com.androidfinalproject.hacktok.router.graph
 
 import SearchDashboardScreenRoot
+import android.util.Log
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
@@ -21,7 +22,6 @@ import com.androidfinalproject.hacktok.ui.friendList.FriendListScreenRoot
 import com.androidfinalproject.hacktok.ui.mainDashboard.DashboardScreenRoot
 import com.androidfinalproject.hacktok.ui.messageDashboard.MessageDashboardRoot
 import com.androidfinalproject.hacktok.ui.newStory.NewStoryRoot
-import com.androidfinalproject.hacktok.ui.messageDashboard.MessageDashboardViewModel
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Alignment
@@ -29,13 +29,11 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import com.androidfinalproject.hacktok.router.routes.AuthRoute
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.androidfinalproject.hacktok.ui.changePassword.ChangePasswordScreenRoot
 import com.androidfinalproject.hacktok.ui.chatDetail.ChatDetailScreenRoot
 import com.androidfinalproject.hacktok.ui.newPost.NewPostScreenRoot
 import com.androidfinalproject.hacktok.ui.storydetail.StoryDetailScreenRoot
 import com.androidfinalproject.hacktok.ui.secretCrush.SecretCrushScreenRoot
-import com.androidfinalproject.hacktok.ui.secretCrush.SecretCrushViewModel
 
 fun NavGraphBuilder.mainNavigation(navController: NavController) {
     navigation(
@@ -102,6 +100,10 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
                 onUserEditNavigate = {
                     navController.navigate(MainRoute.EditProfile.route)
                 },
+                onSecretCrushNavigate = {
+                    Log.d("Navigation", "here")
+                    navController.navigate(MainRoute.SecretCrush.route)
+                }
             )
         }
 

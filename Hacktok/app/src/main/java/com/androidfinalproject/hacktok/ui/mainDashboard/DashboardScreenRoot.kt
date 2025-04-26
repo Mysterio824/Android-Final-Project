@@ -28,7 +28,8 @@ fun DashboardScreenRoot(
     onPostEditNavigate: (String) -> Unit,
     onUserEditNavigate: () -> Unit,
     onChangePassNavigate: () -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onSecretCrushNavigate: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -75,6 +76,7 @@ fun DashboardScreenRoot(
                 is DashboardAction.OnUserEdit -> onUserEditNavigate()
                 is DashboardAction.OnChangePass -> onChangePassNavigate()
                 is DashboardAction.OnAuthNavigate -> onAuthNavigate()
+                is DashboardAction.OnSecretCrushNavigate -> onSecretCrushNavigate()
                 is DashboardAction.OnNavigateBack -> onNavigateBack()
                 else -> viewModel.onAction(action)
             }

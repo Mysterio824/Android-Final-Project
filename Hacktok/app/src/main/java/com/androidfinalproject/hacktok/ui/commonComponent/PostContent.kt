@@ -115,9 +115,9 @@ fun PostContent(
                     contentDescription = "Post image",
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(max = 200.dp)
+                        .heightIn(max = 400.dp)
                         .background(Color.White),
-                    contentScale = ContentScale.FillHeight,
+                    contentScale = ContentScale.FillWidth,
                 )
             }
 
@@ -264,8 +264,7 @@ fun PostContent(
                     contentDescription = "Post image",
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp)
-                        .heightIn(max = 200.dp)
+                        .heightIn(max = 400.dp)
                         .background(Color.White),
                     contentScale = ContentScale.FillHeight,
                 )
