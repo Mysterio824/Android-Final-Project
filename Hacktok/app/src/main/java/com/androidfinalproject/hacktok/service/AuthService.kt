@@ -28,4 +28,12 @@ interface AuthService {
     suspend fun signInWithGoogle(idToken: String): FirebaseUser?
     suspend fun signInWithEmail(email: String, password: String): FirebaseUser?
     suspend fun isUserAdmin(userId: String): Boolean
+    
+    // Verification methods
+    suspend fun verifyCode(email: String, code: String): Boolean
+    suspend fun resendVerificationCode(email: String): String
+    suspend fun setUsername(email: String, username: String): Boolean
+
+    // Check if current user logged in through Google
+    fun checkIfUserLoginGoogle(): Boolean
 } 

@@ -1,6 +1,7 @@
 package com.androidfinalproject.hacktok.ui.friendList
 
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -11,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -51,6 +53,7 @@ fun FriendListScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         Text(
             text = "Friends",

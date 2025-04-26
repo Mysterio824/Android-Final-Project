@@ -45,20 +45,23 @@ fun SettingsScreen(
             )
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            SectionHeader("Account Settings")
 
             // Edit Profile Option
             SettingsItem(
-                icon = Icons.Default.Person,
+                icon = Icons.Default.Edit,
                 title = "Edit Profile",
                 onClick = { onAction(SettingsScreenAction.OnNavigateEdit) }
             )
 
             // Change Password Option
-            SettingsItem(
-                icon = Icons.Default.Lock,
-                title = "Change Password",
-                onClick = { onAction(SettingsScreenAction.OnChangePassword) }
-            )
+            if(!state.isGoogleLogin) {
+                SettingsItem(
+                    icon = Icons.Default.Lock,
+                    title = "Change Password",
+                    onClick = { onAction(SettingsScreenAction.OnChangePassword) }
+                )
+            }
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 

@@ -6,5 +6,6 @@ data class SettingsState (
     val language: String = "",
     val isLanguageChanged: Boolean = false,
     val isLogout: Boolean = false,
-    val currentUser: User? = null
+    val currentUser: User? = null,
+    val isGoogleLogin: Boolean = false,
 )
