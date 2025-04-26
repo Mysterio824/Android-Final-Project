@@ -16,7 +16,9 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.androidfinalproject.hacktok.R
 
 @Composable
 fun PasswordInputField(
@@ -34,9 +36,9 @@ fun PasswordInputField(
         onValueChange = onValueChange,
         placeholder = { Text(
                 if(isConfirm)
-                    "Password"
+                    stringResource(R.string.confirm_password)
                 else
-                    "Confirm Password"
+                    stringResource(R.string.password)
             )
         },
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -63,7 +65,6 @@ fun PasswordInputField(
                 )
             }
         },
-
     )
 
     if (errorText != null) {

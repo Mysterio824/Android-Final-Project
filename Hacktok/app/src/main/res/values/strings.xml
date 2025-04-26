@@ -3,4 +3,27 @@
     <string name="default_notification_channel_id" translatable="false">Default Channel</string>
     <string name="default_notification_channel_name" translatable="true">General Notifications</string>
     <string name="default_notification_channel_description" translatable="true">Notifications for likes, comments, etc.</string> <!-- Add this -->
+    <!-- Auth Screen Strings -->
+    <string name="login">Log in</string>
+    <string name="create_new_account">Create new account</string>
+    <string name="back_to_login">Back to login</string>
+    <string name="forgot_password">Forgot password?</string>
+    <string name="or">OR</string>
+    <string name="email_error_empty">Email cannot be empty</string>
+    <string name="email_error_invalid">Please enter a valid email address</string>
+    <string name="password_error_empty">Password cannot be empty</string>
+    <string name="password_error_length">Password must be at least 8 characters</string>
+    <string name="password_error_number">Password must contain at least one number</string>
+    <string name="password_error_uppercase">Password must contain at least one uppercase letter</string>
+    <string name="confirm_password_error_empty">Please confirm your password</string>
+    <string name="confirm_password_error_mismatch">Passwords do not match</string>
+    <string name="auth_error_wrong_credentials">Wrong Email or Password</string>
+    <string name="auth_error_generic">Authentication failed</string>
+    <string name="language_english">English (US)</string>
+    <string name="language_vietnamese">Tiếng Việt</string>
+    <string name="sign_up">Sign up</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="password">Password</string>
+    <string name="email">Email</string>
+    <string name="continue_with_google">Continue with Google</string>
 </resources>

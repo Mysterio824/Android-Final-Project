@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Hacktok</string>
+    <string name="default_notification_channel_name">Thông báo chung</string>
+    <string name="default_notification_channel_description">Thông báo cho lượt thích, bình luận, v.v.</string>
+    
+    <!-- Auth Screen Strings -->
+    <string name="login">Đăng nhập</string>
+    <string name="create_new_account">Tạo tài khoản mới</string>
+    <string name="back_to_login">Quay lại đăng nhập</string>
+    <string name="forgot_password">Quên mật khẩu?</string>
+    <string name="or">HOẶC</string>
+    <string name="email_error_empty">Email không được để trống</string>
+    <string name="email_error_invalid">Vui lòng nhập địa chỉ email hợp lệ</string>
+    <string name="password_error_empty">Mật khẩu không được để trống</string>
+    <string name="password_error_length">Mật khẩu phải có ít nhất 8 ký tự</string>
+    <string name="password_error_number">Mật khẩu phải chứa ít nhất một số</string>
+    <string name="password_error_uppercase">Mật khẩu phải chứa ít nhất một chữ hoa</string>
+    <string name="confirm_password_error_empty">Vui lòng xác nhận mật khẩu</string>
+    <string name="confirm_password_error_mismatch">Mật khẩu không khớp</string>
+    <string name="auth_error_wrong_credentials">Email hoặc mật khẩu không đúng</string>
+    <string name="auth_error_generic">Xác thực thất bại</string>
+    <string name="language_english">English (US)</string>
+    <string name="language_vietnamese">Tiếng Việt</string>
+    <string name="sign_up">Đăng ký</string>
+    <string name="confirm_password">Xác nhận mật khẩu</string>
+    <string name="password">Mật khẩu</string>
+    <string name="email">Email</string>
+    <string name="continue_with_google">Tiếp tục với Google</string>
+</resources> 

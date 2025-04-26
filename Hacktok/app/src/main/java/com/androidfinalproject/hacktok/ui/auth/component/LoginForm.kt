@@ -12,10 +12,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.androidfinalproject.hacktok.R
 import com.androidfinalproject.hacktok.ui.auth.AuthAction
 import com.androidfinalproject.hacktok.ui.auth.AuthUiState
 
@@ -59,7 +61,7 @@ fun LoginForm (
         )
     ) {
         Text(
-            text = "Log in",
+            text = stringResource(R.string.login),
             fontSize = 16.sp
         )
     }
@@ -70,7 +72,7 @@ fun LoginForm (
         modifier = Modifier.fillMaxWidth(),
     ) {
         Text(
-            text = "Forgot password?",
+            text = stringResource(R.string.forgot_password),
             color = Color(0xFF1877F2),
             fontSize = 15.sp,
             textAlign = TextAlign.Center,

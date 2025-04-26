@@ -18,11 +18,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.androidfinalproject.hacktok.R
 import com.androidfinalproject.hacktok.ui.auth.AuthAction
 import com.androidfinalproject.hacktok.ui.auth.AuthUiState
 
@@ -83,9 +85,8 @@ fun SignUpForm(
         )
     ) {
         Text(
-            text = "Sign up",
+            text = stringResource(R.string.sign_up),
             fontSize = 16.sp
         )
     }
-
 }

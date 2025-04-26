@@ -9,7 +9,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.androidfinalproject.hacktok.R
 import com.androidfinalproject.hacktok.ui.auth.AuthAction
 import com.androidfinalproject.hacktok.ui.auth.AuthAction.*
 
@@ -22,7 +24,7 @@ fun EmailField(
     OutlinedTextField(
         value = value,
         onValueChange = { updateEmail(it) },
-        placeholder = { Text("Email") },
+        placeholder = { Text(stringResource(R.string.email)) },
         modifier = Modifier.fillMaxWidth(),
         singleLine = true,
         isError = error != null,

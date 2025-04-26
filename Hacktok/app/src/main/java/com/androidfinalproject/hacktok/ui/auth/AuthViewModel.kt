@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.androidfinalproject.hacktok.R
 import com.androidfinalproject.hacktok.service.AuthService
 import com.androidfinalproject.hacktok.service.FcmService
 import com.androidfinalproject.hacktok.utils.FcmDiagnosticTool
@@ -227,26 +228,26 @@ class AuthViewModel @Inject constructor(
     // --- Validation Methods --- (Keep as they are)
     private fun validateEmail(email: String): String? {
         return when {
-            email.isEmpty() -> "Email cannot be empty"
-            !emailPattern.matcher(email).matches() -> "Please enter a valid email address"
+            email.isEmpty() -> context.getString(R.string.email_error_empty)
+            !emailPattern.matcher(email).matches() -> context.getString(R.string.email_error_invalid)
             else -> null
         }
     }
 
     private fun validatePassword(password: String): String? {
         return when {
-            password.isEmpty() -> "Password cannot be empty"
-            password.length < 8 -> "Password must be at least 8 characters"
-            !password.any { it.isDigit() } -> "Password must contain at least one number"
-            !password.any { it.isUpperCase() } -> "Password must contain at least one uppercase letter"
+            password.isEmpty() -> context.getString(R.string.password_error_empty)
+            password.length < 8 -> context.getString(R.string.password_error_length)
+            !password.any { it.isDigit() } -> context.getString(R.string.password_error_number)
+            !password.any { it.isUpperCase() } -> context.getString(R.string.password_error_uppercase)
             else -> null
         }
     }
 
     private fun validateConfirmPassword(confirmPassword: String, password: String): String? {
         return when {
-            confirmPassword.isEmpty() -> "Please confirm your password"
-            confirmPassword != password -> "Passwords do not match"
+            confirmPassword.isEmpty() -> context.getString(R.string.confirm_password_error_empty)
+            confirmPassword != password -> context.getString(R.string.confirm_password_error_mismatch)
             else -> null
         }
     }

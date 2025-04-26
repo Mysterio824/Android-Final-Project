@@ -22,6 +22,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
+import com.androidfinalproject.hacktok.R
 
 @Composable
 fun AuthScreenRoot(
@@ -87,8 +88,7 @@ fun AuthScreenRoot(
 
 private fun updateAppLocale(language: String, context: Context, activity: Activity) {
     val locale = when (language) {
-        "Français" -> Locale("fr")
-        "Español" -> Locale("es")
+        context.getString(R.string.language_vietnamese) -> Locale("vi")
         else -> Locale("en")
     }
 

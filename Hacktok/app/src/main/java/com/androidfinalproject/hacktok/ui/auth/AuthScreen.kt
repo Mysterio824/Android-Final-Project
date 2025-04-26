@@ -26,6 +26,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -112,7 +113,7 @@ fun AuthScreen(
                     modifier = Modifier.weight(1f)
                 )
                 Text(
-                    text = "OR",
+                    text = stringResource(R.string.or),
                     color = Color.Gray,
                     modifier = Modifier.padding(horizontal = 16.dp),
                     fontSize = 14.sp
@@ -145,7 +146,10 @@ fun AuthScreen(
                 )
             ) {
                 Text(
-                    text = if (state.isLoginMode) "Create new account" else "Back to login",
+                    text = if (state.isLoginMode) 
+                        stringResource(R.string.create_new_account) 
+                    else 
+                        stringResource(R.string.back_to_login),
                     fontSize = 16.sp
                 )
             }
