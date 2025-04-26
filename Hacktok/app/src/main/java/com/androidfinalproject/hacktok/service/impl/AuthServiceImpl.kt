@@ -9,6 +9,7 @@ import com.androidfinalproject.hacktok.service.ApiService
 import com.androidfinalproject.hacktok.service.AuthService
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.GoogleAuthProvider
 import org.json.JSONObject
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -156,13 +157,13 @@ class AuthServiceImpl @Inject constructor(
                 if (responseBody != null) {
                     try {
                         val jsonObject = JSONObject(responseBody)
-                        return jsonObject.optString("message", "Password changed successfully")
+                        return jsonObject.optString("message", "Verification code sent to your email")
                     } catch (e: Exception) {
                         Log.e(TAG, "Error parsing JSON response: ${e.message}")
-                        return "Password changed successfully"
+                        return "Verification code sent to your email"
                     }
                 }
-                return "Sign up successfully!"
+                return "Verification code sent to your email"
             } else {
                 val responseBody = response.body?.string()
                 if (responseBody != null) {
@@ -195,5 +196,80 @@ class AuthServiceImpl @Inject constructor(
         val user = userRepository.getCurrentUser()
             ?: return false
         return user.role == UserRole.ADMIN
+    }
+
+    override suspend fun verifyCode(email: String, code: String): Boolean {
+        return try {
+            val response = apiService.verifyCode(email, code)
+            
+            if (response.isSuccessful) {
+                val responseBody = response.body?.string()
+                if (responseBody != null) {
+                    try {
+                        val jsonObject = JSONObject(responseBody)
+                        val success = jsonObject.optBoolean("verified", false)
+                        return success
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error parsing JSON response: ${e.message}")
+                    }
+                }
+                return true // Assume success if we can't parse the response
+            }
+            return false
+        } catch (e: Exception) {
+            Log.e(TAG, "Error verifying code: ${e.message}")
+            return false
+        }
+    }
+    
+    override suspend fun resendVerificationCode(email: String): String {
+        return try {
+            val response = apiService.resendVerificationCode(email)
+            
+            if (response.isSuccessful) {
+                val responseBody = response.body?.string()
+                if (responseBody != null) {
+                    try {
+                        val jsonObject = JSONObject(responseBody)
+                        return jsonObject.optString("message", "Verification code resent")
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error parsing JSON response: ${e.message}")
+                    }
+                }
+                return "Verification code resent"
+            }
+            return "Failed to resend verification code"
+        } catch (e: Exception) {
+            Log.e(TAG, "Error resending verification code: ${e.message}")
+            return "Error: ${e.message}"
+        }
+    }
+    
+    override suspend fun setUsername(email: String, username: String): Boolean {
+        return try {
+            val response = apiService.setUsername(email, username)
+            
+            if (response.isSuccessful) {
+                // After successful username set, sign in with the credentials
+                authRepository.signInWithEmail(email, "")  // Server should allow sign in once user is verified
+                return true
+            }
+            return false
+        } catch (e: Exception) {
+            Log.e(TAG, "Error setting username: ${e.message}")
+            return false
+        }
+    }
+
+    override fun checkIfUserLoginGoogle(): Boolean {
+        val currentUser = firebaseAuth.currentUser ?: return false
+        
+        for (profile in currentUser.providerData) {
+            if (profile.providerId == GoogleAuthProvider.PROVIDER_ID) {
+                return true
+            }
+        }
+        
+        return false
     }
 }

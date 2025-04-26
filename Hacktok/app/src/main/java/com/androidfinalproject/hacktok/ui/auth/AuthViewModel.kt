@@ -49,16 +49,20 @@ class AuthViewModel @Inject constructor(
             is AuthAction.UpdateEmail -> updateEmail(action.email)
             is AuthAction.UpdatePassword -> updatePassword(action.password)
             is AuthAction.UpdateConfirmPassword -> updateConfirmPassword(action.confirmPassword)
+            is AuthAction.UpdateVerificationCode -> updateVerificationCode(action.code)
+            is AuthAction.UpdateUsername -> updateUsername(action.username)
             is AuthAction.ToggleAuthMode -> toggleAuthMode()
             is AuthAction.Submit -> submitForm()
+            is AuthAction.SubmitVerificationCode -> submitVerificationCode()
+            is AuthAction.SubmitUsername -> submitUsername()
+            is AuthAction.ResendVerificationCode -> resendVerificationCode()
             is AuthAction.SelectLanguage -> updateLanguage(action.languageId)
 
             // Actions that trigger core auth logic
             is AuthAction.GoogleSignIn -> signInWithGoogle(action.idToken)
 
             // Actions related to navigation or higher-level state (handle where appropriate)
-            is AuthAction.ForgotPassword -> { /* Trigger navigation? */ }
-            is AuthAction.OnLoginSuccess -> { /* Handled by observing _authState */ }
+            else -> {}
         }
     }
 
@@ -73,6 +77,14 @@ class AuthViewModel @Inject constructor(
 
     private fun updateConfirmPassword(confirmPassword: String) {
         _uiState.update { it.copy(confirmPassword = confirmPassword, confirmPasswordError = validateConfirmPassword(confirmPassword, _uiState.value.password)) }
+    }
+
+    private fun updateVerificationCode(code: String) {
+        _uiState.update { it.copy(verificationCode = code) }
+    }
+    
+    private fun updateUsername(username: String) {
+        _uiState.update { it.copy(username = username) }
     }
 
     private fun toggleAuthMode() {
@@ -140,15 +152,124 @@ class AuthViewModel @Inject constructor(
                         }
                         return@launch
                     }
+                    
+                    // Handle signup
                     val res = authService.signUp(currentState.email, currentState.password)
-                    if(res == "Password changed successfully"){
-                        return@launch
+                    if(res.contains("Verification code sent")){
+                        // Show verification screen
+                        _uiState.update { it.copy(
+                            isLoading = false,
+                            isVerificationCodeSent = true,
+                            mainError = null
+                        )}
                     } else {
                         _uiState.update { it.copy(isLoading = false, mainError = res) }
                     }
                 } catch (e: Exception) {
                     _uiState.update { it.copy(isLoading = false, mainError = e.message ?: "Authentication failed") }
                 }
+            }
+        }
+    }
+    
+    private fun submitVerificationCode() {
+        val currentState = _uiState.value
+        
+        if (currentState.verificationCode.length != 6) {
+            _uiState.update { it.copy(mainError = "Please enter the 6-digit code") }
+            return
+        }
+        
+        _uiState.update { it.copy(isLoading = true, mainError = null) }
+        
+        viewModelScope.launch {
+            try {
+                val verified = authService.verifyCode(currentState.email, currentState.verificationCode)
+                
+                if (verified) {
+                    _uiState.update { it.copy(
+                        isLoading = false,
+                        isVerified = true,
+                        mainError = null
+                    )}
+                } else {
+                    _uiState.update { it.copy(
+                        isLoading = false,
+                        mainError = "Invalid verification code. Please try again."
+                    )}
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(
+                    isLoading = false,
+                    mainError = "Error verifying code: ${e.message ?: "Unknown error"}"
+                )}
+            }
+        }
+    }
+    
+    private fun submitUsername() {
+        val currentState = _uiState.value
+        
+        if (currentState.username.length < 3) {
+            _uiState.update { it.copy(mainError = "Username must be at least 3 characters") }
+            return
+        }
+        
+        _uiState.update { it.copy(isLoading = true, mainError = null) }
+        
+        viewModelScope.launch {
+            try {
+                _uiState.update { it.copy(isLoading = true)}
+                val success = authService.setUsername(currentState.email, currentState.username)
+                
+                if (success) {
+                    val user = authService.signInWithEmail(currentState.email, currentState.password)
+                    if (user != null) {
+                        val isAdmin = authService.isUserAdmin(user.uid)
+                        _uiState.update { it.copy(
+                            isLoginSuccess = true,
+                            isAdmin = isAdmin,
+                            isLoading = false,
+                            mainError = null
+                        )}
+
+                        // Initialize FCM after login success
+                        initializeFcm()
+                    } else {
+                        _uiState.update { it.copy(isLoading = false, isVerified = true) }
+                    }
+                } else {
+                    _uiState.update { it.copy(
+                        isLoading = false,
+                        mainError = "Failed to set username. Please try again."
+                    )}
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(
+                    isLoading = false,
+                    mainError = "Error setting username: ${e.message ?: "Unknown error"}"
+                )}
+            }
+        }
+    }
+    
+    private fun resendVerificationCode() {
+        val currentState = _uiState.value
+        
+        _uiState.update { it.copy(isLoading = true, mainError = null) }
+        
+        viewModelScope.launch {
+            try {
+                val result = authService.resendVerificationCode(currentState.email)
+                _uiState.update { it.copy(
+                    isLoading = false,
+                    mainError = result
+                )}
+            } catch (e: Exception) {
+                _uiState.update { it.copy(
+                    isLoading = false,
+                    mainError = "Error requesting new verification code: ${e.message ?: "Unknown error"}"
+                )}
             }
         }
     }

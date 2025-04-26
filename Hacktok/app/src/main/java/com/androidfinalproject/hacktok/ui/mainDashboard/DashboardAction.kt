@@ -5,6 +5,7 @@ import androidx.activity.result.ActivityResultLauncher
 
 sealed class DashboardAction {
     data class SelectTab(val index: String) : DashboardAction()
+
     data class OnPostClick(val postId: String, val commentId: String?) : DashboardAction()
     data class OnUserClick(val userId: String) : DashboardAction()
     data class GotoUserChat(val userId: String) : DashboardAction()
@@ -20,6 +21,7 @@ sealed class DashboardAction {
     object OnCreateStory : DashboardAction()
     object OnUserEdit : DashboardAction()
     object OnChangePass : DashboardAction()
+    object OnSecretCrushNavigate : DashboardAction()
     object OnAuthNavigate : DashboardAction()
     data class CheckNotificationPermission(
         val context: Context,

@@ -108,4 +108,54 @@ class ApiServiceImpl @Inject constructor() : ApiService {
 
         client.newCall(request).execute()
     }
+
+    override suspend fun verifyCode(email: String, code: String): Response = withContext(Dispatchers.IO) {
+        val jsonPayload = JSONObject().apply {
+            put("email", email)
+            put("code", code)
+        }
+        Log.d(TAG, "Sending verification code validation to server")
+        val mediaType = "application/json; charset=utf-8".toMediaType()
+        val requestBody = jsonPayload.toString().toRequestBody(mediaType)
+
+        val request = Request.Builder()
+            .url("$SERVER_URL/verify-code")
+            .post(requestBody)
+            .build()
+
+        client.newCall(request).execute()
+    }
+
+    override suspend fun resendVerificationCode(email: String): Response = withContext(Dispatchers.IO) {
+        val jsonPayload = JSONObject().apply {
+            put("email", email)
+        }
+        Log.d(TAG, "Requesting new verification code from server")
+        val mediaType = "application/json; charset=utf-8".toMediaType()
+        val requestBody = jsonPayload.toString().toRequestBody(mediaType)
+
+        val request = Request.Builder()
+            .url("$SERVER_URL/resend-code")
+            .post(requestBody)
+            .build()
+
+        client.newCall(request).execute()
+    }
+
+    override suspend fun setUsername(email: String, username: String): Response = withContext(Dispatchers.IO) {
+        val jsonPayload = JSONObject().apply {
+            put("email", email)
+            put("username", username)
+        }
+        Log.d(TAG, "Setting username for verified account")
+        val mediaType = "application/json; charset=utf-8".toMediaType()
+        val requestBody = jsonPayload.toString().toRequestBody(mediaType)
+
+        val request = Request.Builder()
+            .url("$SERVER_URL/set-username")
+            .post(requestBody)
+            .build()
+
+        client.newCall(request).execute()
+    }
 }

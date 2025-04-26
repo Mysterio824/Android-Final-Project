@@ -89,7 +89,9 @@ fun DashboardScreen(
                             onEditProfileNavigate = { onAction(DashboardAction.OnUserEdit) },
                             onAuthNavigate = { onAction(DashboardAction.OnAuthNavigate) },
                             onChangePasswordNavigate = { onAction(DashboardAction.OnChangePass) },
-                            onCurrentProfileNavigate = { onAction(DashboardAction.OnCurrentProfileNavigate) }
+                            onCurrentProfileNavigate = { onAction(DashboardAction.OnCurrentProfileNavigate) },
+                            onSecretCrushNavigate = { onAction(DashboardAction.OnSecretCrushNavigate) }
+
                         )
                     }
                 }

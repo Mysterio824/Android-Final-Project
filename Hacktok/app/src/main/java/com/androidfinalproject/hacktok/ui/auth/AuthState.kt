@@ -14,4 +14,8 @@ data class AuthUiState(
     val isAdmin: Boolean = false,
     val isFullInitial: Boolean = false,
     val mainError: String? = null,
+    val isVerificationCodeSent: Boolean = false,
+    val verificationCode: String = "",
+    val isVerified: Boolean = false,
+    val username: String = ""
 )

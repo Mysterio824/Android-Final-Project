@@ -36,7 +36,10 @@ class SettingsViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             _state.update{
-                it.copy(currentUser = authService.getCurrentUser())
+                it.copy(
+                    isGoogleLogin = authService.checkIfUserLoginGoogle(),
+                    currentUser = authService.getCurrentUser()
+                )
             }
         }
     }

@@ -6,6 +6,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -45,25 +46,34 @@ fun SettingsScreen(
             )
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            SectionHeader("Account Settings")
 
             // Edit Profile Option
             SettingsItem(
-                icon = Icons.Default.Person,
+                icon = Icons.Default.Edit,
                 title = "Edit Profile",
                 onClick = { onAction(SettingsScreenAction.OnNavigateEdit) }
             )
 
             // Change Password Option
-            SettingsItem(
-                icon = Icons.Default.Lock,
-                title = "Change Password",
-                onClick = { onAction(SettingsScreenAction.OnChangePassword) }
-            )
+            if(!state.isGoogleLogin) {
+                SettingsItem(
+                    icon = Icons.Default.Lock,
+                    title = "Change Password",
+                    onClick = { onAction(SettingsScreenAction.OnChangePassword) }
+                )
+            }
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
             // App Settings Section
             SectionHeader("App Settings")
+            // Edit Profile Option
+            SettingsItem(
+                icon = Icons.Default.Person,
+                title = "Secret Crush",
+                onClick = { onAction(SettingsScreenAction.OnSecretCrushNavigate) }
+            )
 
             // Language Settings with Dropdown
             Box {
@@ -110,7 +120,7 @@ fun SettingsScreen(
                     .padding(16.dp)
             ) {
                 Icon(
-                    Icons.Default.Logout,
+                    Icons.AutoMirrored.Filled.Logout,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onErrorContainer,
                     modifier = Modifier.padding(end = 8.dp)

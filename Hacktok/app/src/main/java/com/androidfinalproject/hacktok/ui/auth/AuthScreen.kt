@@ -41,6 +41,36 @@ fun AuthScreen(
 ) {
     val focusManager = LocalFocusManager.current
 
+    // Show the verification code screen if needed
+    if (state.isVerificationCodeSent && !state.isVerified) {
+        VerificationCodeScreen(
+            email = state.email,
+            verificationCode = state.verificationCode,
+            onVerificationCodeChange = { code -> 
+                onAction(AuthAction.UpdateVerificationCode(code)) 
+            },
+            onSubmit = { onAction(AuthAction.SubmitVerificationCode) },
+            onResend = { onAction(AuthAction.ResendVerificationCode) },
+            isLoading = state.isLoading,
+            errorMessage = state.mainError
+        )
+        return
+    }
+    
+    // Show the username screen if verified but not completed
+    if (state.isVerified) {
+        UsernameScreen(
+            username = state.username,
+            onUsernameChange = { username -> 
+                onAction(AuthAction.UpdateUsername(username)) 
+            },
+            onSubmit = { onAction(AuthAction.SubmitUsername) },
+            isLoading = state.isLoading,
+            errorMessage = state.mainError
+        )
+        return
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -169,7 +199,7 @@ fun FacebookAuthScreenPreview() {
             onGoogleSignInClicked = {},
             state = AuthUiState(
                 isLoginMode = false,
-                isLoading = true
+                isLoading = false
             )
         )
     }
