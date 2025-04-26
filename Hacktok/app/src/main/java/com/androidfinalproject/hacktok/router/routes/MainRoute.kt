@@ -88,4 +88,13 @@ sealed interface MainRoute : Route {
             const val BASE_ROUTE = "new_post"
         }
     }
+    @Serializable
+    data object SecretCrush : MainRoute {
+        override val route = "secret_crush"
+    }
+
+    @Serializable
+    data object SelectCrush : MainRoute {
+        override val route = "select_crusch"
+    }
 }

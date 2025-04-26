@@ -67,7 +67,7 @@ fun DataTypeSelector(
                 ) {
                     Text(
                         text = when (selectedDataType) {
-                            PostDataType.ALL_POSTS -> "All Posts"
+                            PostDataType.ALL_POSTS -> "Posts"
                             PostDataType.BANNED_POSTS -> "Banned Posts"
                             PostDataType.BOTH -> "Both"
                         }

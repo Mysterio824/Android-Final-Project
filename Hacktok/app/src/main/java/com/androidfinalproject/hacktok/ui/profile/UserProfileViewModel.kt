@@ -100,6 +100,7 @@ class UserProfileViewModel @Inject constructor(
             }
             is UserProfileAction.LikePost -> likePost(action.postId)
             is UserProfileAction.UnlikePost -> unLikePost(action.postId)
+            is UserProfileAction.OnLikesShowClick -> loadLikesUser(action.targetId)
             else -> {}
         }
         
@@ -131,6 +132,19 @@ class UserProfileViewModel @Inject constructor(
             } catch (e: Exception) {
                 Log.e(TAG, "Error performing action $action: ${e.message}", e)
                 _state.update { it.copy(error = "Error performing action: ${e.message}") }
+            }
+        }
+    }
+
+    private fun loadLikesUser(targetId: String) {
+        viewModelScope.launch {
+            try {
+                val likeUsers = likeService.getPostLike(targetId)
+                _state.update{
+                    it.copy(listLikeUser = likeUsers)
+                }
+            } catch(e: Exception){
+                Log.d("PostDetailViewModel", e.message.toString())
             }
         }
     }

@@ -16,5 +16,9 @@ enum class ReportCause(val description: String, val applicableTypes: List<Report
         fun fromDescription(description: String): ReportCause? {
             return entries.find { it.description == description }
         }
+
+        fun fromValue(value: String): ReportCause? {
+            return entries.find { it.name.equals(value, ignoreCase = true) }
+        }
     }
 }

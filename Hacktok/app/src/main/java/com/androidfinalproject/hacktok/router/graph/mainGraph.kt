@@ -1,6 +1,7 @@
 package com.androidfinalproject.hacktok.router.graph
 
 import SearchDashboardScreenRoot
+import android.util.Log
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
@@ -21,7 +22,6 @@ import com.androidfinalproject.hacktok.ui.friendList.FriendListScreenRoot
 import com.androidfinalproject.hacktok.ui.mainDashboard.DashboardScreenRoot
 import com.androidfinalproject.hacktok.ui.messageDashboard.MessageDashboardRoot
 import com.androidfinalproject.hacktok.ui.newStory.NewStoryRoot
-import com.androidfinalproject.hacktok.ui.messageDashboard.MessageDashboardViewModel
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Alignment
@@ -33,6 +33,7 @@ import com.androidfinalproject.hacktok.ui.changePassword.ChangePasswordScreenRoo
 import com.androidfinalproject.hacktok.ui.chatDetail.ChatDetailScreenRoot
 import com.androidfinalproject.hacktok.ui.newPost.NewPostScreenRoot
 import com.androidfinalproject.hacktok.ui.storydetail.StoryDetailScreenRoot
+import com.androidfinalproject.hacktok.ui.secretCrush.SecretCrushScreenRoot
 
 fun NavGraphBuilder.mainNavigation(navController: NavController) {
     navigation(
@@ -99,6 +100,10 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
                 onUserEditNavigate = {
                     navController.navigate(MainRoute.EditProfile.route)
                 },
+                onSecretCrushNavigate = {
+                    Log.d("Navigation", "here")
+                    navController.navigate(MainRoute.SecretCrush.route)
+                }
             )
         }
 
@@ -232,8 +237,11 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
                 onGoToPost = { postId ->
                     navController.navigate("${MainRoute.PostDetail.route}/$postId")
                 },
-                onGoToFriendList = { chatId ->
-                    navController.navigate("${MainRoute.FriendList.route}/$chatId")
+                onGoToFriendList = { 
+                    navController.navigate("${MainRoute.FriendList.route}/$userId")
+                },
+                onUserNavigate = {
+                    navController.navigate("${MainRoute.UserDetail.route}/$it")
                 },
                 onNavigateBack = {
                     navController.popBackStack()
@@ -383,6 +391,19 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
             exitTransition = { slideFadeOutToLeft() }
         ) {
             NewStoryRoot(
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // Secret Crush Screen
+        composable(
+            route = MainRoute.SecretCrush.route,
+            enterTransition = { slideFadeInFromRight() },
+            exitTransition = { slideFadeOutToLeft() }
+        ) {
+            SecretCrushScreenRoot(
                 onNavigateBack = {
                     navController.popBackStack()
                 }

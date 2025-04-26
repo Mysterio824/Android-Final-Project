@@ -43,6 +43,12 @@ class NotificationViewModel @Inject constructor(
         }
     }
 
+    fun reset() {
+        _state.update{
+            it.copy(navigateComment = false)
+        }
+    }
+
     private fun onCommentClick(commentId: String) {
         viewModelScope.launch {
             val comment = commentService.getComment(commentId)

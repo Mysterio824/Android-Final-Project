@@ -31,11 +31,13 @@ import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import com.androidfinalproject.hacktok.service.AuthService
+import com.google.firebase.auth.FirebaseAuth
+import com.androidfinalproject.hacktok.utils.DeepLinkHandler
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     companion object {
-        private const val TAG = "MainActivity"
+        private const val TAG = "MainActivityScreen"
         private const val RC_SIGN_IN = 9001
     }
 
@@ -45,8 +47,23 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var authService: AuthService
 
+    @Inject
+    lateinit var firebaseAuth: FirebaseAuth
+
+    // Track if we have a pending deep link to process
+    private var deepLinkPending = false
+    private var pendingDeepLink: String? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        Log.d(TAG, "onCreate called with savedInstanceState: $savedInstanceState")
+
+        // Process intent if it contains notification data
+        if (intent != null) {
+            Log.d(TAG, "Intent in onCreate: ${intent.action}, extras: ${if (intent.extras != null) intent.extras?.keySet()?.joinToString() else "none"}")
+            processIntent(intent)
+        }
 
         // Initialize Google Sign-In
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -59,11 +76,16 @@ class MainActivity : ComponentActivity() {
         // Ensure Google Play Services is updated
         GooglePlayServicesHelper.updateAndroidSecurityProvider(this)
 
+        // Set up the Compose UI
+        setupComposeUI()
+    }
+    
+    // Set up the Compose UI with navigation
+    private fun setupComposeUI() {
         setContent {
             MainAppTheme {
                 val navController = rememberNavController()
                 authViewModel = hiltViewModel()
-
 
                 // Re-use the existing Google Sign-In Client in Compose
                 val googleSignInClient = remember { googleSignInClient }
@@ -98,11 +120,17 @@ class MainActivity : ComponentActivity() {
                     mainNavigation(navController)
                     testNavigation(navController)
                 }
+
+                // Process deep links from notifications
+                if (pendingDeepLink != null) {
+                    DeepLinkHandler.handleDeepLink(navController, Intent().apply {
+                        putExtra("deepLink", pendingDeepLink)
+                    }, firebaseAuth)
+                    pendingDeepLink = null
+                }
             }
         }
-
     }
-    
 
     private fun startGoogleSignInWithCompatibilityWorkaround() {
         try {
@@ -114,7 +142,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == RC_SIGN_IN) {
@@ -122,7 +149,6 @@ class MainActivity : ComponentActivity() {
         }
     }
     
-
     private fun handleSignInResult(resultCode: Int, data: Intent?) {
         Log.d(TAG, "Sign-in result received. Result code: $resultCode")
         try {
@@ -147,6 +173,67 @@ class MainActivity : ComponentActivity() {
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error handling Google Sign-In result", e)
+        }
+    }
+
+    // Override onNewIntent to handle notifications when app is already running
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        Log.d(TAG, "onNewIntent called")
+        
+        // Set the new intent to update the activity's intent
+        setIntent(intent)
+        
+        // Process the new intent
+        processIntent(intent)
+        
+        // Handle any deep links immediately if the app is already running
+        if (intent.hasExtra("deepLink")) {
+            val deepLink = intent.getStringExtra("deepLink")
+            if (deepLink != null) {
+                Log.d(TAG, "Found deep link in onNewIntent: $deepLink")
+                // Store the deep link for later handling in setContent
+                pendingDeepLink = deepLink
+                Log.d(TAG, "Storing deep link for handling in Compose: $deepLink")
+                
+                // Refresh the UI to handle the deep link
+                setupComposeUI()
+            }
+        }
+    }
+
+    // Process incoming intents for notification data
+    private fun processIntent(intent: Intent?) {
+        if (intent == null) {
+            Log.d(TAG, "processIntent: Intent is null")
+            return
+        }
+
+        // Log all extras for debugging
+        val extras = intent.extras
+        if (extras != null) {
+            Log.d(TAG, "Intent extras:")
+            for (key in extras.keySet()) {
+                Log.d(TAG, "  $key: ${extras.get(key)}")
+            }
+        } else {
+            Log.d(TAG, "Intent has no extras")
+        }
+
+        // Check for notification flag
+        val fromNotification = intent.getBooleanExtra("notificationReceived", false)
+        if (fromNotification) {
+            Log.d(TAG, "Intent received from notification click")
+        }
+
+        // Check for deep link from notification
+        val deepLink = intent.getStringExtra("deepLink")
+        if (deepLink != null) {
+            Log.d(TAG, "Found deepLink: $deepLink")
+            pendingDeepLink = deepLink
+            deepLinkPending = true
+        } else {
+            Log.d(TAG, "No deepLink in intent")
         }
     }
 }

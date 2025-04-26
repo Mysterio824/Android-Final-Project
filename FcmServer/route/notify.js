@@ -5,6 +5,7 @@ const router = express.Router();
 router.post('/send-notification', async (req, res) => {
   try {
     const { token, title, body, data } = req.body;
+    console.log('Received notification request:', req.body);
     if (!token) return res.status(400).json({ error: 'Device token is required' });
     if (!body && !title) return res.status(400).json({ error: 'At least title or body is required' });
 

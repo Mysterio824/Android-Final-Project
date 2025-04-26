@@ -3,6 +3,11 @@ package com.androidfinalproject.hacktok.ui.profile.component
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.LockOpen
+import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Report
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -31,26 +36,22 @@ fun ProfileOptionsContent(
             .fillMaxWidth()
             .padding(bottom = 24.dp)
     ) {
-        Text(
-            text = "Comment Options",
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
-            modifier = Modifier.padding(16.dp)
-        )
-
         OptionItem(
             title = "Report",
+            icon = Icons.Default.Report,
             onClick = withDismiss(report)
         )
 
         if(isBlock){
             OptionItem(
                 title = "Unblock",
+                icon = Icons.Default.LockOpen,
                 onClick = withDismiss(unblock)
             )
         } else {
             OptionItem(
                 title = "Block",
+                icon = Icons.Default.Block,
                 onClick = withDismiss(block)
             )
         }
@@ -58,6 +59,7 @@ fun ProfileOptionsContent(
 
         OptionItem(
             title = "See friendship",
+            icon = Icons.Default.People,
             onClick = withDismiss(seeFriend)
         )
     }

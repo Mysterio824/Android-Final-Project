@@ -14,6 +14,7 @@ sealed class HomeScreenAction {
     data class OnStoryClick(val storyId: String): HomeScreenAction()
     data class OnPostClick(val postId: String) : HomeScreenAction()
     data class OnUserClick(val userId: String) : HomeScreenAction()
+    data class OnLikesShowClick(val targetId: String): HomeScreenAction()
     data class SubmitReport(
         val reportedItemId: String,
         val reportType: ReportType,
@@ -26,5 +27,6 @@ sealed class HomeScreenAction {
     data class OnSharePost(val post: Post, val caption: String, val privacy: PRIVACY) : HomeScreenAction()
     data object DismissShareDialog : HomeScreenAction()
     data object LoadMorePosts : HomeScreenAction()
-    object LoadMoreStories : HomeScreenAction()
+    data object Refresh : HomeScreenAction()
+    data object LoadMoreStories : HomeScreenAction()
 }

@@ -6,7 +6,6 @@ import com.androidfinalproject.hacktok.model.enums.UserRole
 import com.androidfinalproject.hacktok.ui.statistic.postStatistic.PostDataType
 import com.androidfinalproject.hacktok.ui.statistic.postStatistic.PostStatPoint
 import com.androidfinalproject.hacktok.ui.statistic.postStatistic.PostStatisticsState
-import com.androidfinalproject.hacktok.ui.statistic.userStatistic.Timeframe
 import com.androidfinalproject.hacktok.ui.statistic.userStatistic.UserStatPoint
 import com.androidfinalproject.hacktok.ui.statistic.userStatistic.UserStatisticsState
 import java.text.SimpleDateFormat
@@ -184,6 +183,7 @@ object MockData {
             NotificationType.ADMIN_NOTIFICATION -> "Important: ${mockAdminMessages.random()}"
             NotificationType.NEW_STORY -> "${sender.username} post a story, check it out"
             NotificationType.NEW_MESSAGE -> "${sender.username} send you a new message"
+            NotificationType.SECRET_CRUSH -> "Some one have a crush on you!"
         }
 
         // Set a random read status (more recent ones are more likely to be unread)
@@ -317,7 +317,7 @@ object MockData {
         }
 
         return PostStatisticsState(
-            timeframe = com.androidfinalproject.hacktok.ui.statistic.postStatistic.Timeframe.MONTH,
+            timeframe = Timeframe.MONTH,
             dataType = PostDataType.BOTH,
             postStats = postStats,
             bannedPostStats = bannedPostStats,

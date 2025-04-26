@@ -3,6 +3,9 @@ package com.androidfinalproject.hacktok.ui.profile.component
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -31,20 +34,15 @@ fun ResponseOptionsContent(
             .fillMaxWidth()
             .padding(bottom = 24.dp)
     ) {
-        Text(
-            text = "Comment Options",
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
-            modifier = Modifier.padding(16.dp)
-        )
-
         OptionItem(
             title = "Accept",
+            icon = Icons.Default.Check,
             onClick = withDismiss(accept)
         )
 
         OptionItem(
             title = "Delete Request",
+            icon = Icons.Default.Delete,
             onClick = withDismiss(unaccepted)
         )
     }
