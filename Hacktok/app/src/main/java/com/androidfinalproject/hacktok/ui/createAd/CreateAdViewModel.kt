@@ -29,19 +29,30 @@ class CreateAdViewModel @Inject constructor(
     val state: StateFlow<CreateAdState> = _state.asStateFlow()
 
     init {
-        loadCurrentUser()
-        updateEndDate(_state.value.durationDays)
-        loadUserAds()
-    }
-
-    private fun loadCurrentUser() {
         viewModelScope.launch {
             try {
-                val user = authService.getCurrentUser()
-                _state.update { it.copy(currentUser = user) }
+                val user = loadCurrentUser()
+                if (user != null) {
+                    updateEndDate(_state.value.durationDays)
+                    loadUserAds()
+                } else {
+                    _state.update { it.copy(error = "Failed to load user. Please try again.") }
+                }
             } catch (e: Exception) {
-                _state.update { it.copy(error = "Failed to load user: ${e.message}") }
+                _state.update { it.copy(error = "Failed to initialize: ${e.message}") }
             }
+        }
+    }
+
+    private suspend fun loadCurrentUser(): User? {
+        return try {
+            val user = authService.getCurrentUser()
+            Log.d("CREATEADDDDD", "${user?.id}")
+            _state.update { it.copy(currentUser = user) }
+            user
+        } catch (e: Exception) {
+            _state.update { it.copy(error = "Failed to load user: ${e.message}") }
+            null
         }
     }
 
@@ -56,6 +67,7 @@ class CreateAdViewModel @Inject constructor(
             try {
                 _state.update { it.copy(isLoadingAds = true, error = null) }
                 val currentUser = _state.value.currentUser
+                Log.d("CREATE", "${currentUser?.id}")
                 if (currentUser == null) {
                     _state.update { 
                         it.copy(
