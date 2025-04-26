@@ -33,7 +33,7 @@ class GroupChatViewModel : ViewModel() {
     fun sendMessage(content: String) {
         if (content.isBlank()) return
 
-        val newMessage = Message(
+        val newMessage = Message.create(
             id = UUID.randomUUID().toString(),
             senderId = _state.value.currentUser.id ?: "",
             content = content,
@@ -98,25 +98,25 @@ class GroupChatViewModel : ViewModel() {
         val user3 = "user3" // Another member from the group
 
         return listOf(
-            Message(
+            Message.create(
                 id = UUID.randomUUID().toString(),
                 senderId = user2,
                 content = "Chào cả nhóm!",
                 createdAt = Date(System.currentTimeMillis() - 3600000)
             ),
-            Message(
+            Message.create(
                 id = UUID.randomUUID().toString(),
                 senderId = user1,
                 content = "Chào mọi người, dự án của chúng ta tiến triển thế nào rồi?",
                 createdAt = Date(System.currentTimeMillis() - 3500000)
             ),
-            Message(
+            Message.create(
                 id = UUID.randomUUID().toString(),
                 senderId = user3,
                 content = "Mình đã hoàn thành phần UI, đang chờ API.",
                 createdAt = Date(System.currentTimeMillis() - 3400000)
             ),
-            Message(
+            Message.create(
                 id = UUID.randomUUID().toString(),
                 senderId = user2,
                 content = "Mình sẽ gửi API doc vào ngày mai nhé!",

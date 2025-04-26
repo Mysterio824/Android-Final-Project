@@ -105,19 +105,19 @@ fun GroupChatScreenPreview() {
             )
 
             val messages = listOf(
-                Message(
+                Message.create(
                     id = "1",
                     senderId = "user2",
                     content = "Chào cả nhóm!",
                     createdAt = Date(System.currentTimeMillis() - 3600000)
                 ),
-                Message(
+                Message.create(
                     id = "2",
                     senderId = "user1",
                     content = "Chào mọi người, dự án của chúng ta tiến triển thế nào rồi?",
                     createdAt = Date(System.currentTimeMillis() - 3500000)
                 ),
-                Message(
+                Message.create(
                     id = "3",
                     senderId = "user3",
                     content = "Mình đã hoàn thành phần UI, đang chờ API.",

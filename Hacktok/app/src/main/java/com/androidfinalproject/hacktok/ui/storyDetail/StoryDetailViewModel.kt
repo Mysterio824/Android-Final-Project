@@ -198,7 +198,7 @@ class StoryDetailViewModel @Inject constructor(
                 val chatId = chatRepository.getOrCreateChat(senderId, receiverId)
 
                 // 2. Create message
-                val message = Message(
+                val message = Message.create(
                     senderId = senderId,
                     content = content,
                     createdAt = Date(),
