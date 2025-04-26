@@ -38,7 +38,7 @@ fun DashboardScreen(
         Scaffold(
             topBar = {
                 TopNavigationBar(
-                    imageUrl = state.currentUser?.profileImage!!,
+                    imageUrl = state.currentUser?.profileImage ?: "",
                     currentTab = state.selectedTab,
                     onSearchClick = { onAction(DashboardAction.OnSearchNavigate) },
                     onMessageClick = { onAction(DashboardAction.OnMessageDashboardNavigate) },

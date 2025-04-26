@@ -183,6 +183,7 @@ object MockData {
             NotificationType.ADMIN_NOTIFICATION -> "Important: ${mockAdminMessages.random()}"
             NotificationType.NEW_STORY -> "${sender.username} post a story, check it out"
             NotificationType.NEW_MESSAGE -> "${sender.username} send you a new message"
+            NotificationType.SECRET_CRUSH -> "Some one have a crush on you!"
         }
 
         // Set a random read status (more recent ones are more likely to be unread)
