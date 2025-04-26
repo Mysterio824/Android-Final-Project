@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.ComponentName
 import android.media.RingtoneManager
 import android.util.Log
 import androidx.core.app.NotificationCompat
@@ -124,45 +125,37 @@ class FcmServiceImpl @Inject constructor(
 
     override fun showNotification(title: String, body: String, data: Map<String, String>) {
         Log.d(TAG, "Preparing to show notification. Title: $title, Body: $body, Data: $data")
-        val intent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        
+        if (com.androidfinalproject.hacktok.utils.AppForegroundDetector.isAppInForeground(context)) {
+            Log.d(TAG, "App is in foreground, skipping notification display")
+            return
+        }
+        val notificationId = data["notificationId"]?.hashCode() ?: System.currentTimeMillis().toInt()
+        
+        // Create intent with explicit component name to ensure it targets the right activity
+        val componentName = ComponentName(context.packageName, "com.androidfinalproject.hacktok.MainActivity")
+        val intent = Intent().apply {
+            component = componentName
+            // Set flags for launching from notification
+            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             
             // Add all notification data as extras to support precise navigation
             putExtra("notificationReceived", true)
+            putExtra("notificationId", notificationId.toString())
+            putExtra("deepLink", data["deepLink"])
+
+            // Log all extras for debugging
+            Log.d(TAG, "Setting notification extras:")
             data.forEach { (key, value) ->
                 putExtra(key, value)
-            }
-            
-            // Handle specific navigation based on notification type
-            when (data["type"]) {
-                NotificationType.POST_LIKE.name, NotificationType.POST_COMMENT.name -> {
-                    // Use deep linking format for post detail
-                    putExtra("deepLink", "${MainRoute.PostDetail.route}/${data["itemId"]}")
-                }
-                NotificationType.COMMENT_LIKE.name, NotificationType.COMMENT_REPLY.name -> {
-                    // Deep link with post ID and comment ID (scrollToComment)
-                    val postId = data["postId"]
-                    val commentId = data["itemId"]
-                    if (postId != null && commentId != null) {
-                        putExtra("deepLink", "${MainRoute.PostDetail.route}/$postId?commentId=$commentId")
-                    }
-                }
-                NotificationType.NEW_MESSAGE.name -> {
-                    // Use deep linking format for chat room with user
-                    val senderId = data["senderId"]
-                    if (senderId != null) {
-                        putExtra("deepLink", "${MainRoute.ChatRoom.route}/user/$senderId")
-                    }
-                }
-                else -> {
-                    // Default to dashboard if no specific navigation
-                    putExtra("deepLink", MainRoute.Dashboard.route)
-                }
+                Log.d(TAG, "  Extra: $key = $value")
             }
         }
 
+        // Create a unique pending intent for this notification using the notification ID
         val pendingIntent = PendingIntent.getActivity(
-            context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            context, notificationId, intent, 
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
@@ -179,7 +172,6 @@ class FcmServiceImpl @Inject constructor(
 
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        val notificationId = data["notificationId"]?.hashCode() ?: System.currentTimeMillis().toInt()
         Log.d(TAG, "Showing notification with ID: $notificationId")
         notificationManager.notify(notificationId, notificationBuilder.build())
     }
@@ -204,6 +196,7 @@ class FcmServiceImpl @Inject constructor(
             
             Log.d(TAG, "Retrieved recipient's FCM token: ${recipientToken.take(10)}...")
 
+
             val response = apiService.sendNotificationRequest(recipientToken, title, body, data)
 
             val isSuccessful = response.isSuccessful
@@ -227,7 +220,8 @@ class FcmServiceImpl @Inject constructor(
         recipientUserId: String,
         senderUserId: String,
         notificationType: NotificationType,
-        itemId: String // e.g., Post ID, Comment ID
+        itemId: String, // e.g., Post ID, Comment ID
+        content: String?
     ): Boolean = withContext(Dispatchers.IO) {
         Log.d(TAG, "Processing interaction notification: Type=$notificationType, Recipient=$recipientUserId, Sender=$senderUserId, Item=$itemId")
 
@@ -246,7 +240,7 @@ class FcmServiceImpl @Inject constructor(
             }
 
             // Generate notification content
-            val (title, body) = generateNotificationContent(sender, notificationType, itemId)
+            val body = generateNotificationContent(sender, notificationType, itemId) + (content ?: "")
 
             // Prepare data payload for FCM (and backend)
             val fcmData = mutableMapOf(
@@ -256,7 +250,7 @@ class FcmServiceImpl @Inject constructor(
             )
             
             // Add post ID for comment notifications to enable proper navigation
-            if (notificationType == NotificationType.COMMENT_LIKE || notificationType == NotificationType.COMMENT_REPLY) {
+            if (notificationType == NotificationType.COMMENT_LIKE || notificationType == NotificationType.COMMENT_REPLY || notificationType == NotificationType.POST_COMMENT) {
                 try {
                     val comment = commentRepository.getById(itemId).getOrNull()
                     comment?.postId?.let { postId ->
@@ -266,6 +260,8 @@ class FcmServiceImpl @Inject constructor(
                     Log.e(TAG, "Error fetching post ID for comment notification", e)
                 }
             }
+
+            fcmData["deepLink"] = generateDeepLink(fcmData)
 
             // Call the refactored sendNotification which triggers the backend
             val backendCallInitiated = sendNotification(
@@ -291,7 +287,7 @@ class FcmServiceImpl @Inject constructor(
         sender: User,
         notificationType: NotificationType,
         itemId: String
-    ): Pair<String, String> {
+    ): String {
         Log.d(TAG, "Generating content for type: $notificationType, item: $itemId")
         // Add try-catch blocks around repository calls for more robustness
         val senderName = sender.username ?: "Someone"
@@ -300,31 +296,31 @@ class FcmServiceImpl @Inject constructor(
                 NotificationType.POST_LIKE -> {
                     val post = postRepository.getPost(itemId)
                     val shortContent = post?.content?.take(30)?.let { if (it.length >= 30) "$it..." else it } ?: "your post"
-                    Pair("New Like", "$senderName liked your post: $shortContent")
+                    "$senderName liked your post: $shortContent"
                 }
                 NotificationType.POST_COMMENT -> {
                     val post = postRepository.getPost(itemId)
                     val shortContent = post?.content?.take(30)?.let { if (it.length >= 30) "$it..." else it } ?: "your post"
-                    Pair("New Comment", "$senderName commented on your post: $shortContent")
+                    "$senderName commented on your post: $shortContent"
                 }
                 NotificationType.COMMENT_LIKE -> {
                     val comment = commentRepository.getById(itemId).getOrNull()
                     val shortContent = comment?.content?.take(30)?.let { if (it.length >= 30) "$it..." else it } ?: "your comment"
-                    Pair("New Like", "$senderName liked your comment: $shortContent")
+                    "$senderName liked your comment: $shortContent"
                 }
                 NotificationType.COMMENT_REPLY -> {
                     val comment = commentRepository.getById(itemId).getOrNull()
                     val shortContent = comment?.content?.take(30)?.let { if (it.length >= 30) "$it..." else it } ?: "your comment"
-                    Pair("New Reply", "$senderName replied to your comment: $shortContent")
+                    "$senderName replied to your comment: $shortContent"
                 }
                 NotificationType.NEW_MESSAGE -> {
-                    Pair("New Message", "$senderName send you a new message ")
+                    "$senderName: "
                 }
-                else -> Pair("HackTok", "$senderName interacted with you")
+                else -> "$senderName interacted with you"
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error fetching details in generateNotificationContent", e)
-            Pair("HackTok Notification", "$senderName interacted with you") // Fallback content
+            "$senderName interacted with you" // Fallback content
         }
     }
 
@@ -343,6 +339,42 @@ class FcmServiceImpl @Inject constructor(
 
     // Keep the delay method
     suspend fun delay(timeMillis: Long) = kotlinx.coroutines.delay(timeMillis)
+
+    private fun generateDeepLink(data: Map<String, String>) : String {
+        when (data["type"]) {
+            NotificationType.POST_LIKE.name -> {
+                // Use deep linking format for post detail
+                val itemId = data["itemId"]
+                if (itemId != null) {
+                    val deepLink = "${MainRoute.PostDetail.route}/$itemId"
+                    Log.d(TAG, "  Setting deepLink = $deepLink")
+                    return deepLink
+                }
+            }
+            NotificationType.COMMENT_LIKE.name, NotificationType.COMMENT_REPLY.name, NotificationType.POST_COMMENT.name -> {
+                // Deep link with post ID and comment ID (scrollToComment)
+                val postId = data["postId"]
+                val commentId = data["itemId"]
+                if (postId != null && commentId != null) {
+                    val deepLink = "${MainRoute.PostDetail.route}/$postId?commentId=$commentId"
+                    Log.d(TAG, "  Setting deepLink = $deepLink")
+                    return deepLink
+                }
+            }
+            NotificationType.NEW_MESSAGE.name -> {
+                // Use deep linking format for chat room with user
+                val senderId = data["senderId"]
+                if (senderId != null) {
+                    val deepLink = "${MainRoute.ChatRoom.route}/user/$senderId"
+                    Log.d(TAG, "  Setting deepLink = $deepLink")
+                    return deepLink
+                }
+            }
+        }
+        val deepLink = MainRoute.Dashboard.route
+        Log.d(TAG, "  Setting default deepLink = $deepLink")
+        return deepLink
+    }
 
     override suspend fun removeFcmToken() = withContext(Dispatchers.IO) {
         try {

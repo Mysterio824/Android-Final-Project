@@ -155,6 +155,7 @@ class ChatRepositoryImpl @Inject constructor(
                         senderUserId = message.senderId,
                         notificationType = NotificationType.NEW_MESSAGE,
                         itemId = chatId,
+                        content = message.content
                     )
                 }
             }
