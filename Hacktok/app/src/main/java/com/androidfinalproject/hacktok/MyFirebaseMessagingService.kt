@@ -51,27 +51,18 @@ open class AndroidEntryPointFirebaseMessagingService : FirebaseMessagingService(
         super.onMessageReceived(remoteMessage)
         Log.d(TAG, "FCM Message Received! From: ${remoteMessage.from}")
 
-        // Log entire message for debugging
-        // Log.d(TAG, "Message Data payload: ${remoteMessage.data}")
-        // remoteMessage.notification?.let { Log.d(TAG, "Message Notification payload: Title=${it.title}, Body=${it.body}") }
-
-        // Prioritize Data Payload (more reliable for background handling)
         if (remoteMessage.data.isNotEmpty()) {
             Log.d(TAG, "Processing message data payload: ${remoteMessage.data}")
             handleDataMessage(remoteMessage.data)
         }
-        // Handle Notification Payload (if app is in foreground)
-        // You might choose to ignore this if data payload contains same info
         else if (remoteMessage.notification != null) {
             Log.d(TAG, "Processing message notification payload (app likely foreground).")
             val notification = remoteMessage.notification!!
-            // Construct a data map if needed, or use defaults
             val data = mapOf(
                 "title" to (notification.title ?: "Notification"),
                 "body" to (notification.body ?: "")
-                // Add other fields if available/needed
             )
-            handleDataMessage(data) // Reuse data handling logic
+            handleDataMessage(data)
         } else {
             Log.w(TAG, "Received empty FCM message.")
         }
@@ -82,8 +73,16 @@ open class AndroidEntryPointFirebaseMessagingService : FirebaseMessagingService(
         val title = data["title"] ?: "Notification" // Provide default title
         val body = data["body"] ?: "" // Provide default body
         val notificationDocId = data["notificationDocId"] // Get history ID if sent from backend
+        val deepLink = data["deepLink"] // Extract deep link for navigation
 
-        Log.d(TAG, "Handling data message: Title='$title', Body='$body', Data=$data")
+        // Log complete data payload for debugging
+        Log.d(TAG, "Handling notification data message:")
+        Log.d(TAG, "  Title: $title")
+        Log.d(TAG, "  Body: $body")
+        Log.d(TAG, "  NotificationDocId: $notificationDocId")
+        Log.d(TAG, "  DeepLink: $deepLink")
+        Log.d(TAG, "  Complete data: $data")
+        
         fcmService.showNotification(title, body, data)
     }
 

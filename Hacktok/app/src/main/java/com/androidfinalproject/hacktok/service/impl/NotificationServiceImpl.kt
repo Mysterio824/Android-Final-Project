@@ -42,6 +42,9 @@ class NotificationServiceImpl @Inject constructor(
         priority: String
     ): String? {
         return try {
+
+            if(recipientUserId == authService.getCurrentUserIdSync())
+                return null
             // Fetch sender details if senderId is provided
             val sender = if (senderId != null) {
                 userRepository.getUserById(senderId)
@@ -76,7 +79,7 @@ class NotificationServiceImpl @Inject constructor(
                     recipientUserId = recipientUserId,
                     senderUserId = senderId!!,
                     notificationType = type,
-                    itemId = relatedItemId!!
+                    itemId = relatedItemId!!,
                 )
             }
             

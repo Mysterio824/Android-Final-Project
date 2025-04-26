@@ -178,6 +178,9 @@ class CommentServiceImpl @Inject constructor(
                         relatedItemId = parentId
                     )
                     post!!.id?.let {
+                        if(post.userId == parentComment.userId){
+                            return@launch
+                        }
                         notificationService.createNotification(
                             recipientUserId = post.userId,
                             type = NotificationType.POST_COMMENT,
