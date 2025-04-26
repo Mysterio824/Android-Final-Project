@@ -4,8 +4,11 @@ import com.androidfinalproject.hacktok.model.Ad
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class AdRepository {
+@Singleton
+class AdRepository @Inject constructor() {
     private val db = FirebaseFirestore.getInstance()
     private val collection = db.collection("ads")
 
