@@ -27,6 +27,10 @@ import com.androidfinalproject.hacktok.ui.commonComponent.PostOptionsContent
 import com.androidfinalproject.hacktok.ui.commonComponent.ReportOptionsContent
 import com.androidfinalproject.hacktok.ui.commonComponent.SharePostDialog
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
+import com.androidfinalproject.hacktok.model.User
+import com.androidfinalproject.hacktok.model.enums.UserRole
+import com.androidfinalproject.hacktok.model.PrivacySettings
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,7 +75,7 @@ fun WatchLaterScreen(
                 LazyColumn(
                     modifier = Modifier.padding(paddingValues)
                 ){
-                    items(state.savedPosts) { post ->
+                    items(state.posts) { post ->
                         val refPost = state.referencePosts[post.refPostId]
                         val refUser = refPost?.userId?.let { state.referenceUsers[it] }
                         Card(
@@ -98,7 +102,27 @@ fun WatchLaterScreen(
                                 onOptionsClick = { selectPostId = post.id },
                                 onUnLike = { onAction(WatchLaterAction.OnUnLikeClick(post.id!!)) },
                                 currentId = state.currentUserId ?: "",
-                                user = state.postUsers[post.id]!!,
+                                user = state.postUsers[post.id] ?: state.user ?: User(
+                                    id = post.userId,
+                                    email = "",
+                                    username = "Unknown User",
+                                    fullName = "Unknown User",
+                                    profileImage = null,
+                                    bio = null,
+                                    createdAt = Date(),
+                                    isActive = true,
+                                    role = UserRole.USER,
+                                    privacySettings = PrivacySettings(),
+                                    language = "en",
+                                    friends = emptyList(),
+                                    blockedUsers = emptyList(),
+                                    followers = emptyList(),
+                                    following = emptyList(),
+                                    followerCount = 0,
+                                    followingCount = 0,
+                                    searchHistory = emptyList(),
+                                    videosCount = 0
+                                ),
                                 onImageClick = {
                                     onAction(WatchLaterAction.OnImageClick(post.imageLink))
                                 },
@@ -134,9 +158,13 @@ fun WatchLaterScreen(
                     ) {
                         PostOptionsContent(
                             onDismiss = { selectPostId = null },
-                            onReport = { reportTargetId = selectPostId!! },
-                            isPostOwner = state.currentUserId == selectPostId,
-                            onSavePost = {}
+                            onReport = { reportTargetId = selectPostId },
+                            isPostOwner = selectPostId == state.user?.id,
+                            isPostSaved = state.savedPosts.contains(selectPostId),
+                            onSavePost = {},
+                            onUnsavePost = { onAction(WatchLaterAction.OnDeleteSavedPost(selectPostId!!)) },
+                            onPostEdit = { onAction(WatchLaterAction.OnPostEditClick(selectPostId!!)) },
+                            onPostDelete = { onAction(WatchLaterAction.OnDeletePost(selectPostId!!)) }
                         )
                     }
                 }
@@ -177,21 +205,35 @@ fun WatchLaterScreen(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun WatchLaterScreenPreview() {
-    MainAppTheme {
-        Box(
-            modifier = Modifier
-                .width(400.dp)
-                .height(800.dp)
-        ) {
-            WatchLaterScreen(
-                state = WatchLaterState(
-                    savedPosts = MockData.mockPosts
-                ),
-                onAction = {}
-            )
-        }
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun WatchLaterScreenPreview() {
+//    MainAppTheme {
+//        Box(
+//            modifier = Modifier
+//                .width(400.dp)
+//                .height(800.dp)
+//        ) {
+//            WatchLaterScreen(
+//                state = WatchLaterState(
+//                    currentUserId = "user1",
+//                    postUsers = mapOf(
+//                        "post1" to MockData.mockUsers[0],
+//                        "post2" to MockData.mockUsers[1]
+//                    ),
+//                    savedPosts = MockData.mockPosts,
+//                    referencePosts = mapOf(
+//                        "ref1" to MockData.mockPosts[0],
+//                        "ref2" to MockData.mockPosts[1]
+//                    ),
+//                    referenceUsers = mapOf(
+//                        "user1" to MockData.mockUsers[0],
+//                        "user2" to MockData.mockUsers[1]
+//                    ),
+//                    user = MockData.mockUsers[0]
+//                ),
+//                onAction = {}
+//            )
+//        }
+//    }
+//}

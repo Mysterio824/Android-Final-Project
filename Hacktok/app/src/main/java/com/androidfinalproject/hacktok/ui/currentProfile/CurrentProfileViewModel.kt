@@ -8,6 +8,8 @@ import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.repository.PostRepository
 import com.androidfinalproject.hacktok.repository.UserRepository
 import com.androidfinalproject.hacktok.service.LikeService
+import com.androidfinalproject.hacktok.model.SavedPost
+import com.androidfinalproject.hacktok.repository.SavedPostRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,7 +21,8 @@ import javax.inject.Inject
 class CurrentProfileViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val postRepository: PostRepository,
-    private val likeService: LikeService
+    private val likeService: LikeService,
+    private val savedPostRepository: SavedPostRepository
 ) : ViewModel() {
     private val _state = MutableStateFlow<CurrentProfileState>(CurrentProfileState.Loading)
     val state = _state.asStateFlow()
@@ -53,12 +56,18 @@ class CurrentProfileViewModel @Inject constructor(
                             }
                         }
                     }
+
+                    // Load saved posts
+                    val savedPosts = savedPostRepository.getSavedPostsByUser(userId)
+                        .map { it.postId }
+
                     _state.value = CurrentProfileState.Success(
                         user = user,
                         posts = posts,
                         friendCount = user.friends.size,
                         referencePosts = referencePosts,
-                        referenceUsers = referenceUsers
+                        referenceUsers = referenceUsers,
+                        savedPosts = savedPosts
                     )
                 } else {
                     _state.value = CurrentProfileState.Error("User not found")
@@ -115,6 +124,46 @@ class CurrentProfileViewModel @Inject constructor(
         }
     }
 
+    private fun savePost(postId: String) {
+        viewModelScope.launch {
+            try {
+                val current = _state.value
+                if (current is CurrentProfileState.Success) {
+                    val userId = current.user.id ?: return@launch
+                    val savedPost = SavedPost(
+                        userId = userId,
+                        postId = postId
+                    )
+                    savedPostRepository.savePost(savedPost)
+                    // Update the state with the new saved post
+                    _state.value = current.copy(
+                        savedPosts = current.savedPosts + postId
+                    )
+                }
+            } catch (e: Exception) {
+                _state.value = CurrentProfileState.Error("Failed to save post: ${e.message}")
+            }
+        }
+    }
+
+    private fun deleteSavedPost(postId: String) {
+        viewModelScope.launch {
+            try {
+                val current = _state.value
+                if (current is CurrentProfileState.Success) {
+                    val userId = current.user.id ?: return@launch
+                    savedPostRepository.deleteSavedPost(postId)
+                    // Update the state by removing the unsaved post
+                    _state.value = current.copy(
+                        savedPosts = current.savedPosts.filter { it != postId }
+                    )
+                }
+            } catch (e: Exception) {
+                _state.value = CurrentProfileState.Error("Failed to delete saved post: ${e.message}")
+            }
+        }
+    }
+
     fun onAction(action: CurrentProfileAction) {
         when (action) {
             is CurrentProfileAction.RetryLoading -> {
@@ -124,6 +173,7 @@ class CurrentProfileViewModel @Inject constructor(
                 deletePost(action.postId)
             }
             is CurrentProfileAction.OnSavePost -> savePost(action.postId)
+            is CurrentProfileAction.OnDeleteSavedPost -> deleteSavedPost(action.postId)
             is CurrentProfileAction.ShowShareDialog -> {
                 val current = _state.value
                 if (current is CurrentProfileState.Success) {
@@ -216,10 +266,6 @@ class CurrentProfileViewModel @Inject constructor(
 
             } // Handle other actions
         }
-    }
-
-    private fun savePost(postId: String) {
-
     }
 
     fun List<Post>.replacePost(updatedPost: Post): List<Post> {

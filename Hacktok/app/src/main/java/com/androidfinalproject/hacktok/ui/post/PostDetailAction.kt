@@ -13,6 +13,7 @@ sealed class PostDetailAction {
     data object LoadComments : PostDetailAction()
     data class ToggleLike(val emoji: String) : PostDetailAction()
     data class OnSavePost(val postId: String) : PostDetailAction()
+    data class OnDeleteSavedPost(val postId: String) : PostDetailAction()
     data object UnLikePost : PostDetailAction()
     data class SubmitReport(
         val reportedItemId: String,

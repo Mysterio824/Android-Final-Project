@@ -282,14 +282,18 @@ fun CurrentProfileScreen(
                     containerColor = MaterialTheme.colorScheme.surface,
                     shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
                 ) {
-                    PostOptionsContent(
-                        onDismiss = { selectPostId = null },
-                        onReport = {},
-                        isPostOwner = true,
-                        onSavePost = { onAction(CurrentProfileAction.OnSavePost(selectPostId!!)) },
-                        onPostEdit = { onAction(CurrentProfileAction.NavigateToPostEdit(selectPostId!!)) },
-                        onPostDelete = { onAction(CurrentProfileAction.OnDeletePost(selectPostId!!)) }
-                    )
+                    if (state is CurrentProfileState.Success) {
+                        PostOptionsContent(
+                            onDismiss = { selectPostId = null },
+                            onReport = {},
+                            isPostOwner = true,
+                            isPostSaved = state.savedPosts.contains(selectPostId),
+                            onSavePost = { onAction(CurrentProfileAction.OnSavePost(selectPostId!!)) },
+                            onUnsavePost = { onAction(CurrentProfileAction.OnDeleteSavedPost(selectPostId!!)) },
+                            onPostEdit = { onAction(CurrentProfileAction.NavigateToPostEdit(selectPostId!!)) },
+                            onPostDelete = { onAction(CurrentProfileAction.OnDeletePost(selectPostId!!)) }
+                        )
+                    }
                 }
             }
         }

@@ -225,15 +225,16 @@ fun PostDetailScreen(
                     onDismissRequest = { showPostOptionsSheet = false },
                     sheetState = bottomSheetState
                 ) {
-                    PostOptionsContent(
-                        isPostOwner = state.currentUser?.id == state.postUser?.id,
-                        onDismiss = { showPostOptionsSheet = false },
-                        onReport = {
-                            reportTargetId = state.post?.id
-                            reportType = ReportType.Post
-                        },
-                        onSavePost = { onAction(PostDetailAction.OnSavePost(state.post!!.id!!)) }
-                    )
+                    state.post?.let { post ->
+                        PostOptionsContent(
+                            onDismiss = { showPostOptionsSheet = false },
+                            onReport = { reportTargetId = post.id },
+                            isPostOwner = post.userId == state.currentUser?.id,
+                            isPostSaved = state.savedPosts.contains(post.id),
+                            onSavePost = { onAction(PostDetailAction.OnSavePost(post.id!!)) },
+                            onUnsavePost = { onAction(PostDetailAction.OnDeleteSavedPost(post.id!!)) },
+                        )
+                    }
                 }
             }
 

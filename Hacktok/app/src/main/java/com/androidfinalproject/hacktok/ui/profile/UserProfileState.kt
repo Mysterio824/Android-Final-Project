@@ -23,5 +23,6 @@ data class UserProfileState (
     val currentUser: User? = null,
     val listLikeUser: List<FullReaction> = emptyList(),
     val referencePosts: Map<String, Post> = emptyMap(),
-    val referenceUsers: Map<String, User> = emptyMap()
+    val referenceUsers: Map<String, User> = emptyMap(),
+    val savedPosts: List<String> = emptyList()
 )

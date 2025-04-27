@@ -30,6 +30,8 @@ import android.app.Application
 import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.utils.MessageEncryptionUtil
 import com.androidfinalproject.hacktok.service.ApiService
+import com.androidfinalproject.hacktok.model.SavedPost
+import com.androidfinalproject.hacktok.repository.SavedPostRepository
 
 @HiltViewModel
 class HomeScreenViewModel @Inject constructor(
@@ -42,6 +44,7 @@ class HomeScreenViewModel @Inject constructor(
     private val storyService: StoryService,
     private val adService: AdService,
     private val apiService: ApiService,
+    private val savedPostRepository: SavedPostRepository,
     application: Application
 ) : AndroidViewModel(application) {
     private val _state = MutableStateFlow(HomeScreenState())
@@ -56,6 +59,7 @@ class HomeScreenViewModel @Inject constructor(
             loadStories()   // loads current user's and following's stories
             loadRandomAd()  // loads a random eligible ad
             initializeEncryption()
+            loadSavedPosts() // load saved posts
         }
     }
 
@@ -182,12 +186,47 @@ class HomeScreenViewModel @Inject constructor(
                 reportCause = action.reportCause
             )
             is HomeScreenAction.OnSavePost -> savePost(action.postId)
+            is HomeScreenAction.OnDeleteSavedPost -> deleteSavedPost(action.postId)
             else -> {}
         }
     }
 
+    private fun loadSavedPosts() {
+        viewModelScope.launch {
+            try {
+                val currentUser = state.value.user
+                if (currentUser != null) {
+                    val userId = currentUser.id ?: return@launch
+                    val savedPosts = savedPostRepository.getSavedPostsByUser(userId)
+                        .map { it.postId }
+                    _state.update { it.copy(savedPosts = savedPosts) }
+                }
+            } catch (e: Exception) {
+                _state.update { it.copy(error = "Failed to load saved posts: ${e.message}") }
+            }
+        }
+    }
+
     private fun savePost(postId: String) {
-        //TODO
+        viewModelScope.launch {
+            try {
+                val currentUser = state.value.user
+                if (currentUser != null) {
+                    val userId = currentUser.id ?: return@launch
+                    val savedPost = SavedPost(
+                        userId = userId,
+                        postId = postId
+                    )
+                    savedPostRepository.savePost(savedPost)
+                    // Update the state with the new saved post
+                    _state.update { it.copy(
+                        savedPosts = it.savedPosts + postId
+                    ) }
+                }
+            } catch (e: Exception) {
+                _state.update { it.copy(error = "Failed to save post: ${e.message}") }
+            }
+        }
     }
 
     private fun deletePost(postId: String) {
@@ -199,6 +238,24 @@ class HomeScreenViewModel @Inject constructor(
                     Log.e("HomeScreenViewmodel", e.message.toString())
                     it.copy(error = e.message)
                 }
+            }
+        }
+    }
+
+    private fun deleteSavedPost(postId: String) {
+        viewModelScope.launch {
+            try {
+                val currentUser = state.value.user
+                if (currentUser != null) {
+                    val userId = currentUser.id ?: return@launch
+                    savedPostRepository.deleteSavedPost(postId)
+                    // Update the state by removing the unsaved post
+                    _state.update { it.copy(
+                        savedPosts = it.savedPosts.filter { it != postId }
+                    ) }
+                }
+            } catch (e: Exception) {
+                _state.update { it.copy(error = "Failed to delete saved post: ${e.message}") }
             }
         }
     }

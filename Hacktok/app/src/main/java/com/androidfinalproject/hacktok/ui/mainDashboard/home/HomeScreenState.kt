@@ -26,5 +26,6 @@ data class HomeScreenState(
     val listLikeUser: List<FullReaction> = emptyList(),
     val referencePosts: Map<String, Post> = emptyMap(),
     val referenceUsers: Map<String, User> = emptyMap(),
-    val currentAd: Ad? = null
+    val currentAd: Ad? = null,
+    val savedPosts: List<String> = emptyList()
 )
