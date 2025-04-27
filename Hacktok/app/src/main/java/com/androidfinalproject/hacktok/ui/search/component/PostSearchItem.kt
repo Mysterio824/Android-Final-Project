@@ -21,11 +21,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.androidfinalproject.hacktok.model.Post
+import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.ui.commonComponent.ProfileImage
 
 @Composable
 fun PostSearchItem(
     post: Post,
+    user: User,
     onClick: () -> Unit
 ) {
     Column(
@@ -39,14 +41,14 @@ fun PostSearchItem(
             modifier = Modifier.padding(bottom = 8.dp)
         ) {
             ProfileImage(
-                imageUrl = post.user?.profileImage,
+                imageUrl = user.profileImage ?: "",
                 size = 32.dp,
             )
 
             Spacer(modifier = Modifier.width(8.dp))
 
             Text(
-                text = post.user?.username ?: "Unknown User",
+                text = user.username ?: "Unknown User",
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = FontWeight.Bold
                 )

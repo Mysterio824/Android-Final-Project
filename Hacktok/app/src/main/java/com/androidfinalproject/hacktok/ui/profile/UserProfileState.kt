@@ -9,6 +9,7 @@ import com.androidfinalproject.hacktok.ui.newPost.PRIVACY
 data class UserProfileState (
     val user: User? = null,
     val posts: List<Post> = emptyList(),
+    val postUsers: Map<String, User> = emptyMap(),
     val relationshipInfo: RelationInfo? = null,
     val isLoading: Boolean = true,
     val error: String? = null,
@@ -20,5 +21,7 @@ data class UserProfileState (
     val sharePrivacy: PRIVACY = PRIVACY.PUBLIC,
     val shareCaption: String = "",
     val currentUser: User? = null,
-    val listLikeUser: List<FullReaction> = emptyList()
+    val listLikeUser: List<FullReaction> = emptyList(),
+    val referencePosts: Map<String, Post> = emptyMap(),
+    val referenceUsers: Map<String, User> = emptyMap()
 )

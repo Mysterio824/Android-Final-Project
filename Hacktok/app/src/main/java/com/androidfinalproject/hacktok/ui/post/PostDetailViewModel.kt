@@ -3,8 +3,8 @@ package com.androidfinalproject.hacktok.ui.post
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.androidfinalproject.hacktok.model.Comment
 import com.androidfinalproject.hacktok.model.Post
+import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.model.enums.ReportCause
 import com.androidfinalproject.hacktok.model.enums.ReportType
 import com.androidfinalproject.hacktok.repository.PostRepository
@@ -13,7 +13,6 @@ import com.androidfinalproject.hacktok.service.AuthService
 import com.androidfinalproject.hacktok.service.CommentService
 import com.androidfinalproject.hacktok.service.LikeService
 import com.androidfinalproject.hacktok.service.ReportService
-import com.androidfinalproject.hacktok.ui.currentProfile.CurrentProfileState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -40,13 +39,11 @@ class PostDetailViewModel @Inject constructor(
         when (action) {
             is PostDetailAction.OnSharePost -> {
                 viewModelScope.launch {
-                    val referencePost = postRepository.getPost(action.post.id ?: return@launch)
                     val post = Post(
                         content = action.caption,
                         userId = state.value.currentUser?.id ?: "",
-                        reference = referencePost,
+                        refPostId = action.post.id,
                         privacy = action.privacy.name,
-                        user = state.value.currentUser
                     )
                     try {
                         postRepository.addPost(post)
@@ -123,7 +120,25 @@ class PostDetailViewModel @Inject constructor(
                 val currentUser = authService.getCurrentUser()
                     ?: throw IllegalStateException("User not found")
 
-                _state.update { it.copy(post = post, currentUser = currentUser, postUser = postUser) }
+                // NEW: Load referenced post and its user if exists
+                var referencePost: Post? = null
+                var referenceUser: User? = null
+
+                post.refPostId?.let { refPostId ->
+                    referencePost = postRepository.getPost(refPostId)
+                    referenceUser = referencePost?.userId?.let { userRepository.getUserById(it) }
+                }
+
+                _state.update {
+                    it.copy(
+                        post = post,
+                        currentUser = currentUser,
+                        postUser = postUser,
+                        referencePost = referencePost,
+                        referenceUser = referenceUser
+                    )
+                }
+
                 loadComments()
             } catch (e: Exception) {
                 _state.update { it.copy(error = "Failed to load post: ${e.message}") }
@@ -197,7 +212,6 @@ class PostDetailViewModel @Inject constructor(
             _state.value.post?.let { post ->
                 val updatedPost = likeService.likePost(post.id!!, emoji)
                     ?: post
-                updatedPost.copy(user = post.user)
                 _state.update { it.copy(post = updatedPost) }
             }
         }
@@ -208,7 +222,6 @@ class PostDetailViewModel @Inject constructor(
             _state.value.post?.let { post ->
                 val updatedPost = likeService.unlikePost(post.id!!)
                     ?: post
-                updatedPost.copy(user = post.user)
                 _state.update { it.copy(post = updatedPost) }
             }
         }

@@ -9,6 +9,7 @@ import com.androidfinalproject.hacktok.model.RelationInfo
 import com.androidfinalproject.hacktok.model.enums.ReportCause
 import com.androidfinalproject.hacktok.model.enums.ReportType
 import com.androidfinalproject.hacktok.repository.PostRepository
+import com.androidfinalproject.hacktok.repository.UserRepository
 import com.androidfinalproject.hacktok.service.AuthService
 import com.androidfinalproject.hacktok.service.LikeService
 import com.androidfinalproject.hacktok.service.RelationshipService
@@ -36,7 +37,8 @@ class UserProfileViewModel @Inject constructor(
     private val postRepository: PostRepository,
     private val authService: AuthService,
     private val reportService: ReportService,
-    private val likeService: LikeService
+    private val likeService: LikeService,
+    private val userRepository: UserRepository
 ) : ViewModel() {
     private val TAG = "UserProfileViewModel"
     private val _state = MutableStateFlow(UserProfileState())
@@ -83,13 +85,11 @@ class UserProfileViewModel @Inject constructor(
             is UserProfileAction.UpdateSharePost -> _state.update { it.copy(sharePost = action.post, showShareDialog = true) }
             is UserProfileAction.OnSharePost -> {
                 viewModelScope.launch {
-                    val referencePost = postRepository.getPost(action.post.id ?: return@launch)
                     val post = Post(
                         content = action.caption,
                         userId = state.value.currentUser?.id ?: return@launch,
-                        reference = referencePost,
+                        refPostId = action.post.id,
                         privacy = action.privacy.name,
-                        user = state.value.currentUser
                     )
                     try {
                         postRepository.addPost(post)
@@ -177,20 +177,47 @@ class UserProfileViewModel @Inject constructor(
                  // Fetch user and posts, relationship is handled by the flow
                  val userAndPostsResult = fetchUserAndPosts(userId)
                  loadedUser = userAndPostsResult.first
-                 loadedPosts = userAndPostsResult.second
+                 loadedPosts = userAndPostsResult.second.sortedByDescending { it.createdAt }
                  loadError = if (loadedUser == null /* && userAndPostsResult.second.isEmpty() */) "User not found" else null // Simplified error check
                  val relationship = relationshipService.getFriends(userId)
                  if (loadedUser != null) {
+                     val refPostIds = loadedPosts.mapNotNull { it.refPostId }.toSet()
+
+                     val refPosts = mutableMapOf<String, Post>()
+                     val refUsers = mutableMapOf<String, User>()
+                     val postUsers = mutableMapOf<String, User>()
+
+                     for (post in loadedPosts) {
+                         // Map the author of the post
+                         if (post.id != null) {
+                             postUsers[post.id] = loadedUser // Because these posts are all written by loadedUser
+                         }
+
+                         // Map the referenced posts
+                         post.refPostId?.let { refId ->
+                             val refPost = postRepository.getPost(refId)
+                             if (refPost != null) {
+                                 refPosts[refPost.id!!] = refPost
+                                 val refUser = userRepository.getUserById(refPost.userId)
+                                 if (refUser != null) {
+                                     refUsers[refUser.id!!] = refUser
+                                 }
+                             }
+                         }
+                     }
                      Log.d(TAG, "Updating state with User: ${loadedUser.id}, Posts: ${loadedPosts.size}")
                      _state.update {
                          it.copy(
                             user = loadedUser,
                             posts = loadedPosts,
-                            isLoading = false,
+                             postUsers = postUsers,
+                             isLoading = false,
                             error = null,
                             userIdBeingLoaded = null,
                             numberOfFriends = relationship.size,
-                            currentUser = authService.getCurrentUser()
+                            currentUser = authService.getCurrentUser(),
+                             referencePosts = refPosts,
+                             referenceUsers = refUsers,
                         )
                     }
                  } else {
@@ -239,8 +266,7 @@ class UserProfileViewModel @Inject constructor(
                 .await()
             val posts = postsSnapshot.documents.mapNotNull { doc ->
                 try {
-                    val post = doc.toObject(Post::class.java)
-                    post?.copy(user = user)
+                    doc.toObject(Post::class.java)
                 } catch (e: Exception) {
                     Log.e(TAG, "Error parsing post document: ${e.message}")
                     null
@@ -265,9 +291,7 @@ class UserProfileViewModel @Inject constructor(
                 val updatedPost = likeService.likePost(postId, emoji) ?: return@launch
 
                 val newList = currentState.posts.map { post ->
-                    if (post.id == updatedPost.id) updatedPost.copy(
-                        user = post.user,
-                    ) else post
+                    if (post.id == updatedPost.id) updatedPost else post
                 }
 
                 currentState.copy(posts = newList)
@@ -282,9 +306,7 @@ class UserProfileViewModel @Inject constructor(
                 val updatedPost = likeService.unlikePost(postId) ?: return@launch
 
                 val newList = currentState.posts.map { post ->
-                    if (post.id == updatedPost.id) updatedPost.copy(
-                        user = post.user,
-                    ) else post
+                    if (post.id == updatedPost.id) updatedPost else post
                 }
 
                 currentState.copy(posts = newList)

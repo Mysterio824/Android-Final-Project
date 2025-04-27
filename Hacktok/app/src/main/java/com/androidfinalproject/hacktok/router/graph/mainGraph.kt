@@ -78,7 +78,7 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
                     navController.navigate(MainRoute.ChatDashboard.route)
                 },
                 onPostEditNavigate = { postId ->
-                    navController.navigate("${MainRoute.EditPost.route}/$postId")
+                    navController.navigate("${MainRoute.NewPost.BASE_ROUTE}?postId=$postId")
                 },
                 onCreatePostNavigate = {
                     navController.navigate(MainRoute.NewPost.BASE_ROUTE)

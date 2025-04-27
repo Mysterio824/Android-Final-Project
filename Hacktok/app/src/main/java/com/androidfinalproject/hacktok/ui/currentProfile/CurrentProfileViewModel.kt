@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.model.Post
+import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.repository.PostRepository
 import com.androidfinalproject.hacktok.repository.UserRepository
 import com.androidfinalproject.hacktok.service.LikeService
@@ -35,10 +36,29 @@ class CurrentProfileViewModel @Inject constructor(
                 if (user != null) {
                     val userId = user.id ?: return@launch
                     val posts = postRepository.getPostsByUser(userId)
+                        .sortedByDescending { it.createdAt }
+
+                    val referencePosts = mutableMapOf<String, Post>()
+                    val referenceUsers = mutableMapOf<String, User>()
+
+                    posts.forEach { post ->
+                        post.refPostId?.let { refId ->
+                            val refPost = postRepository.getPost(refId)
+                            if (refPost != null) {
+                                referencePosts[refId] = refPost
+                                val refUser = userRepository.getUserById(refPost.userId)
+                                if (refUser != null) {
+                                    referenceUsers[refPost.userId] = refUser
+                                }
+                            }
+                        }
+                    }
                     _state.value = CurrentProfileState.Success(
                         user = user,
                         posts = posts,
-                        friendCount = 0
+                        friendCount = user.friends.size,
+                        referencePosts = referencePosts,
+                        referenceUsers = referenceUsers
                     )
                 } else {
                     _state.value = CurrentProfileState.Error("User not found")
@@ -144,13 +164,11 @@ class CurrentProfileViewModel @Inject constructor(
                 val current = _state.value
                 if (current is CurrentProfileState.Success) {
                     viewModelScope.launch {
-                        val referencePost = postRepository.getPost(action.post.id ?: return@launch)
                         val post = Post(
                             content = action.caption,
                             userId = current.user.id ?: return@launch,
-                            reference = referencePost,
+                            refPostId = action.post.id ?: return@launch,
                             privacy = action.privacy.name,
-                            user = current.user
                         )
                         try {
                             postRepository.addPost(post)

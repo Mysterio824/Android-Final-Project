@@ -188,48 +188,51 @@ fun NewPostScreen(
                 )
             )
 
-            if (state.imageUri == null || state.imageUri.toString().isBlank()) {
-                IconButton(modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.LightGray, RoundedCornerShape(8.dp))
-                    .padding(12.dp),
-                    onClick = { onAction(NewPostAction.UpdateImage) })
-                {
-                    Icon(painterResource(id = R.drawable.ic_add_photo), contentDescription = "Add an image")
-                }
-            } else {
-                Box(
-                    modifier = Modifier
+            if (!state.isEditingReferencePost) {
+                if (state.imageUri == null || state.imageUri.toString().isBlank()) {
+                    IconButton(modifier = Modifier
                         .fillMaxWidth()
-                        .height(200.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                ) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(state.imageUri)
-                            .crossfade(true)
-                            .build(),
-                        contentDescription = "Selected image",
+                        .background(Color.LightGray, RoundedCornerShape(8.dp))
+                        .padding(12.dp),
+                        onClick = { onAction(NewPostAction.UpdateImage) })
+                    {
+                        Icon(painterResource(id = R.drawable.ic_add_photo), contentDescription = "Add an image")
+                    }
+                } else {
+                    Box(
                         modifier = Modifier
-                            .matchParentSize(),
-                        contentScale = ContentScale.Crop
-                    )
-
-                    IconButton(
-                        onClick = { onAction(NewPostAction.RemoveImage) },
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(8.dp)
-                            .background(Color.Black.copy(alpha = 0.4f), CircleShape)
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .clip(RoundedCornerShape(8.dp))
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Remove image",
-                            tint = Color.White
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(state.imageUri)
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = "Selected image",
+                            modifier = Modifier
+                                .matchParentSize(),
+                            contentScale = ContentScale.Crop
                         )
+
+                        IconButton(
+                            onClick = { onAction(NewPostAction.RemoveImage) },
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(8.dp)
+                                .background(Color.Black.copy(alpha = 0.4f), CircleShape)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Remove image",
+                                tint = Color.White
+                            )
+                        }
                     }
                 }
             }
+
 
             Button(
                 onClick = { onAction(NewPostAction.SubmitPost) },
