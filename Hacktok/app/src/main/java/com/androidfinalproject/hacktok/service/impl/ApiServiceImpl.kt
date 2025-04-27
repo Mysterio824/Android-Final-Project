@@ -158,4 +158,21 @@ class ApiServiceImpl @Inject constructor() : ApiService {
 
         client.newCall(request).execute()
     }
+
+    override suspend fun getEncryptionKey(): String = withContext(Dispatchers.IO) {
+        Log.d(TAG, "Getting encryption key from server")
+        val request = Request.Builder()
+            .url("$SERVER_URL/encryption-key")
+            .get()
+            .build()
+
+        val response = client.newCall(request).execute()
+        if (!response.isSuccessful) {
+            throw Exception("Failed to get encryption key: ${response.code}")
+        }
+
+        val responseBody = response.body?.string()
+        val jsonResponse = JSONObject(responseBody ?: "{}")
+        jsonResponse.getString("key")
+    }
 }

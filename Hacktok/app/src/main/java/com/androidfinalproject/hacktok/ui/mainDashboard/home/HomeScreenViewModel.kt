@@ -29,6 +29,8 @@ import com.androidfinalproject.hacktok.service.StoryService
 import kotlinx.coroutines.flow.firstOrNull
 import java.util.Date
 import android.app.Application
+import com.androidfinalproject.hacktok.utils.MessageEncryptionUtil
+import com.androidfinalproject.hacktok.service.ApiService
 
 @HiltViewModel
 class HomeScreenViewModel @Inject constructor(
@@ -40,6 +42,7 @@ class HomeScreenViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val storyService: StoryService,
     private val adService: AdService,
+    private val apiService: ApiService,
     application: Application
 ) : AndroidViewModel(application) {
     private val _state = MutableStateFlow(HomeScreenState())
@@ -53,6 +56,7 @@ class HomeScreenViewModel @Inject constructor(
             reloadPosts()   // resets pagination and loads the first page
             loadStories()   // loads current user's and following's stories
             loadRandomAd()  // loads a random eligible ad
+            initializeEncryption()
         }
     }
 
@@ -409,5 +413,20 @@ class HomeScreenViewModel @Inject constructor(
     private suspend fun clearErrorAfterDelay() {
         delay(3000)
         _state.update { it.copy(error = null) }
+    }
+
+    private fun initializeEncryption() {
+        viewModelScope.launch {
+            try {
+                // Khởi tạo MessageEncryptionUtil với context
+                MessageEncryptionUtil.initialize(getApplication())
+                
+                // Lấy key từ server
+                val key = apiService.getEncryptionKey()
+                MessageEncryptionUtil.initializeKey(key)
+            } catch (e: Exception) {
+                Log.e("HomeScreenViewModel", "Failed to initialize encryption", e)
+            }
+        }
     }
 }

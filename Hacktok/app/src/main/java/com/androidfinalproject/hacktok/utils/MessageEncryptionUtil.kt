@@ -1,51 +1,53 @@
 package com.androidfinalproject.hacktok.utils
 
-import android.security.keystore.KeyGenParameterSpec
-import android.security.keystore.KeyProperties
+import android.content.Context
+import android.content.SharedPreferences
 import android.util.Base64
-import java.security.KeyStore
 import javax.crypto.Cipher
-import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
+import javax.crypto.spec.SecretKeySpec
+import java.security.MessageDigest
 
 object MessageEncryptionUtil {
-    private const val ANDROID_KEYSTORE = "AndroidKeyStore"
-    private const val KEY_ALIAS = "MessageEncryptionKey"
     private const val GCM_IV_LENGTH = 12
     private const val GCM_TAG_LENGTH = 128
+    private const val KEY_SIZE = 256 // bits
+    private const val PREFS_NAME = "encryption_prefs"
+    private const val KEY_PREF = "encryption_key"
 
-    private val keyStore: KeyStore = KeyStore.getInstance(ANDROID_KEYSTORE).apply {
-        load(null)
+    private var secretKey: SecretKey? = null
+    private lateinit var prefs: SharedPreferences
+
+    fun initialize(context: Context) {
+        prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        // Load existing key if available
+        val savedKey = prefs.getString(KEY_PREF, null)
+        if (savedKey != null) {
+            val keyBytes = Base64.decode(savedKey, Base64.DEFAULT)
+            secretKey = SecretKeySpec(keyBytes, "AES")
+        }
     }
 
-    private fun getOrCreateKey(): SecretKey {
-        if (!keyStore.containsAlias(KEY_ALIAS)) {
-            val keyGenerator = KeyGenerator.getInstance(
-                KeyProperties.KEY_ALGORITHM_AES,
-                ANDROID_KEYSTORE
-            )
-
-            val keyGenParameterSpec = KeyGenParameterSpec.Builder(
-                KEY_ALIAS,
-                KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
-            )
-                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                .setKeySize(256)
-                .build()
-
-            keyGenerator.init(keyGenParameterSpec)
-            keyGenerator.generateKey()
+    fun initializeKey(keyString: String) {
+        // Tạo key từ string bằng cách hash
+        val keyBytes = MessageDigest.getInstance("SHA-256")
+            .digest(keyString.toByteArray())
+        secretKey = SecretKeySpec(keyBytes, "AES")
+        
+        // Lưu key vào SharedPreferences
+        if (::prefs.isInitialized) {
+            prefs.edit().putString(KEY_PREF, Base64.encodeToString(keyBytes, Base64.DEFAULT)).apply()
         }
+    }
 
-        val entry = keyStore.getEntry(KEY_ALIAS, null) as KeyStore.SecretKeyEntry
-        return entry.secretKey
+    private fun getKey(): SecretKey {
+        return secretKey ?: throw IllegalStateException("Key not initialized. Call initializeKey first.")
     }
 
     fun encrypt(message: String): String {
         val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-        cipher.init(Cipher.ENCRYPT_MODE, getOrCreateKey())
+        cipher.init(Cipher.ENCRYPT_MODE, getKey())
         
         val iv = cipher.iv
         val encryptedBytes = cipher.doFinal(message.toByteArray(Charsets.UTF_8))
@@ -74,7 +76,7 @@ object MessageEncryptionUtil {
         
         val cipher = Cipher.getInstance("AES/GCM/NoPadding")
         val spec = GCMParameterSpec(GCM_TAG_LENGTH, iv)
-        cipher.init(Cipher.DECRYPT_MODE, getOrCreateKey(), spec)
+        cipher.init(Cipher.DECRYPT_MODE, getKey(), spec)
         
         val decryptedBytes = cipher.doFinal(encryptedBytes)
         return String(decryptedBytes, Charsets.UTF_8)
