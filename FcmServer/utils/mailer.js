@@ -121,7 +121,103 @@ async function sendPasswordResetEmail(email, resetLink) {
   });
 }
 
+async function sendVerificationCodeEmail(email, code) {
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Verify Your HackTok Account</title>
+      <style>
+        body {
+          font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
+          margin: 0;
+          padding: 0;
+          color: #1c1e21;
+          background-color: #f0f2f5;
+        }
+        .email-container {
+          max-width: 600px;
+          margin: 0 auto;
+          background-color: #ffffff;
+          border-radius: 8px;
+          overflow: hidden;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        .email-header {
+          background-color: #1877f2;
+          padding: 20px;
+          text-align: center;
+        }
+        .logo {
+          font-size: 24px;
+          font-weight: bold;
+          color: white;
+        }
+        .email-body {
+          padding: 20px;
+          line-height: 1.5;
+        }
+        .verification-code {
+          font-size: 32px;
+          font-weight: bold;
+          letter-spacing: 4px;
+          margin: 20px 0;
+          text-align: center;
+          color: #1877f2;
+        }
+        .email-footer {
+          padding: 15px 20px;
+          text-align: center;
+          font-size: 12px;
+          color: #65676b;
+          border-top: 1px solid #e4e6eb;
+        }
+        .security-notice {
+          background-color: #f0f2f5;
+          padding: 10px;
+          border-radius: 6px;
+          font-size: 12px;
+          margin-top: 20px;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="email-container">
+        <div class="email-header">
+          <div class="logo">HackTok</div>
+        </div>
+        <div class="email-body">
+          <h2>Account Verification</h2>
+          <p>Hello,</p>
+          <p>Thanks for signing up with HackTok! Please use the verification code below to complete your registration:</p>
+          <div class="verification-code">${code}</div>
+          <p>Enter this code in the app to verify your account.</p>
+          <div class="security-notice">
+            <strong>Security Tip:</strong> For your protection, this code will expire in 10 minutes.
+          </div>
+        </div>
+        <div class="email-footer">
+          <p>© ${new Date().getFullYear()} HackTok. All rights reserved.</p>
+          <p>This is an automated message, please do not reply.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return transporter.sendMail({
+    from: 'no-reply@HackTok.com',
+    to: email,
+    subject: 'Your HackTok Verification Code',
+    html: htmlContent
+  });
+}
+
+// Export the new function
 module.exports = {
   sendVerificationEmail,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  sendVerificationCodeEmail
 };

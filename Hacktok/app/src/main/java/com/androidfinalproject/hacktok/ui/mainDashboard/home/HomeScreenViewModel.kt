@@ -3,6 +3,7 @@ package com.androidfinalproject.hacktok.ui.mainDashboard.home
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.androidfinalproject.hacktok.model.Ad
 import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.service.AdService
@@ -132,13 +133,14 @@ class HomeScreenViewModel @Inject constructor(
                     }
                 }
             }
+            is HomeScreenAction.DeletePost -> deletePost(action.postId)
             is HomeScreenAction.LoadMorePosts -> loadMorePosts()
             is HomeScreenAction.LoadMoreStories -> loadStories()
             is HomeScreenAction.UpdateSharePrivacy -> _state.update { it.copy(sharePrivacy = action.privacy) }
             is HomeScreenAction.UpdateShareCaption -> _state.update { it.copy(shareCaption = action.caption) }
             is HomeScreenAction.UpdateSharePost -> _state.update { it.copy(sharePost = action.post, showShareDialog = true) }
             is HomeScreenAction.DismissShareDialog -> _state.update { it.copy(showShareDialog = false) }
-            is HomeScreenAction.LikePost -> likePost(action.postId)
+            is HomeScreenAction.LikePost -> likePost(action.postId, action.emoji)
             is HomeScreenAction.Refresh -> {
                 Log.d("HomeScreenViewModel", "Refreshing home screen content")
                 viewModelScope.launch {
@@ -156,6 +158,19 @@ class HomeScreenViewModel @Inject constructor(
                 reportCause = action.reportCause
             )
             else -> {}
+        }
+    }
+
+    private fun deletePost(postId: String) {
+        viewModelScope.launch {
+            try {
+                postRepository.deletePost(postId)
+            } catch(e: Exception) {
+                _state.update {
+                    Log.e("HomeScreenViewmodel", e.message.toString())
+                    it.copy(error = e.message)
+                }
+            }
         }
     }
 
@@ -260,10 +275,10 @@ class HomeScreenViewModel @Inject constructor(
         }
     }
 
-    private fun likePost(postId: String) {
+    private fun likePost(postId: String, emoji: String) {
         viewModelScope.launch {
             _state.update { currentState ->
-                val updatedPost = likeService.likePost(postId) ?: return@launch
+                val updatedPost = likeService.likePost(postId, emoji) ?: return@launch
 
                 val newList = currentState.posts.map { post ->
                     if (post.id == updatedPost.id) updatedPost.copy(

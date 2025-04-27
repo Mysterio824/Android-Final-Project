@@ -1,20 +1,17 @@
 package com.androidfinalproject.hacktok.model
 
-import com.google.firebase.firestore.PropertyName
-import java.util.Date
-
 data class Reaction(
-    @PropertyName("id") val id: String? = null,
-    @PropertyName("postId") val postId: String,
-    @PropertyName("userId") val userId: String,
-    @PropertyName("emoji") val emoji: String, // Ví dụ: "👍", "❤️"
-    @PropertyName("createdAt") val createdAt: Date = Date(),
-    @PropertyName("reactionType") val reactionType: String = "like" // "like", "love", "haha", etc.
+    val userId: String,
+    val emoji: String,
 ) {
-    constructor() : this(null, "", "", "", Date(), "like")
+    constructor() : this("", "")
 
     override fun toString(): String {
-        return "Reaction(id=$id, postId='$postId', userId='$userId', emoji='$emoji', " +
-                "createdAt=$createdAt, reactionType='$reactionType')"
+        return "Reaction(userId='$userId', emoji='$emoji')"
     }
 }
+
+data class FullReaction(
+    val user: User,
+    val emoji: String
+)

@@ -1,6 +1,7 @@
 package com.androidfinalproject.hacktok.ui.post
 
 import com.androidfinalproject.hacktok.model.Comment
+import com.androidfinalproject.hacktok.model.FullReaction
 import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.model.User
 
@@ -20,5 +21,5 @@ data class PostDetailState(
     val showShareDialog: Boolean = false,
     val postUser: User? = null,
     val trigger: Boolean = false,
-    val listLikeUser: List<User> = emptyList()
+    val listLikeUser: List<FullReaction> = emptyList()
 )

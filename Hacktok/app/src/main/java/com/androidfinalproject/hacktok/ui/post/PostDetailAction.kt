@@ -11,7 +11,7 @@ sealed class PostDetailAction {
     //post action
     data class LoadPost(val postId: String) : PostDetailAction()
     data object LoadComments : PostDetailAction()
-    data object ToggleLike : PostDetailAction()
+    data class ToggleLike(val emoji: String) : PostDetailAction()
     data object UnLikePost : PostDetailAction()
     data class SubmitReport(
         val reportedItemId: String,
@@ -26,7 +26,7 @@ sealed class PostDetailAction {
 
     //comment action
     data class SetCommentFocus(val focused: Boolean) : PostDetailAction()
-    data class LikeComment(val commentId: String?) : PostDetailAction()
+    data class LikeComment(val commentId: String?, val emoji: String) : PostDetailAction()
     data class UnLikeComment(val commentId: String?) : PostDetailAction()
     data class SelectCommentToReply(val commentId: String) : PostDetailAction()
     data class DeleteComment(val commentId: String) : PostDetailAction()

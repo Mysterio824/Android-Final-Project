@@ -1,7 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const admin = require('../firebase');
-const { sendVerificationEmail, sendPasswordResetEmail } = require('../utils/mailer');
+const { sendVerificationCodeEmail, sendPasswordResetEmail } = require('../utils/mailer');
 const cache = require('../utils/cache');
 const createUserData = require('../utils/createUserData');
 const verifyCurrentPassword = require('../utils/verifyCurrentPassword');
@@ -23,36 +23,107 @@ router.post('/signup', async (req, res) => {
     if (err.code !== 'auth/user-not-found') return res.status(500).json({ error: 'Server error' });
   }
 
-  const token = jwt.sign({ email, password }, JWT_SECRET, { expiresIn: '10m' });
-  cache.set(email, { email, password });
+  // Generate a 6-digit verification code
+  const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+  
+  // Store email, password and code in cache
+  cache.set(email, { email, password, verificationCode });
 
-  const verifyLink = `http://localhost:3000/verify/${token}`;
   try {
-    await sendVerificationEmail(email, verifyLink);
-    res.status(200).json({ message: 'Verification email sent' });
+    // Send verification code via email
+    await sendVerificationCodeEmail(email, verificationCode);
+    res.status(200).json({ message: 'Verification code sent to your email' });
   } catch (error) {
     cache.del(email);
     res.status(500).json({ error: 'Failed to send email', details: error.message });
   }
 });
 
-router.get('/verify/:token', async (req, res) => {
+// Add this endpoint to verify the code
+router.post('/verify-code', async (req, res) => {
+  const { email, code } = req.body;
+  
+  if (!email || !code) {
+    return res.status(400).json({ error: 'Email and verification code required' });
+  }
+
+  const cachedData = cache.get(email);
+  if (!cachedData) {
+    return res.status(400).json({ error: 'Verification expired or invalid email' });
+  }
+
+  if (cachedData.verificationCode !== code) {
+    return res.status(400).json({ error: 'Invalid verification code' });
+  }
+
   try {
-    const decoded = jwt.verify(req.params.token, JWT_SECRET);
-    const cachedData = cache.get(decoded.email);
-
-    if (!cachedData) return res.status(400).json({ error: 'Verification expired or already used' });
-
+    // Create the user in Firebase
     const userRecord = await admin.auth().createUser({
       email: cachedData.email,
       password: cachedData.password
     });
+    
+    // Create additional user data
     await createUserData(userRecord);
-
-    cache.del(decoded.email);
-    res.status(200).json({ message: 'Account verified and created', uid: userRecord.uid });
+    
+    // Remove the cache entry
+    cache.del(email);
+    
+    return res.status(200).json({ verified: true, message: 'Account verified successfully' });
   } catch (error) {
-    res.status(400).json({ error: 'Invalid or expired token' });
+    return res.status(500).json({ error: 'Failed to create user', details: error.message });
+  }
+});
+
+// Endpoint to resend verification code
+router.post('/resend-code', async (req, res) => {
+  const { email } = req.body;
+  
+  if (!email) {
+    return res.status(400).json({ error: 'Email required' });
+  }
+
+  const cachedData = cache.get(email);
+  if (!cachedData) {
+    return res.status(400).json({ error: 'No pending verification for this email' });
+  }
+
+  // Generate a new verification code
+  const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+  
+  // Update the cached data with the new code
+  cache.set(email, { ...cachedData, verificationCode });
+
+  try {
+    // Send the new code
+    await sendVerificationCodeEmail(email, verificationCode);
+    return res.status(200).json({ message: 'Verification code resent' });
+  } catch (error) {
+    return res.status(500).json({ error: 'Failed to send email', details: error.message });
+  }
+});
+
+// Endpoint to set username after verification
+router.post('/set-username', async (req, res) => {
+  const { email, username } = req.body;
+  
+  if (!email || !username) {
+    return res.status(400).json({ error: 'Email and username required' });
+  }
+
+  try {
+    // Get the user by email
+    const userRecord = await admin.auth().getUserByEmail(email);
+    
+    // Update user data with username
+    await admin.firestore().collection('users').doc(userRecord.uid).update({
+      username: username,
+      displayName: username
+    });
+    
+    return res.status(200).json({ success: true, message: 'Username set successfully' });
+  } catch (error) {
+    return res.status(500).json({ error: 'Failed to set username', details: error.message });
   }
 });
 
