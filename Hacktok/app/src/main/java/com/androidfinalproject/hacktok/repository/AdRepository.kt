@@ -1,5 +1,6 @@
 package com.androidfinalproject.hacktok.repository
 
+import android.util.Log
 import com.androidfinalproject.hacktok.model.Ad
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
@@ -10,6 +11,7 @@ import java.util.*
 
 @Singleton
 class AdRepository @Inject constructor() {
+    private val TAG = "AdRepository"
     private val db = FirebaseFirestore.getInstance()
     private val collection = db.collection("ads")
 
@@ -24,42 +26,99 @@ class AdRepository @Inject constructor() {
         return documentRef.id
     }
 
-    // Thêm quảng cáo mới
-    suspend fun addAd(ad: Ad): String {
-        val documentRef = collection.add(ad).await()
-        collection.document(documentRef.id).update("id", documentRef.id).await()
-        return documentRef.id
+    // Get all active ads
+    suspend fun getAllActiveAds(): List<Ad> {
+        val currentDate = Date()
+        val snapshot = collection
+            .whereGreaterThan("endDate", currentDate)
+            .get()
+            .await()
+        return snapshot.toObjects(Ad::class.java)
     }
 
-    // Lấy quảng cáo theo ID
-    suspend fun getAd(adId: String): Ad? {
-        val snapshot = collection.document(adId).get().await()
-        return snapshot.toObject(Ad::class.java)
-    }
-
-    // Lấy quảng cáo theo userId
+    // Get ads by user ID
     suspend fun getUserAds(userId: String): List<Ad> {
         val snapshot = collection.whereEqualTo("userId", userId).get().await()
         return snapshot.toObjects(Ad::class.java)
     }
 
-    // Tăng lượt hiển thị
+    // Get a random eligible ad for a user
+    suspend fun getRandomEligibleAd(userId: String): Ad? {
+        try {
+            Log.d(TAG, "Getting random eligible ad for user: $userId")
+            val currentDate = Date()
+            Log.d(TAG, "Current date: $currentDate")
+
+            // First get all active ads
+            val snapshot = collection
+                .whereGreaterThan("endDate", currentDate)
+                .get()
+                .await()
+            
+            Log.d(TAG, "Query returned ${snapshot.documents.size} documents")
+            
+            val ads = snapshot.toObjects(Ad::class.java)
+            Log.d(TAG, "Converted to ${ads.size} Ad objects")
+            
+            // Filter out ads from the same user
+//            val eligibleAds = ads.filter { it.userId != userId }
+            val eligibleAds = ads
+
+            Log.d(TAG, "After filtering same user ads: ${eligibleAds.size} eligible ads")
+            
+            if (eligibleAds.isEmpty()) {
+                Log.d(TAG, "No eligible ads found")
+                return null
+            }
+
+            val randomAd = eligibleAds.random()
+            Log.d(TAG, "Selected random ad with ID: ${randomAd.id}")
+            return randomAd
+        } catch (e: Exception) {
+            Log.e(TAG, "Error message: ${e.message}")
+            return null
+        }
+    }
+
+    // Increment impressions
     suspend fun incrementImpressions(adId: String) {
-        collection.document(adId).update("impressions", FieldValue.increment(1)).await()
+        try {
+            Log.d(TAG, "Incrementing impressions for ad: $adId")
+            collection.document(adId).update("impressions", FieldValue.increment(1)).await()
+            Log.d(TAG, "Successfully incremented impressions for ad: $adId")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error incrementing impressions for ad: $adId", e)
+            Log.e(TAG, "Error message: ${e.message}")
+            Log.e(TAG, "Error stack trace: ${e.stackTraceToString()}")
+        }
     }
 
-    // Tăng lượt nhấp
+    // Increment clicks
     suspend fun incrementClicks(adId: String) {
-        collection.document(adId).update("clicks", FieldValue.increment(1)).await()
+        try {
+            Log.d(TAG, "Incrementing clicks for ad: $adId")
+            collection.document(adId).update("clicks", FieldValue.increment(1)).await()
+            Log.d(TAG, "Successfully incremented clicks for ad: $adId")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error incrementing clicks for ad: $adId", e)
+            Log.e(TAG, "Error message: ${e.message}")
+            Log.e(TAG, "Error stack trace: ${e.stackTraceToString()}")
+        }
     }
 
-    // Cập nhật quảng cáo
+    // Update ad
     suspend fun updateAd(adId: String, updates: Map<String, Any>) {
         collection.document(adId).update(updates).await()
     }
 
-    // Xóa quảng cáo
+    // Delete ad
     suspend fun deleteAd(adId: String) {
         collection.document(adId).delete().await()
+    }
+
+    // Get ad by ID
+    suspend fun getAd(adId: String): Ad? {
+        val snapshot = collection.document(adId).get().await()
+        return snapshot.toObject(Ad::class.java)
     }
 }

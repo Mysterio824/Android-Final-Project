@@ -38,7 +38,7 @@ import com.androidfinalproject.hacktok.ui.createAd.CreateAdScreenRoot
 
 fun NavGraphBuilder.mainNavigation(navController: NavController) {
     navigation(
-        startDestination = MainRoute.CreateAd.route,
+        startDestination = MainRoute.Dashboard.route,
         route = MainRoute.Graph.route
     ) {
         // Dashboard Screen
