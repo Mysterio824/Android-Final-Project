@@ -4,6 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -19,7 +22,10 @@ import com.androidfinalproject.hacktok.model.Ad
 @Composable
 fun AdContent(
     ad: Ad,
-    onAdClick: () -> Unit
+    onAdClick: () -> Unit,
+    onInterested: () -> Unit,
+    onUninterested: () -> Unit,
+    currentUserId: String
 ) {
     Card(
         modifier = Modifier
@@ -60,20 +66,47 @@ fun AdContent(
             
             Spacer(modifier = Modifier.height(8.dp))
             
-            // Ad stats
+            // Ad stats and interested button
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                // Stats
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Text(
+                        text = "Impressions: ${ad.impressions}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = "Clicks: ${ad.clicks}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                // Interested button
+                IconButton(
+                    onClick = if (ad.isInterested(currentUserId)) onUninterested else onInterested
+                ) {
+                    Icon(
+                        imageVector = if (ad.isInterested(currentUserId)) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        contentDescription = if (ad.isInterested(currentUserId)) "Uninterested" else "Interested",
+                        tint = if (ad.isInterested(currentUserId)) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            // Interested count
+            if (ad.getInterestedCount() > 0) {
                 Text(
-                    text = "Impressions: ${ad.impressions}",
+                    text = "${ad.getInterestedCount()} people interested",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = "Clicks: ${ad.clicks}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 4.dp)
                 )
             }
         }

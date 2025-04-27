@@ -11,4 +11,6 @@ interface AdService {
     suspend fun updateAd(adId: String, updates: Map<String, Any>)
     suspend fun deleteAd(adId: String)
     suspend fun getAd(adId: String): Ad?
+    suspend fun addInterestedUser(adId: String, userId: String): Ad?
+    suspend fun removeInterestedUser(adId: String, userId: String): Ad?
 } 

@@ -121,4 +121,48 @@ class AdRepository @Inject constructor() {
         val snapshot = collection.document(adId).get().await()
         return snapshot.toObject(Ad::class.java)
     }
+
+    // Add user to interested list
+    suspend fun addInterestedUser(adId: String, userId: String) {
+        try {
+            Log.d(TAG, "Adding user $userId to interested list for ad $adId")
+            collection.document(adId).update(
+                "interestedUserIds", 
+                FieldValue.arrayUnion(userId)
+            ).await()
+            Log.d(TAG, "Successfully added user to interested list")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error adding user to interested list", e)
+            throw e
+        }
+    }
+
+    // Remove user from interested list
+    suspend fun removeInterestedUser(adId: String, userId: String) {
+        try {
+            Log.d(TAG, "Removing user $userId from interested list for ad $adId")
+            collection.document(adId).update(
+                "interestedUserIds", 
+                FieldValue.arrayRemove(userId)
+            ).await()
+            Log.d(TAG, "Successfully removed user from interested list")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error removing user from interested list", e)
+            throw e
+        }
+    }
+
+    // Get ad with updated interested status
+    suspend fun getAdWithInterestedStatus(adId: String): Ad? {
+        try {
+            Log.d(TAG, "Getting ad $adId with interested status")
+            val snapshot = collection.document(adId).get().await()
+            val ad = snapshot.toObject(Ad::class.java)
+            Log.d(TAG, "Successfully got ad with interested status")
+            return ad
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting ad with interested status", e)
+            return null
+        }
+    }
 }

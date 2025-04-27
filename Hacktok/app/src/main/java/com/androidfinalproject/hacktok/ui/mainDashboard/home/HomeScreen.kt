@@ -163,7 +163,10 @@ fun HomeScreen(
                                 item {
                                     AdContent(
                                         ad = ad,
-                                        onAdClick = { onAction(HomeScreenAction.OnAdClick) }
+                                        onAdClick = { onAction(HomeScreenAction.OnAdClick) },
+                                        onInterested = { onAction(HomeScreenAction.OnAdInterested) },
+                                        onUninterested = { onAction(HomeScreenAction.OnAdUninterested) },
+                                        currentUserId = state.user?.id ?: ""
                                     )
                                 }
                             }

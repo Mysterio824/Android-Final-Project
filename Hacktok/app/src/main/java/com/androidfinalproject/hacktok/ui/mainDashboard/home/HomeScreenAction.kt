@@ -30,4 +30,6 @@ sealed class HomeScreenAction {
     data object Refresh : HomeScreenAction()
     data object LoadMoreStories : HomeScreenAction()
     data object OnAdClick : HomeScreenAction()
+    data object OnAdInterested : HomeScreenAction()
+    data object OnAdUninterested : HomeScreenAction()
 }

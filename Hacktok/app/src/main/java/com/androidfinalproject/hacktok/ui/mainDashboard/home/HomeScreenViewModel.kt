@@ -91,6 +91,30 @@ class HomeScreenViewModel @Inject constructor(
                     }
                 }
             }
+            is HomeScreenAction.OnAdInterested -> {
+                viewModelScope.launch {
+                    val currentUser = state.value.user
+                    val currentAd = state.value.currentAd
+                    if (currentUser != null && currentAd != null) {
+                        val updatedAd = adService.addInterestedUser(currentAd.id!!, currentUser.id!!)
+                        if (updatedAd != null) {
+                            _state.update { it.copy(currentAd = updatedAd) }
+                        }
+                    }
+                }
+            }
+            is HomeScreenAction.OnAdUninterested -> {
+                viewModelScope.launch {
+                    val currentUser = state.value.user
+                    val currentAd = state.value.currentAd
+                    if (currentUser != null && currentAd != null) {
+                        val updatedAd = adService.removeInterestedUser(currentAd.id!!, currentUser.id!!)
+                        if (updatedAd != null) {
+                            _state.update { it.copy(currentAd = updatedAd) }
+                        }
+                    }
+                }
+            }
             is HomeScreenAction.OnSharePost -> {
                 viewModelScope.launch {
                     val referencePost = postRepository.getPost(action.post.id ?: return@launch)

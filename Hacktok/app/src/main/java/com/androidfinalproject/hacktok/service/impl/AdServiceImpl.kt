@@ -42,4 +42,14 @@ class AdServiceImpl @Inject constructor(
     override suspend fun getAd(adId: String): Ad? {
         return adRepository.getAd(adId)
     }
+
+    override suspend fun addInterestedUser(adId: String, userId: String): Ad? {
+        adRepository.addInterestedUser(adId, userId)
+        return adRepository.getAdWithInterestedStatus(adId)
+    }
+
+    override suspend fun removeInterestedUser(adId: String, userId: String): Ad? {
+        adRepository.removeInterestedUser(adId, userId)
+        return adRepository.getAdWithInterestedStatus(adId)
+    }
 } 
