@@ -16,6 +16,8 @@ sealed class CurrentProfileState {
         val postToShare: Post? = null,
         val sharePrivacy: PRIVACY = PRIVACY.PUBLIC,
         val shareCaption: String = "",
-        val listLikeUser: List<FullReaction> = emptyList()
+        val listLikeUser: List<FullReaction> = emptyList(),
+        val referencePosts: Map<String, Post> = emptyMap(), // refPostId -> Post
+        val referenceUsers: Map<String, User> = emptyMap(),
     ) : CurrentProfileState()
 }

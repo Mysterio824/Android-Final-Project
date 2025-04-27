@@ -194,7 +194,9 @@ fun CurrentProfileScreen(
                                 ) {
                                     PostContent(
                                         post = post,
-                                        fullName = state.user.fullName,
+                                        user = state.user,
+                                        referencePost = state.referencePosts[post.refPostId],
+                                        referenceUser = state.referencePosts[post.refPostId]?.userId?.let { state.referenceUsers[it] },
                                         onPostClick = {
                                             onAction(
                                                 CurrentProfileAction.OnPostClick(

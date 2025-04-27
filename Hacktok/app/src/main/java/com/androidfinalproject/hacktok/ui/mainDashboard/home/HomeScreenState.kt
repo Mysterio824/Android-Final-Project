@@ -9,6 +9,7 @@ import com.androidfinalproject.hacktok.ui.newPost.PRIVACY
 
 data class HomeScreenState(
     val posts: List<Post> = emptyList(),
+    val postUsers: Map<String, User> = emptyMap(),
     val stories: List<Story> = emptyList(),
     val user: User? = null,
     val isLoading: Boolean = false,
@@ -23,5 +24,7 @@ data class HomeScreenState(
     val postAuthorNames: Map<String, String> = emptyMap(), // postId -> authorFullName
     val isStoryLoading: Boolean = false,
     val listLikeUser: List<FullReaction> = emptyList(),
+    val referencePosts: Map<String, Post> = emptyMap(),
+    val referenceUsers: Map<String, User> = emptyMap(),
     val currentAd: Ad? = null // Added for displaying current ad
 )

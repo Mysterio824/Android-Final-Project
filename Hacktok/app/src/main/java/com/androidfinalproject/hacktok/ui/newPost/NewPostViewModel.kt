@@ -60,7 +60,8 @@ class NewPostViewModel @Inject constructor(
                                 caption = it.content,
                                 imageUri = Uri.parse(it.imageLink),
                                 privacy = PRIVACY.valueOf(it.privacy.uppercase()),
-                                isEditing = true
+                                isEditing = true,
+                                isEditingReferencePost = post.refPostId != null
                             )
                         } ?: Log.e("EditPost", "Post not found for ID: ${action.postId}")
                     } catch (e: Exception) {
@@ -124,7 +125,6 @@ class NewPostViewModel @Inject constructor(
                         userId = userId,
                         imageLink = imageLink,
                         privacy = privacy,
-                        user = currentUser,
                     )
                     val postId = postRepository.addPost(post)
                     _state.value = _state.value.copy(postSubmitted = true)

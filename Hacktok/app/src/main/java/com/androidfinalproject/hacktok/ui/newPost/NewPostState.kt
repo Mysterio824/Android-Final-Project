@@ -18,4 +18,5 @@ data class NewPostState (
     val imageLink: String = "",
     val postSubmitted: Boolean = false,
     val isEditing: Boolean = false,
+    val isEditingReferencePost: Boolean = false,
 )

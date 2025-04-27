@@ -140,8 +140,10 @@ fun PostDetailScreen(
                 item {
                     state.post?.let { post ->
                         PostContent(
-                            fullName = state.postUser?.fullName ?: "",
                             post = post,
+                            user = state.postUser!!,
+                            referencePost = state.referencePost,
+                            referenceUser = state.referenceUser,
                             onToggleLike = { emoji -> onAction(PostDetailAction.ToggleLike(emoji)) },
                             onComment = { onAction(PostDetailAction.ToggleCommentInputFocus) },
                             onShare = { showShareOptionsSheet = true },

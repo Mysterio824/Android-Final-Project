@@ -172,7 +172,8 @@ fun HomeScreen(
                             }
 
                             items(state.posts) { post ->
-                                val authorName = state.postAuthorNames[post.id]
+                                val refPost = state.referencePosts[post.refPostId]
+                                val refUser = refPost?.userId?.let { state.referenceUsers[it] }
                                 Card(
                                     modifier = Modifier.fillMaxWidth(),
                                     shape = RectangleShape,
@@ -180,8 +181,10 @@ fun HomeScreen(
                                     elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
                                 ) {
                                     PostContent(
-                                        fullName = authorName,
                                         post = post,
+                                        user = state.postUsers[post.id]!!,
+                                        referencePost = refPost,
+                                        referenceUser = refUser,
                                         onPostClick = { onAction(HomeScreenAction.OnPostClick(post.id!!)) },
                                         onToggleLike = { onAction(HomeScreenAction.LikePost(post.id!!, it)) },
                                         onUnLike = { onAction(HomeScreenAction.UnLikePost(post.id!!)) },
@@ -257,7 +260,7 @@ fun HomeScreen(
                             onReport = { reportTargetId = selectPost!!.id },
                             onPostEdit = { onAction(HomeScreenAction.OnPostEditClick(selectPost!!.id!!)) },
                             onPostDelete = { onAction(HomeScreenAction.DeletePost(selectPost!!.id!!)) },
-                            isPostOwner = state.user!!.id == selectPost!!.user?.id
+                            isPostOwner = state.user!!.id == selectPost!!.userId
                         )
                     }
                 }

@@ -229,9 +229,15 @@ fun UserProfileScreen (
                      }
                  } else {
                      items(state.posts, key = { it.id ?: "" }) {
+                         val referencePost = state.referencePosts[it.refPostId]
+                         val referenceUser = referencePost?.userId?.let { refUserId ->
+                             state.referenceUsers[refUserId]
+                         }
                          PostContent(
-                             fullName = state.user.fullName ?: "",
                              post = it,
+                             user = state.user,
+                             referencePost = referencePost,
+                             referenceUser = referenceUser,
                              onUserClick = { onAction(UserProfileAction.RefreshProfile) },
                              onPostClick = { postId -> onAction(UserProfileAction.GoToPost(postId)) },
                              onOptionsClick = { selectPostId = it.id },
@@ -345,75 +351,5 @@ fun UserProfileScreen (
                 )
             }
         }
-    }
-}
-
-
-
-@Preview(showBackground = true, widthDp = 380, heightDp = 800)
-@Composable
-fun ProfileScreenPreview_Friend() {
-    MainAppTheme {
-         UserProfileScreen(
-            state = UserProfileState(
-                user = MockData.mockUsers.first().copy(bio = "This is a sample bio text.", followerCount = 123, followingCount = 45),
-                posts = MockData.mockPosts.map { it.copy(user = MockData.mockUsers.first()) },
-                relationshipInfo = RelationInfo(id="otherUser", status=RelationshipStatus.FRIENDS),
-                isLoading = false,
-                error = null
-            ),
-            onAction = {}
-         )
-    }
-}
-
-@Preview(showBackground = true, widthDp = 380, heightDp = 800)
-@Composable
-fun ProfileScreenPreview_PendingIncoming() {
-    MainAppTheme {
-         UserProfileScreen(
-            state = UserProfileState(
-                user = MockData.mockUsers.first().copy(bio = "", followerCount = 10, followingCount = 5),
-                posts = emptyList(),
-                relationshipInfo = RelationInfo(id="otherUser", status=RelationshipStatus.PENDING_INCOMING),
-                isLoading = false,
-                error = null
-            ),
-            onAction = {}
-         )
-    }
-}
-
-@Preview(showBackground = true, widthDp = 380, heightDp = 800)
-@Composable
-fun ProfileScreenPreview_None() {
-    MainAppTheme {
-         UserProfileScreen(
-            state = UserProfileState(
-                user = MockData.mockUsers.first().copy(bio = "Another user", followerCount = 0, followingCount = 0),
-                posts = MockData.mockPosts.take(1).map { it.copy(user = MockData.mockUsers.first()) },
-                relationshipInfo = null, // Or RelationInfo(status=RelationshipStatus.NONE)
-                isLoading = false,
-                error = null
-            ),
-            onAction = {}
-         )
-    }
-}
-
-@Preview(showBackground = true, widthDp = 380, heightDp = 800)
-@Composable
-fun ProfileScreenPreview_Blocking() {
-    MainAppTheme {
-         UserProfileScreen(
-            state = UserProfileState(
-                user = MockData.mockUsers.first(),
-                posts = emptyList(),
-                relationshipInfo = RelationInfo(id="otherUser", status=RelationshipStatus.BLOCKING),
-                isLoading = false,
-                error = null
-            ),
-            onAction = {}
-         )
     }
 }

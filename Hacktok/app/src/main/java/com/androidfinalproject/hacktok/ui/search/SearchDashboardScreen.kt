@@ -29,16 +29,16 @@ fun SearchDashboardScreen(
     onAction: (SearchAction) -> Unit,
 ) {
     val tabs = listOf("Accounts", "Tags", "Places", "Posts")
-    
+
     // Load search history when the screen is first displayed
     androidx.compose.runtime.LaunchedEffect(Unit) {
         onAction(SearchAction.LoadSearchHistory)
     }
-    
+
     BackHandler {
         onAction(SearchAction.OnNavigateBack)
     }
-    
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -61,7 +61,7 @@ fun SearchDashboardScreen(
                     tint = MaterialTheme.colorScheme.onBackground
                 )
             }
-            
+
             Spacer(modifier = Modifier.width(8.dp))
 
             SearchBar(
@@ -106,14 +106,14 @@ fun SearchDashboardScreen(
                     Tab(
                         selected = state.selectedTabIndex == index,
                         onClick = { onAction(SearchAction.ChangeTab(index)) },
-                        text = { 
+                        text = {
                             Text(
-                                title, 
+                                title,
                                 style = MaterialTheme.typography.bodyMedium.copy(
-                                    fontWeight = if (state.selectedTabIndex == index) 
+                                    fontWeight = if (state.selectedTabIndex == index)
                                         FontWeight.Bold else FontWeight.Normal
                                 )
-                            ) 
+                            )
                         },
                         selectedContentColor = MaterialTheme.colorScheme.primary,
                         unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant
@@ -161,7 +161,8 @@ fun SearchDashboardScreen(
                                 1, 2, 3 -> items(state.filteredPosts) { post ->
                                     PostSearchItem(
                                         post = post,
-                                        onClick = { onAction(SearchAction.OnPostClick(post)) }
+                                        onClick = { onAction(SearchAction.OnPostClick(post)) },
+                                        user = state.users.find { it.id == post.userId }!!
                                     )
                                 }
                             }

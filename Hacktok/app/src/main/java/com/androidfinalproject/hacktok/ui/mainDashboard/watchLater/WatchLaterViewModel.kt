@@ -73,9 +73,7 @@ class WatchLaterViewModel @Inject constructor(
             val updatedPost = likeService.likePost(postId, emoji) ?: return@launch
 
             val newList = _state.value.savedPosts.map { post ->
-                if (post.id == updatedPost.id) updatedPost.copy(
-                    user = post.user,
-                ) else post
+                if (post.id == updatedPost.id) updatedPost else post
             }
 
             _state.update { currentState ->
@@ -90,9 +88,7 @@ class WatchLaterViewModel @Inject constructor(
             val updatedPost = likeService.unlikePost(postId) ?: return@launch
 
             val newList = _state.value.savedPosts.map { post ->
-                if (post.id == updatedPost.id) updatedPost.copy(
-                    user = post.user,
-                ) else post
+                if (post.id == updatedPost.id) updatedPost else post
             }
 
             _state.update { currentState ->

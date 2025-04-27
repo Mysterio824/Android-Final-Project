@@ -5,8 +5,6 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.androidfinalproject.hacktok.model.Ad
 import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.service.AdService
 import com.androidfinalproject.hacktok.repository.PostRepository
@@ -26,9 +24,8 @@ import com.androidfinalproject.hacktok.service.LikeService
 import com.androidfinalproject.hacktok.repository.UserRepository
 import com.androidfinalproject.hacktok.service.RelationshipService
 import com.androidfinalproject.hacktok.service.StoryService
-import kotlinx.coroutines.flow.firstOrNull
-import java.util.Date
 import android.app.Application
+import com.androidfinalproject.hacktok.model.User
 
 @HiltViewModel
 class HomeScreenViewModel @Inject constructor(
@@ -142,13 +139,11 @@ class HomeScreenViewModel @Inject constructor(
             }
             is HomeScreenAction.OnSharePost -> {
                 viewModelScope.launch {
-                    val referencePost = postRepository.getPost(action.post.id ?: return@launch)
                     val post = Post(
                         content = action.caption,
                         userId = state.value.user?.id ?: "",
-                        reference = referencePost,
+                        refPostId = action.post.id,
                         privacy = action.privacy.name,
-                        user = state.value.user
                     )
                     try {
                         postRepository.addPost(post)
@@ -208,7 +203,7 @@ class HomeScreenViewModel @Inject constructor(
         }
     }
 
-    fun reloadPosts() {
+    private fun reloadPosts() {
         postRepository.resetPagination()
         loadPosts()
     }
@@ -248,12 +243,43 @@ class HomeScreenViewModel @Inject constructor(
                     limit = 10L
                 )
 
-                val postAuthorMap = loadAuthorNames(posts)
+                // ✅ Build postId -> fullName map
+                val postAuthorNames = loadAuthorNames(posts)
+
+                // ✅ New: postId -> User map
+                val postUsers = mutableMapOf<String, User>()
+
+                // ✅ Reference posts and users
+                val referencePosts = mutableMapOf<String, Post>()
+                val referenceUsers = mutableMapOf<String, User>()
+
+                posts.forEach { post ->
+                    // Load the User of the post
+                    val author = userRepository.getUserById(post.userId)
+                    if (author != null && post.id != null) {
+                        postUsers[post.id] = author
+                    }
+
+                    // If it's a shared (reference) post
+                    post.refPostId?.let { refId ->
+                        val refPost = postRepository.getPost(refId)
+                        if (refPost != null) {
+                            referencePosts[refId] = refPost
+                            val refUser = userRepository.getUserById(refPost.userId)
+                            if (refUser != null) {
+                                referenceUsers[refPost.userId] = refUser
+                            }
+                        }
+                    }
+                }
 
                 _state.update {
                     it.copy(
                         posts = posts,
-                        postAuthorNames = postAuthorMap,
+                        postAuthorNames = postAuthorNames,
+                        postUsers = postUsers,                 // ✅ New line added here
+                        referencePosts = referencePosts,
+                        referenceUsers = referenceUsers,
                         isLoading = false,
                         isPaginating = false,
                         hasMorePosts = posts.size == 10
@@ -305,9 +331,7 @@ class HomeScreenViewModel @Inject constructor(
                 val updatedPost = likeService.likePost(postId, emoji) ?: return@launch
 
                 val newList = currentState.posts.map { post ->
-                    if (post.id == updatedPost.id) updatedPost.copy(
-                        user = post.user,
-                    ) else post
+                    if (post.id == updatedPost.id) updatedPost else post
                 }
 
                 currentState.copy(posts = newList)
@@ -321,9 +345,7 @@ class HomeScreenViewModel @Inject constructor(
                 val updatedPost = likeService.unlikePost(postId) ?: return@launch
 
                 val newList = currentState.posts.map { post ->
-                    if (post.id == updatedPost.id) updatedPost.copy(
-                        user = post.user,
-                    ) else post
+                    if (post.id == updatedPost.id) updatedPost else post
                 }
 
                 currentState.copy(posts = newList)
