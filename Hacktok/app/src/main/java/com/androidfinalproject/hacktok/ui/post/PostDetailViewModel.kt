@@ -65,14 +65,14 @@ class PostDetailViewModel @Inject constructor(
             is PostDetailAction.ShowShareDialog -> _state.update { it.copy(showShareDialog = true) }
             is PostDetailAction.LoadPost -> loadPost(action.postId)
             is PostDetailAction.LoadComments -> loadComments()
-            is PostDetailAction.ToggleLike -> toggleLike()
+            is PostDetailAction.ToggleLike -> toggleLike(action.emoji)
             is PostDetailAction.UnLikePost -> unlike()
             is PostDetailAction.UpdateCommentText -> updateCommentText(action.text)
             is PostDetailAction.SubmitComment -> submitComment()
             is PostDetailAction.ToggleCommentInputFocus -> toggleCommentInputFocus()
             is PostDetailAction.SetCommentFocus -> setCommentFocus(action.focused)
-            is PostDetailAction.LikeComment -> handleLikeComment(action.commentId, true)
-            is PostDetailAction.UnLikeComment -> handleLikeComment(action.commentId, false)
+            is PostDetailAction.LikeComment -> handleLikeComment(action.commentId, action.emoji, true)
+            is PostDetailAction.UnLikeComment -> handleLikeComment(action.commentId, "",false)
             is PostDetailAction.SelectCommentToReply -> selectComment(action.commentId)
             is PostDetailAction.DeleteComment -> deleteComment(action.commentId)
             is PostDetailAction.SubmitReport -> submitReport(action.reportedItemId, action.reportType, action.reportCause)
@@ -84,13 +84,13 @@ class PostDetailViewModel @Inject constructor(
     private fun loadLikesUser(targetId: String, isPost: Boolean) {
         viewModelScope.launch {
             try {
-                val likeUsers = if(isPost){
+                val likeItems = if(isPost){
                     likeService.getPostLike(targetId)
                 }  else {
                     likeService.getCommentLike(targetId)
                 }
                 _state.update{
-                    it.copy(listLikeUser = likeUsers)
+                    it.copy(listLikeUser = likeItems)
                 }
             } catch(e: Exception){
                 Log.d("PostDetailViewModel", e.message.toString())
@@ -192,10 +192,10 @@ class PostDetailViewModel @Inject constructor(
         }
     }
 
-    private fun toggleLike() {
+    private fun toggleLike(emoji: String) {
         viewModelScope.launch {
             _state.value.post?.let { post ->
-                val updatedPost = likeService.likePost(post.id!!)
+                val updatedPost = likeService.likePost(post.id!!, emoji)
                     ?: post
                 updatedPost.copy(user = post.user)
                 _state.update { it.copy(post = updatedPost) }
@@ -258,7 +258,7 @@ class PostDetailViewModel @Inject constructor(
         }
     }
 
-    private fun handleLikeComment(commentId: String?, isLiking: Boolean) {
+    private fun handleLikeComment(commentId: String?, emoji: String, isLiking: Boolean) {
         if (commentId == null) {
             Log.e(tag, "Cannot like comment: comment ID is null")
             return
@@ -266,7 +266,7 @@ class PostDetailViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                if(isLiking) likeService.likeComment(commentId)
+                if(isLiking) likeService.likeComment(commentId, emoji)
                 else likeService.unlikeComment(commentId)
 
                 // The likes will be updated automatically through the observeCommentsForPost Flow

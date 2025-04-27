@@ -26,9 +26,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.androidfinalproject.hacktok.model.Comment
 import com.androidfinalproject.hacktok.model.MockData
+import com.androidfinalproject.hacktok.ui.commonComponent.CommentLikeButton
 import com.androidfinalproject.hacktok.ui.commonComponent.ProfileImage
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
-import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -40,7 +40,7 @@ fun CommentItem(
     isSelected: Boolean = false,
     isHighlighted: Boolean = false, // New parameter
     allComments: List<Comment>,
-    onLikeComment: (String?) -> Unit,
+    onLikeComment: (String?, String) -> Unit,
     onUnLikeComment: (String?) -> Unit,
     onCommentLongPress: (String?) -> Unit,
     onUserClick: (String) -> Unit,
@@ -121,38 +121,16 @@ fun CommentItem(
                     Text(
                         text = formatDateShort(comment.createdAt),
                         fontSize = 12.sp,
-                        color = Color.Gray
+                        color = Color.Gray,
+                        modifier = Modifier.widthIn(min = 45.dp, max = 45.dp)
                     )
 
-//                    Spacer(modifier = Modifier.width(20.dp))
-
-                     if(comment.isLiked(currentUserId)){
-                         TextButton(
-                             onClick = { onUnLikeComment(comment.id) },
-                             modifier = Modifier.height(20.dp),
-                             contentPadding = PaddingValues(horizontal = 4.dp)
-                         ) {
-                             Text(
-                                 text = "like",
-                                 fontSize = 12.sp,
-                                 fontWeight = FontWeight.Bold,
-                                 color = Color.Blue
-                             )
-                         }
-                    } else {
-                        TextButton(
-                            onClick = { onLikeComment(comment.id) },
-                            modifier = Modifier.height(20.dp),
-                            contentPadding = PaddingValues(horizontal = 2.dp)
-                        ) {
-                            Text(
-                                text = "Like",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.Gray
-                            )
-                        }
-                     }
+                    CommentLikeButton(
+                        itemId = comment.id!!,
+                        existingReaction = comment.getEmoji(currentUserId),
+                        onLike = { id, emoji -> onLikeComment(id, emoji) },
+                        onUnlike = { onUnLikeComment(it) }
+                    )
 
                     Spacer(modifier = Modifier.width(8.dp))
 
@@ -174,7 +152,7 @@ fun CommentItem(
 
                     if (comment.getLikeCount() > 0) {
                         TextButton(
-                            onClick = { onLikesClick(comment.id!!) },
+                            onClick = { onLikesClick(comment.id) },
                             modifier = Modifier.height(20.dp),
                             contentPadding = PaddingValues(horizontal = 4.dp)
                         ) {
@@ -266,9 +244,9 @@ fun formatDateShort(date: Date): String {
 private fun PreviewComponent() {
     MainAppTheme {
         CommentItem(
-            comment = MockData.mockComments.first().copy(likedUserIds = listOf("1")),
+            comment = MockData.mockComments.first(),
             onUserClick = {},
-            onLikeComment = {},
+            onLikeComment = { _, _ -> },
             onCommentLongPress = {},
             onUnLikeComment = {},
             onReplyClick = {},

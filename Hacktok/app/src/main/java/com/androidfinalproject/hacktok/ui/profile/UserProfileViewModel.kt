@@ -98,7 +98,7 @@ class UserProfileViewModel @Inject constructor(
                     }
                 }
             }
-            is UserProfileAction.LikePost -> likePost(action.postId)
+            is UserProfileAction.LikePost -> likePost(action.postId, action.emoji)
             is UserProfileAction.UnlikePost -> unLikePost(action.postId)
             is UserProfileAction.OnLikesShowClick -> loadLikesUser(action.targetId)
             else -> {}
@@ -121,7 +121,7 @@ class UserProfileViewModel @Inject constructor(
                             action.reportCause
                         )
 
-                    is UserProfileAction.LikePost -> { likePost(action.postId); true }
+                    is UserProfileAction.LikePost -> { likePost(action.postId, action.emoji); true }
                     UserProfileAction.RefreshProfile -> { loadProfile(); true }
                     else -> true
                 }
@@ -258,11 +258,11 @@ class UserProfileViewModel @Inject constructor(
         state.value.user?.id?.let { loadUserProfile(it) }
     }
     
-    private fun likePost(postId: String) {
+    private fun likePost(postId: String, emoji: String) {
         Log.d(TAG, "LikePost action called for postId: $postId (Not Implemented)")
         viewModelScope.launch {
             _state.update { currentState ->
-                val updatedPost = likeService.likePost(postId) ?: return@launch
+                val updatedPost = likeService.likePost(postId, emoji) ?: return@launch
 
                 val newList = currentState.posts.map { post ->
                     if (post.id == updatedPost.id) updatedPost.copy(

@@ -1,8 +1,14 @@
 package com.androidfinalproject.hacktok.ui.commonComponent
 
+import android.util.Log
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.filled.MoreVert
@@ -15,6 +21,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,12 +35,13 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PostContent(
     fullName: String? = null,
     post: Post,
     onPostClick: (String) -> Unit = {},
-    onToggleLike: () -> Unit,
+    onToggleLike: (String) -> Unit,
     onUnLike: () -> Unit,
     onComment: () -> Unit,
     onShare: () -> Unit,
@@ -128,7 +136,9 @@ fun PostContent(
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.weight(1f).clickable { onLikesClick(post.id!!) }
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable { onLikesClick(post.id!!) }
                 ) {
                     Icon(
                         imageVector = Icons.Filled.ThumbUp,
@@ -228,7 +238,7 @@ fun PostContent(
                         .padding(start = 8.dp)
                 ) {
                     Text(
-                        text = post.reference?.user?.fullName ?: "Unknown",
+                        text = post.reference.user?.fullName ?: "Unknown",
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
                         modifier = Modifier.clickable(onClick = onUserClick)
@@ -312,26 +322,17 @@ fun PostContent(
                 .padding(vertical = 4.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-
-            TextButton(
-                onClick = {
-                    if (post.isLiked(currentId)) {
-                        onUnLike()
-                    } else {
-                        onToggleLike()
-                    }
-                },
+            Box(
                 modifier = Modifier.weight(1f)
+                    .padding(10.dp)
             ) {
-                Icon(
-                    imageVector = if (post.isLiked(currentId)) Icons.Filled.ThumbUp else Icons.Outlined.ThumbUp,
-                    contentDescription = "Like",
-                    tint = if (post.isLiked(currentId)) Color(0xFF1565C0) else LocalContentColor.current
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = "Like",
-                    color = if (post.isLiked(currentId)) Color(0xFF1565C0) else LocalContentColor.current
+                val currentEmoji = post.getEmoji(currentId)
+                PostLikeButton(
+                    existingReaction = currentEmoji,
+                    onLike = { emoji ->
+                        onToggleLike(emoji)
+                    },
+                    onUnlike = { onUnLike() }
                 )
             }
 

@@ -25,7 +25,7 @@ sealed class UserProfileAction {
     data object NavigateBack : UserProfileAction()
 
     // Data Actions
-    data class LikePost(val postId: String) : UserProfileAction()
+    data class LikePost(val postId: String, val emoji: String) : UserProfileAction()
     data class UnlikePost(val postId: String) : UserProfileAction()
     data object RefreshProfile : UserProfileAction()
     data object MessageUser : UserProfileAction()

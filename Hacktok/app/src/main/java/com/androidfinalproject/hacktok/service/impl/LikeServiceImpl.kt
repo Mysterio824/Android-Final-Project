@@ -1,9 +1,8 @@
 package com.androidfinalproject.hacktok.service.impl
 
-import android.util.Log
+import com.androidfinalproject.hacktok.model.FullReaction
 import com.androidfinalproject.hacktok.model.Post
-import com.androidfinalproject.hacktok.model.User
-import com.androidfinalproject.hacktok.model.UserSnapshot
+import com.androidfinalproject.hacktok.model.Reaction
 import com.androidfinalproject.hacktok.model.enums.NotificationType
 import com.androidfinalproject.hacktok.repository.CommentRepository
 import com.androidfinalproject.hacktok.repository.PostRepository
@@ -18,19 +17,19 @@ class LikeServiceImpl @Inject constructor(
     private val postRepository: PostRepository,
     private val notificationService: NotificationService
 ) : LikeService{
-    override suspend fun likePost(postId: String): Post? {
+    override suspend fun likePost(postId: String, emoji: String): Post? {
         try {
             val post = postRepository.getPost(postId)
                 ?: return null
 
             val user = userRepository.getCurrentUser()
                 ?: return null
-            val userId = user.id
+            val userId = user.id ?: return null
 
             val updatedLikedUserIds = post.likedUserIds.toMutableList()
-            // Only add like and send notification if the user hasn't liked yet
-            if (!updatedLikedUserIds.contains(userId)) {
-                updatedLikedUserIds.add(userId!!)
+            if (!updatedLikedUserIds.any { it.userId == userId && it.emoji == emoji }) {
+                updatedLikedUserIds.removeAll { it.userId == userId }
+                updatedLikedUserIds.add(Reaction(userId, emoji))
 
                 val updates = mapOf("likedUserIds" to updatedLikedUserIds)
 
@@ -62,9 +61,10 @@ class LikeServiceImpl @Inject constructor(
 
             val user = userRepository.getCurrentUser()
                 ?: return null
+            val userId = user.id ?: return null
 
             val updatedLikedUserIds = post.likedUserIds.toMutableList()
-            updatedLikedUserIds.remove(user.id)
+            updatedLikedUserIds.removeAll { it.userId == userId }
 
             val updates = mapOf("likedUserIds" to updatedLikedUserIds)
 
@@ -78,19 +78,19 @@ class LikeServiceImpl @Inject constructor(
         }
     }
 
-    override suspend fun likeComment(commentId: String): Result<Unit> {
+    override suspend fun likeComment(commentId: String, emoji: String): Result<Unit> {
         return try {
             val comment = commentRepository.getById(commentId).getOrNull()
                 ?: return Result.failure(IllegalArgumentException("Comment not found"))
 
             val user = userRepository.getCurrentUser()
                 ?: return Result.failure(IllegalArgumentException("User not found"))
-            val userId = user.id
+            val userId = user.id ?: return Result.failure(IllegalArgumentException("User ID is null"))
 
             val updatedLikedUserIds = comment.likedUserIds.toMutableList()
-            // Only add like and send notification if the user hasn't liked yet
-            if (!updatedLikedUserIds.contains(userId)) {
-                updatedLikedUserIds.add(userId!!)
+            if (!updatedLikedUserIds.any { it.userId == userId && it.emoji == emoji }) {
+                updatedLikedUserIds.removeAll { it.userId == userId }
+                updatedLikedUserIds.add(Reaction(userId, emoji))
 
                 val updatedComment = comment.copy(
                     likedUserIds = updatedLikedUserIds
@@ -107,7 +107,7 @@ class LikeServiceImpl @Inject constructor(
 
                 Result.success(Unit)
             } else {
-                Result.success(Unit) // User already liked this comment
+                Result.success(Unit) // User already liked this comment with this emoji
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -121,32 +121,43 @@ class LikeServiceImpl @Inject constructor(
 
             val user = userRepository.getCurrentUser()
                 ?: return Result.failure(IllegalArgumentException("User not found"))
-            val userId = user.id
+            val userId = user.id ?: return Result.failure(IllegalArgumentException("User ID is null"))
 
             val updatedLikedUserIds = comment.likedUserIds.toMutableList()
-            updatedLikedUserIds.remove(userId)
+            updatedLikedUserIds.removeAll { it.userId == userId }
 
             val updatedComment = comment.copy(
                 likedUserIds = updatedLikedUserIds
             )
 
             commentRepository.update(commentId, updatedComment)
+            Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    override suspend fun getCommentLike(commentId: String): List<User> {
+    override suspend fun getCommentLike(commentId: String): List<FullReaction> {
         val comment = commentRepository.getById(commentId).getOrNull()
             ?: return emptyList()
-        val userList = userRepository.getUsersByIds(comment.likedUserIds)
-        return userList
+
+        val result = mutableListOf<FullReaction>()
+        for (reaction in comment.likedUserIds) {
+            val user = userRepository.getUserById(reaction.userId) ?: continue
+            result.add(FullReaction(user, reaction.emoji))
+        }
+        return result
     }
 
-    override suspend fun getPostLike(postId: String): List<User> {
+    override suspend fun getPostLike(postId: String): List<FullReaction> {
         val post = postRepository.getPost(postId)
             ?: return emptyList()
-        val userList = userRepository.getUsersByIds(post.likedUserIds)
-        return userList
+
+        val result = mutableListOf<FullReaction>()
+        for (reaction in post.likedUserIds) {
+            val user = userRepository.getUserById(reaction.userId) ?: continue
+            result.add(FullReaction(user, reaction.emoji))
+        }
+        return result
     }
 }

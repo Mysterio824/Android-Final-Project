@@ -6,13 +6,14 @@ import com.androidfinalproject.hacktok.model.enums.ReportType
 import com.androidfinalproject.hacktok.ui.newPost.PRIVACY
 
 sealed class HomeScreenAction {
-    data class LikePost(val postId: String) : HomeScreenAction()
+    data class LikePost(val postId: String, val emoji: String) : HomeScreenAction()
     data class UnLikePost(val postId: String) : HomeScreenAction()
     data class SharePost(val postId: String) : HomeScreenAction()
     data object OnCreatePost: HomeScreenAction()
     data object OnCreateStory: HomeScreenAction()
     data class OnStoryClick(val storyId: String): HomeScreenAction()
     data class OnPostClick(val postId: String) : HomeScreenAction()
+    data class OnPostEditClick(val postId: String) : HomeScreenAction()
     data class OnUserClick(val userId: String) : HomeScreenAction()
     data class OnLikesShowClick(val targetId: String): HomeScreenAction()
     data class SubmitReport(
@@ -20,7 +21,7 @@ sealed class HomeScreenAction {
         val reportType: ReportType,
         val reportCause: ReportCause
     ) : HomeScreenAction()
-    data object ShowShareDialog : HomeScreenAction()
+    data class DeletePost(val postId : String) : HomeScreenAction()
     data class UpdateSharePost(val post: Post) : HomeScreenAction()
     data class UpdateSharePrivacy(val privacy: PRIVACY) : HomeScreenAction()
     data class UpdateShareCaption(val caption: String) : HomeScreenAction()

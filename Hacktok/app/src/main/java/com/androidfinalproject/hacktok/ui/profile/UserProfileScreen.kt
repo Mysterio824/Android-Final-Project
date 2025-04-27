@@ -235,7 +235,7 @@ fun UserProfileScreen (
                              onUserClick = { onAction(UserProfileAction.RefreshProfile) },
                              onPostClick = { postId -> onAction(UserProfileAction.GoToPost(postId)) },
                              onOptionsClick = { selectPostId = it.id },
-                             onToggleLike = { onAction(UserProfileAction.LikePost(it.id!!)) },
+                             onToggleLike = { emoji -> onAction(UserProfileAction.LikePost(it.id!!, emoji)) },
                              onComment = { onAction(UserProfileAction.GoToPost(it.id!!)) },
                              onShare = { onAction(UserProfileAction.UpdateSharePost(it)) },
                              onUnLike = { onAction(UserProfileAction.UnlikePost(it.id!!)) },
@@ -339,7 +339,7 @@ fun UserProfileScreen (
                 sheetState = bottomSheetState
             ) {
                 LikeListContent(
-                    users = state.listLikeUser,
+                    listEmotions = state.listLikeUser,
                     onUserClick = { onAction(UserProfileAction.OnUserClick(it)) },
                     onDismiss = { selectedLikeShowId = null }
                 )
