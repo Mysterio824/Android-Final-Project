@@ -370,24 +370,44 @@ class HomeScreenViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update { it.copy(isPaginating = true) }
 
-            val newPosts = postRepository.getNextPosts(
-                userId = state.value.user?.id ?: "",
-                friendList = friendList,
-                limit = 10L
-            )
-
-            val newAuthorMap = loadAuthorNames(newPosts)
-
-            _state.update {
-                val allPosts = (it.posts + newPosts).distinctBy { post -> post.id }
-                val allAuthors = it.postAuthorNames + newAuthorMap
-
-                it.copy(
-                    posts = allPosts,
-                    postAuthorNames = allAuthors,
-                    isPaginating = false,
-                    hasMorePosts = newPosts.size == 10
+            try {
+                val newPosts = postRepository.getNextPosts(
+                    userId = state.value.user?.id ?: "",
+                    friendList = friendList,
+                    limit = 10L
                 )
+
+                val newAuthorMap = loadAuthorNames(newPosts)
+                val newPostUsers = mutableMapOf<String, User>()
+
+                // 🛠️ Fetch each post's author
+                for (post in newPosts) {
+                    val author = userRepository.getUserById(post.userId)
+                    if (author != null && post.id != null) {
+                        newPostUsers[post.id] = author
+                    }
+                }
+
+                _state.update {
+                    val allPosts = (it.posts + newPosts).distinctBy { post -> post.id }
+                    val allAuthors = it.postAuthorNames + newAuthorMap
+                    val allPostUsers = it.postUsers + newPostUsers
+
+                    it.copy(
+                        posts = allPosts,
+                        postAuthorNames = allAuthors,
+                        postUsers = allPostUsers,          // ✅ Updated here
+                        isPaginating = false,
+                        hasMorePosts = newPosts.size == 10
+                    )
+                }
+            } catch (e: Exception) {
+                _state.update {
+                    it.copy(
+                        isPaginating = false,
+                        error = "Failed to load more posts: ${e.message}"
+                    )
+                }
             }
         }
     }

@@ -183,7 +183,7 @@ fun HomeScreen(
                                 ) {
                                     PostContent(
                                         post = post,
-                                        user = state.postUsers[post.id]!!,
+                                        user = state.postUsers[post.id] ?: User(),
                                         referencePost = refPost,
                                         referenceUser = refUser,
                                         onPostClick = { onAction(HomeScreenAction.OnPostClick(post.id!!)) },
