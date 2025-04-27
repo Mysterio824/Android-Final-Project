@@ -193,7 +193,8 @@ fun HomeScreen(
                                         onShare = { onAction(HomeScreenAction.UpdateSharePost(post)) },
                                         onOptionsClick = { selectPost = post },
                                         currentId = state.user?.id ?: "",
-                                        onLikesClick = { selectedLikeShowId = post.id }
+                                        onLikesClick = { selectedLikeShowId = post.id },
+                                        onImageClick = { onAction(HomeScreenAction.OnImageClick(it)) }
                                     )
                                 }
                                 Spacer(modifier = Modifier.height(8.dp))

@@ -18,6 +18,7 @@ sealed class PostDetailAction {
         val reportType: ReportType,
         val reportCause: ReportCause
     ) : PostDetailAction()
+    data class OnImageClick(val imageUrl: String) : PostDetailAction()
 
     //input comment action
     data object ToggleCommentInputFocus : PostDetailAction()

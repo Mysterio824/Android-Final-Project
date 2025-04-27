@@ -14,7 +14,8 @@ fun HomeScreenRoot(
     onStoryClick: (String) -> Unit,
     onNewPostNavigate: () -> Unit,
     onCreateStoryNavigate: () -> Unit,
-    onPostEditClick: (String) -> Unit
+    onPostEditClick: (String) -> Unit,
+    onImageClickNavigate: (String) -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -28,6 +29,7 @@ fun HomeScreenRoot(
                 is HomeScreenAction.OnPostEditClick -> onPostEditClick(action.postId)
                 is HomeScreenAction.OnCreateStory -> onCreateStoryNavigate()
                 is HomeScreenAction.OnCreatePost -> onNewPostNavigate()
+                is HomeScreenAction.OnImageClick -> onImageClickNavigate(action.imageUrl)
                 else -> viewModel.onAction(action)
             }
         }

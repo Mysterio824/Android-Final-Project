@@ -235,7 +235,8 @@ fun CurrentProfileScreen(
                                             )
                                         },
                                         onLikesClick = { postId -> selectedLikeShowId = postId },
-                                        currentId = state.user.id ?: ""
+                                        currentId = state.user.id ?: "",
+                                        onImageClick = { onAction(CurrentProfileAction.OnImageClick(it)) }
                                     )
                                 }
                             }

@@ -20,6 +20,7 @@ fun CurrentProfileScreenRoot(
     onNewPostNavigation: () -> Unit,
     onFriendListNavigation: (String) -> Unit,
     onProfileEditNavigation: () -> Unit,
+    onImageClickNavigation: (String) -> Unit,
     onNavigateBack: () -> Unit,
     viewModel: CurrentProfileViewModel = hiltViewModel()
 ) {
@@ -35,6 +36,7 @@ fun CurrentProfileScreenRoot(
                 is CurrentProfileAction.NavigateToPostEdit -> onPostEditNavigation(action.postId)
                 is CurrentProfileAction.OnPostClick -> onPostClickNavigation(action.post.id!!)
                 is CurrentProfileAction.NavigateFriendList -> onFriendListNavigation(action.userId)
+                is CurrentProfileAction.OnImageClick -> onImageClickNavigation(action.imageUrl)
                 else -> viewModel.onAction(action)
             }
         },

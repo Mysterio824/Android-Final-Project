@@ -154,7 +154,8 @@ fun PostDetailScreen(
                             onLikesClick = {
                                 selectedType = "post"
                                 selectedLikeShowId = it
-                            }
+                            },
+                            onImageClick = { onAction(PostDetailAction.OnImageClick(it)) }
                         )
 
                         CommentsSectionToggle(

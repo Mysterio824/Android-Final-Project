@@ -17,6 +17,7 @@ fun UserProfileScreenRoot(
     onGoToFriendList: () -> Unit,
     onNavigateBack: () -> Unit,
     onUserNavigate: (String) -> Unit,
+    onImageClickNavigate: (String) -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val TAG = "UserProfileScreenRoot"
@@ -36,6 +37,7 @@ fun UserProfileScreenRoot(
                 is UserProfileAction.MessageUser -> onChatWithFriend(userId)
                 is UserProfileAction.GoToPost -> onGoToPost(action.postId)
                 is UserProfileAction.OnUserClick -> onUserNavigate(action.userId)
+                is UserProfileAction.OnImageClick -> onImageClickNavigate(action.imageUrl)
                 else -> viewModel.onAction(action)
             }
         }

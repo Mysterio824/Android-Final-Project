@@ -31,6 +31,7 @@ import com.androidfinalproject.hacktok.router.routes.AuthRoute
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.androidfinalproject.hacktok.ui.changePassword.ChangePasswordScreenRoot
 import com.androidfinalproject.hacktok.ui.chatDetail.ChatDetailScreenRoot
+import com.androidfinalproject.hacktok.ui.commonComponent.FullScreenImageScreen
 import com.androidfinalproject.hacktok.ui.newPost.NewPostScreenRoot
 import com.androidfinalproject.hacktok.ui.storydetail.StoryDetailScreenRoot
 import com.androidfinalproject.hacktok.ui.secretCrush.SecretCrushScreenRoot
@@ -104,7 +105,23 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
                 onSecretCrushNavigate = {
                     Log.d("Navigation", "here")
                     navController.navigate(MainRoute.SecretCrush.route)
+                },
+                onImageClickNavigate = { imageUrl ->
+                    navController.navigate(MainRoute.FullScreenImage(imageUrl).route)
                 }
+            )
+        }
+
+        composable(
+            route = "${MainRoute.FullScreenImage.BASE_ROUTE}?imageUrl={imageUrl}",
+            arguments = listOf(
+                navArgument("imageUrl") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val imageUrl = backStackEntry.arguments?.getString("imageUrl") ?: ""
+            FullScreenImageScreen(
+                imageUrl = imageUrl,
+                onClose = { navController.popBackStack() }
             )
         }
 
@@ -169,6 +186,9 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
                 onNavigateBack = {
                     navController.popBackStack()
                 },
+                onImageClickNavigation = {
+                    navController.navigate(MainRoute.FullScreenImage(it).route)
+                }
             )
         }
 
@@ -211,6 +231,9 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
                 },
                 onUserProfileNavigate = { userId ->
                     navController.navigate("${MainRoute.UserDetail.route}/$userId")
+                },
+                onImageClickNavigate = {
+                    navController.navigate(MainRoute.FullScreenImage(it).route)
                 }
             )
         }
@@ -246,6 +269,9 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
                 },
                 onNavigateBack = {
                     navController.popBackStack()
+                },
+                onImageClickNavigate = {
+                    navController.navigate(MainRoute.FullScreenImage(it).route)
                 }
             )
         }

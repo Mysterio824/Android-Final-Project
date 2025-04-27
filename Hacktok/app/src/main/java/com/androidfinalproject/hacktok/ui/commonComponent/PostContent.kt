@@ -1,14 +1,9 @@
 package com.androidfinalproject.hacktok.ui.commonComponent
 
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.filled.Groups
@@ -17,28 +12,22 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.ThumbUp
-import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.model.User
-import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PostContent(
     user: User,
@@ -51,10 +40,12 @@ fun PostContent(
     onOptionsClick: () -> Unit,
     onUserClick: () -> Unit,
     currentId: String,
+    onImageClick: (String) -> Unit = {},
     onLikesClick: (String) -> Unit = {},
     referencePost: Post? = null,
     referenceUser: User? = null,
 ) {
+    var imageLink by remember { mutableStateOf("") }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -122,11 +113,14 @@ fun PostContent(
                 }
             }
 
-            Text(
-                text = post.content,
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                fontSize = 16.sp
-            )
+            if (post.content.isNotBlank()) {
+                Text(
+                    text = post.content,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                    fontSize = 16.sp
+                )
+            }
+
 
             if (post.imageLink.isNotEmpty()) {
                 AsyncImage(
@@ -135,7 +129,10 @@ fun PostContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(max = 400.dp)
-                        .background(Color.White),
+                        .background(Color.White)
+                        .clickable {
+                            onImageClick(post.imageLink) // 👈 call navigate
+                        },
                     contentScale = ContentScale.FillWidth,
                 )
             }
@@ -222,11 +219,13 @@ fun PostContent(
                 }
             }
 
-            Text(
-                text = post.content,
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                fontSize = 16.sp
-            )
+            if (post.content.isNotBlank()) {
+                Text(
+                    text = post.content,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                    fontSize = 16.sp
+                )
+            }
 
             HorizontalDivider()
 
@@ -273,11 +272,13 @@ fun PostContent(
                 }
             }
 
-            Text(
-                text = referencePost.content,
-                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
-                fontSize = 16.sp
-            )
+            if (referencePost.content.isNotBlank()) {
+                Text(
+                    text = referencePost.content,
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+                    fontSize = 16.sp
+                )
+            }
 
             if (referencePost.imageLink.isNotEmpty()) {
                 AsyncImage(
@@ -286,7 +287,10 @@ fun PostContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(max = 400.dp)
-                        .background(Color.White),
+                        .background(Color.White)
+                        .clickable {
+                            onImageClick(referencePost.imageLink) // 👈 call navigate
+                        },
                     contentScale = ContentScale.FillHeight,
                 )
             } else {
