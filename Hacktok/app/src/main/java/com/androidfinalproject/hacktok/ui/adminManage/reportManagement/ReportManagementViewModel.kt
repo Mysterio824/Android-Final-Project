@@ -3,6 +3,8 @@ package com.androidfinalproject.hacktok.ui.adminManage.reportManagement
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.androidfinalproject.hacktok.repository.CommentRepository
+import com.androidfinalproject.hacktok.repository.PostRepository
 import kotlinx.coroutines.launch
 import com.androidfinalproject.hacktok.repository.ReportRepository
 import com.androidfinalproject.hacktok.repository.UserRepository
@@ -18,6 +20,8 @@ import javax.inject.Inject
 class ReportManagementViewModel @Inject constructor(
     private val reportRepository: ReportRepository,
     private val userRepository: UserRepository,
+    private val postRepository: PostRepository,
+    private val commentRepository: CommentRepository,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ReportManagementState())
     val state: StateFlow<ReportManagementState> = _state.asStateFlow()
@@ -123,9 +127,69 @@ class ReportManagementViewModel @Inject constructor(
                 _state.update { it.copy(isResolveReportDialogOpen = false, selectedReport = null) }
             }
             is ReportManagementAction.DeleteContent -> {
-//                _state.update { it.copy(
-//                    reports = it.reports.filter { it.targetId != action.contentId || it.type != action.contentType }
-//                ) }
+                viewModelScope.launch {
+                    try {
+                        when (action.contentType.name) {
+                            "Post" -> {
+                                // 1. Delete the post
+                                postRepository.deletePost(action.contentId)
+
+                                // 2. Update reports related to this post
+                                val matchingReports = _state.value.reports.filter {
+                                    it.targetId == action.contentId && it.type?.name == "Post"
+                                }
+
+                                matchingReports.forEach { report ->
+                                    reportRepository.updateReport(
+                                        report.id ?: return@forEach,
+                                        mapOf(
+                                            "status" to "resolved",
+                                            "resolutionNote" to "Post deleted",
+                                            "resolvedAt" to Date()
+                                        )
+                                    )
+                                }
+                            }
+                            "Comment" -> {
+                                // 1. Delete the comment
+                                commentRepository.delete(action.contentId)
+
+                                // 2. Update reports related to this comment
+                                val matchingReports = _state.value.reports.filter {
+                                    it.targetId == action.contentId && it.type?.name == "Comment"
+                                }
+
+                                matchingReports.forEach { report ->
+                                    reportRepository.updateReport(
+                                        report.id ?: return@forEach,
+                                        mapOf(
+                                            "status" to "resolved",
+                                            "resolutionNote" to "Comment deleted",
+                                            "resolvedAt" to Date()
+                                        )
+                                    )
+                                }
+                            }
+                        }
+
+                        // 3. Update local state for both Post and Comment
+                        _state.update {
+                            val updatedReports = it.reports.map { report ->
+                                if (report.targetId == action.contentId && report.type?.name == action.contentType.name) {
+                                    report.copy(status = "resolved")
+                                } else report
+                            }
+
+                            it.copy(
+                                reports = updatedReports,
+                                isResolveReportDialogOpen = false,
+                                selectedReport = null
+                            )
+                        }
+                    } catch (e: Exception) {
+                        Log.e("ReportViewModel", "Error deleting content ${action.contentId}", e)
+                    }
+                }
             }
             is ReportManagementAction.SetStatusFilter -> {
                 _state.update { it.copy(statusFilter = action.filter) }

@@ -396,7 +396,7 @@ class HomeScreenViewModel @Inject constructor(
                     it.copy(
                         posts = allPosts,
                         postAuthorNames = allAuthors,
-                        postUsers = allPostUsers,          // ✅ Updated here
+                        postUsers = allPostUsers,
                         isPaginating = false,
                         hasMorePosts = newPosts.size == 10
                     )

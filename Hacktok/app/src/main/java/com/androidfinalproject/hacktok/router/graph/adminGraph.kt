@@ -22,7 +22,7 @@ import androidx.navigation.compose.NavHost
 
 fun NavGraphBuilder.adminNavigation(navController: NavController) {
     navigation(
-        startDestination = AdminRoute.Statistic.route,
+        startDestination = AdminRoute.AdminDashboard.route,
         route = AdminRoute.Graph.route
     ) {
         composable(

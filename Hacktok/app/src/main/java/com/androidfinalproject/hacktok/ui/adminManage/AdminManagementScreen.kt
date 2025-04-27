@@ -31,7 +31,6 @@ fun AdminManagementScreen(
 ) {
     var selectedTab by remember { mutableIntStateOf(startTabIndex) }
     val userManagementViewModel: UserManagementViewModel = hiltViewModel()
-    val postManagementViewModel: PostManagementViewModel = hiltViewModel()
     val reportManagementViewModel: ReportManagementViewModel = hiltViewModel()
 
     val reportState by reportManagementViewModel.state.collectAsState()
@@ -50,14 +49,6 @@ fun AdminManagementScreen(
                 selected = selectedTab == 1,
                 onClick = {
                     selectedTab = 1
-                    onAction(AdminManagementAction.SelectTab("Content"))
-                },
-                text = { Text("Content Management") }
-            )
-            Tab(
-                selected = selectedTab == 2,
-                onClick = {
-                    selectedTab = 2
                     onAction(AdminManagementAction.SelectTab("Reports"))
                 },
                 text = { Text("Reports") }
@@ -72,10 +63,7 @@ fun AdminManagementScreen(
                     navController.navigate("userDetail/$userId")
                 }
             )
-            1 -> ContentManagementScreen(
-
-            )
-            2 -> ReportManagementTab(
+            1 -> ReportManagementTab(
                 state = reportState,
                 onAction = { action -> reportManagementViewModel.onAction(action) }
             )
