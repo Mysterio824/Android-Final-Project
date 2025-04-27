@@ -20,6 +20,17 @@ data class Post(
     fun getEmoji(userId: String): String? =
         likedUserIds.find { it.userId == userId }?.emoji
 
+    fun getTopEmojis(limit: Int = 3): List<String> {
+        val emojiCounts = likedUserIds.groupBy { it.emoji }
+            .mapValues { it.value.size }
+            .toList()
+            .sortedByDescending { it.second }
+            .take(limit)
+            .map { it.first }
+
+        return emojiCounts
+    }
+
     constructor() : this(null, "", "", Date(), true, emptyList(), 0, "", "", null)
 
     override fun toString(): String {
