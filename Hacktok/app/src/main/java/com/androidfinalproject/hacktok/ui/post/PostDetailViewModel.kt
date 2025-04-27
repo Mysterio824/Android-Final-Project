@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.model.Post
+import com.androidfinalproject.hacktok.model.SavedPost
 import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.model.enums.ReportCause
 import com.androidfinalproject.hacktok.model.enums.ReportType
@@ -13,6 +14,7 @@ import com.androidfinalproject.hacktok.service.AuthService
 import com.androidfinalproject.hacktok.service.CommentService
 import com.androidfinalproject.hacktok.service.LikeService
 import com.androidfinalproject.hacktok.service.ReportService
+import com.androidfinalproject.hacktok.repository.SavedPostRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,7 +31,8 @@ class PostDetailViewModel @Inject constructor(
     private val likeService: LikeService,
     private val authService: AuthService,
     private val reportService: ReportService,
-    private val commentService: CommentService
+    private val commentService: CommentService,
+    private val savedPostRepository: SavedPostRepository
 ) : ViewModel() {
     private val tag = "PostViewModel"
     private val _state = MutableStateFlow(PostDetailState())
@@ -75,12 +78,49 @@ class PostDetailViewModel @Inject constructor(
             is PostDetailAction.SubmitReport -> submitReport(action.reportedItemId, action.reportType, action.reportCause)
             is PostDetailAction.OnLikesShowClick -> loadLikesUser(action.targetId, action.isPost)
             is PostDetailAction.OnSavePost -> savePost(action.postId)
+            is PostDetailAction.OnDeleteSavedPost -> deleteSavedPost(action.postId)
             else -> {}
         }
     }
 
     private fun savePost(postId: String) {
-        TODO("Not yet implemented")
+        viewModelScope.launch {
+            try {
+                val currentUser = state.value.currentUser
+                if (currentUser != null) {
+                    val userId = currentUser.id ?: return@launch
+                    val savedPost = SavedPost(
+                        userId = userId,
+                        postId = postId
+                    )
+                    savedPostRepository.savePost(savedPost)
+                    // Update the state with the new saved post
+                    _state.update { it.copy(
+                        savedPosts = it.savedPosts + postId
+                    ) }
+                }
+            } catch (e: Exception) {
+                _state.update { it.copy(error = "Failed to save post: ${e.message}") }
+            }
+        }
+    }
+
+    private fun deleteSavedPost(postId: String) {
+        viewModelScope.launch {
+            try {
+                val currentUser = state.value.currentUser
+                if (currentUser != null) {
+                    val userId = currentUser.id ?: return@launch
+                    savedPostRepository.deleteSavedPost(postId)
+                    // Update the state by removing the unsaved post
+                    _state.update { it.copy(
+                        savedPosts = it.savedPosts.filter { it != postId }
+                    ) }
+                }
+            } catch (e: Exception) {
+                _state.update { it.copy(error = "Failed to delete saved post: ${e.message}") }
+            }
+        }
     }
 
     private fun loadLikesUser(targetId: String, isPost: Boolean) {
@@ -125,6 +165,10 @@ class PostDetailViewModel @Inject constructor(
                 val currentUser = authService.getCurrentUser()
                     ?: throw IllegalStateException("User not found")
 
+                // Load saved posts
+                val savedPosts = savedPostRepository.getSavedPostsByUser(currentUser.id!!)
+                    .map { it.postId }
+
                 // NEW: Load referenced post and its user if exists
                 var referencePost: Post? = null
                 var referenceUser: User? = null
@@ -140,7 +184,8 @@ class PostDetailViewModel @Inject constructor(
                         currentUser = currentUser,
                         postUser = postUser,
                         referencePost = referencePost,
-                        referenceUser = referenceUser
+                        referenceUser = referenceUser,
+                        savedPosts = savedPosts
                     )
                 }
 

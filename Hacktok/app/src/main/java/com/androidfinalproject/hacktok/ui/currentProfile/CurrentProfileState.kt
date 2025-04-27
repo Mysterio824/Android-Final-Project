@@ -19,5 +19,6 @@ sealed class CurrentProfileState {
         val listLikeUser: List<FullReaction> = emptyList(),
         val referencePosts: Map<String, Post> = emptyMap(), // refPostId -> Post
         val referenceUsers: Map<String, User> = emptyMap(),
+        val savedPosts: List<String> = emptyList()
     ) : CurrentProfileState()
 }

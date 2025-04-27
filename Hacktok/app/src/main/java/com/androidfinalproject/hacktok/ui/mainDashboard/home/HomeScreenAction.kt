@@ -16,6 +16,7 @@ sealed class HomeScreenAction {
     data class OnUserClick(val userId: String) : HomeScreenAction()
     data class OnLikesShowClick(val targetId: String): HomeScreenAction()
     data class OnSavePost(val postId: String) : HomeScreenAction()
+    data class OnDeleteSavedPost(val postId: String) : HomeScreenAction()
     data class SubmitReport(
         val reportedItemId: String,
         val reportType: ReportType,

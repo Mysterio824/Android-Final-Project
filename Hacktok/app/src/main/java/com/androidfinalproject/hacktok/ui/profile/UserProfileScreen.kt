@@ -333,9 +333,11 @@ fun UserProfileScreen (
             ) {
                 PostOptionsContent(
                     onDismiss = { selectPostId = null },
-                    onReport = { reportTargetId = selectPostId!! },
-                    isPostOwner = false,
-                    onSavePost = { onAction(UserProfileAction.OnSavePost(selectPostId!!)) }
+                    onReport = { reportTargetId = selectPostId },
+                    isPostOwner = selectPostId == state.user?.id,
+                    isPostSaved = state.savedPosts.contains(selectPostId),
+                    onSavePost = { onAction(UserProfileAction.OnSavePost(selectPostId!!)) },
+                    onUnsavePost = { onAction(UserProfileAction.OnDeleteSavedPost(selectPostId!!)) },
                 )
             }
         }

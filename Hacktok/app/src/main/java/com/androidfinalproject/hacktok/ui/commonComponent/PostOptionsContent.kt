@@ -22,9 +22,11 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun PostOptionsContent(
     isPostOwner: Boolean,
+    isPostSaved: Boolean,
     onDismiss: () -> Unit,
     onReport: () -> Unit,
     onSavePost: () -> Unit,
+    onUnsavePost: () -> Unit,
     onPostDelete: () -> Unit = {},
     onPostEdit: () -> Unit = {},
 ) {
@@ -53,11 +55,19 @@ fun PostOptionsContent(
             )
         }
 
-        OptionItem(
-            title = "Save Post",
-            icon = Icons.Default.Save,
-            onClick = withDismiss(onSavePost)
-        )
+        if (isPostSaved) {
+            OptionItem(
+                title = "Unsave Post",
+                icon = Icons.Default.Save,
+                onClick = withDismiss(onUnsavePost)
+            )
+        } else {
+            OptionItem(
+                title = "Save Post",
+                icon = Icons.Default.Save,
+                onClick = withDismiss(onSavePost)
+            )
+        }
 
         // Options only for post owner
         if (isPostOwner) {

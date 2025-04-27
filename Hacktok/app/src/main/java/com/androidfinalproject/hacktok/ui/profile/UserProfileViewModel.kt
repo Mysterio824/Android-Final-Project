@@ -6,9 +6,11 @@ import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.model.RelationInfo
+import com.androidfinalproject.hacktok.model.SavedPost
 import com.androidfinalproject.hacktok.model.enums.ReportCause
 import com.androidfinalproject.hacktok.model.enums.ReportType
 import com.androidfinalproject.hacktok.repository.PostRepository
+import com.androidfinalproject.hacktok.repository.SavedPostRepository
 import com.androidfinalproject.hacktok.repository.UserRepository
 import com.androidfinalproject.hacktok.service.AuthService
 import com.androidfinalproject.hacktok.service.LikeService
@@ -38,7 +40,8 @@ class UserProfileViewModel @Inject constructor(
     private val authService: AuthService,
     private val reportService: ReportService,
     private val likeService: LikeService,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val savedPostRepository: SavedPostRepository
 ) : ViewModel() {
     private val TAG = "UserProfileViewModel"
     private val _state = MutableStateFlow(UserProfileState())
@@ -102,6 +105,7 @@ class UserProfileViewModel @Inject constructor(
             is UserProfileAction.UnlikePost -> unLikePost(action.postId)
             is UserProfileAction.OnLikesShowClick -> loadLikesUser(action.targetId)
             is UserProfileAction.OnSavePost -> savePost(action.postId)
+            is UserProfileAction.OnDeleteSavedPost -> deleteSavedPost(action.postId)
             else -> {}
         }
         
@@ -138,7 +142,43 @@ class UserProfileViewModel @Inject constructor(
     }
 
     private fun savePost(postId: String) {
-        TODO("Not yet implemented")
+        viewModelScope.launch {
+            try {
+                val currentUser = state.value.currentUser
+                if (currentUser != null) {
+                    val userId = currentUser.id ?: return@launch
+                    val savedPost = SavedPost(
+                        userId = userId,
+                        postId = postId
+                    )
+                    savedPostRepository.savePost(savedPost)
+                    // Update the state with the new saved post
+                    _state.update { it.copy(
+                        savedPosts = it.savedPosts + postId
+                    ) }
+                }
+            } catch (e: Exception) {
+                _state.update { it.copy(error = "Failed to save post: ${e.message}") }
+            }
+        }
+    }
+
+    private fun deleteSavedPost(postId: String) {
+        viewModelScope.launch {
+            try {
+                val currentUser = state.value.currentUser
+                if (currentUser != null) {
+                    val userId = currentUser.id ?: return@launch
+                    savedPostRepository.deleteSavedPost(postId)
+                    // Update the state by removing the unsaved post
+                    _state.update { it.copy(
+                        savedPosts = it.savedPosts.filter { it != postId }
+                    ) }
+                }
+            } catch (e: Exception) {
+                _state.update { it.copy(error = "Failed to delete saved post: ${e.message}") }
+            }
+        }
     }
 
     private fun loadLikesUser(targetId: String) {
@@ -183,8 +223,18 @@ class UserProfileViewModel @Inject constructor(
                  val userAndPostsResult = fetchUserAndPosts(userId)
                  loadedUser = userAndPostsResult.first
                  loadedPosts = userAndPostsResult.second.sortedByDescending { it.createdAt }
-                 loadError = if (loadedUser == null /* && userAndPostsResult.second.isEmpty() */) "User not found" else null // Simplified error check
+                 loadError = if (loadedUser == null) "User not found" else null
                  val relationship = relationshipService.getFriends(userId)
+
+                 // Load saved posts
+                 val currentUser = authService.getCurrentUser()
+                 val savedPosts = if (currentUser != null) {
+                     savedPostRepository.getSavedPostsByUser(currentUser.id!!)
+                         .map { it.postId }
+                 } else {
+                     emptyList()
+                 }
+
                  if (loadedUser != null) {
                      val refPostIds = loadedPosts.mapNotNull { it.refPostId }.toSet()
 
@@ -223,6 +273,7 @@ class UserProfileViewModel @Inject constructor(
                             currentUser = authService.getCurrentUser(),
                              referencePosts = refPosts,
                              referenceUsers = refUsers,
+                             savedPosts = savedPosts
                         )
                     }
                  } else {

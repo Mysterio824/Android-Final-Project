@@ -29,6 +29,7 @@ sealed class UserProfileAction {
     data class LikePost(val postId: String, val emoji: String) : UserProfileAction()
     data class UnlikePost(val postId: String) : UserProfileAction()
     data class OnSavePost(val postId: String) : UserProfileAction()
+    data class OnDeleteSavedPost(val postId: String) : UserProfileAction()
     data object RefreshProfile : UserProfileAction()
     data object MessageUser : UserProfileAction()
     data class OnLikesShowClick(val targetId: String): UserProfileAction()

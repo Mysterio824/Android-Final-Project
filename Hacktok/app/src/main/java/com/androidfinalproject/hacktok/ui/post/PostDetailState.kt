@@ -7,21 +7,21 @@ import com.androidfinalproject.hacktok.model.User
 
 data class PostDetailState(
     val post: Post? = null,
+    val postUser: User? = null,
     val currentUser: User? = null,
     val comments: List<Comment> = emptyList(),
     val isLoadingComments: Boolean = false,
-    val commentText: String = "",
-    val isShare: Boolean = false,
-    val isCommenting: Boolean = false,
     val error: String? = null,
-    val commentIdReply: String = "", // For replying to comments
-    val highlightedCommentId: String? = null,
-    val showComments: Boolean = true,
     val userMessage: String? = null,
+    val showComments: Boolean = false,
+    val isCommenting: Boolean = false,
+    val commentText: String = "",
+    val commentIdReply: String = "",
+    val highlightedCommentId: String? = null,
     val showShareDialog: Boolean = false,
-    val postUser: User? = null,
-    val trigger: Boolean = false,
     val listLikeUser: List<FullReaction> = emptyList(),
     val referencePost: Post? = null,
     val referenceUser: User? = null,
+    val trigger: Boolean = false,
+    val savedPosts: List<String> = emptyList()
 )

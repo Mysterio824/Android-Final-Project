@@ -74,12 +74,12 @@ fun DashboardScreen(
                         )
                     }
 
-//                    "WatchLater" -> {
-//                        WatchLaterScreenRoot(
-//                            onPostClickNavigation = { onAction(DashboardAction.OnPostClick(it, null)) },
-//                            onUserProfileNavigate = { onAction(DashboardAction.OnUserClick(it)) }
-//                        )
-//                    }
+                    "WatchLater" -> {
+                        WatchLaterScreenRoot(
+                            onPostClickNavigation = { onAction(DashboardAction.OnPostClick(it, null)) },
+                            onUserProfileNavigate = { onAction(DashboardAction.OnUserClick(it)) }
+                        )
+                    }
 
                     "Notifications" -> {
                         NotificationScreenRoot(
@@ -116,7 +116,7 @@ fun PreviewDashboardScreen() {
         ) {
             DashboardScreen(
                 state = DashboardState(
-                    selectedTab = "Home"
+                    selectedTab = "WatchLater"
                     //Home, Notifications, WatchLater, Friends, Settings
                 ),
                 onAction = {}
