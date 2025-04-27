@@ -15,7 +15,6 @@ import com.androidfinalproject.hacktok.model.RelationInfo
 import com.androidfinalproject.hacktok.model.enums.RelationshipStatus
 import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.ui.mainDashboard.friendSuggestion.component.*
-import com.androidfinalproject.hacktok.ui.messageDashboard.MessageDashboardAction
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState

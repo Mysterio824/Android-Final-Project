@@ -313,6 +313,12 @@ class FcmServiceImpl @Inject constructor(
                     val shortContent = comment?.content?.take(30)?.let { if (it.length >= 30) "$it..." else it } ?: "your comment"
                     "$senderName replied to your comment: $shortContent"
                 }
+                NotificationType.FRIEND_REQUEST -> {
+                    "$senderName send you a friend request!"
+                }
+                NotificationType.FRIEND_ACCEPT -> {
+                    "$senderName accept your friend request!"
+                }
                 NotificationType.NEW_MESSAGE -> {
                     "$senderName: "
                 }
@@ -366,6 +372,14 @@ class FcmServiceImpl @Inject constructor(
                 val senderId = data["senderId"]
                 if (senderId != null) {
                     val deepLink = "${MainRoute.ChatRoom.route}/user/$senderId"
+                    Log.d(TAG, "  Setting deepLink = $deepLink")
+                    return deepLink
+                }
+            }
+            NotificationType.FRIEND_REQUEST.name, NotificationType.FRIEND_ACCEPT.name -> {
+                val senderId = data["senderId"]
+                if (senderId != null) {
+                    val deepLink = "${MainRoute.UserDetail.route}/$senderId"
                     Log.d(TAG, "  Setting deepLink = $deepLink")
                     return deepLink
                 }

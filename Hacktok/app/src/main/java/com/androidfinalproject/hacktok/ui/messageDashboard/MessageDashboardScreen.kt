@@ -55,16 +55,6 @@ fun MessageDashboardScreen (
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold
                 )
-                ActionButton(icon = Icons.Default.Add,
-                    contentDescription = "Create",
-                    menuItems = listOf(
-                        "New Chat" to {
-                            onAction(MessageDashboardAction.NewChat)
-                        },
-                        "New Group" to {
-                            onAction(MessageDashboardAction.NewGroup)
-                        }
-                    ))
             }
 
             Spacer(modifier = Modifier.height(8.dp))
