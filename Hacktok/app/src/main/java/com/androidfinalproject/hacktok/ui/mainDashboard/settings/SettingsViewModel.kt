@@ -35,12 +35,16 @@ class SettingsViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            _state.update{
-                it.copy(
-                    isGoogleLogin = authService.checkIfUserLoginGoogle(),
-                    currentUser = authService.getCurrentUser()
-                )
-            }
+            val currentUser = authService.getCurrentUser()
+            val isGoogleLogin = authService.checkIfUserLoginGoogle()
+            val savedLanguage = context.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+                .getString("language", "English") ?: "English"
+            
+            _state.update { it.copy(
+                currentUser = currentUser,
+                isGoogleLogin = isGoogleLogin,
+                language = savedLanguage
+            )}
         }
     }
 
@@ -76,20 +80,18 @@ class SettingsViewModel @Inject constructor(
     }
 
     private fun changeLanguage(language: String) {
-//        val localeList = LocaleListCompat.forLanguageTags(language)
-//        AppCompatDelegate.setApplicationLocales(localeList)
-//
-//        saveLanguagePreference(language)
+        viewModelScope.launch {
+            // Save language preference
+            context.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+                .edit()
+                .putString("language", language)
+                .apply()
 
-        // Emit a state change to notify the UI to recreate the activity
-        _state.update {
-            it.copy(isLanguageChanged = true, language = language)
+            // Update state
+            _state.update { it.copy(
+                language = language,
+                isLanguageChanged = true
+            )}
         }
-    }
-
-    private fun saveLanguagePreference(language: String) {
-        // Example with SharedPreferences
-        val prefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
-        prefs.edit().putString("selected_language", language).apply()
     }
 }

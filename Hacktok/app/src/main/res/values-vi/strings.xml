@@ -27,4 +27,19 @@
     <string name="password">Mật khẩu</string>
     <string name="email">Email</string>
     <string name="continue_with_google">Tiếp tục với Google</string>
+
+    <!-- Settings Screen -->
+    <string name="settings">Cài đặt</string>
+    <string name="account_settings">Cài đặt tài khoản</string>
+    <string name="edit_profile">Chỉnh sửa hồ sơ</string>
+    <string name="change_password">Đổi mật khẩu</string>
+    <string name="secret_crush">Crush bí mật</string>
+    <string name="app_settings">Cài đặt ứng dụng</string>
+    <string name="language">Ngôn ngữ</string>
+    <string name="english">Tiếng Anh</string>
+    <string name="vietnamese">Tiếng Việt</string>
+    <string name="logout">Đăng xuất</string>
+    <string name="logout_confirmation">Bạn có chắc chắn muốn đăng xuất?</string>
+    <string name="yes">Có</string>
+    <string name="no">Không</string>
 </resources> 

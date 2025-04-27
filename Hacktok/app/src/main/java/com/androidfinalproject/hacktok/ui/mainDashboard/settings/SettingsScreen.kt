@@ -14,9 +14,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.androidfinalproject.hacktok.R
 import com.androidfinalproject.hacktok.ui.commonComponent.ProfileImage
+import com.androidfinalproject.hacktok.ui.mainDashboard.settings.SettingsScreenAction.*
 
 @Composable
 fun SettingsScreen(
@@ -24,8 +27,35 @@ fun SettingsScreen(
     onAction: (SettingsScreenAction) -> Unit
 ) {
     val scrollState = rememberScrollState()
+    var showLogoutDialog by remember { mutableStateOf(false) }
     var showLanguageDropdown by remember { mutableStateOf(false) }
-    val languages = listOf("English", "Spanish", "French", "German", "Chinese", "Japanese")
+
+    val languages = listOf(
+        stringResource(R.string.english),
+        stringResource(R.string.vietnamese)
+    )
+
+    if (showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = { showLogoutDialog = false },
+            title = { Text(stringResource(R.string.logout_confirmation)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showLogoutDialog = false
+                        onAction(OnLogout)
+                    }
+                ) {
+                    Text(stringResource(R.string.yes))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showLogoutDialog = false }) {
+                    Text(stringResource(R.string.no))
+                }
+            }
+        )
+    }
 
     Scaffold{ innerPadding ->
         Column(
@@ -35,85 +65,51 @@ fun SettingsScreen(
                 .verticalScroll(scrollState)
         ) {
             // Account Section
-            SectionHeader("Account")
+            SectionHeader(stringResource(R.string.account_settings))
 
             // Profile Option
             SettingsItem(
                 icon = Icons.Default.Person,
-                title = "Main Profile",
+                title = stringResource(R.string.edit_profile),
                 imageUrl = state.currentUser?.profileImage,
-                onClick = { onAction(SettingsScreenAction.OnCurrentProfileNavigate) }
+                onClick = { onAction(OnNavigateEdit) }
             )
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-            SectionHeader("Account Settings")
+            SectionHeader(stringResource(R.string.account_settings))
 
             // Edit Profile Option
             SettingsItem(
                 icon = Icons.Default.Edit,
-                title = "Edit Profile",
-                onClick = { onAction(SettingsScreenAction.OnNavigateEdit) }
+                title = stringResource(R.string.change_password),
+                onClick = { onAction(OnChangePassword) }
             )
 
             // Change Password Option
             if(!state.isGoogleLogin) {
                 SettingsItem(
                     icon = Icons.Default.Lock,
-                    title = "Change Password",
-                    onClick = { onAction(SettingsScreenAction.OnChangePassword) }
+                    title = stringResource(R.string.change_password),
+                    onClick = { onAction(OnChangePassword) }
                 )
             }
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
             // App Settings Section
-            SectionHeader("App Settings")
+            SectionHeader(stringResource(R.string.app_settings))
             // Edit Profile Option
             SettingsItem(
-                icon = Icons.Default.Person,
-                title = "Secret Crush",
-                onClick = { onAction(SettingsScreenAction.OnSecretCrushNavigate) }
+                icon = Icons.Default.Favorite,
+                title = stringResource(R.string.secret_crush),
+                onClick = { onAction(OnSecretCrushNavigate) }
             )
 
-            // Language Settings with Dropdown
-            Box {
-                SettingsItem(
-                    icon = Icons.Default.Language,
-                    title = "Language",
-                    subtitle = state.language.ifEmpty { "English" },
-                    onClick = { showLanguageDropdown = true }
-                )
-
-                DropdownMenu(
-                    expanded = showLanguageDropdown,
-                    onDismissRequest = { showLanguageDropdown = false },
-                    modifier = Modifier.width(200.dp)
-                ) {
-                    languages.forEach { language ->
-                        DropdownMenuItem(
-                            text = { Text(language) },
-                            onClick = {
-                                onAction(SettingsScreenAction.OnChangeLanguage(language))
-                                showLanguageDropdown = false
-                            },
-                            leadingIcon = {
-                                if (language == state.language || (state.language.isEmpty() && language == "English")) {
-                                    Icon(
-                                        Icons.Default.Check,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary
-                                    )
-                                }
-                            }
-                        )
-                    }
-                }
-            }
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
             // Logout Button
             Button(
-                onClick = { onAction(SettingsScreenAction.OnLogout) },
+                onClick = { showLogoutDialog = true },
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -126,7 +122,7 @@ fun SettingsScreen(
                     modifier = Modifier.padding(end = 8.dp)
                 )
                 Text(
-                    "Log Out",
+                    stringResource(R.string.logout),
                     color = MaterialTheme.colorScheme.onErrorContainer,
                     fontWeight = FontWeight.Bold
                 )
