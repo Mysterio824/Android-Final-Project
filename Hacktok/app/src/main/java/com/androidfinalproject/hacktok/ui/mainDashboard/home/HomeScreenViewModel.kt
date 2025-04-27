@@ -95,8 +95,19 @@ class HomeScreenViewModel @Inject constructor(
                         adService.incrementClicks(ad.id!!)
                         if (ad.url.isNotEmpty()) {
                             try {
-                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(ad.url))
+                                val url = ad.url.trim()
+                                // Validate URL format
+                                val formattedUrl = if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                                    "https://$url"
+                                } else {
+                                    url
+                                }
+                                
+                                // Create a simple intent to open in default browser
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(formattedUrl))
                                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                
+                                // Start the activity
                                 getApplication<Application>().startActivity(intent)
                             } catch (e: Exception) {
                                 Log.e("HomeScreenViewModel", "Error opening URL: ${e.message}")
