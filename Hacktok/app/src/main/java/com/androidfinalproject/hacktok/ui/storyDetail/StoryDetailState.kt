@@ -14,5 +14,6 @@ data class StoryDetailState(
     val error: String? = null,
     val isStoryPaused: Boolean = false,
     val storyProgress: Float = 0f,
-    val reportSuccessMessage: String? = null
+    val reportSuccessMessage: String? = null,
+    val successMessage: String? = null
 )

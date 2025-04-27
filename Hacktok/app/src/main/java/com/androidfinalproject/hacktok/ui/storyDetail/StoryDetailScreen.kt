@@ -1,5 +1,6 @@
 package com.androidfinalproject.hacktok.ui.storydetail
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -18,6 +19,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -34,8 +36,18 @@ fun StoryDetailScreen(
     state: StoryDetailState,
     onAction: (StoryDetailAction) -> Unit
 ) {
+    val context = LocalContext.current
+
     var messageText by remember { mutableStateOf(TextFieldValue("")) }
     var showReportDialog by remember { mutableStateOf(false) }
+
+    // Handle success message and navigation
+    LaunchedEffect(state.successMessage) {
+        state.successMessage?.let { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            onAction(StoryDetailAction.CloseStory)
+        }
+    }
 
     if (showReportDialog) {
         AlertDialog(

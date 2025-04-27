@@ -10,5 +10,6 @@ data class NewStoryState(
     val selectedImageUri: Uri? = null,
     val storyText: String = "",
     val error: String? = null,
-    val isStoryCreated: Boolean = false
+    val isStoryCreated: Boolean = false,
+    val successMessage: String? = null
 )

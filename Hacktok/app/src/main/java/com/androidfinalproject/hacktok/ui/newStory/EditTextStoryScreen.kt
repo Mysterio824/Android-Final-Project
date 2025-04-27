@@ -1,6 +1,8 @@
 package com.androidfinalproject.hacktok.ui.newStory
 
 import android.annotation.SuppressLint
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -9,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -26,13 +29,24 @@ fun EditTextStoryScreen(
 ) {
     var privacy by remember { mutableStateOf(PRIVACY.PUBLIC) }
     var inputText by remember { mutableStateOf("") }
+    val context = LocalContext.current
+    val state by viewModel.state.collectAsState()
 
     // Observe state for successful story creation
-    LaunchedEffect(viewModel.state.value.isStoryCreated) {
-        if (viewModel.state.value.isStoryCreated) {
+    LaunchedEffect(state.isStoryCreated) {
+        Log.d("EditTextStoryScreen", "isStoryCreated changed to: ${state.isStoryCreated}")
+        if (state.isStoryCreated) {
+            Log.d("EditTextStoryScreen", "Showing success toast and navigating back")
+            // Show success notification
+            Toast.makeText(context, "Create story successfully", Toast.LENGTH_SHORT).show()
             onClose()
             viewModel.resetState()
         }
+    }
+
+    // Log state changes
+    LaunchedEffect(state) {
+        Log.d("EditTextStoryScreen", "State updated: isLoading=${state.isLoading}, isStoryCreated=${state.isStoryCreated}, error=${state.error}")
     }
 
     StoryEditorScaffold(

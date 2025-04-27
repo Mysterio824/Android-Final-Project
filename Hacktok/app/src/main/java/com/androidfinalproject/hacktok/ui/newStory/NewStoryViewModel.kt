@@ -82,12 +82,14 @@ class NewStoryViewModel @Inject constructor(
 
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
+            Log.d("NewStoryViewModel", "Starting image story creation")
 
             try {
                 val context = getApplication<Application>().applicationContext
                 val tempFile = copyUriToTempFile(context, imageUri)
 
                 if (tempFile == null || !tempFile.exists()) {
+                    Log.e("NewStoryViewModel", "Failed to create temp file")
                     _state.update {
                         it.copy(isLoading = false, error = "Không thể đọc tệp hình ảnh")
                     }
@@ -98,31 +100,42 @@ class NewStoryViewModel @Inject constructor(
                 tempFile.delete()
 
                 if (imageUrl.isNullOrBlank()) {
+                    Log.e("NewStoryViewModel", "Failed to upload image to Cloudinary")
                     _state.update {
                         it.copy(isLoading = false, error = "Tải ảnh lên thất bại")
                     }
                     return@launch
                 }
 
+                Log.d("NewStoryViewModel", "Image uploaded successfully, creating story")
                 val media = Media(
                     type = "image",
                     url = imageUrl,
-                    thumbnailUrl = imageUrl // Có thể sinh thumbnail riêng nếu muốn
+                    thumbnailUrl = imageUrl
                 )
 
                 val result = storyService.createStory(media, privacy)
+                Log.d("NewStoryViewModel", "Story creation result: ${result.isSuccess}")
 
                 if (result.isSuccess) {
+                    Log.d("NewStoryViewModel", "Story created successfully, updating state")
                     _state.update {
-                        it.copy(isLoading = false, isStoryCreated = true, error = null)
+                        it.copy(
+                            isLoading = false,
+                            isStoryCreated = true,
+                            error = null,
+                            successMessage = "Story created successfully!"
+                        )
                     }
                 } else {
+                    Log.e("NewStoryViewModel", "Failed to create story: ${result.exceptionOrNull()?.message}")
                     _state.update {
                         it.copy(isLoading = false, error = result.exceptionOrNull()?.message)
                     }
                 }
 
             } catch (e: Exception) {
+                Log.e("NewStoryViewModel", "Error in createImageStory", e)
                 _state.update {
                     it.copy(isLoading = false, error = e.message)
                 }
@@ -134,28 +147,33 @@ class NewStoryViewModel @Inject constructor(
 
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
+            Log.d("NewStoryViewModel", "Starting text story creation")
 
             try {
                 val media = Media(
                     type = "text",
-                    url = text, // For text stories, store text content in url field
-                    thumbnailUrl = "" // No thumbnail for text
+                    url = text,
+                    thumbnailUrl = ""
                 )
 
                 val result = storyService.createStory(
                     media = media,
                     privacy = privacy
                 )
+                Log.d("NewStoryViewModel", "Story creation result: ${result.isSuccess}")
 
                 if (result.isSuccess) {
+                    Log.d("NewStoryViewModel", "Story created successfully, updating state")
                     _state.update { currentState ->
                         currentState.copy(
                             isLoading = false,
                             isStoryCreated = true,
-                            error = null
+                            error = null,
+                            successMessage = "Story created successfully!"
                         )
                     }
                 } else {
+                    Log.e("NewStoryViewModel", "Failed to create story: ${result.exceptionOrNull()?.message}")
                     _state.update { currentState ->
                         currentState.copy(
                             isLoading = false,
@@ -164,6 +182,7 @@ class NewStoryViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
+                Log.e("NewStoryViewModel", "Error in createTextStory", e)
                 _state.update { currentState ->
                     currentState.copy(
                         isLoading = false,

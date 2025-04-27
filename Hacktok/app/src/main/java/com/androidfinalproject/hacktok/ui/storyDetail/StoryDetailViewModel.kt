@@ -1,5 +1,6 @@
 package com.androidfinalproject.hacktok.ui.storydetail
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.model.Message
@@ -151,19 +152,24 @@ class StoryDetailViewModel @Inject constructor(
 
                     if (result != null) {
                         if (result.isSuccess) {
+                            Log.d("StoryDetailViewModel", "Story deleted successfully")
                             // If there are more stories, move to next one, otherwise close
                             if (_state.value.totalStories > 1) {
                                 moveToNextStory()
                             } else {
                                 _state.update { it.copy(story = null) }
                             }
+                            // Show success notification
+                            _state.update { it.copy(successMessage = "Story deleted successfully") }
                         } else {
+                            Log.e("StoryDetailViewModel", "Failed to delete story: ${result.exceptionOrNull()?.message}")
                             _state.update {
                                 it.copy(error = "Failed to delete story: ${result.exceptionOrNull()?.message}")
                             }
                         }
                     }
                 } catch (e: Exception) {
+                    Log.e("StoryDetailViewModel", "Error deleting story", e)
                     _state.update { it.copy(error = "Failed to delete story: ${e.message}") }
                 }
             }
