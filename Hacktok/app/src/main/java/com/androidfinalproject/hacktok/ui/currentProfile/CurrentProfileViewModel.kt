@@ -123,6 +123,7 @@ class CurrentProfileViewModel @Inject constructor(
             is CurrentProfileAction.OnDeletePost -> {
                 deletePost(action.postId)
             }
+            is CurrentProfileAction.OnSavePost -> savePost(action.postId)
             is CurrentProfileAction.ShowShareDialog -> {
                 val current = _state.value
                 if (current is CurrentProfileState.Success) {
@@ -215,6 +216,10 @@ class CurrentProfileViewModel @Inject constructor(
 
             } // Handle other actions
         }
+    }
+
+    private fun savePost(postId: String) {
+
     }
 
     fun List<Post>.replacePost(updatedPost: Post): List<Post> {

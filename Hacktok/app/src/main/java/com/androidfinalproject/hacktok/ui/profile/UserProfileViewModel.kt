@@ -101,6 +101,7 @@ class UserProfileViewModel @Inject constructor(
             is UserProfileAction.LikePost -> likePost(action.postId, action.emoji)
             is UserProfileAction.UnlikePost -> unLikePost(action.postId)
             is UserProfileAction.OnLikesShowClick -> loadLikesUser(action.targetId)
+            is UserProfileAction.OnSavePost -> savePost(action.postId)
             else -> {}
         }
         
@@ -134,6 +135,10 @@ class UserProfileViewModel @Inject constructor(
                 _state.update { it.copy(error = "Error performing action: ${e.message}") }
             }
         }
+    }
+
+    private fun savePost(postId: String) {
+        TODO("Not yet implemented")
     }
 
     private fun loadLikesUser(targetId: String) {

@@ -18,13 +18,13 @@ data class HomeScreenState(
     val sharePrivacy: PRIVACY = PRIVACY.PUBLIC,
     val shareCaption: String = "",
     val error: String? = null,
-    val userMessage: String? = null, // Added for showing transient messages
+    val userMessage: String? = null,
     val isPaginating: Boolean = false,
     val hasMorePosts: Boolean = true,
-    val postAuthorNames: Map<String, String> = emptyMap(), // postId -> authorFullName
+    val postAuthorNames: Map<String, String> = emptyMap(),
     val isStoryLoading: Boolean = false,
     val listLikeUser: List<FullReaction> = emptyList(),
     val referencePosts: Map<String, Post> = emptyMap(),
     val referenceUsers: Map<String, User> = emptyMap(),
-    val currentAd: Ad? = null // Added for displaying current ad
+    val currentAd: Ad? = null
 )

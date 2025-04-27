@@ -176,14 +176,18 @@ class HomeScreenViewModel @Inject constructor(
             }
             is HomeScreenAction.OnLikesShowClick -> loadLikesUser(action.targetId)
             is HomeScreenAction.UnLikePost -> unLikePost(action.postId)
-            is HomeScreenAction.SharePost -> sharePost(action.postId)
             is HomeScreenAction.SubmitReport -> submitReport(
                 reportedItemId = action.reportedItemId,
                 reportType = action.reportType,
                 reportCause = action.reportCause
             )
+            is HomeScreenAction.OnSavePost -> savePost(action.postId)
             else -> {}
         }
+    }
+
+    private fun savePost(postId: String) {
+        //TODO
     }
 
     private fun deletePost(postId: String) {
@@ -357,10 +361,6 @@ class HomeScreenViewModel @Inject constructor(
                 currentState.copy(posts = newList)
             }
         }
-    }
-
-    private fun sharePost(postId: String) {
-        // Placeholder logic for sharing a post
     }
 
     private fun submitReport(reportedItemId: String, reportType: ReportType, reportCause: ReportCause) {

@@ -286,6 +286,7 @@ fun CurrentProfileScreen(
                         onDismiss = { selectPostId = null },
                         onReport = {},
                         isPostOwner = true,
+                        onSavePost = { onAction(CurrentProfileAction.OnSavePost(selectPostId!!)) },
                         onPostEdit = { onAction(CurrentProfileAction.NavigateToPostEdit(selectPostId!!)) },
                         onPostDelete = { onAction(CurrentProfileAction.OnDeletePost(selectPostId!!)) }
                     )

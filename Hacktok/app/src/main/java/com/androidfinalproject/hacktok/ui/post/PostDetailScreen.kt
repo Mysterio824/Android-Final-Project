@@ -43,7 +43,6 @@ import com.androidfinalproject.hacktok.ui.commonComponent.LikeListContent
 import com.androidfinalproject.hacktok.ui.commonComponent.PostContent
 import com.androidfinalproject.hacktok.ui.commonComponent.PostOptionsContent
 import com.androidfinalproject.hacktok.ui.commonComponent.ReportOptionsContent
-import com.androidfinalproject.hacktok.ui.commonComponent.ShareOptionsContent
 import com.androidfinalproject.hacktok.ui.commonComponent.SharePostDialog
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 import com.androidfinalproject.hacktok.ui.post.component.*
@@ -60,7 +59,6 @@ fun PostDetailScreen(
     val listState = rememberLazyListState()
 
     var showPostOptionsSheet by remember { mutableStateOf(false) }
-    var showShareOptionsSheet by remember { mutableStateOf(false) }
     var selectedComment by remember { mutableStateOf<Comment?>(null) }
     var reportTargetId by remember { mutableStateOf<String?>(null) }
     var reportType by remember { mutableStateOf<ReportType?>(null) }
@@ -148,7 +146,7 @@ fun PostDetailScreen(
                             referenceUser = state.referenceUser,
                             onToggleLike = { emoji -> onAction(PostDetailAction.ToggleLike(emoji)) },
                             onComment = { onAction(PostDetailAction.ToggleCommentInputFocus) },
-                            onShare = { showShareOptionsSheet = true },
+                            onShare = { onAction(PostDetailAction.ShowShareDialog) },
                             onOptionsClick = { showPostOptionsSheet = true },
                             onUserClick = { onAction(PostDetailAction.OnUserClick(post.userId)) },
                             onUnLike = { onAction(PostDetailAction.UnLikePost) },
@@ -233,20 +231,8 @@ fun PostDetailScreen(
                         onReport = {
                             reportTargetId = state.post?.id
                             reportType = ReportType.Post
-                        }
-                    )
-                }
-            }
-
-            // Share options bottom sheet
-            if (showShareOptionsSheet) {
-                ModalBottomSheet(
-                    onDismissRequest = { showShareOptionsSheet = false },
-                    sheetState = bottomSheetState
-                ) {
-                    ShareOptionsContent(
-                        onShareToFeed = { onAction(PostDetailAction.ShowShareDialog) },
-                        onDismiss = { showShareOptionsSheet = false }
+                        },
+                        onSavePost = { onAction(PostDetailAction.OnSavePost(state.post!!.id!!)) }
                     )
                 }
             }

@@ -260,6 +260,7 @@ fun HomeScreen(
                         PostOptionsContent(
                             onDismiss = { selectPost = null },
                             onReport = { reportTargetId = selectPost!!.id },
+                            onSavePost = { onAction(HomeScreenAction.OnSavePost(selectPost!!.id!!)) },
                             onPostEdit = { onAction(HomeScreenAction.OnPostEditClick(selectPost!!.id!!)) },
                             onPostDelete = { onAction(HomeScreenAction.DeletePost(selectPost!!.id!!)) },
                             isPostOwner = state.user!!.id == selectPost!!.userId

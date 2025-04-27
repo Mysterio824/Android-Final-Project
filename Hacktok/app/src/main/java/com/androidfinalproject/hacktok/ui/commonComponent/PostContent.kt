@@ -1,6 +1,5 @@
 package com.androidfinalproject.hacktok.ui.commonComponent
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -11,7 +10,6 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -45,7 +43,8 @@ fun PostContent(
     referencePost: Post? = null,
     referenceUser: User? = null,
 ) {
-    var imageLink by remember { mutableStateOf("") }
+    val topEmojis = post.getTopEmojis(3)
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -131,7 +130,7 @@ fun PostContent(
                         .heightIn(max = 400.dp)
                         .background(Color.White)
                         .clickable {
-                            onImageClick(post.imageLink) // 👈 call navigate
+                            onImageClick(post.imageLink)
                         },
                     contentScale = ContentScale.FillWidth,
                 )
@@ -142,25 +141,32 @@ fun PostContent(
                     .fillMaxWidth()
                     .padding(horizontal = 12.dp, vertical = 8.dp)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .weight(1f)
-                        .clickable { onLikesClick(post.id!!) }
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.ThumbUp,
-                        contentDescription = "Likes",
-                        tint = Color(0xFF1877F2),
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "${post.getLikeCount()}",
-                        color = Color.Gray,
-                        fontSize = 14.sp
-                    )
+                if (topEmojis.isNotEmpty()) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable { onLikesClick(post.id!!) }
+                    ) {
+                        Row {
+                            topEmojis.forEach { emoji ->
+                                Text(
+                                    text = emoji,
+                                    fontSize = 14.sp,
+                                    modifier = Modifier.padding(end = 2.dp)
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "${post.getLikeCount()}",
+                            color = Color.Gray,
+                            fontSize = 14.sp
+                        )
+                    }
                 }
+                Spacer(modifier = Modifier.weight(1f))
 
                 Text(
                     text = "${post.commentCount} comments",
@@ -302,23 +308,31 @@ fun PostContent(
                     .fillMaxWidth()
                     .padding(horizontal = 12.dp, vertical = 8.dp)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.ThumbUp,
-                        contentDescription = "Likes",
-                        tint = Color(0xFF1877F2),
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "${post.getLikeCount()}",
-                        color = Color.Gray,
-                        fontSize = 14.sp
-                    )
+                if (topEmojis.isNotEmpty()) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable { onLikesClick(post.id!!) }
+                    ) {
+                        Row {
+                            topEmojis.forEach { emoji ->
+                                Text(
+                                    text = emoji,
+                                    fontSize = 14.sp,
+                                    modifier = Modifier.padding(end = 2.dp)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "${post.getLikeCount()}",
+                            color = Color.Gray,
+                            fontSize = 14.sp
+                        )
+                    }
                 }
+                Spacer(modifier = Modifier.weight(1f))
 
                 Text(
                     text = "${post.commentCount} comments",

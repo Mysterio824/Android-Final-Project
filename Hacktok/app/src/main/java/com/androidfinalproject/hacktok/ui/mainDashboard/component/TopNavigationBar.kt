@@ -43,7 +43,7 @@ fun TopNavigationBar(
     val tabs = listOf(
         "Home" to Icons.Default.Home,
         "Friends" to Icons.Outlined.Group,
-        "WatchLater" to Icons.Default.VideoLibrary,
+//        "WatchLater" to Icons.Default.VideoLibrary,
         "Notifications" to Icons.Outlined.Notifications,
         "Settings" to Icons.Outlined.Settings
     )

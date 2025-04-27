@@ -10,6 +10,7 @@ sealed class CurrentProfileAction {
     data object NavigateToProfileEdit : CurrentProfileAction()
     data object NavigateToNewPost : CurrentProfileAction()
     data class OnImageClick (val imageUrl: String) : CurrentProfileAction()
+    data class OnSavePost (val postId: String) : CurrentProfileAction()
     object OnNavigateBack : CurrentProfileAction()
     object Refresh: CurrentProfileAction()
     data class OnLikesShowClick(val targetId: String): CurrentProfileAction()

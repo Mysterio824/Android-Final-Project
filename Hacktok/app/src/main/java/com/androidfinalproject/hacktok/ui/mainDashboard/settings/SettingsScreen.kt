@@ -75,9 +75,6 @@ fun SettingsScreen(
                 onClick = { onAction(OnNavigateEdit) }
             )
 
-            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-            SectionHeader(stringResource(R.string.account_settings))
-
             // Edit Profile Option
             SettingsItem(
                 icon = Icons.Default.Edit,
