@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.androidfinalproject.hacktok.model.MockData
+import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.model.enums.ReportType
 import com.androidfinalproject.hacktok.ui.commonComponent.PostContent
 import com.androidfinalproject.hacktok.ui.commonComponent.PostOptionsContent
@@ -91,7 +92,8 @@ fun WatchLaterScreen(
                                 onShare = {},
                                 onOptionsClick = { selectPostId = post.id },
                                 onUnLike = { onAction(WatchLaterAction.OnUnLikeClick(post.id!!)) },
-                                currentId = state.currentUserId ?: ""
+                                currentId = state.currentUserId ?: "",
+                                user = User(),
                             )
                         }
                     }

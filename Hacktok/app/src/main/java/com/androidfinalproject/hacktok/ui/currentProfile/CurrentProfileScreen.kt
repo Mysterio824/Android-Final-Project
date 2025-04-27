@@ -194,7 +194,6 @@ fun CurrentProfileScreen(
                                 ) {
                                     PostContent(
                                         post = post,
-                                        fullName = state.user.fullName,
                                         onPostClick = {
                                             onAction(
                                                 CurrentProfileAction.OnPostClick(
@@ -231,7 +230,10 @@ fun CurrentProfileScreen(
                                             )
                                         },
                                         onLikesClick = { postId -> selectedLikeShowId = postId },
-                                        currentId = state.user.id ?: ""
+                                        currentId = state.user.id ?: "",
+                                        user = state.user,
+                                        referencePost = state.referencePosts[post.refPostId],
+                                        referenceUser = state.referencePosts[post.refPostId]?.userId?.let { state.referenceUsers[it] },
                                     )
                                 }
                             }

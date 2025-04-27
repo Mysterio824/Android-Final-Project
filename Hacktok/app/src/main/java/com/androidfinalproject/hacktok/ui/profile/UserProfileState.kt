@@ -19,5 +19,7 @@ data class UserProfileState (
     val sharePrivacy: PRIVACY = PRIVACY.PUBLIC,
     val shareCaption: String = "",
     val currentUser: User? = null,
-    val listLikeUser: List<User> = emptyList()
+    val listLikeUser: List<User> = emptyList(),
+    val referencePosts: Map<String, Post> = emptyMap(),
+    val referenceUsers: Map<String, User> = emptyMap()
 )

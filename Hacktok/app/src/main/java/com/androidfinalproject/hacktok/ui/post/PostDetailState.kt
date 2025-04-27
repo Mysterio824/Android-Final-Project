@@ -20,5 +20,7 @@ data class PostDetailState(
     val showShareDialog: Boolean = false,
     val postUser: User? = null,
     val trigger: Boolean = false,
-    val listLikeUser: List<User> = emptyList()
+    val listLikeUser: List<User> = emptyList(),
+    val referencePost: Post? = null,
+    val referenceUser: User? = null,
 )

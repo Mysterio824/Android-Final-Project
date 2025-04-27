@@ -22,5 +22,7 @@ data class HomeScreenState(
     val postAuthorNames: Map<String, String> = emptyMap(), // postId -> authorFullName
     val isStoryLoading: Boolean = false,
     val listLikeUser: List<User> = emptyList(),
-    val currentAd: Ad? = null // Added for displaying current ad
+    val currentAd: Ad? = null, // Added for displaying current ad
+    val referencePosts: Map<String, Post> = emptyMap(),
+    val referenceUsers: Map<String, User> = emptyMap(),
 )

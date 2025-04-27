@@ -179,8 +179,10 @@ fun HomeScreen(
                                     colors = CardDefaults.cardColors(containerColor = Color.White),
                                     elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
                                 ) {
+                                    val refPost = state.referencePosts[post.refPostId]
+                                    val refUser = refPost?.userId?.let { state.referenceUsers[it] }
+
                                     PostContent(
-                                        fullName = authorName,
                                         post = post,
                                         onPostClick = { onAction(HomeScreenAction.OnPostClick(post.id!!)) },
                                         onToggleLike = { onAction(HomeScreenAction.LikePost(post.id!!)) },
@@ -190,7 +192,10 @@ fun HomeScreen(
                                         onShare = { onAction(HomeScreenAction.UpdateSharePost(post)) },
                                         onOptionsClick = { selectPost = post },
                                         currentId = state.user?.id ?: "",
-                                        onLikesClick = { selectedLikeShowId = post.id }
+                                        onLikesClick = { selectedLikeShowId = post.id },
+                                        user = state.user!!,
+                                        referencePost = refPost,
+                                        referenceUser = refUser
                                     )
                                 }
                                 Spacer(modifier = Modifier.height(8.dp))
@@ -255,7 +260,7 @@ fun HomeScreen(
                         PostOptionsContent(
                             onDismiss = { selectPost = null },
                             onReport = { reportTargetId = selectPost!!.id },
-                            isPostOwner = state.user!!.id == selectPost!!.user?.id
+                            isPostOwner = state.user!!.id == selectPost!!.userId
                         )
                     }
                 }

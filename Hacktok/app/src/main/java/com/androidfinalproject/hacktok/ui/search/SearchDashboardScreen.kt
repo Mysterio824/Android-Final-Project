@@ -161,7 +161,8 @@ fun SearchDashboardScreen(
                                 1, 2, 3 -> items(state.filteredPosts) { post ->
                                     PostSearchItem(
                                         post = post,
-                                        onClick = { onAction(SearchAction.OnPostClick(post)) }
+                                        onClick = { onAction(SearchAction.OnPostClick(post)) },
+                                        user = state.users.find { it.id == post.userId }!!
                                     )
                                 }
                             }

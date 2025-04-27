@@ -13,8 +13,7 @@ data class Post(
     @PropertyName("commentCount") val commentCount: Int = 0, // Số lượng bình luận
     @PropertyName("imageLink") val imageLink: String = "",
     @PropertyName("privacy") val privacy: String = "",
-    @PropertyName("user") val user: User? = null,
-    @PropertyName("reference") val reference: Post? = null,
+    @PropertyName("refPostId") val refPostId: String? = null
 ) {
     fun getLikeCount(): Int = likedUserIds.size
 

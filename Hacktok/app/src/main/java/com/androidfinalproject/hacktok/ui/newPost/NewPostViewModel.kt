@@ -124,7 +124,6 @@ class NewPostViewModel @Inject constructor(
                         userId = userId,
                         imageLink = imageLink,
                         privacy = privacy,
-                        user = currentUser,
                     )
                     val postId = postRepository.addPost(post)
                     _state.value = _state.value.copy(postSubmitted = true)

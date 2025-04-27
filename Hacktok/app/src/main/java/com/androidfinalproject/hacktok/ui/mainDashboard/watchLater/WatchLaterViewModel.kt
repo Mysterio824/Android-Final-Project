@@ -74,7 +74,7 @@ class WatchLaterViewModel @Inject constructor(
 
             val newList = _state.value.savedPosts.map { post ->
                 if (post.id == updatedPost.id) updatedPost.copy(
-                    user = post.user,
+                    userId = post.userId,
                 ) else post
             }
 
@@ -91,7 +91,7 @@ class WatchLaterViewModel @Inject constructor(
 
             val newList = _state.value.savedPosts.map { post ->
                 if (post.id == updatedPost.id) updatedPost.copy(
-                    user = post.user,
+                    userId = post.userId,
                 ) else post
             }
 

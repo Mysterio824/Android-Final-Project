@@ -140,7 +140,6 @@ fun PostDetailScreen(
                 item {
                     state.post?.let { post ->
                         PostContent(
-                            fullName = state.postUser?.fullName ?: "",
                             post = post,
                             onToggleLike = { onAction(PostDetailAction.ToggleLike) },
                             onComment = { onAction(PostDetailAction.ToggleCommentInputFocus) },
@@ -152,7 +151,10 @@ fun PostDetailScreen(
                             onLikesClick = {
                                 selectedType = "post"
                                 selectedLikeShowId = it
-                            }
+                            },
+                            user = state.currentUser!!,
+                            referencePost = state.referencePost,
+                            referenceUser = state.referenceUser,
                         )
 
                         CommentsSectionToggle(

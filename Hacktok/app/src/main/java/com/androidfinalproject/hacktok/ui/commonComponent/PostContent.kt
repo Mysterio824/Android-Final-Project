@@ -17,21 +17,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.Post
-import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
+import com.androidfinalproject.hacktok.model.User
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 @Composable
 fun PostContent(
-    fullName: String? = null,
+    user: User,
     post: Post,
+    referencePost: Post? = null,
+    referenceUser: User? = null,
     onPostClick: (String) -> Unit = {},
     onToggleLike: () -> Unit,
     onUnLike: () -> Unit,
@@ -40,7 +40,7 @@ fun PostContent(
     onOptionsClick: () -> Unit,
     onUserClick: () -> Unit,
     currentId: String,
-    onLikesClick: (String) -> Unit = {}
+    onLikesClick: (String) -> Unit = {},
 ) {
     Card(
         modifier = Modifier
@@ -52,7 +52,7 @@ fun PostContent(
             containerColor = MaterialTheme.colorScheme.background
         )
     ) {
-        if (post.reference == null) {
+        if (referencePost == null) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -61,7 +61,7 @@ fun PostContent(
             ) {
                 // Avatar
                 ProfileImage(
-                    imageUrl = post.user?.profileImage,
+                    imageUrl = user.profileImage ?: "",
                     size = 45.dp,
                     onClick = onUserClick
                 )
@@ -72,7 +72,7 @@ fun PostContent(
                         .padding(start = 8.dp)
                 ) {
                     Text(
-                        text = fullName ?: "",
+                        text = user.fullName ?: "",
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
                         modifier = Modifier.clickable(onClick = onUserClick)
@@ -159,7 +159,7 @@ fun PostContent(
             ) {
                 // Avatar
                 ProfileImage(
-                    imageUrl = post.user?.profileImage,
+                    imageUrl = user.profileImage ?: "",
                     size = 45.dp,
                     onClick = onUserClick
                 )
@@ -170,7 +170,7 @@ fun PostContent(
                         .padding(start = 8.dp)
                 ) {
                     Text(
-                        text = fullName ?: "",
+                        text = user.fullName ?: "",
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
                         modifier = Modifier.clickable(onClick = onUserClick)
@@ -217,7 +217,7 @@ fun PostContent(
             ) {
                 // Avatar
                 ProfileImage(
-                    imageUrl = post.reference.user?.profileImage,
+                    imageUrl = referenceUser?.profileImage ?: "",
                     size = 45.dp,
                     onClick = onUserClick
                 )
@@ -228,7 +228,7 @@ fun PostContent(
                         .padding(start = 8.dp)
                 ) {
                     Text(
-                        text = post.reference?.user?.fullName ?: "Unknown",
+                        text = referenceUser?.fullName ?: "Unknown",
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
                         modifier = Modifier.clickable(onClick = onUserClick)
@@ -237,7 +237,7 @@ fun PostContent(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = formatDate(post.reference?.createdAt!!),
+                            text = formatDate(referencePost?.createdAt!!),
                             color = Color.Gray,
                             fontSize = 12.sp
                         )
@@ -253,14 +253,14 @@ fun PostContent(
             }
 
             Text(
-                text = post.reference.content,
+                text = referencePost?.content ?: "",
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
                 fontSize = 16.sp
             )
 
-            if (post.reference.imageLink.isNotEmpty()) {
+            if (referencePost?.imageLink?.isNotEmpty() == true) {
                 AsyncImage(
-                    model = post.reference.imageLink,
+                    model = referencePost.imageLink,
                     contentDescription = "Post image",
                     modifier = Modifier
                         .fillMaxWidth()
@@ -367,23 +367,4 @@ fun PostContent(
 fun formatDate(date: Date): String {
     val format = SimpleDateFormat("MMM d 'at' h:mm a", Locale.getDefault())
     return format.format(date)
-}
-
-@Preview
-@Composable
-fun PostPreview(){
-    MainAppTheme {
-        Box{
-            PostContent(
-                post = MockData.mockPosts.first(),
-                onShare = {},
-                onComment = {},
-                onToggleLike = {},
-                onUserClick = {},
-                onOptionsClick = {},
-                onUnLike = {},
-                currentId = ""
-            )
-        }
-    }
 }
