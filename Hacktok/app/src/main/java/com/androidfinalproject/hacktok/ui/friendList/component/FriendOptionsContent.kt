@@ -3,12 +3,13 @@ package com.androidfinalproject.hacktok.ui.friendList.component
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Chat
+import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.PersonRemove
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.androidfinalproject.hacktok.ui.commonComponent.OptionItem
 
 @Composable
@@ -28,28 +29,21 @@ fun FriendOptionsContent(
             .fillMaxWidth()
             .padding(bottom = 24.dp)
     ) {
-        Text(
-            text = "Post Options",
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
-            modifier = Modifier.padding(16.dp)
-        )
-
         OptionItem(
             title = "Unfriend",
-            description = "Unfriend with this user",
+            icon = Icons.Default.PersonRemove,
             onClick = withDismiss(onUnFriend)
         )
 
         OptionItem(
             title = "Chat",
-            description = "Chat with this user",
+            icon = Icons.AutoMirrored.Filled.Chat,
             onClick = withDismiss(onChat)
         )
 
         OptionItem(
             title = "Block",
-            description = "Block everything about this user",
+            icon = Icons.Default.Block,
             onClick = withDismiss(onBlock)
         )
     }

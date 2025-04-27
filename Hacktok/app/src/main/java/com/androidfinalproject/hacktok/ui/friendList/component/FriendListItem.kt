@@ -8,7 +8,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -23,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import com.androidfinalproject.hacktok.model.RelationInfo
 import com.androidfinalproject.hacktok.model.enums.RelationshipStatus
 import com.androidfinalproject.hacktok.model.User
+import com.androidfinalproject.hacktok.ui.commonComponent.ProfileImage
 
 @Composable
 fun FriendListItem(
@@ -43,20 +43,11 @@ fun FriendListItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         // User avatar
-        Box(
-            modifier = Modifier
-                .size(50.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = user.username?.firstOrNull()?.toString()?.uppercase() ?: "?",
-                color = MaterialTheme.colorScheme.primary,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
+        ProfileImage(
+            imageUrl = user.profileImage,
+            size = 50.dp,
+            onClick = onUserClick
+        )
 
         Spacer(modifier = Modifier.width(16.dp))
 

@@ -24,6 +24,7 @@ fun PostOptionsContent(
     isPostOwner: Boolean,
     onDismiss: () -> Unit,
     onReport: () -> Unit,
+    onSavePost: () -> Unit,
     onPostDelete: () -> Unit = {},
     onPostEdit: () -> Unit = {},
 ) {
@@ -55,7 +56,7 @@ fun PostOptionsContent(
         OptionItem(
             title = "Save Post",
             icon = Icons.Default.Save,
-            onClick = onDismiss
+            onClick = withDismiss(onSavePost)
         )
 
         // Options only for post owner

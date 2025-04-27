@@ -74,8 +74,13 @@ class PostDetailViewModel @Inject constructor(
             is PostDetailAction.DeleteComment -> deleteComment(action.commentId)
             is PostDetailAction.SubmitReport -> submitReport(action.reportedItemId, action.reportType, action.reportCause)
             is PostDetailAction.OnLikesShowClick -> loadLikesUser(action.targetId, action.isPost)
+            is PostDetailAction.OnSavePost -> savePost(action.postId)
             else -> {}
         }
+    }
+
+    private fun savePost(postId: String) {
+        TODO("Not yet implemented")
     }
 
     private fun loadLikesUser(targetId: String, isPost: Boolean) {

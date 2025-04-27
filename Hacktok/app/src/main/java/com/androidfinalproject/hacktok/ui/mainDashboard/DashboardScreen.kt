@@ -14,6 +14,8 @@ import com.androidfinalproject.hacktok.ui.mainDashboard.component.TopNavigationB
 import com.androidfinalproject.hacktok.ui.mainDashboard.friendSuggestion.FriendSuggestionScreenRoot
 import com.androidfinalproject.hacktok.ui.mainDashboard.notifcation.NotificationScreenRoot
 import com.androidfinalproject.hacktok.ui.mainDashboard.settings.SettingsScreenRoot
+import com.androidfinalproject.hacktok.ui.mainDashboard.watchLater.WatchLaterScreenRoot
+
 //import com.androidfinalproject.hacktok.ui.mainDashboard.watchLater.WatchLaterScreenRoot
 
 
@@ -73,10 +75,10 @@ fun DashboardScreen(
                     }
 
                     "WatchLater" -> {
-//                        WatchLaterScreenRoot(
-//                            onPostClickNavigation = { onAction(DashboardAction.OnPostClick(it, null)) },
-//                            onUserProfileNavigate = { onAction(DashboardAction.OnUserClick(it)) }
-//                        )
+                        WatchLaterScreenRoot(
+                            onPostClickNavigation = { onAction(DashboardAction.OnPostClick(it, null)) },
+                            onUserProfileNavigate = { onAction(DashboardAction.OnUserClick(it)) }
+                        )
                     }
 
                     "Notifications" -> {

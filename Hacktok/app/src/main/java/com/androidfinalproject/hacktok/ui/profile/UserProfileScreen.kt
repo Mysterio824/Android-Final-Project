@@ -334,7 +334,8 @@ fun UserProfileScreen (
                 PostOptionsContent(
                     onDismiss = { selectPostId = null },
                     onReport = { reportTargetId = selectPostId!! },
-                    isPostOwner = false
+                    isPostOwner = false,
+                    onSavePost = { onAction(UserProfileAction.OnSavePost(selectPostId!!)) }
                 )
             }
         }

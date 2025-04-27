@@ -1,10 +1,13 @@
 package com.androidfinalproject.hacktok.ui.mainDashboard.watchLater
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.model.MockData
+import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.model.enums.ReportCause
 import com.androidfinalproject.hacktok.model.enums.ReportType
+import com.androidfinalproject.hacktok.repository.PostRepository
 import com.androidfinalproject.hacktok.service.AuthService
 import com.androidfinalproject.hacktok.service.LikeService
 import com.androidfinalproject.hacktok.service.ReportService
@@ -19,10 +22,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class WatchLaterViewModel @Inject constructor(
-//    private val postService: PostService
     private val authService: AuthService,
     private val reportService: ReportService,
-    private val likeService: LikeService
+    private val likeService: LikeService,
+    private val postRepository: PostRepository
 ) : ViewModel() {
     private val _state = MutableStateFlow(WatchLaterState())
     val state: StateFlow<WatchLaterState> = _state.asStateFlow()
@@ -37,7 +40,41 @@ class WatchLaterViewModel @Inject constructor(
             is WatchLaterAction.OnLikeClick -> likePost(action.postId, action.emoji)
             is WatchLaterAction.SubmitReport -> submitReport(action.reportedItemId, action.reportType, action.reportCause)
             is WatchLaterAction.OnUnLikeClick -> unlikePost(action.postId)
+            is WatchLaterAction.OnLikesShowClick -> loadLikesUser(action.targetId)
+            is WatchLaterAction.OnSharePost -> {
+                viewModelScope.launch {
+                    val post = Post(
+                        content = action.caption,
+                        userId = state.value.user?.id ?: "",
+                        refPostId = action.post.id,
+                        privacy = action.privacy.name,
+                    )
+                    try {
+                        postRepository.addPost(post)
+                    } catch (e: Exception) {
+                        Log.d("ERROR", e.toString())
+                    }
+                }
+            }
+            is WatchLaterAction.DeletePost -> deletePost(action.postId)
+            is WatchLaterAction.UpdateSharePrivacy -> _state.update { it.copy(sharePrivacy = action.privacy) }
+            is WatchLaterAction.UpdateShareCaption -> _state.update { it.copy(shareCaption = action.caption) }
+            is WatchLaterAction.UpdateSharePost -> _state.update { it.copy(sharePost = action.post, showShareDialog = true) }
+            is WatchLaterAction.DismissShareDialog -> _state.update { it.copy(showShareDialog = false) }
             else -> {}
+        }
+    }
+
+    private fun deletePost(postId: String) {
+        viewModelScope.launch {
+            try {
+                postRepository.deletePost(postId)
+            } catch(e: Exception) {
+                _state.update {
+                    Log.e("WatchlaterViewmodel", e.message.toString())
+                    it.copy(error = e.message)
+                }
+            }
         }
     }
 
@@ -61,10 +98,23 @@ class WatchLaterViewModel @Inject constructor(
     }
 
     private fun removePost(postId: String) {
-        _state.update { currentState ->
-            currentState.copy(
-                savedPosts = currentState.savedPosts.filter { it.id != postId }
-            )
+//        _state.update { currentState ->
+//            currentState.copy(
+//                savedPosts = currentState.savedPosts.filter { it.id != postId }
+//            )
+//        }
+    }
+
+    private fun loadLikesUser(targetId: String) {
+        viewModelScope.launch {
+            try {
+                val likeUsers = likeService.getPostLike(targetId)
+                _state.update{
+                    it.copy(listLikeUser = likeUsers)
+                }
+            } catch(e: Exception){
+                Log.d("PostDetailViewModel", e.message.toString())
+            }
         }
     }
 
