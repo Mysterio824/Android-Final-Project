@@ -14,7 +14,9 @@ import androidx.compose.material.icons.filled.Report
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.androidfinalproject.hacktok.R
 import com.androidfinalproject.hacktok.model.Comment
 import com.androidfinalproject.hacktok.ui.commonComponent.OptionItem
 
@@ -49,20 +51,20 @@ fun CommentOptionsContent(
             .padding(bottom = 24.dp)
     ) {
         OptionItem(
-            title = "Copy Text",
+            title = stringResource(R.string.copy_cmt),
             icon = Icons.Default.CopyAll,
             onClick = withDismiss(copyTextAction)
         )
 
         if(isCommentOwner){
              OptionItem(
-                 title = "Delete Comment",
+                 title = stringResource(R.string.delete_cmt),
                  icon = Icons.Default.Delete,
                  onClick = withDismiss(deleteComment)
              )
         } else {
             OptionItem(
-                title = "Report Comment",
+                title = stringResource(R.string.report_cmt),
                 icon = Icons.Default.Report,
                 onClick = withDismiss(reportComment)
             )

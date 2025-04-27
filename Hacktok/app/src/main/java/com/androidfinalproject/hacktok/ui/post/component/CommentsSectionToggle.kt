@@ -9,8 +9,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.androidfinalproject.hacktok.R
 
 
 @Composable
@@ -27,7 +29,7 @@ fun CommentsSectionToggle(
             contentPadding = PaddingValues(horizontal = 25.dp)
         ) {
             Text(
-                text = if (showComments) "Hide comments" else "View all $commentCount comments",
+                text = if (showComments) stringResource(R.string.hide_cmt) else stringResource(R.string.view_cmt, commentCount),
                 fontWeight = FontWeight.Medium,
                 color = Color.Gray,
             )

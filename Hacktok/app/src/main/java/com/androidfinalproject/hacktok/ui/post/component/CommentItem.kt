@@ -12,18 +12,18 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.androidfinalproject.hacktok.R
 import com.androidfinalproject.hacktok.model.Comment
 import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.ui.commonComponent.CommentLikeButton
@@ -38,7 +38,7 @@ import java.util.Locale
 fun CommentItem(
     comment: Comment,
     isSelected: Boolean = false,
-    isHighlighted: Boolean = false, // New parameter
+    isHighlighted: Boolean = false,
     allComments: List<Comment>,
     onLikeComment: (String?, String) -> Unit,
     onUnLikeComment: (String?) -> Unit,
@@ -48,17 +48,23 @@ fun CommentItem(
     onLikesClick: (String) -> Unit,
     currentUserId: String
 ) {
-    // Use either isSelected or isHighlighted to determine background color
     val shouldHighlight = isSelected || isHighlighted
-    val replies = allComments.filter { it.parentCommentId == comment.id }
+
+    val replies = allComments
+        .filter { it.parentCommentId == comment.id }
+        .sortedBy { it.createdAt }
+
     val user = comment.userSnapshot
+
+    // Get top 3 emojis
+    val topEmojis = comment.getTopEmojis(3)
 
     var showReplies by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
             .padding(
-                start = if (comment.parentCommentId == null) 16.dp else 10.dp,
+                start = if (comment.parentCommentId == null) 16.dp else 32.dp, // Increased indent for replies
                 end = 16.dp,
                 top = 8.dp
             )
@@ -66,6 +72,7 @@ fun CommentItem(
             .background(
                 if (shouldHighlight) Color(0xFFE0E0E0) else Color.Transparent
             )
+            .fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
@@ -85,6 +92,7 @@ fun CommentItem(
                 modifier = Modifier
                     .weight(1f)
                     .padding(start = 8.dp)
+                    .fillMaxWidth()
             ) {
                 Box(
                     modifier = Modifier
@@ -95,6 +103,7 @@ fun CommentItem(
                             onLongClick = { onCommentLongPress(comment.id) }
                         )
                         .padding(horizontal = 12.dp, vertical = 8.dp)
+                        .fillMaxWidth() // Make comment box take full width
                 ) {
                     Column {
                         Text(
@@ -113,7 +122,9 @@ fun CommentItem(
 
                 // Comment actions
                 Row(
-                    modifier = Modifier.padding(start = 0.dp, top = 0.dp),
+                    modifier = Modifier
+                        .padding(start = 0.dp, top = 0.dp)
+                        .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Spacer(modifier = Modifier.width(10.dp))
@@ -135,13 +146,12 @@ fun CommentItem(
                     Spacer(modifier = Modifier.width(8.dp))
 
                     TextButton(
-                        onClick = { onReplyClick(comment.parentCommentId ?: comment.id!!) },
+                        onClick = { onReplyClick(comment.parentCommentId ?: comment.id) },
                         modifier = Modifier.height(24.dp),
                         contentPadding = PaddingValues(horizontal = 4.dp)
-
                     ) {
                         Text(
-                            text = "Reply",
+                            text = stringResource(R.string.reply),
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.Gray
@@ -151,25 +161,36 @@ fun CommentItem(
                     Spacer(modifier = Modifier.weight(1f))
 
                     if (comment.getLikeCount() > 0) {
-                        TextButton(
-                            onClick = { onLikesClick(comment.id) },
-                            modifier = Modifier.height(20.dp),
-                            contentPadding = PaddingValues(horizontal = 4.dp)
+                        Box(
+                            modifier = Modifier
+                                .clickable { onLikesClick(comment.id) }
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Color(0xFFF0F2F5))
+                                .padding(horizontal = 8.dp, vertical = 4.dp),
                         ) {
-                            Text(
-                                text = "${comment.getLikeCount()}",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.Blue
-                            )
-                            Icon(
-                                imageVector = Icons.Filled.ThumbUp,
-                                contentDescription = "Like Icon",
-                                modifier = Modifier
-                                    .padding(start = 4.dp)
-                                    .size(16.dp),
-                                tint = Color.Blue
-                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                if (topEmojis.isNotEmpty()) {
+                                    Row {
+                                        topEmojis.forEach { emoji ->
+                                            Text(
+                                                text = emoji,
+                                                fontSize = 14.sp,
+                                                modifier = Modifier.padding(end = 2.dp)
+                                            )
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                }
+
+                                Text(
+                                    text = "${comment.getLikeCount()}",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.Gray
+                                )
+                            }
                         }
                     }
                 }
@@ -190,7 +211,8 @@ fun CommentItem(
                                     .background(Color.Gray)
                             )
                             Text(
-                                text = if (showReplies) "Hide replies" else "View ${replies.size} replies",
+                                text = if (showReplies) stringResource(R.string.hide_replies)
+                                        else stringResource(R.string.view_replies, replies.size),
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.Gray
@@ -198,13 +220,14 @@ fun CommentItem(
                         }
                     }
 
-                    // Display replies with animation
                     AnimatedVisibility(
                         visible = showReplies,
                         enter = fadeIn(animationSpec = tween(150)) + expandVertically(animationSpec = tween(150)),
                         exit = fadeOut(animationSpec = tween(150)) + shrinkVertically(animationSpec = tween(150))
                     ) {
-                        Column {
+                        Column(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
                             replies.forEach { reply ->
                                 CommentItem(
                                     comment = reply,

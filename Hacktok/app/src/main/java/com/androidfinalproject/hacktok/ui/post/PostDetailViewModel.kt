@@ -262,7 +262,7 @@ class PostDetailViewModel @Inject constructor(
                     }.getOrThrow()
 
                     // Clear comment text and reply ID after submission
-                    _state.update { it.copy(commentText = "", commentIdReply = "") }
+                    _state.update { it.copy(commentText = "", commentIdReply = "", highlightedCommentId = "") }
                 } catch (e: Exception) {
                     Log.e(tag, "Error submitting comment", e)
                     _state.update { it.copy(error = "Failed to submit comment: ${e.message}") }

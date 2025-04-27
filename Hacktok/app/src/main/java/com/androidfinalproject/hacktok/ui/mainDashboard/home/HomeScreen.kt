@@ -34,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.androidfinalproject.hacktok.model.Ad
@@ -218,7 +219,7 @@ fun HomeScreen(
                             SharePostDialog(
                                 userName = state.user?.fullName ?: "Unknown",
                                 userAvatar = state.user?.profileImage
-                                    ?: "", // Replace with actual avatar if you have it
+                                    ?: "",
                                 onDismiss = { onAction(HomeScreenAction.DismissShareDialog) },
                                 onSubmit = { caption, privacy ->
                                     onAction(
@@ -275,7 +276,6 @@ fun HomeScreen(
                         LikeListContent(
                             listEmotions = state.listLikeUser,
                             onUserClick = { onAction(HomeScreenAction.OnUserClick(it)) },
-                            onDismiss = { selectedLikeShowId = null }
                         )
                     }
                 }
