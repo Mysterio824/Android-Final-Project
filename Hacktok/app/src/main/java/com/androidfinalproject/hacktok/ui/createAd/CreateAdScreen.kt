@@ -33,6 +33,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -81,6 +82,12 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import android.content.res.Configuration
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import android.net.Uri
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -90,10 +97,17 @@ fun CreateAdScreen(
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scrollState = rememberScrollState()
+    val context = LocalContext.current
 
     var showAdTypeMenu by remember { mutableStateOf(false) }
     var newInterest by remember { mutableStateOf("") }
     var newLocation by remember { mutableStateOf("") }
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { onAction(CreateAdAction.UploadImage(it)) }
+    }
 
     LaunchedEffect(state.error) {
         if (state.error != null) {
@@ -179,7 +193,16 @@ fun CreateAdScreen(
 
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        if (state.mediaUrl.isNotEmpty()) {
+                        if (state.isLoading) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(200.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                        } else if (state.mediaUrl.isNotEmpty()) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -210,7 +233,7 @@ fun CreateAdScreen(
                             }
                         } else {
                             OutlinedButton(
-                                onClick = { /* TODO: Implement media upload */ },
+                                onClick = { imagePickerLauncher.launch("image/*") },
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = ButtonDefaults.outlinedButtonColors(
                                     contentColor = MaterialTheme.colorScheme.primary

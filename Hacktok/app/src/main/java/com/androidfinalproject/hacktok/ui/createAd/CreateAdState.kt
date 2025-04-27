@@ -19,5 +19,6 @@ data class CreateAdState(
     val isSuccess: Boolean = false,
     val userAds: List<Ad> = emptyList(),
     val isLoadingAds: Boolean = false,
-    val isDeletingAd: Boolean = false
+    val isDeletingAd: Boolean = false,
+    val isLoading: Boolean = false
 )

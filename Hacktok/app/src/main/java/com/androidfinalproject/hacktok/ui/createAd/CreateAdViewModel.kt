@@ -1,6 +1,10 @@
 package com.androidfinalproject.hacktok.ui.createAd
 
+import android.app.Application
+import android.content.Context
+import android.net.Uri
 import android.util.Log
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.model.Ad
@@ -11,19 +15,29 @@ import com.androidfinalproject.hacktok.repository.AdRepository
 import com.androidfinalproject.hacktok.service.AuthService
 import com.androidfinalproject.hacktok.ui.createAd.CreateAdState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.asRequestBody
+import org.json.JSONObject
+import java.io.File
 import java.util.Date
 import javax.inject.Inject
 
 @HiltViewModel
 class CreateAdViewModel @Inject constructor(
     private val adRepository: AdRepository,
-    private val authService: AuthService
-) : ViewModel() {
+    private val authService: AuthService,
+    application: Application
+) : AndroidViewModel(application) {
     private val tag = "CreateAdViewModel"
     private val _state = MutableStateFlow(CreateAdState())
     val state: StateFlow<CreateAdState> = _state.asStateFlow()
@@ -252,6 +266,105 @@ class CreateAdViewModel @Inject constructor(
             is CreateAdAction.DeleteAd -> {
                 deleteAd(action.adId)
             }
+            is CreateAdAction.UploadImage -> {
+                uploadImage(action.imageUri)
+            }
+        }
+    }
+
+    private fun uploadImage(imageUri: Uri) {
+        viewModelScope.launch {
+            try {
+                _state.update { it.copy(isLoading = true) }
+                val context = getApplication<Application>().applicationContext
+                val tempFile = copyUriToTempFile(context, imageUri)
+
+                if (tempFile == null || !tempFile.exists()) {
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            error = "Failed to process image"
+                        )
+                    }
+                    return@launch
+                }
+
+                val imageUrl = uploadToCloudinary(tempFile)
+                tempFile.delete()
+
+                if (imageUrl.isNullOrBlank()) {
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            error = "Failed to upload image"
+                        )
+                    }
+                    return@launch
+                }
+
+                _state.update {
+                    it.copy(
+                        mediaUrl = imageUrl,
+                        isLoading = false,
+                        error = null
+                    )
+                }
+            } catch (e: Exception) {
+                Log.e(tag, "Error uploading image", e)
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = "Failed to upload image: ${e.message}"
+                    )
+                }
+            }
+        }
+    }
+
+    private suspend fun uploadToCloudinary(file: File): String? = withContext(Dispatchers.IO) {
+        val cloudName = "dbeximude"
+        val uploadPreset = "Kotlin"
+
+        val requestBody = MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart("file", file.name, file.asRequestBody("image/*".toMediaTypeOrNull()))
+            .addFormDataPart("upload_preset", uploadPreset)
+            .build()
+
+        val request = Request.Builder()
+            .url("https://api.cloudinary.com/v1_1/$cloudName/image/upload")
+            .post(requestBody)
+            .build()
+
+        return@withContext try {
+            val client = OkHttpClient()
+            val response = client.newCall(request).execute()
+            if (response.isSuccessful) {
+                val json = JSONObject(response.body?.string() ?: "")
+                val url = json.getString("secure_url")
+                Log.d("Cloudinary", "✅ Uploaded to: $url")
+                url
+            } else {
+                Log.e("Cloudinary", "Upload failed: ${response.code} ${response.message}")
+                null
+            }
+        } catch (e: Exception) {
+            Log.e("Cloudinary", "Upload exception", e)
+            null
+        }
+    }
+
+    private fun copyUriToTempFile(context: Context, uri: Uri): File? {
+        return try {
+            val inputStream = context.contentResolver.openInputStream(uri) ?: return null
+            val tempFile = File.createTempFile("ad_upload_", ".jpg", context.cacheDir)
+            tempFile.outputStream().use { outputStream ->
+                inputStream.copyTo(outputStream)
+            }
+            tempFile
+        } catch (e: Exception) {
+            Log.e("Cloudinary", "Failed to copy URI to temp file", e)
+            null
         }
     }
 }
