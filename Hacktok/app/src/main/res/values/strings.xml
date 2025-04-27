@@ -40,4 +40,25 @@
     <string name="logout_confirmation">Are you sure you want to logout?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+
+    <!-- Like Screen -->
+    <string name="total">Total</string>
+    <string name="haha">Haha</string>
+    <string name="like">Like</string>
+    <string name="love">Love</string>
+    <string name="wow">Wow</string>
+    <string name="angry">Angry</string>
+    <string name="sad">Sad</string>
+
+    <!-- Comment Screen -->
+    <string name="reply">Reply</string>
+    <string name="hide_cmt">Hide comments</string>
+    <string name="view_cmt">View all %1$d comments</string>
+    <string name="hide_replies">Hide replies</string>
+    <string name="view_replies">View %1$d replies</string>
+    <string name="copy_cmt">Copy Text</string>
+    <string name="delete_cmt">Delete Text</string>
+    <string name="report_cmt">Report Text</string>
+    <string name="input_cmt">Write a comment...</string>
+
 </resources>

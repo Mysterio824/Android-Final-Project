@@ -28,6 +28,17 @@ data class Comment(
     fun getEmoji(userId: String): String? =
         likedUserIds.find { it.userId == userId }?.emoji
 
+    fun getTopEmojis(limit: Int = 3): List<String> {
+        val emojiCounts = likedUserIds.groupBy { it.emoji }
+            .mapValues { it.value.size }
+            .toList()
+            .sortedByDescending { it.second }
+            .take(limit)
+            .map { it.first }
+
+        return emojiCounts
+    }
+
     override fun toString(): String {
         return "Comment(id=$id, content='$content', userId='$userId', postId='$postId', " +
                 "createdAt=$createdAt, isReported=$isReported, likeCount=${getLikeCount()}, " +

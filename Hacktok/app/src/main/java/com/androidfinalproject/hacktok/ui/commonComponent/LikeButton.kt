@@ -22,11 +22,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
+import com.androidfinalproject.hacktok.R
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -67,15 +69,7 @@ fun PostLikeButton(
     ) {
             Icon(
                 imageVector = if (isLiked) {
-                    when (existingReaction) {
-                        "👍" -> Icons.Default.ThumbUp
-                        "❤️" -> Icons.Default.Favorite
-                        "😆" -> Icons.Default.EmojiEmotions
-                        "😮" -> Icons.Default.SentimentSatisfied
-                        "😢" -> Icons.Default.SentimentDissatisfied
-                        "😠" -> Icons.Default.SentimentVeryDissatisfied
-                        else -> Icons.Default.ThumbUp
-                    }
+                    getReactionIcon(existingReaction!!)
                 } else Icons.Default.ThumbUp,
                 contentDescription = "Emoji Icon",
                 tint = color
@@ -84,16 +78,16 @@ fun PostLikeButton(
 
             Text(
                 text = if (isLiked) {
-                    when (existingReaction) {
-                        "👍" -> "Like"
-                        "❤️" -> "Love"
-                        "😆" -> "Haha"
-                        "😮" -> "Wow"
-                        "😢" -> "Sad"
-                        "😠" -> "Angry"
-                        else -> "Like"
-                    }
-                } else "Like",
+                    stringResource(id = when (existingReaction) {
+                        "👍" -> R.string.like
+                        "❤️" -> R.string.love
+                        "😆" -> R.string.haha
+                        "😮" -> R.string.wow
+                        "😢" -> R.string.sad
+                        "😠" -> R.string.angry
+                        else -> R.string.like
+                    })
+                } else stringResource(id = R.string.like),
                 color = color
             )
         }
@@ -167,37 +161,30 @@ fun CommentLikeButton(
             )
             .padding(horizontal = 4.dp)
         ) {
-            if (isLiked){
-                Icon(
-                    imageVector =
-                        when (existingReaction) {
-                            "👍" -> Icons.Default.ThumbUp
-                            "❤️" -> Icons.Default.Favorite
-                            "😆" -> Icons.Default.EmojiEmotions
-                            "😮" -> Icons.Default.SentimentSatisfied
-                            "😢" -> Icons.Default.SentimentDissatisfied
-                            "😠" -> Icons.Default.SentimentVeryDissatisfied
-                            else -> Icons.Default.ThumbUp
-                    },
-                    contentDescription = "Emoji Icon",
-                    tint = when (existingReaction) {
-                            "👍" -> Color(0xFF1565C0)
-                            "❤️" -> Color(0xFFED4956) // Red for love
-                            "😆" -> Color(0xFFFFD700) // Yellow for haha
-                            "😮" -> Color(0xFF00BFFF) // Light blue for wow
-                            "😢" -> Color(0xFF9932CC) // Purple for sad
-                            "😠" -> Color(0xFFFF8C00) // Orange for angry
-                            else -> MaterialTheme.colorScheme.primary
-                        }
-                )
-            } else {
-                Text(
-                    text = "Like",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Gray
-                )
-            }
+            Text(
+                text = if (isLiked) {
+                    stringResource(id = when (existingReaction) {
+                        "👍" -> R.string.like
+                        "❤️" -> R.string.love
+                        "😆" -> R.string.haha
+                        "😮" -> R.string.wow
+                        "😢" -> R.string.sad
+                        "😠" -> R.string.angry
+                        else -> R.string.like
+                    })
+                } else stringResource(id = R.string.like),
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color =  when (existingReaction) {
+                    "👍" -> Color(0xFF1565C0)
+                    "❤️" -> Color(0xFFED4956) // Red for love
+                    "😆" -> Color(0xFFFFD700) // Yellow for haha
+                    "😮" -> Color(0xFF00BFFF) // Light blue for wow
+                    "😢" -> Color(0xFF9932CC) // Purple for sad
+                    "😠" -> Color(0xFFFF8C00) // Orange for angry
+                    else -> Color.Gray
+                }
+            )
         }
 
         // Long press to show emoji menu
@@ -252,7 +239,6 @@ fun CommentLikeButton(
             }
         }
     }
-
 
 
 @Composable

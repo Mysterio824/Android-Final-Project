@@ -1,8 +1,6 @@
 package com.androidfinalproject.hacktok.ui.post.component
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,6 +16,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.androidfinalproject.hacktok.R
@@ -68,7 +67,7 @@ fun CommentInputBar(
             OutlinedTextField(
                 value = text,
                 onValueChange = onTextChange,
-                placeholder = { Text("Write a comment...") },
+                placeholder = { Text(stringResource(R.string.input_cmt)) },
                 modifier = Modifier
                     .weight(1f)
                     .padding(horizontal = 8.dp)

@@ -42,4 +42,20 @@
     <string name="logout_confirmation">Bạn có chắc chắn muốn đăng xuất?</string>
     <string name="yes">Có</string>
     <string name="no">Không</string>
+    <string name="total">Tất cả</string>
+    <string name="haha">Haha</string>
+    <string name="like">Thích</string>
+    <string name="love">Yêu thích</string>
+    <string name="wow">Wow</string>
+    <string name="angry">Tức giận</string>
+    <string name="sad">Buồn</string>
+    <string name="view_cmt">Hiện tất cả %1$d  bình luận</string>
+    <string name="hide_replies">Giấu phản hồi</string>
+    <string name="view_replies">HIện %1$d  phản hồi</string>
+    <string name="reply">Phản hồi</string>
+    <string name="hide_cmt">Giấu bình luận</string>
+    <string name="copy_cmt">Sao chép</string>
+    <string name="delete_cmt">Xóa bình luận</string>
+    <string name="report_cmt">Báo cáo bình luận</string>
+    <string name="input_cmt">Nhập vào 1 bình luận...</string>
 </resources> 

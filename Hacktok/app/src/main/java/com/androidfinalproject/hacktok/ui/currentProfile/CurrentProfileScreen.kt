@@ -268,7 +268,6 @@ fun CurrentProfileScreen(
                                 LikeListContent(
                                     listEmotions = state.listLikeUser,
                                     onUserClick = { onAction(CurrentProfileAction.OnUserClick(it)) },
-                                    onDismiss = { selectedLikeShowId = null }
                                 )
                             }
                         }
