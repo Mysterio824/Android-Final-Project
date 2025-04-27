@@ -34,6 +34,7 @@ import com.androidfinalproject.hacktok.ui.chatDetail.ChatDetailScreenRoot
 import com.androidfinalproject.hacktok.ui.newPost.NewPostScreenRoot
 import com.androidfinalproject.hacktok.ui.storydetail.StoryDetailScreenRoot
 import com.androidfinalproject.hacktok.ui.secretCrush.SecretCrushScreenRoot
+import com.androidfinalproject.hacktok.ui.createAd.CreateAdScreenRoot
 
 fun NavGraphBuilder.mainNavigation(navController: NavController) {
     navigation(
@@ -404,6 +405,19 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
             exitTransition = { slideFadeOutToLeft() }
         ) {
             SecretCrushScreenRoot(
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // Create Ad Screen
+        composable(
+            route = MainRoute.CreateAd.route,
+            enterTransition = { slideFadeInFromRight() },
+            exitTransition = { slideFadeOutToLeft() }
+        ) {
+            CreateAdScreenRoot(
                 onNavigateBack = {
                     navController.popBackStack()
                 }

@@ -1,5 +1,6 @@
 package com.androidfinalproject.hacktok.ui.mainDashboard.home
 
+import com.androidfinalproject.hacktok.model.Ad
 import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.model.Story
 import com.androidfinalproject.hacktok.model.User
@@ -20,5 +21,6 @@ data class HomeScreenState(
     val hasMorePosts: Boolean = true,
     val postAuthorNames: Map<String, String> = emptyMap(), // postId -> authorFullName
     val isStoryLoading: Boolean = false,
-    val listLikeUser: List<User> = emptyList()
+    val listLikeUser: List<User> = emptyList(),
+    val currentAd: Ad? = null // Added for displaying current ad
 )

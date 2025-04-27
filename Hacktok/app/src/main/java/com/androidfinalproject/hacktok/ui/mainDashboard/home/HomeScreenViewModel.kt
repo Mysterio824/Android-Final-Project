@@ -3,7 +3,9 @@ package com.androidfinalproject.hacktok.ui.mainDashboard.home
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.androidfinalproject.hacktok.model.Ad
 import com.androidfinalproject.hacktok.model.Post
+import com.androidfinalproject.hacktok.service.AdService
 import com.androidfinalproject.hacktok.repository.PostRepository
 import com.androidfinalproject.hacktok.service.AuthService
 import com.androidfinalproject.hacktok.service.ReportService
@@ -22,6 +24,7 @@ import com.androidfinalproject.hacktok.repository.UserRepository
 import com.androidfinalproject.hacktok.service.RelationshipService
 import com.androidfinalproject.hacktok.service.StoryService
 import kotlinx.coroutines.flow.firstOrNull
+import java.util.Date
 
 @HiltViewModel
 class HomeScreenViewModel @Inject constructor(
@@ -32,6 +35,7 @@ class HomeScreenViewModel @Inject constructor(
     private val likeService: LikeService,
     private val userRepository: UserRepository,
     private val storyService: StoryService,
+    private val adService: AdService
 ) : ViewModel() {
     private val _state = MutableStateFlow(HomeScreenState())
     val state: StateFlow<HomeScreenState> = _state.asStateFlow()
@@ -43,11 +47,74 @@ class HomeScreenViewModel @Inject constructor(
         viewModelScope.launch {
             reloadPosts()   // resets pagination and loads the first page
             loadStories()   // loads current user's and following's stories
+            loadRandomAd()  // loads a random eligible ad
+        }
+    }
+
+    private suspend fun loadRandomAd() {
+        try {
+            Log.d("HomeScreenViewModel", "Starting to load random ad")
+            val currentUser = authService.getCurrentUser()
+            if (currentUser == null) {
+                Log.e("HomeScreenViewModel", "Failed to load ad: Current user is null")
+                return
+            }
+            Log.d("HomeScreenViewModel", "Current user ID: ${currentUser.id}")
+
+            // Get a random eligible ad
+            val randomAd = adService.getRandomEligibleAd(currentUser.id!!)
+            Log.d("HomeScreenViewModel", "Random ad result: ${randomAd?.id ?: "null"}")
+            
+            if (randomAd != null) {
+                // Increment impressions
+                Log.d("HomeScreenViewModel", "Incrementing impressions for ad: ${randomAd.id}")
+                adService.incrementImpressions(randomAd.id!!)
+                
+                _state.update { it.copy(currentAd = randomAd) }
+                Log.d("HomeScreenViewModel", "Successfully updated state with ad: ${randomAd.id}")
+            } else {
+                Log.d("HomeScreenViewModel", "No eligible ads found for user: ${currentUser.id}")
+            }
+        } catch (e: Exception) {
+            Log.e("HomeScreenViewModel", "Error loading random ad", e)
+            Log.e("HomeScreenViewModel", "Error message: ${e.message}")
+            Log.e("HomeScreenViewModel", "Error stack trace: ${e.stackTraceToString()}")
         }
     }
 
     fun onAction(action: HomeScreenAction) {
         when (action) {
+            is HomeScreenAction.OnAdClick -> {
+                viewModelScope.launch {
+                    state.value.currentAd?.let { ad ->
+                        adService.incrementClicks(ad.id!!)
+                    }
+                }
+            }
+            is HomeScreenAction.OnAdInterested -> {
+                viewModelScope.launch {
+                    val currentUser = state.value.user
+                    val currentAd = state.value.currentAd
+                    if (currentUser != null && currentAd != null) {
+                        val updatedAd = adService.addInterestedUser(currentAd.id!!, currentUser.id!!)
+                        if (updatedAd != null) {
+                            _state.update { it.copy(currentAd = updatedAd) }
+                        }
+                    }
+                }
+            }
+            is HomeScreenAction.OnAdUninterested -> {
+                viewModelScope.launch {
+                    val currentUser = state.value.user
+                    val currentAd = state.value.currentAd
+                    if (currentUser != null && currentAd != null) {
+                        val updatedAd = adService.removeInterestedUser(currentAd.id!!, currentUser.id!!)
+                        if (updatedAd != null) {
+                            _state.update { it.copy(currentAd = updatedAd) }
+                        }
+                    }
+                }
+            }
             is HomeScreenAction.OnSharePost -> {
                 viewModelScope.launch {
                     val referencePost = postRepository.getPost(action.post.id ?: return@launch)
@@ -73,8 +140,12 @@ class HomeScreenViewModel @Inject constructor(
             is HomeScreenAction.DismissShareDialog -> _state.update { it.copy(showShareDialog = false) }
             is HomeScreenAction.LikePost -> likePost(action.postId)
             is HomeScreenAction.Refresh -> {
-                reloadPosts()
-                loadStories()
+                Log.d("HomeScreenViewModel", "Refreshing home screen content")
+                viewModelScope.launch {
+                    reloadPosts()   // resets pagination and loads the first page
+                    loadStories()   // loads current user's and following's stories
+                    loadRandomAd()  // loads a random eligible ad
+                }
             }
             is HomeScreenAction.OnLikesShowClick -> loadLikesUser(action.targetId)
             is HomeScreenAction.UnLikePost -> unLikePost(action.postId)

@@ -88,6 +88,11 @@ sealed interface MainRoute : Route {
             const val BASE_ROUTE = "new_post"
         }
     }
+
+    data object CreateAd : MainRoute {
+        override val route = "create_ad"
+    }
+
     @Serializable
     data object SecretCrush : MainRoute {
         override val route = "secret_crush"

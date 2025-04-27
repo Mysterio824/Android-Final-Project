@@ -36,9 +36,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.androidfinalproject.hacktok.model.Ad
 import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.Post
+import com.androidfinalproject.hacktok.model.PrivacySettings
+import com.androidfinalproject.hacktok.model.TargetAudience
+import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.model.enums.ReportType
+import com.androidfinalproject.hacktok.model.enums.UserRole
 import com.androidfinalproject.hacktok.ui.commonComponent.LikeListContent
 import com.androidfinalproject.hacktok.ui.mainDashboard.home.component.*
 import com.androidfinalproject.hacktok.ui.commonComponent.PostContent
@@ -49,6 +54,7 @@ import com.androidfinalproject.hacktok.ui.profile.UserProfileAction
 import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -150,6 +156,19 @@ fun HomeScreen(
                                     onCreateStory = { onAction(HomeScreenAction.OnCreateStory) },
                                     onStoryClick = { onAction(HomeScreenAction.OnStoryClick(it)) }
                                 )
+                            }
+
+                            // Display ad if available
+                            state.currentAd?.let { ad ->
+                                item {
+                                    AdContent(
+                                        ad = ad,
+                                        onAdClick = { onAction(HomeScreenAction.OnAdClick) },
+                                        onInterested = { onAction(HomeScreenAction.OnAdInterested) },
+                                        onUninterested = { onAction(HomeScreenAction.OnAdUninterested) },
+                                        currentUserId = state.user?.id ?: ""
+                                    )
+                                }
                             }
 
                             items(state.posts) { post ->
@@ -268,11 +287,55 @@ fun HomeScreenPreview() {
                 .width(400.dp)
                 .height(800.dp)
         ) {
+            // Create a mock ad
+            val mockAd = Ad(
+                id = "preview_ad_1",
+                advertiserId = "advertiser_1",
+                userId = "user_1",
+                content = "Check out our amazing products! Limited time offer.",
+                mediaUrl = "https://res.cloudinary.com/dbeximude/image/upload/v1744990649/yhfww12fm92fipcxgz06.jpg",
+                targetAudience = TargetAudience(),
+                impressions = 100,
+                clicks = 25,
+                createdAt = Date(),
+                endDate = Date(System.currentTimeMillis() + (7 * 24 * 60 * 60 * 1000L))
+            )
+
+            // Create a mock user
+            val mockUser = User(
+                id = "user_1",
+                username = "johndoe",
+                email = "john@example.com",
+                fullName = "John Doe",
+                profileImage = "https://picsum.photos/200",
+                createdAt = Date(),
+                isActive = true,
+                role = UserRole.USER,
+                bio = "Hello, I'm John!",
+                privacySettings = PrivacySettings(),
+                language = "en",
+                friends = emptyList(),
+                blockedUsers = emptyList(),
+                followers = emptyList(),
+                following = emptyList(),
+                followerCount = 0,
+                followingCount = 0,
+                searchHistory = emptyList(),
+                videosCount = 0
+            )
+
             HomeScreen(
                 state = HomeScreenState(
                     posts = MockData.mockPosts,
+                    currentAd = mockAd,
+                    user = mockUser,
+                    postAuthorNames = mapOf(
+                        "1" to "John Doe",
+                        "2" to "Jane Smith",
+                        "3" to "Mike Johnson"
+                    )
                 ),
-                onAction = {},
+                onAction = {}
             )
         }
     }
