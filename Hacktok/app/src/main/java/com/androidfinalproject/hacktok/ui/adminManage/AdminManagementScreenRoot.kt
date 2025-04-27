@@ -37,7 +37,7 @@ fun AdminManagementScreenRoot(
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToReportManagement = {
                     // Navigate to AdminManagementScreen with the Reports tab selected
-                    navController.navigate("adminManagement?tab=2") {
+                    navController.navigate("adminManagement?tab=1") {
                         popUpTo("adminManagement") { inclusive = true }
                     }
                 }
