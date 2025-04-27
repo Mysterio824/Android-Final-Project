@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
+import java.util.Date
 
 @Singleton
 class ChatRepositoryImpl @Inject constructor(
@@ -45,7 +46,15 @@ class ChatRepositoryImpl @Inject constructor(
         val newChat = Chat(
             id = chatId,
             participants = listOf(currentUserId, otherUserId),
-            encryptedLastMessage = "", // Initialize with empty string
+            lastMessage = "", // Initialize with empty string
+            lastMessageAt = Date(),
+            unreadCountUser1 = 0,
+            unreadCountUser2 = 0,
+            isGroup = false,
+            groupName = null,
+            groupAdmins = emptyList(),
+            isMutedByUser1 = false,
+            isMutedByUser2 = false
         )
 
         // Try to create document with that ID
@@ -157,7 +166,7 @@ class ChatRepositoryImpl @Inject constructor(
             // Update chat's last message details
             chatsCollection.document(chatId).update(
                 mapOf(
-                    "encryptedLastMessage" to encryptedMessage.encryptedContent, // Store encrypted content for preview
+                    "lastMessage" to encryptedMessage.encryptedContent, // Store encrypted content for preview
                     "lastMessageAt" to message.createdAt,
                     userIndex to currentUnreadCount + 1
                 ),

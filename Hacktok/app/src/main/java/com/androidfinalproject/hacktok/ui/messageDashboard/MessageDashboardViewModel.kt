@@ -19,19 +19,47 @@ import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.androidfinalproject.hacktok.model.enums.RelationshipStatus
 import com.androidfinalproject.hacktok.service.RelationshipService
+import com.androidfinalproject.hacktok.utils.MessageEncryptionUtil
+import com.androidfinalproject.hacktok.service.ApiService
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 
 @HiltViewModel
 class MessageDashboardViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
     private val authRepository: AuthRepository,
     private val userRepository: UserRepository,
-    private val relationshipService: RelationshipService
-) : ViewModel() {
+    private val relationshipService: RelationshipService,
+    private val apiService: ApiService,
+    application: Application
+) : AndroidViewModel(application) {
     private val _state = MutableStateFlow(MessageDashboardState())
     val state = _state.asStateFlow()
+    private val TAG = "MessageDashboardViewModel"
 
     init {
+        initializeEncryption()
         loadChats()
+    }
+
+    private fun initializeEncryption() {
+        viewModelScope.launch {
+            try {
+                Log.d(TAG, "Initializing encryption...")
+                // Initialize MessageEncryptionUtil with context
+                MessageEncryptionUtil.initialize(getApplication())
+                Log.d(TAG, "MessageEncryptionUtil initialized with context")
+
+                // Get key from server
+                val key = apiService.getEncryptionKey()
+                Log.d(TAG, "Got encryption key from server: ${key.take(10)}...")
+                
+                MessageEncryptionUtil.initializeKey(key)
+                Log.d(TAG, "Encryption key initialized")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to initialize encryption", e)
+            }
+        }
     }
 
     private fun loadChats() {
@@ -48,12 +76,22 @@ class MessageDashboardViewModel @Inject constructor(
                 _state.update { it.copy(currentUserId = currentUser.uid) }
 
                 val chats = chatRepository.getUserChats(currentUser.uid)
+                Log.d(TAG, "Loaded ${chats.size} chats")
 
                 val chatItems = chats.mapNotNull { chat ->
                     val otherUserId = chat.participants.firstOrNull { it != currentUser.uid } ?: return@mapNotNull null
                     val user = userRepository.getUserById(otherUserId) ?: return@mapNotNull null
                     val relationInfo = relationshipService.getRelationship(otherUserId)
-                    ChatItem(user, chat, relationInfo)
+                    
+                    // Create a modified chat with decrypted last message
+                    Log.d(TAG, "Attempting to decrypt message for chat ${chat.id}")
+                    Log.d(TAG, "Encrypted message: ${chat.lastMessage.take(20)}...")
+                    
+                    val decryptedChat = chat.copy(
+                        lastMessage = chat.decryptedLastMessage
+                    )
+                    
+                    ChatItem(user, decryptedChat, relationInfo)
                 }
 
                 _state.update {
@@ -64,6 +102,7 @@ class MessageDashboardViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
+                Log.e(TAG, "Error loading chats", e)
                 _state.update {
                     it.copy(
                         error = e.message ?: "An error occurred",
