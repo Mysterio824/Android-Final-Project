@@ -116,8 +116,12 @@ class HomeScreenViewModel @Inject constructor(
             is HomeScreenAction.DismissShareDialog -> _state.update { it.copy(showShareDialog = false) }
             is HomeScreenAction.LikePost -> likePost(action.postId)
             is HomeScreenAction.Refresh -> {
-                reloadPosts()
-                loadStories()
+                Log.d("HomeScreenViewModel", "Refreshing home screen content")
+                viewModelScope.launch {
+                    reloadPosts()   // resets pagination and loads the first page
+                    loadStories()   // loads current user's and following's stories
+                    loadRandomAd()  // loads a random eligible ad
+                }
             }
             is HomeScreenAction.OnLikesShowClick -> loadLikesUser(action.targetId)
             is HomeScreenAction.UnLikePost -> unLikePost(action.postId)
