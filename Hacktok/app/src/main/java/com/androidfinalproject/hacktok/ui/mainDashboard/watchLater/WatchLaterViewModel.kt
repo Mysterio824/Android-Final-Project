@@ -34,7 +34,7 @@ class WatchLaterViewModel @Inject constructor(
     fun onAction(action: WatchLaterAction) {
         when (action) {
             is WatchLaterAction.RemovePost -> removePost(action.postId)
-            is WatchLaterAction.OnLikeClick -> likePost(action.postId)
+            is WatchLaterAction.OnLikeClick -> likePost(action.postId, action.emoji)
             is WatchLaterAction.SubmitReport -> submitReport(action.reportedItemId, action.reportType, action.reportCause)
             is WatchLaterAction.OnUnLikeClick -> unlikePost(action.postId)
             else -> {}
@@ -68,9 +68,9 @@ class WatchLaterViewModel @Inject constructor(
         }
     }
 
-    private fun likePost(postId: String) {
+    private fun likePost(postId: String, emoji: String) {
         viewModelScope.launch {
-            val updatedPost = likeService.likePost(postId) ?: return@launch
+            val updatedPost = likeService.likePost(postId, emoji) ?: return@launch
 
             val newList = _state.value.savedPosts.map { post ->
                 if (post.id == updatedPost.id) updatedPost.copy(

@@ -1,5 +1,6 @@
 package com.androidfinalproject.hacktok.ui.profile
 
+import com.androidfinalproject.hacktok.model.FullReaction
 import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.model.RelationInfo
 import com.androidfinalproject.hacktok.model.User
@@ -19,5 +20,5 @@ data class UserProfileState (
     val sharePrivacy: PRIVACY = PRIVACY.PUBLIC,
     val shareCaption: String = "",
     val currentUser: User? = null,
-    val listLikeUser: List<User> = emptyList()
+    val listLikeUser: List<FullReaction> = emptyList()
 )

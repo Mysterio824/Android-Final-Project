@@ -183,7 +183,7 @@ fun HomeScreen(
                                         fullName = authorName,
                                         post = post,
                                         onPostClick = { onAction(HomeScreenAction.OnPostClick(post.id!!)) },
-                                        onToggleLike = { onAction(HomeScreenAction.LikePost(post.id!!)) },
+                                        onToggleLike = { onAction(HomeScreenAction.LikePost(post.id!!, it)) },
                                         onUnLike = { onAction(HomeScreenAction.UnLikePost(post.id!!)) },
                                         onUserClick = { onAction(HomeScreenAction.OnUserClick(post.userId)) },
                                         onComment = { onAction(HomeScreenAction.OnPostClick(post.id!!)) },
@@ -255,6 +255,8 @@ fun HomeScreen(
                         PostOptionsContent(
                             onDismiss = { selectPost = null },
                             onReport = { reportTargetId = selectPost!!.id },
+                            onPostEdit = { onAction(HomeScreenAction.OnPostEditClick(selectPost!!.id!!)) },
+                            onPostDelete = { onAction(HomeScreenAction.DeletePost(selectPost!!.id!!)) },
                             isPostOwner = state.user!!.id == selectPost!!.user?.id
                         )
                     }
@@ -264,10 +266,10 @@ fun HomeScreen(
                     onAction(HomeScreenAction.OnLikesShowClick(selectedLikeShowId!!))
                     ModalBottomSheet(
                         onDismissRequest = { selectedLikeShowId = null },
-                        sheetState = bottomSheetState
+                        sheetState = bottomSheetState,
                     ) {
                         LikeListContent(
-                            users = state.listLikeUser,
+                            listEmotions = state.listLikeUser,
                             onUserClick = { onAction(HomeScreenAction.OnUserClick(it)) },
                             onDismiss = { selectedLikeShowId = null }
                         )

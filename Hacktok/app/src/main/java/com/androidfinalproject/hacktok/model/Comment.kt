@@ -11,7 +11,7 @@ data class Comment(
     @PropertyName("createdAt") val createdAt: Date = Date(),
     @PropertyName("isReported") val isReported: Boolean = false, // Trạng thái báo cáo
     @PropertyName("userSnapshot") val userSnapshot: UserSnapshot,
-    @PropertyName("likedUserIds") val likedUserIds: List<String> = emptyList(),
+    @PropertyName("likedUserIds") val likedUserIds: List<Reaction> = emptyList(),
     @PropertyName("parentCommentId") val parentCommentId: String? = null, // Hỗ trợ bình luận lồng nhau
     @PropertyName("replyCount") val replyCount: Int = 0, // Số phản hồi cho bình luận này
     @PropertyName("updatedAt") val updatedAt: Long? = null,
@@ -25,7 +25,8 @@ data class Comment(
 
     fun getLikeCount(): Int = likedUserIds.size
 
-    fun isLiked(userId: String): Boolean = likedUserIds.contains(userId)
+    fun getEmoji(userId: String): String? =
+        likedUserIds.find { it.userId == userId }?.emoji
 
     override fun toString(): String {
         return "Comment(id=$id, content='$content', userId='$userId', postId='$postId', " +

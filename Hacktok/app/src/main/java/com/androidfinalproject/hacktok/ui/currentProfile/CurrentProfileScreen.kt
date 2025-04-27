@@ -206,6 +206,7 @@ fun CurrentProfileScreen(
                                             onAction(
                                                 CurrentProfileAction.OnLike(
                                                     post.id!!,
+                                                    it,
                                                     true
                                                 )
                                             )
@@ -214,6 +215,7 @@ fun CurrentProfileScreen(
                                             onAction(
                                                 CurrentProfileAction.OnLike(
                                                     post.id!!,
+                                                    "",
                                                     false
                                                 )
                                             )
@@ -261,7 +263,7 @@ fun CurrentProfileScreen(
                                 sheetState = bottomSheetState
                             ) {
                                 LikeListContent(
-                                    users = state.listLikeUser,
+                                    listEmotions = state.listLikeUser,
                                     onUserClick = { onAction(CurrentProfileAction.OnUserClick(it)) },
                                     onDismiss = { selectedLikeShowId = null }
                                 )

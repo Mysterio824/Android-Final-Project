@@ -142,7 +142,7 @@ fun PostDetailScreen(
                         PostContent(
                             fullName = state.postUser?.fullName ?: "",
                             post = post,
-                            onToggleLike = { onAction(PostDetailAction.ToggleLike) },
+                            onToggleLike = { emoji -> onAction(PostDetailAction.ToggleLike(emoji)) },
                             onComment = { onAction(PostDetailAction.ToggleCommentInputFocus) },
                             onShare = { showShareOptionsSheet = true },
                             onOptionsClick = { showPostOptionsSheet = true },
@@ -172,7 +172,7 @@ fun PostDetailScreen(
                             isSelected = state.commentIdReply == comment.id,
                             isHighlighted = state.highlightedCommentId == comment.id,
                             allComments = state.comments,
-                            onLikeComment = { onAction(PostDetailAction.LikeComment(it)) },
+                            onLikeComment = { commentId, emoji -> onAction(PostDetailAction.LikeComment(commentId, emoji)) },
                             onUnLikeComment = { onAction(PostDetailAction.UnLikeComment(it)) },
                             onCommentLongPress = { selectedComment = comment },
                             onUserClick = { onAction(PostDetailAction.OnUserClick(it)) },
@@ -307,7 +307,7 @@ fun PostDetailScreen(
                     sheetState = bottomSheetState
                 ) {
                     LikeListContent(
-                        users = state.listLikeUser,
+                        listEmotions = state.listLikeUser,
                         onUserClick = { onAction(PostDetailAction.OnUserClick(it)) },
                         onDismiss = {
                             selectedLikeShowId = null

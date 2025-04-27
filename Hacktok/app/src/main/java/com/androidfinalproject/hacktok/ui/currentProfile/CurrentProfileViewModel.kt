@@ -165,7 +165,7 @@ class CurrentProfileViewModel @Inject constructor(
             is CurrentProfileAction.OnLike -> {
                 viewModelScope.launch {
                     val updatedPost = if (action.isLike) {
-                        likeService.likePost(action.postId)
+                        likeService.likePost(action.postId, action.emoji)
                     } else {
                         likeService.unlikePost(action.postId)
                     }

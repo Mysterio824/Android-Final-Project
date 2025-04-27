@@ -9,7 +9,7 @@ data class Post(
     @PropertyName("userId") val userId: String, // Tham chiếu đến user trong collection "users"
     @PropertyName("createdAt") val createdAt: Date = Date(),
     @PropertyName("active") val isActive: Boolean = true,
-    @PropertyName("likedUserIds") val likedUserIds: List<String> = emptyList(),
+    @PropertyName("likedUserIds") val likedUserIds: List<Reaction> = emptyList(),
     @PropertyName("commentCount") val commentCount: Int = 0, // Số lượng bình luận
     @PropertyName("imageLink") val imageLink: String = "",
     @PropertyName("privacy") val privacy: String = "",
@@ -18,8 +18,9 @@ data class Post(
 ) {
     fun getLikeCount(): Int = likedUserIds.size
 
-    fun isLiked(userId: String): Boolean = likedUserIds.contains(userId)
-    // Constructor không tham số cho Firestore
+    fun getEmoji(userId: String): String? =
+        likedUserIds.find { it.userId == userId }?.emoji
+
     constructor() : this(null, "", "", Date(), true, emptyList(), 0, "", "", null)
 
     override fun toString(): String {
