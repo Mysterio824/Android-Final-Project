@@ -42,6 +42,7 @@ class StoryDetailViewModel @Inject constructor(
             // Initialize current user
             try {
                 val user = userRepository.getCurrentUser()
+                currentUserId = user?.id
                 _state.update { it.copy(currentUser = user ?: User()) }
             } catch (e: Exception) {
                 _state.update { it.copy(error = "Failed to load user: ${e.message}") }
@@ -197,8 +198,14 @@ class StoryDetailViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                val senderId = currentUserId ?: return@launch
-                val receiverId = currentStory.userId ?: return@launch
+                val senderId = currentUserId ?: run {
+                    _state.update { it.copy(error = "Cannot send message: User not logged in") }
+                    return@launch
+                }
+                val receiverId = currentStory.userId ?: run {
+                    _state.update { it.copy(error = "Cannot send message: Story owner not found") }
+                    return@launch
+                }
 
                 // 1. Get or create chat
                 val chatId = chatRepository.getOrCreateChat(senderId, receiverId)
