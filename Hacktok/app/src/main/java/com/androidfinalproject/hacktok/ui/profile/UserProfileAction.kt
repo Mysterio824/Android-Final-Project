@@ -23,6 +23,7 @@ sealed class UserProfileAction {
     data class OnUserClick (val userId: String) : UserProfileAction()
     data object NavigateFriendList : UserProfileAction()
     data object NavigateBack : UserProfileAction()
+    data class OnImageClick(val imageUrl: String) : UserProfileAction()
 
     // Data Actions
     data class LikePost(val postId: String, val emoji: String) : UserProfileAction()

@@ -30,6 +30,7 @@ fun DashboardScreenRoot(
     onChangePassNavigate: () -> Unit,
     onNavigateBack: () -> Unit,
     onSecretCrushNavigate: () -> Unit,
+    onImageClickNavigate: (String) -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -78,6 +79,7 @@ fun DashboardScreenRoot(
                 is DashboardAction.OnAuthNavigate -> onAuthNavigate()
                 is DashboardAction.OnSecretCrushNavigate -> onSecretCrushNavigate()
                 is DashboardAction.OnNavigateBack -> onNavigateBack()
+                is DashboardAction.OnImageClick -> onImageClickNavigate(action.imageUrl)
                 else -> viewModel.onAction(action)
             }
         }

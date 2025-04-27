@@ -102,4 +102,14 @@ sealed interface MainRoute : Route {
     data object SelectCrush : MainRoute {
         override val route = "select_crusch"
     }
+
+    @Serializable
+    data class FullScreenImage(val imageUrl: String) : MainRoute {
+        override val route: String
+            get() = "$BASE_ROUTE?imageUrl=$imageUrl"
+
+        companion object {
+            const val BASE_ROUTE = "full_screen_image"
+        }
+    }
 }

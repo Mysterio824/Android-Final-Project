@@ -60,7 +60,8 @@ fun DashboardScreen(
                             onPostEditClick = { onAction(DashboardAction.OnPostEditNavigate(it)) },
                             onStoryClick = { onAction(DashboardAction.OnStoryClick(it)) },
                             onNewPostNavigate = { onAction(DashboardAction.OnCreatePost) },
-                            onCreateStoryNavigate = { onAction(DashboardAction.OnCreateStory) }
+                            onCreateStoryNavigate = { onAction(DashboardAction.OnCreateStory) },
+                            onImageClickNavigate = { onAction(DashboardAction.OnImageClick(it)) }
                         )
                     }
 

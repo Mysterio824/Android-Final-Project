@@ -246,7 +246,8 @@ fun UserProfileScreen (
                              onShare = { onAction(UserProfileAction.UpdateSharePost(it)) },
                              onUnLike = { onAction(UserProfileAction.UnlikePost(it.id!!)) },
                              currentId = state.currentUser?.id ?: "",
-                             onLikesClick = { postId -> selectedLikeShowId = postId }
+                             onLikesClick = { postId -> selectedLikeShowId = postId },
+                             onImageClick = { imageUrl -> onAction(UserProfileAction.OnImageClick(imageUrl)) }
                          )
                      }
                  }
