@@ -228,7 +228,10 @@ fun PostDetailScreen(
                     state.post?.let { post ->
                         PostOptionsContent(
                             onDismiss = { showPostOptionsSheet = false },
-                            onReport = { reportTargetId = post.id },
+                            onReport = {
+                                reportTargetId = state.post.id
+                                reportType = ReportType.Post
+                            },
                             isPostOwner = post.userId == state.currentUser?.id,
                             isPostSaved = state.savedPosts.contains(post.id),
                             onSavePost = { onAction(PostDetailAction.OnSavePost(post.id!!)) },
