@@ -176,9 +176,23 @@ fun CreateAdScreen(
                     OutlinedTextField(
                         value = state.adContent,
                         onValueChange = { onAction(CreateAdAction.UpdateAdContent(it)) },
-                        label = { Text("Ad Text") },
-                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Ad Content") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
                         minLines = 3
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    OutlinedTextField(
+                        value = state.url,
+                        onValueChange = { onAction(CreateAdAction.UpdateAdUrl(it)) },
+                        label = { Text("External URL (optional)") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri)
                     )
 
                     // Media Upload Section

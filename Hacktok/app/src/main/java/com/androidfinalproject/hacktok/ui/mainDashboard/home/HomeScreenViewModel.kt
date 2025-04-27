@@ -1,7 +1,9 @@
 package com.androidfinalproject.hacktok.ui.mainDashboard.home
 
+import android.content.Intent
+import android.net.Uri
 import android.util.Log
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.androidfinalproject.hacktok.model.Ad
 import com.androidfinalproject.hacktok.model.Post
@@ -25,6 +27,7 @@ import com.androidfinalproject.hacktok.service.RelationshipService
 import com.androidfinalproject.hacktok.service.StoryService
 import kotlinx.coroutines.flow.firstOrNull
 import java.util.Date
+import android.app.Application
 
 @HiltViewModel
 class HomeScreenViewModel @Inject constructor(
@@ -35,8 +38,9 @@ class HomeScreenViewModel @Inject constructor(
     private val likeService: LikeService,
     private val userRepository: UserRepository,
     private val storyService: StoryService,
-    private val adService: AdService
-) : ViewModel() {
+    private val adService: AdService,
+    application: Application
+) : AndroidViewModel(application) {
     private val _state = MutableStateFlow(HomeScreenState())
     val state: StateFlow<HomeScreenState> = _state.asStateFlow()
     private lateinit var friendList: List<String>
@@ -88,6 +92,15 @@ class HomeScreenViewModel @Inject constructor(
                 viewModelScope.launch {
                     state.value.currentAd?.let { ad ->
                         adService.incrementClicks(ad.id!!)
+                        if (ad.url.isNotEmpty()) {
+                            try {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(ad.url))
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                getApplication<Application>().startActivity(intent)
+                            } catch (e: Exception) {
+                                Log.e("HomeScreenViewModel", "Error opening URL: ${e.message}")
+                            }
+                        }
                     }
                 }
             }

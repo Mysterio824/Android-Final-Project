@@ -9,6 +9,7 @@ import java.util.Date
 data class CreateAdState(
     val adContent: String = "",
     val mediaUrl: String = "",
+    val url: String = "",
     val adType: AdType = AdType.SPONSORED_POST,
     val durationDays: Int = 7,
     val targetAudience: TargetAudience = TargetAudience(),

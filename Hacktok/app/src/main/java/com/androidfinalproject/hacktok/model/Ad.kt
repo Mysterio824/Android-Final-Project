@@ -14,13 +14,14 @@ data class Ad(
     @PropertyName("clicks") val clicks: Int = 0,
     @PropertyName("createdAt") val createdAt: Date = Date(),
     @PropertyName("endDate") val endDate: Date = Date(),
-    @PropertyName("interestedUserIds") val interestedUserIds: List<String> = emptyList()
+    @PropertyName("interestedUserIds") val interestedUserIds: List<String> = emptyList(),
+    @PropertyName("url") val url: String = ""
 ) {
-    constructor() : this(null, "", "", "", "", TargetAudience(), 0, 0, Date(), Date(), emptyList())
+    constructor() : this(null, "", "", "", "", TargetAudience(), 0, 0, Date(), Date(), emptyList(), "")
 
     override fun toString(): String {
         return "Ad(id=$id, advertiserId='$advertiserId', userId='$userId', content='$content', " +
-                "impressions=$impressions, createdAt=$createdAt, endDate=$endDate)"
+                "impressions=$impressions, createdAt=$createdAt, endDate=$endDate, url='$url')"
     }
 
     fun getInterestedCount(): Int = interestedUserIds.size

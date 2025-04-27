@@ -7,6 +7,7 @@ import com.androidfinalproject.hacktok.model.enums.AdType
 sealed class CreateAdAction {
     data class UpdateAdContent(val content: String) : CreateAdAction()
     data class UpdateAdMedia(val url: String) : CreateAdAction()
+    data class UpdateAdUrl(val url: String) : CreateAdAction()
     data class SelectAdType(val adType: AdType) : CreateAdAction()
     data class UpdateDuration(val days: Int) : CreateAdAction()
     data class UpdateAgeRange(val min: Int, val max: Int) : CreateAdAction()

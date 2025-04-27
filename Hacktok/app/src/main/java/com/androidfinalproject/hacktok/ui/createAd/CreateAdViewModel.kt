@@ -147,6 +147,9 @@ class CreateAdViewModel @Inject constructor(
             is CreateAdAction.UpdateAdMedia -> {
                 _state.update { it.copy(mediaUrl = action.url) }
             }
+            is CreateAdAction.UpdateAdUrl -> {
+                _state.update { it.copy(url = action.url) }
+            }
             is CreateAdAction.SelectAdType -> {
                 _state.update { it.copy(adType = action.adType) }
             }
@@ -193,15 +196,15 @@ class CreateAdViewModel @Inject constructor(
             }
             is CreateAdAction.SubmitAd -> {
                 viewModelScope.launch {
-                    _state.update { it.copy(isSubmitting = true, error = null) }
                     try {
+                        _state.update { it.copy(isSubmitting = true, error = null) }
                         val currentState = _state.value
                         val currentUser = currentState.currentUser
 
                         if (currentUser == null) {
                             _state.update { it.copy(
                                 isSubmitting = false,
-                                error = "User not authenticated. Please try again."
+                                error = "User not found. Please try again."
                             )}
                             return@launch
                         }
@@ -228,7 +231,8 @@ class CreateAdViewModel @Inject constructor(
                             userId = userId,
                             content = currentState.adContent,
                             mediaUrl = currentState.mediaUrl,
-                            targetAudience = currentState.targetAudience
+                            targetAudience = currentState.targetAudience,
+                            url = currentState.url
                         )
 
                         // Create the ad in the repository
@@ -242,16 +246,14 @@ class CreateAdViewModel @Inject constructor(
                             isSuccess = true,
                             adContent = "", // Clear the form
                             mediaUrl = "", // Clear the media
+                            url = "", // Clear the URL
                             error = null
                         )}
                     } catch (e: Exception) {
-                        Log.e(tag, "Error submitting ad", e)
-                        _state.update {
-                            it.copy(
-                                isSubmitting = false,
-                                error = "Failed to submit ad: ${e.message}"
-                            )
-                        }
+                        _state.update { it.copy(
+                            isSubmitting = false,
+                            error = "Failed to create ad: ${e.message}"
+                        )}
                     }
                 }
             }
