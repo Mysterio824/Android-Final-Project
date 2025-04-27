@@ -173,11 +173,13 @@ class ChatViewModel @Inject constructor(
                 val currentUser = authRepository.getCurrentUser() ?: return@launch
                 val chatId = chatRepository.getOrCreateChat(currentUser.uid, otherUserId!!)
 
-                val message = Message(
+                val message = Message.create(
                     senderId = currentUser.uid,
                     content = content,
                     createdAt = Date()
                 )
+                Log.d("CHATVIEWMODEL", "✅ Uploaded to: ${message.encryptedContent}")
+                Log.d("CHATVIEWMODEL", "✅ Uploaded to: ${message.content}")
 
                 chatRepository.sendMessage(chatId, message)
             } catch (e: Exception) {
@@ -198,7 +200,7 @@ class ChatViewModel @Inject constructor(
                     return@launch
                 }
 
-                val message = Message(
+                val message = Message.create(
                     senderId = currentUser.uid,
                     content = "",
                     createdAt = Date(),

@@ -18,9 +18,9 @@ import java.util.concurrent.TimeUnit
 object MockData {
 
     val mockMessages = listOf(
-        Message(id = "m1", senderId = "1", content = "Hello!", createdAt = Date()),
-        Message(id = "m2", senderId = "2", content = "Hey there!", createdAt = Date(), isRead = true),
-        Message(id = "m3", senderId = "3", content = "How are you?", createdAt = Date(), replyTo = "m1")
+        Message.create(id = "m1", senderId = "1", content = "Hello!", createdAt = Date()),
+        Message.create(id = "m2", senderId = "2", content = "Hey there!", createdAt = Date(), isRead = true),
+        Message.create(id = "m3", senderId = "3", content = "How are you?", createdAt = Date(), replyTo = "m1")
     )
 
     val mockUsers = listOf(

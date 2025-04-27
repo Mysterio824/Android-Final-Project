@@ -6,6 +6,7 @@ import com.androidfinalproject.hacktok.model.Message
 import com.androidfinalproject.hacktok.model.enums.NotificationType
 import com.androidfinalproject.hacktok.repository.ChatRepository
 import com.androidfinalproject.hacktok.service.FcmService
+import com.androidfinalproject.hacktok.utils.MessageEncryptionUtil
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.toObject
@@ -44,7 +45,7 @@ class ChatRepositoryImpl @Inject constructor(
         val newChat = Chat(
             id = chatId,
             participants = listOf(currentUserId, otherUserId),
-            lastMessage = "",
+            encryptedLastMessage = "", // Initialize with empty string
         )
 
         // Try to create document with that ID
@@ -60,12 +61,17 @@ class ChatRepositoryImpl @Inject constructor(
 
         val subscription = messagesRef.addSnapshotListener { snapshot, error ->
             if (error != null) {
-                // Handle error
+                Log.e(TAG, "Error listening to chat messages", error)
                 return@addSnapshotListener
             }
 
             val messages = snapshot?.documents?.mapNotNull { doc ->
-                doc.toObject<Message>()?.copy(id = doc.id)
+                try {
+                    doc.toObject<Message>()?.copy(id = doc.id)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error decrypting message ${doc.id}", e)
+                    null
+                }
             } ?: emptyList()
 
             trySend(messages)
@@ -79,6 +85,7 @@ class ChatRepositoryImpl @Inject constructor(
         val subscription = chatsCollection.document(chatId)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
+                    Log.e(TAG, "Error listening to chat updates", error)
                     return@addSnapshotListener
                 }
                 val chat = snapshot?.toObject<Chat>()
@@ -99,7 +106,6 @@ class ChatRepositoryImpl @Inject constructor(
         val subscription = query.addSnapshotListener { snapshot, error ->
             if (error != null) {
                 Log.e(TAG, "Error listening to user chats flow for userId: $userId", error)
-                // Handle error
                 close(error)
                 return@addSnapshotListener
             }
@@ -125,12 +131,25 @@ class ChatRepositoryImpl @Inject constructor(
             val recipientUserId = chat.participants.find { it != message.senderId }
                 ?: throw Exception("User not found")
 
+            // Create a new message with encrypted content
+            var encryptedMessage = Message.create(
+                id = message.id,
+                senderId = message.senderId,
+                content = message.content,
+                createdAt = message.createdAt,
+                isRead = message.isRead,
+                media = message.media,
+                isDeleted = message.isDeleted,
+                replyTo = message.replyTo
+            )
+
+            // Write to Firestore using the map that excludes transient fields
             val messageRef = chatsCollection.document(chatId)
                 .collection("messages")
-                .add(message)
+                .add(encryptedMessage.toFirestoreMap())
                 .await()
 
-            Log.d(TAG, "Message sent: ${message.content}")
+            Log.d(TAG, "Message sent and encrypted")
             val userIndex = if (chat.participants[0] == recipientUserId) "unreadCountUser1" else "unreadCountUser2"
             val currentUnreadCount = if (chat.participants[0] == recipientUserId)
                 chat.unreadCountUser1 else chat.unreadCountUser2
@@ -138,7 +157,7 @@ class ChatRepositoryImpl @Inject constructor(
             // Update chat's last message details
             chatsCollection.document(chatId).update(
                 mapOf(
-                    "lastMessage" to message.content,
+                    "encryptedLastMessage" to encryptedMessage.encryptedContent, // Store encrypted content for preview
                     "lastMessageAt" to message.createdAt,
                     userIndex to currentUnreadCount + 1
                 ),
@@ -177,7 +196,6 @@ class ChatRepositoryImpl @Inject constructor(
 
     // Delete a chat
     override suspend fun deleteChat(chatId: String) {
-
         // First delete all messages
         val messages = chatsCollection.document(chatId)
             .collection("messages")
@@ -194,26 +212,22 @@ class ChatRepositoryImpl @Inject constructor(
 
     // Get user's chats
     override suspend fun getUserChats(userId: String): List<Chat> {
-        Log.d(TAG, "Attempting getUserChats query for userId: $userId (NO ORDERING - DIAGNOSTIC)")
-        // Temporarily removed orderBy for diagnostics
+        Log.d(TAG, "Attempting getUserChats query for userId: $userId")
         val query = chatsCollection
             .whereArrayContains("participants", userId)
-        // .orderBy("lastMessageAt", Query.Direction.DESCENDING) // <--- Temporarily commented out
 
-        Log.d(TAG, "getUserChats Firestore query constructed for userId: $userId (NO ORDERING - DIAGNOSTIC)")
+        Log.d(TAG, "getUserChats Firestore query constructed for userId: $userId")
         return try {
             val snapshot = query.get().await()
-            Log.d(TAG, "getUserChats snapshot received for userId: $userId, documents count: ${snapshot.size()} (NO ORDERING - DIAGNOSTIC)")
-            // Client-side sorting would be needed here if this was permanent
+            Log.d(TAG, "getUserChats snapshot received for userId: $userId, documents count: ${snapshot.size()}")
             snapshot.documents.mapNotNull { doc ->
                 doc.toObject(Chat::class.java)
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Error fetching user chats for userId: $userId (NO ORDERING - DIAGNOSTIC)", e)
+            Log.e(TAG, "Error fetching user chats for userId: $userId", e)
             emptyList()
         }
     }
-
 
     override suspend fun setMuteState(chatId: String, currentUserId: String, setMute: Boolean): Boolean {
         try {
