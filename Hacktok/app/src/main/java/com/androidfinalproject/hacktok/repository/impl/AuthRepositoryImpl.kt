@@ -67,6 +67,7 @@ class AuthRepositoryImpl @Inject constructor(
                 Log.d("AuthRepository", "Firebase sign-in successful. User: ${it.uid}")
                 checkAndCreateUserData(it)
             }
+
             authResult.user
         } catch (e: Exception) {
             Log.e("AuthRepository", "Firebase sign-in with email failed", e)

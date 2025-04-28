@@ -9,6 +9,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.androidfinalproject.hacktok.ui.adminManage.reportManagement.ReportManagementTab
 import com.androidfinalproject.hacktok.ui.adminManage.userManagement.UserDetailScreen
+import com.androidfinalproject.hacktok.ui.statistic.StatisticViewModel
+import com.androidfinalproject.hacktok.ui.statistic.StatisticsScreenRoot
 
 @Composable
 fun AdminManagementScreenRoot(
@@ -34,13 +36,20 @@ fun AdminManagementScreenRoot(
             val userId = backStackEntry.arguments?.getString("userId") ?: return@composable
             UserDetailScreen(
                 userId = userId,
+
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToReportManagement = {
                     // Navigate to AdminManagementScreen with the Reports tab selected
                     navController.navigate("adminManagement?tab=1") {
                         popUpTo("adminManagement") { inclusive = true }
                     }
-                }
+                },
+            )
+        }
+        composable("statistics") { backStackEntry ->
+            StatisticsScreenRoot(
+                viewModel = StatisticViewModel(),
+                onNavigateBack = { navController.popBackStack() }
             )
         }
     }

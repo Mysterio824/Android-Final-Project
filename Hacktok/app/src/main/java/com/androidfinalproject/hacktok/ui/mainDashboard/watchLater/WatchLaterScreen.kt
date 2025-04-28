@@ -30,6 +30,9 @@ import com.androidfinalproject.hacktok.ui.theme.MainAppTheme
 import com.androidfinalproject.hacktok.model.User
 import com.androidfinalproject.hacktok.model.enums.UserRole
 import com.androidfinalproject.hacktok.model.PrivacySettings
+import com.androidfinalproject.hacktok.ui.mainDashboard.home.HomeScreenAction
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,150 +58,174 @@ fun WatchLaterScreen(
             snackbarHostState.showSnackbar(message = state.error)
         }
     }
+    val isRefreshing = state.isLoading
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        modifier = Modifier.fillMaxSize()
-    ) { paddingValues ->
+    SwipeRefresh(
+        state = rememberSwipeRefreshState(isRefreshing),
+        onRefresh = {
+            onAction(WatchLaterAction.Refresh)
+        }
+    ) {
 
-        when {
-            state.isLoading -> {
-                CircularProgressIndicator()
-            }
-            state.error != null -> {
-                Text(text = state.error)
-            }
-            state.savedPosts.isEmpty() -> {
-                Text(text = "No saved posts")
-            }
-            else -> {
-                LazyColumn(
-                    modifier = Modifier.padding(paddingValues)
-                ){
-                    items(state.posts) { post ->
-                        val refPost = state.referencePosts[post.refPostId]
-                        val refUser = refPost?.userId?.let { state.referenceUsers[it] }
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RectangleShape
-                        ) {
-                            PostContent(
-                                post = post,
-                                onPostClick = {
-                                    onAction(WatchLaterAction.OnPostClick(post.id!!))
-                                },
-                                onToggleLike = {
-                                    onAction(WatchLaterAction.OnLikeClick(post.id!!, it))
-                                },
-                                onUserClick = {
-                                    onAction(WatchLaterAction.OnUserClick(post.userId))
-                                },
-                                onComment = {
-                                    onAction(WatchLaterAction.OnPostClick(post.id!!))
-                                },
-                                onShare = {
-                                    onAction(WatchLaterAction.UpdateSharePost(post))
-                                },
-                                onOptionsClick = { selectPostId = post.id },
-                                onUnLike = { onAction(WatchLaterAction.OnUnLikeClick(post.id!!)) },
-                                currentId = state.currentUserId ?: "",
-                                user = state.postUsers[post.id] ?: state.user ?: User(
-                                    id = post.userId,
-                                    email = "",
-                                    username = "Unknown User",
-                                    fullName = "Unknown User",
-                                    profileImage = null,
-                                    bio = null,
-                                    createdAt = Date(),
-                                    isActive = true,
-                                    role = UserRole.USER,
-                                    privacySettings = PrivacySettings(),
-                                    language = "en",
-                                    friends = emptyList(),
-                                    blockedUsers = emptyList(),
-                                    followers = emptyList(),
-                                    following = emptyList(),
-                                    followerCount = 0,
-                                    followingCount = 0,
-                                    searchHistory = emptyList(),
-                                    videosCount = 0
-                                ),
-                                onImageClick = {
-                                    onAction(WatchLaterAction.OnImageClick(post.imageLink))
-                                },
-                                onLikesClick = {
-                                    onAction(WatchLaterAction.OnLikesShowClick(post.id!!))
-                                },
-                                referencePost = refPost,
-                                referenceUser = refUser,
-                            )
-                        }
-                    }
+        Scaffold(
+            snackbarHost = { SnackbarHost(snackbarHostState) },
+            modifier = Modifier.fillMaxSize()
+        ) { paddingValues ->
+
+            when {
+                state.isLoading -> {
+                    CircularProgressIndicator()
                 }
-                if (reportTargetId != null) {
-                    ModalBottomSheet(
-                        onDismissRequest = { reportTargetId = null },
-                        sheetState = bottomSheetState
+
+                state.error != null -> {
+                    Text(text = state.error)
+                }
+
+                state.savedPosts.isEmpty() -> {
+                    Text(text = "No saved posts")
+                }
+
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier.padding(paddingValues)
                     ) {
-                        ReportOptionsContent(
-                            onDismiss = { reportTargetId = null },
-                            targetId = reportTargetId!!,
-                            onReportCauseSelected = { id, cause, type ->
-                                onAction(WatchLaterAction.SubmitReport(id, type, cause))
-                            },
-                            type = ReportType.Post,
-                        )
-                    }
-                }
-
-                if (selectPostId != null) {
-                    ModalBottomSheet(
-                        onDismissRequest = { selectPostId = null },
-                        sheetState = bottomSheetState
-                    ) {
-                        PostOptionsContent(
-                            onDismiss = { selectPostId = null },
-                            onReport = { reportTargetId = selectPostId },
-                            isPostOwner = selectPostId == state.user?.id,
-                            isPostSaved = state.savedPosts.contains(selectPostId),
-                            onSavePost = {},
-                            onUnsavePost = { onAction(WatchLaterAction.OnDeleteSavedPost(selectPostId!!)) },
-                            onPostEdit = { onAction(WatchLaterAction.OnPostEditClick(selectPostId!!)) },
-                            onPostDelete = { onAction(WatchLaterAction.OnDeletePost(selectPostId!!)) }
-                        )
-                    }
-                }
-
-                if(selectedLikeShowId != null) {
-                    onAction(WatchLaterAction.OnLikesShowClick(selectedLikeShowId!!))
-                    ModalBottomSheet(
-                        onDismissRequest = { selectedLikeShowId = null },
-                        sheetState = bottomSheetState,
-                    ) {
-                        LikeListContent(
-                            listEmotions = state.listLikeUser,
-                            onUserClick = { onAction(WatchLaterAction.OnUserClick(it)) },
-                        )
-                    }
-                }
-
-                if (state.showShareDialog) {
-                    SharePostDialog(
-                        userName = state.user?.fullName ?: "Unknown",
-                        userAvatar = state.user?.profileImage
-                            ?: "",
-                        onDismiss = { onAction(WatchLaterAction.DismissShareDialog) },
-                        onSubmit = { caption, privacy ->
-                            onAction(
-                                WatchLaterAction.OnSharePost(
-                                    post = state.sharePost!!,
-                                    caption = caption,
-                                    privacy = privacy
+                        items(state.posts) { post ->
+                            val refPost = state.referencePosts[post.refPostId]
+                            val refUser = refPost?.userId?.let { state.referenceUsers[it] }
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RectangleShape
+                            ) {
+                                PostContent(
+                                    post = post,
+                                    onPostClick = {
+                                        onAction(WatchLaterAction.OnPostClick(post.id!!))
+                                    },
+                                    onToggleLike = {
+                                        onAction(WatchLaterAction.OnLikeClick(post.id!!, it))
+                                    },
+                                    onUserClick = {
+                                        onAction(WatchLaterAction.OnUserClick(post.userId))
+                                    },
+                                    onComment = {
+                                        onAction(WatchLaterAction.OnPostClick(post.id!!))
+                                    },
+                                    onShare = {
+                                        onAction(WatchLaterAction.UpdateSharePost(post))
+                                    },
+                                    onOptionsClick = { selectPostId = post.id },
+                                    onUnLike = { onAction(WatchLaterAction.OnUnLikeClick(post.id!!)) },
+                                    currentId = state.currentUserId ?: "",
+                                    user = state.postUsers[post.id] ?: state.user ?: User(
+                                        id = post.userId,
+                                        email = "",
+                                        username = "Unknown User",
+                                        fullName = "Unknown User",
+                                        profileImage = null,
+                                        bio = null,
+                                        createdAt = Date(),
+                                        isActive = true,
+                                        role = UserRole.USER,
+                                        privacySettings = PrivacySettings(),
+                                        language = "en",
+                                        friends = emptyList(),
+                                        blockedUsers = emptyList(),
+                                        followers = emptyList(),
+                                        following = emptyList(),
+                                        followerCount = 0,
+                                        followingCount = 0,
+                                        searchHistory = emptyList(),
+                                        videosCount = 0
+                                    ),
+                                    onImageClick = {
+                                        onAction(WatchLaterAction.OnImageClick(post.imageLink))
+                                    },
+                                    onLikesClick = {
+                                        onAction(WatchLaterAction.OnLikesShowClick(post.id!!))
+                                    },
+                                    referencePost = refPost,
+                                    referenceUser = refUser,
                                 )
-                            )
-                            onAction(WatchLaterAction.DismissShareDialog)
+                            }
                         }
-                    )
+                    }
+                    if (reportTargetId != null) {
+                        ModalBottomSheet(
+                            onDismissRequest = { reportTargetId = null },
+                            sheetState = bottomSheetState
+                        ) {
+                            ReportOptionsContent(
+                                onDismiss = { reportTargetId = null },
+                                targetId = reportTargetId!!,
+                                onReportCauseSelected = { id, cause, type ->
+                                    onAction(WatchLaterAction.SubmitReport(id, type, cause))
+                                },
+                                type = ReportType.Post,
+                            )
+                        }
+                    }
+
+                    if (selectPostId != null) {
+                        ModalBottomSheet(
+                            onDismissRequest = { selectPostId = null },
+                            sheetState = bottomSheetState
+                        ) {
+                            PostOptionsContent(
+                                onDismiss = { selectPostId = null },
+                                onReport = { reportTargetId = selectPostId },
+                                isPostOwner = selectPostId == state.user?.id,
+                                isPostSaved = state.savedPosts.contains(selectPostId),
+                                onSavePost = {},
+                                onUnsavePost = {
+                                    onAction(
+                                        WatchLaterAction.OnDeleteSavedPost(
+                                            selectPostId!!
+                                        )
+                                    )
+                                },
+                                onPostEdit = {
+                                    onAction(
+                                        WatchLaterAction.OnPostEditClick(
+                                            selectPostId!!
+                                        )
+                                    )
+                                },
+                                onPostDelete = { onAction(WatchLaterAction.OnDeletePost(selectPostId!!)) }
+                            )
+                        }
+                    }
+
+                    if (selectedLikeShowId != null) {
+                        onAction(WatchLaterAction.OnLikesShowClick(selectedLikeShowId!!))
+                        ModalBottomSheet(
+                            onDismissRequest = { selectedLikeShowId = null },
+                            sheetState = bottomSheetState,
+                        ) {
+                            LikeListContent(
+                                listEmotions = state.listLikeUser,
+                                onUserClick = { onAction(WatchLaterAction.OnUserClick(it)) },
+                            )
+                        }
+                    }
+
+                    if (state.showShareDialog) {
+                        SharePostDialog(
+                            userName = state.user?.fullName ?: "Unknown",
+                            userAvatar = state.user?.profileImage
+                                ?: "",
+                            onDismiss = { onAction(WatchLaterAction.DismissShareDialog) },
+                            onSubmit = { caption, privacy ->
+                                onAction(
+                                    WatchLaterAction.OnSharePost(
+                                        post = state.sharePost!!,
+                                        caption = caption,
+                                        privacy = privacy
+                                    )
+                                )
+                                onAction(WatchLaterAction.DismissShareDialog)
+                            }
+                        )
+                    }
                 }
             }
         }

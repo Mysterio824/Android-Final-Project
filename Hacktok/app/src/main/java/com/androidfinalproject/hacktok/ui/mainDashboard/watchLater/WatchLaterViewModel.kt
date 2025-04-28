@@ -3,7 +3,6 @@ package com.androidfinalproject.hacktok.ui.mainDashboard.watchLater
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.androidfinalproject.hacktok.model.MockData
 import com.androidfinalproject.hacktok.model.Post
 import com.androidfinalproject.hacktok.model.SavedPost
 import com.androidfinalproject.hacktok.model.User
@@ -60,6 +59,7 @@ class WatchLaterViewModel @Inject constructor(
             is WatchLaterAction.OnSharePost -> sharePost(action.post, action.caption, action.privacy)
             is WatchLaterAction.DismissShareDialog -> _state.update { it.copy(showShareDialog = false) }
             is WatchLaterAction.RemovePost -> removePost(action.postId)
+            is WatchLaterAction.Refresh -> loadWatchLaterPosts()
         }
     }
 

@@ -27,4 +27,5 @@ sealed class WatchLaterAction {
     data class UpdateShareCaption(val caption: String) : WatchLaterAction()
     data class OnSharePost(val post: Post, val caption: String, val privacy: PRIVACY) : WatchLaterAction()
     data object DismissShareDialog : WatchLaterAction()
+    data object Refresh : WatchLaterAction()
 }
