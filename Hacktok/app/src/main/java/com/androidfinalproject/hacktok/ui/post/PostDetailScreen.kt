@@ -236,6 +236,7 @@ fun PostDetailScreen(
                             isPostSaved = state.savedPosts.contains(post.id),
                             onSavePost = { onAction(PostDetailAction.OnSavePost(post.id!!)) },
                             onUnsavePost = { onAction(PostDetailAction.OnDeleteSavedPost(post.id!!)) },
+                            onPostEdit = { onAction(PostDetailAction.OnEditPostClick(post.id ?: "")) }
                         )
                     }
                 }

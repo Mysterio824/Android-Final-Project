@@ -234,7 +234,10 @@ fun NavGraphBuilder.mainNavigation(navController: NavController) {
                 },
                 onImageClickNavigate = {
                     navController.navigate(MainRoute.FullScreenImage(it).route)
-                }
+                },
+                onEditPostNavigate = { editPostId ->
+                    navController.navigate("${MainRoute.NewPost.BASE_ROUTE}?postId=$editPostId")
+                },
             )
         }
 

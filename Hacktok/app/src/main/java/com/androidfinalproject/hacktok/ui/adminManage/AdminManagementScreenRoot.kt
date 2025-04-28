@@ -3,11 +3,9 @@ package com.androidfinalproject.hacktok.ui.adminManage
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.androidfinalproject.hacktok.ui.adminManage.reportManagement.ReportManagementTab
 import com.androidfinalproject.hacktok.ui.adminManage.userManagement.UserDetailScreen
 import com.androidfinalproject.hacktok.ui.statistic.StatisticViewModel
 import com.androidfinalproject.hacktok.ui.statistic.StatisticsScreenRoot
