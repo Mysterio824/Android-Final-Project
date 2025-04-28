@@ -28,7 +28,12 @@ class SavedPostRepository {
     }
 
     // Xóa bài đăng đã lưu
-    suspend fun deleteSavedPost(savedPostId: String) {
-        collection.document(savedPostId).delete().await()
+    suspend fun deleteSavedPost(postId: String) {
+        val snapshot = collection.whereEqualTo("postId", postId).get().await()
+        if (!snapshot.isEmpty) {
+            snapshot.documents.forEach { doc ->
+                collection.document(doc.id).delete().await()
+            }
+        }
     }
 }
